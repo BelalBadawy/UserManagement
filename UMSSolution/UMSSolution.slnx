@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="UMS.API/UMS.API.csproj" />
+  <Project Path="UMS.Application/UMS.Application.csproj" />
+  <Project Path="UMS.Domain/UMS.Domain.csproj" />
+  <Project Path="UMS.Infrastructure/UMS.Infrastructure.csproj" />
+  <Project Path="UMS.IntegrationTests/UMS.IntegrationTests.csproj" />
+  <Project Path="UMS.Tests/UMS.Tests.csproj" />
+</Solution>
