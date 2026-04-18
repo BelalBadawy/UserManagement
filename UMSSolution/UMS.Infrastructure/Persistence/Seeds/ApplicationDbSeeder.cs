@@ -1,4 +1,4 @@
-﻿using UMS.Infrastructure.Persistence.Contexts;
+using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.Infrastructure.Persistence.DbInitializers
 {
@@ -27,9 +27,12 @@ namespace UMS.Infrastructure.Persistence.DbInitializers
 
         private async Task CheckAndApplyPendingMigrationAsync()
         {
-            if (_context.Database.GetPendingMigrations().Any())
+            if (_context.Database.IsRelational())
             {
-                await _context.Database.MigrateAsync();
+                if ((await _context.Database.GetPendingMigrationsAsync()).Any())
+                {
+                    await _context.Database.MigrateAsync();
+                }
             }
         }
 
