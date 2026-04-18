@@ -227,7 +227,10 @@ namespace UMS.Infrastructure.Persistence.Contexts
                     {
                         entityType.SetTableName(tableName.Substring(6));
                     }
-                    entityType.SetSchema("Identity");
+                    if (Database.IsSqlServer())
+                    {
+                        entityType.SetSchema("Identity");
+                    }
                 }
 
                 // ✅ Configure decimal precision globally

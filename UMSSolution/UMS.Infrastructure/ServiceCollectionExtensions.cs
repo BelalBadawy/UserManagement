@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using UMS.Application.Dtos.Cache;
 using UMS.Application.Dtos.Email;
@@ -57,22 +57,35 @@ namespace UMS.Infrastructure
 
         internal static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
         {
-            return services
-                .AddDbContext<ApplicationDbContext>(options =>
+            var dbProvider = config.GetValue<string>("DbProvider", "SqlServer");
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                if (dbProvider == "Sqlite")
                 {
-                    options
-                    .UseSqlServer(config.GetConnectionString("DefaultConnection"), builder =>
+                    options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                }
+                else if (dbProvider == "InMemory")
+                {
+                    options.UseInMemoryDatabase("TestingDb");
+                }
+                else
+                {
+                    options.UseSqlServer(config.GetConnectionString("DefaultConnection"), builder =>
                     {
                         builder.MigrationsHistoryTable("Migrations", "EFCore");
                         builder.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: new TimeSpan(0, 0, 0, 100), errorNumbersToAdd: [1]);
                     });
+                }
 
-                    options.AddInterceptors(new TrimStringInterceptor());
-                })
-                .AddScoped<IApplicationDbContext, ApplicationDbContext>()
-                .AddTransient<ApplicationDbSeeder>()
-                .AddTransient<FeaturesDbSeeder>();
+                options.AddInterceptors(new TrimStringInterceptor());
+            });
 
+            services.AddScoped<IApplicationDbContext, ApplicationDbContext>()
+                    .AddTransient<ApplicationDbSeeder>()
+                    .AddTransient<FeaturesDbSeeder>();
+
+            return services;
         }
 
         public static async Task<IApplicationBuilder> UseInfrastructureAsync(this IApplicationBuilder app)
