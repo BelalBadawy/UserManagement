@@ -1,0 +1,14 @@
+global using UMS.Domain.Entities;
+global using UMS.Domain.Interfaces;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.AspNetCore.Identity;
+global using UMS.Infrastructure.Identity.Constants;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.Extensions.Configuration;
+global using UMS.Infrastructure.Persistence.Contexts;
+global using UMS.Infrastructure.Identity.Models;
+global using UMS.Application.Interfaces;
+global using System.Data;
+global using System.Security.Claims;

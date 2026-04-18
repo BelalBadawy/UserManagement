@@ -1,0 +1,96 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using UMS.Application.Dtos.Cache;
+using UMS.Application.Dtos.Email;
+using UMS.Application.Dtos.JWT;
+using UMS.Application.Interfaces.Common;
+using UMS.Infrastructure.Common;
+using UMS.Infrastructure.Identity;
+using UMS.Infrastructure.Persistence.DbInitializers;
+using UMS.Infrastructure.Persistence.Interceptors;
+using UMS.Infrastructure.Services;
+using UMS.Infrastructure.Services.Common;
+
+namespace UMS.Infrastructure
+{
+    /// <summary>
+    /// Extension methods for setting up infrastructure-specific services in an <see cref="IServiceCollection"/>.
+    /// </summary>
+    public static class ServiceCollectionExtensions
+    {
+        /// <summary>
+        /// Registers all infrastructure services including database, identity, and feature services.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configuration">Application configuration.</param>
+        /// <returns>The modified service collection.</returns>
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            return services
+                .AddDatabase(configuration)
+                .AddIdentityServices(configuration)
+                .AddPermissions()
+                .AddJwtAuthentication(configuration)
+                .Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"))
+                .Configure<CacheConfiguration>(configuration.GetSection("CacheConfiguration"))
+                .Configure<JwtConfiguration>(configuration.GetSection("JwtConfiguration"))
+                .AddMemoryCache()
+                .AddDistributedMemoryCache()
+                .AddScoped<ISessionWrapper, InMemorySessionWrapper>()
+                .AddScoped<ICacheService, DistributedCacheService>()
+                .AddScoped<ICurrentUserService, CurrentUserService>()
+                .AddScoped<IEmailService, MailSenderService>()
+                .AddScoped<IDateTimeService, DateTimeService>()
+                .AddScoped<IFileStorageService, LocalFileStorageService>()
+                .AddFeatures();
+        }
+
+
+        internal static IServiceCollection AddFeatures(this IServiceCollection services)
+        {
+            //services
+            //    .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>))
+            //    .AddScoped<IUnitOfWork, UnitOfWork>();
+            return services;
+        }
+
+
+        internal static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
+        {
+            return services
+                .AddDbContext<ApplicationDbContext>(options =>
+                {
+                    options
+                    .UseSqlServer(config.GetConnectionString("DefaultConnection"), builder =>
+                    {
+                        builder.MigrationsHistoryTable("Migrations", "EFCore");
+                        builder.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: new TimeSpan(0, 0, 0, 100), errorNumbersToAdd: [1]);
+                    });
+
+                    options.AddInterceptors(new TrimStringInterceptor());
+                })
+                .AddScoped<IApplicationDbContext, ApplicationDbContext>()
+                .AddTransient<ApplicationDbSeeder>()
+                .AddTransient<FeaturesDbSeeder>();
+
+        }
+
+        public static async Task<IApplicationBuilder> UseInfrastructureAsync(this IApplicationBuilder app)
+        {
+
+            //  Run migration & seeder at startup
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
+                await seeder.SeedApplicationDatabaseAsync();
+            }
+
+
+            return app
+                .UseAuthentication()
+                .UseCurrentUser()
+                .UseAuthorization();
+        }
+
+    }
+}

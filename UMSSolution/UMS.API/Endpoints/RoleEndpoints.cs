@@ -1,0 +1,77 @@
+﻿using Mediator;
+using UMS.API.Extensions;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Roles;
+using UMS.Application.Features.Roles.Commands;
+using UMS.Application.Features.Roles.Queries;
+using UMS.Infrastructure.Identity.Constants;
+
+namespace WebApi.Endpoints;
+
+public static class RoleEndpoints
+{
+    public static IEndpointRouteBuilder MapRoleEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("api/v{version:apiVersion}/roles")
+                       .WithTags("Roles")
+                       .RequireAuthorization();
+
+        group.MapPost("/", async (CreateRoleRequest request, ISender sender) =>
+        {
+            var response = await sender.Send(new CreateRoleCommand { CreateRole = request });
+            return response.ToApiResult();
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Create))
+          .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapGet("all", async (ISender sender) =>
+        {
+            var response = await sender.Send(new GetRolesQuery());
+            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
+          .Produces<IResponseWrapper<List<RoleResponse>>>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
+
+        group.MapPut("/", async (UpdateRoleRequest updateRole, ISender sender) =>
+        {
+            var response = await sender.Send(new UpdateRoleCommand { UpdateRole = updateRole });
+            return response.ToApiResult();
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Update))
+          .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapGet("{roleId:int}", async (int roleId, ISender sender) =>
+        {
+            var response = await sender.Send(new GetRoleByIdQuery { RoleId = roleId });
+            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
+          .Produces<IResponseWrapper<RoleResponse>>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
+
+        group.MapDelete("{roleId:int}", async (int roleId, ISender sender) =>
+        {
+            var response = await sender.Send(new DeleteRoleCommand { RoleId = roleId });
+            return response.ToApiResult();
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Delete))
+          .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapGet("permissions/{roleId:int}", async (int roleId, ISender sender) =>
+        {
+            var response = await sender.Send(new GetPermissionsQuery { RoleId = roleId });
+            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
+          .Produces<IResponseWrapper<RoleClaimResponse>>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
+
+        group.MapPut("update-permissions", async (UpdateRoleClaimsRequest request, ISender sender) =>
+        {
+            var response = await sender.Send(new UpdateRolePermissionsCommand { UpdateRoleClaims = request });
+            return response.ToApiResult();
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Update))
+          .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        return app;
+    }
+}

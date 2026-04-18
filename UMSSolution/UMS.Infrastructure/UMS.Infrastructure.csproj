@@ -6,4 +6,23 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="FluentEmail.Core" Version="3.0.2" />
+		<PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.6">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+    <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
