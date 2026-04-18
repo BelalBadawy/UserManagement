@@ -1,0 +1,26 @@
+﻿using UMS.Application.Dtos.Pagination;
+using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Models.Requests;
+using UMS.Application.Features.Users.Models.Responses;
+
+namespace UMS.Application.Features.Users
+{
+    public interface IUserService
+    {
+        Task<IResponseWrapper> RegisterUserAsync(UserRegistrationRequest userRegistration);
+        Task<IResponseWrapper> UpdateUserAsync(UpdateUserRequest userUpdate);
+
+        // Start
+        Task<IResponseWrapper<UserResponse>> GetUserByIdAsync(int userId);
+        Task<IResponseWrapper<List<UserResponse>>> GetAllUsersAsync();
+        Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct);
+        Task<IResponseWrapper> ChangeUserPasswordAsync(ChangePasswordRequest changePassword);
+        Task<IResponseWrapper> ChangeUserStatusAsync(ChangeUserStatusRequest changeUserStatus);
+        Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId);
+        Task<IResponseWrapper> UpdateUserRolesAsync(UpdateUserRolesRequest updateUserRoles,CancellationToken ct);
+        Task<IResponseWrapper> ForgotPasswordAsync(string email);
+        Task<IResponseWrapper> ResetPasswordAsync(ResetPasswordRequest request);
+
+        // End
+    }
+}

@@ -8,7 +8,7 @@ public class LogUserActivity : BaseEntity<int>
     /// <summary>
     /// ID of the user who performed the action.
     /// </summary>
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     /// <summary>
     /// Date and time when the activity was logged.
