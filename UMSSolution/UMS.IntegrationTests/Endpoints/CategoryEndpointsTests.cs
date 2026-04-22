@@ -11,6 +11,12 @@ namespace UMS.IntegrationTests.Endpoints
     [TestFixture]
     public class CategoryEndpointsTests : IntegrationTestBase
     {
+        [SetUp]
+        public async Task SetUp()
+        {
+            await LoginAsAdminAsync();
+        }
+
         [Test]
         public async Task GetAllCategories_Should_ReturnOk()
         {
@@ -24,6 +30,22 @@ namespace UMS.IntegrationTests.Endpoints
             result.Should().NotBeNull();
             result.IsSuccessful.Should().BeTrue();
             result.Data.Should().NotBeNull();
+        }
+
+        [Test]
+        public async Task CreateCategory_Should_ReturnOk_When_Valid()
+        {
+            // Arrange
+            var request = new { Name = "Integration Category", Slug = "integration-category", SortOrder = 10 };
+
+            // Act
+            var response = await Client.PostAsJsonAsync("/api/v1/categories", request);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var result = await response.Content.ReadFromJsonAsync<ResponseWrapperStub<int>>();
+            result.IsSuccessful.Should().BeTrue();
+            result.Data.Should().BeGreaterThan(0);
         }
 
         [Test]
@@ -43,20 +65,4 @@ namespace UMS.IntegrationTests.Endpoints
             result.IsSuccessful.Should().BeFalse();
         }
     }
-
-    // Stub classes to avoid namespace issues and complex deserialization of internal types
-    public class ResponseWrapperStub<T>
-    {
-        public List<string> Messages { get; set; } = new();
-        public bool IsSuccessful { get; set; }
-        public T Data { get; set; }
-    }
-
-    public record CategoryResponseStub(
-        int Id,
-        string Name,
-        string Slug,
-        int? ParentId,
-        int SortOrder
-    );
 }

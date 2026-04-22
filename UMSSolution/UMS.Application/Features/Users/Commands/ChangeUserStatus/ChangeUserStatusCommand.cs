@@ -1,15 +1,15 @@
-﻿namespace UMS.Application.Features.Users.Commands
+namespace UMS.Application.Features.Users.Commands
 {
     public class ChangeUserStatusCommand : IRequest<IResponseWrapper>, IValidateMe
     {
         public ChangeUserStatusRequest ChangeUserStatus { get; set; }
     }
 
-    public class ChangeUserStatusCommandHalder : IRequestHandler<ChangeUserStatusCommand, IResponseWrapper>
+    public class ChangeUserStatusCommandHandler : IRequestHandler<ChangeUserStatusCommand, IResponseWrapper>
     {
         private readonly IUserService _userService;
 
-        public ChangeUserStatusCommandHalder(IUserService userService)
+        public ChangeUserStatusCommandHandler(IUserService userService)
         {
             _userService = userService;
         }
