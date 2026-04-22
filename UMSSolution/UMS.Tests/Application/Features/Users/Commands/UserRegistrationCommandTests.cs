@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users;
 using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 
 namespace UMS.Tests.Application.Features.Users.Commands

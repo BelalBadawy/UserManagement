@@ -1,4 +1,4 @@
-﻿using UMS.Application.Features.Users.Models.Responses;
+using UMS.Application.Features.Users.Models.Responses;
 
 namespace UMS.Application.Features.Users.Queries
 {
@@ -7,11 +7,11 @@ namespace UMS.Application.Features.Users.Queries
         public int UserId { get; set; }
     }
 
-    public class GetUserByIdQueryHanlder : IRequestHandler<GetUserByIdQuery, IResponseWrapper<UserResponse>>
+    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, IResponseWrapper<UserResponse>>
     {
         private readonly IUserService _userService;
 
-        public GetUserByIdQueryHanlder(IUserService userService)
+        public GetUserByIdQueryHandler(IUserService userService)
         {
             _userService = userService;
         }
