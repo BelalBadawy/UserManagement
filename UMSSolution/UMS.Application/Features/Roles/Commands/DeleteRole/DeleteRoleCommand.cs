@@ -1,6 +1,6 @@
 ﻿namespace UMS.Application.Features.Roles.Commands
 {
-    public class DeleteRoleCommand : IRequest<IResponseWrapper>
+    public class DeleteRoleCommand : IRequest<IResponseWrapper>, IValidateMe
     {
         public int RoleId { get; set; }
     }

@@ -1,10 +1,9 @@
-using UMS.Application.Features.Categories.Events;
 using UMS.Application.Features.Categories.Commands;
+using UMS.Application.Features.Categories.Events;
 using UMS.Application.Interfaces.Common;
 
 namespace UMS.Application.Features.Categories.Commands.Create
 {
-
     public record CreateCategoryCommand(
         string Name,
         string Slug,
@@ -38,14 +37,14 @@ namespace UMS.Application.Features.Categories.Commands.Create
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedName") == normalizedName,
+                    o => o.NormalizedName == normalizedName,
                     ct))
             {
                 return ResponseWrapper<int>.Fail("Category with this name already exists.");
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedSlug") == normalizedSlug,
+                    o => o.NormalizedSlug == normalizedSlug,
                     ct))
             {
                 return ResponseWrapper<int>.Fail("Category with this slug already exists.");
@@ -54,7 +53,9 @@ namespace UMS.Application.Features.Categories.Commands.Create
             var category = new Category
             {
                 Name = request.Name.Trim(),
+                NormalizedName = normalizedName,
                 Slug = request.Slug.Trim(),
+                NormalizedSlug = normalizedSlug,
                 ParentId = request.ParentId,
                 IsActive = request.IsActive,
                 SortOrder = request.SortOrder
@@ -75,7 +76,6 @@ namespace UMS.Application.Features.Categories.Commands.Create
                 }
                 catch (InvalidOperationException)
                 {
-                    // Transaction may already be completed/disposed.
                 }
             }
 

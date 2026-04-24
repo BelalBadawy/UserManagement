@@ -1,6 +1,6 @@
-using UMS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UMS.Domain.Entities;
 
 namespace UMS.Infrastructure.Persistence.DbConfigurations
 {
@@ -10,7 +10,6 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
         {
             builder.ToTable("Categories");
 
-            // Primary key
             builder.HasKey(c => c.Id);
 
             builder.Property(c => c.Id)
@@ -18,15 +17,25 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
                 .ValueGeneratedOnAdd()
                 .HasColumnType("int");
 
-            // Properties
             builder.Property(c => c.Name)
                 .IsRequired()
                 .HasMaxLength(150)
                 .HasColumnType("nvarchar(150)");
 
+            builder.Property(c => c.NormalizedName)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("nvarchar(256)");
+
             builder.Property(c => c.Slug)
+                .IsRequired()
                 .HasMaxLength(150)
                 .HasColumnType("nvarchar(250)");
+
+            builder.Property(c => c.NormalizedSlug)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("nvarchar(256)");
 
             builder.Property(c => c.ParentId);
 
@@ -38,7 +47,19 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
                 .IsRequired()
                 .HasDefaultValue(0);
 
-            // Self-referencing relationship for parent/child categories
+            builder.Property(c => c.RowVersion)
+                .IsConcurrencyToken()
+                .ValueGeneratedOnAddOrUpdate()
+                .HasColumnType("varbinary(max)");
+
+            builder.HasIndex(c => c.NormalizedName)
+                .IsUnique()
+                .HasDatabaseName("UX_Categories_NormalizedName");
+
+            builder.HasIndex(c => c.NormalizedSlug)
+                .IsUnique()
+                .HasDatabaseName("UX_Categories_NormalizedSlug");
+
             builder.HasOne(c => c.Parent)
                 .WithMany(c => c.Children)
                 .HasForeignKey(c => c.ParentId)

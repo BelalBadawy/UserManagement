@@ -7,7 +7,7 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoryById
        string? ParentName
    );
 
-    public record GetCategoryByIdQuery(int Id) : IRequest<IResponseWrapper<CategoryDto>>;
+    public record GetCategoryByIdQuery(int Id) : IRequest<IResponseWrapper<CategoryDto>>, IValidateMe;
 
     public class GetCategoryByIdQueryHandler(IApplicationDbContext applicationDbContext)
         : IRequestHandler<GetCategoryByIdQuery, IResponseWrapper<CategoryDto>>

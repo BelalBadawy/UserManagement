@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.API.Tests.Fixtures;
 
@@ -17,6 +19,14 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["DbProvider"] = "InMemory",
                 ["EnableAuditLog"] = "false"
             });
+        });
+
+        builder.ConfigureServices(services =>
+        {
+            var serviceProvider = services.BuildServiceProvider();
+            using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+            dbContext?.Database.EnsureCreated();
         });
     }
 

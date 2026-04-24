@@ -32,4 +32,33 @@ public class AccountEndpointsTests : ApiTestBase
         payload.Data!.Token.Should().NotBeNullOrWhiteSpace();
     }
 
+    [Fact]
+    public async Task Login_should_return_unsuccessful_payload_when_credentials_are_invalid()
+    {
+        var response = await Client.PostAsJsonAsync("/api/v1/account/login", new
+        {
+            Email = "admin@gmail.com",
+            Password = "WrongPassword"
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<TokenResponseContract>>();
+
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Forgot_password_should_return_unsuccessful_payload_when_email_flow_is_not_configured()
+    {
+        var response = await Client.PostAsJsonAsync("/api/v1/account/forgot-password?email=admin@gmail.com", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
+
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeFalse();
+    }
 }

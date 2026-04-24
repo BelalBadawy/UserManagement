@@ -1,8 +1,8 @@
 ﻿namespace UMS.Application.Features.Users.Commands
 {
-    public class UpdateUserCommandValidatorValidator : AbstractValidator<UpdateUserCommand>
+    public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     {
-        public UpdateUserCommandValidatorValidator()
+        public UpdateUserCommandValidator()
         {
             RuleFor(x => x.UpdateUser.UserId)
                 .NotEmpty().WithMessage("User ID is required.");

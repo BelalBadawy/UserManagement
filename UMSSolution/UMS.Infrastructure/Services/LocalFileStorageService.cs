@@ -1,6 +1,6 @@
-using UMS.Application.Interfaces.Common;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using UMS.Application.Dtos.Common;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Infrastructure.Services
 {
@@ -13,19 +13,27 @@ namespace UMS.Infrastructure.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<string> SaveFileAsync(IFormFile file, string folderName, CancellationToken ct)
+        public async Task<string> SaveFileAsync(FileData file, string folderName, CancellationToken ct)
         {
+            if (file.Content.CanSeek)
+            {
+                file.Content.Position = 0;
+            }
+
             if (string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
             {
-                // Fallback for some cases if WebRootPath is empty
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folderName);
-                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
 
                 var name = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 using (var stream = new FileStream(Path.Combine(path, name), FileMode.Create))
                 {
-                    await file.CopyToAsync(stream, ct);
+                    await file.Content.CopyToAsync(stream, ct);
                 }
+
                 return name;
             }
 
@@ -41,7 +49,7 @@ namespace UMS.Infrastructure.Services
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await file.CopyToAsync(stream);
+                await file.Content.CopyToAsync(stream, ct);
             }
 
             return fileName;

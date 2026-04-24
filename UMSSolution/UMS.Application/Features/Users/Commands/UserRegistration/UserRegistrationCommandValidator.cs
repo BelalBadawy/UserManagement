@@ -32,12 +32,6 @@ namespace UMS.Application.Features.Users.Commands
                 .Matches(@"^[0-9+\-\s]+$").WithMessage("Phone number contains invalid characters.")
                 .MinimumLength(11).WithMessage("Phone number must be at least 11 digits long.");
 
-            // Booleans: optional, but you can enforce defaults or business logic if needed
-            RuleFor(x => x.UserRegistration.AutoConfirmEmail)
-                .NotNull().WithMessage("AutoConfirmEmail flag is required.");
-
-            RuleFor(x => x.UserRegistration.ActivateUser)
-                .NotNull().WithMessage("ActivateUser flag is required.");
         }
     }
 }

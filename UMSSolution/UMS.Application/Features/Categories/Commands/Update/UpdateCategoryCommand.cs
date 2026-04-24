@@ -1,7 +1,6 @@
 using UMS.Application.Features.Categories.Commands;
 using UMS.Application.Features.Categories.Events;
 using UMS.Application.Interfaces.Common;
-using UMS.Domain.Entities;
 
 namespace UMS.Application.Features.Categories.Commands.Update
 {
@@ -47,28 +46,25 @@ namespace UMS.Application.Features.Categories.Commands.Update
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedName") == normalizedName && o.Id != request.Id,
+                    o => o.NormalizedName == normalizedName && o.Id != request.Id,
                     ct))
             {
                 return ResponseWrapper.Fail("Category with this name already exists.");
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedSlug") == normalizedSlug && o.Id != request.Id,
+                    o => o.NormalizedSlug == normalizedSlug && o.Id != request.Id,
                     ct))
             {
                 return ResponseWrapper.Fail("Category with this slug already exists.");
             }
 
-            if (_applicationDbContext is not DbContext dbContext)
-            {
-                throw new InvalidOperationException("IApplicationDbContext must be an EF DbContext for concurrency handling.");
-            }
-
-            dbContext.Entry(category).Property(x => x.RowVersion).OriginalValue = request.RowVersion;
+            _applicationDbContext.SetOriginalRowVersion(category, request.RowVersion);
 
             category.Name = request.Name.Trim();
+            category.NormalizedName = normalizedName;
             category.Slug = request.Slug.Trim();
+            category.NormalizedSlug = normalizedSlug;
             category.ParentId = request.ParentId;
             category.IsActive = request.IsActive;
             category.SortOrder = request.SortOrder;
@@ -83,7 +79,7 @@ namespace UMS.Application.Features.Categories.Commands.Update
             {
                 return ResponseWrapper.Fail(
                     "Concurrency conflict: this category was modified by another user. Refresh and try again.",
-                    Microsoft.AspNetCore.Http.StatusCodes.Status409Conflict);
+                    409);
             }
             catch (DbUpdateException ex) when (CategoryWriteGuards.IsUniqueConstraintViolation(ex))
             {

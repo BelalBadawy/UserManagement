@@ -19,3 +19,18 @@ public sealed record CategoryResponseContract(
     string Slug,
     int? ParentId,
     int SortOrder);
+
+public sealed record RoleResponseContract(
+    int Id,
+    string Name,
+    string? Description);
+
+public sealed record UserResponseContract(
+    int Id,
+    string FirstName,
+    string LastName,
+    string UserName,
+    string Email,
+    string? PhoneNumber,
+    string? ProfilePicture,
+    bool IsActive);

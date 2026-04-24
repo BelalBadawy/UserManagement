@@ -1,6 +1,6 @@
 ﻿namespace UMS.Application.Features.Token.Queries
 {
-    public class GetRefreshTokenQuery : IRequest<IResponseWrapper<TokenResponse>>
+    public class GetRefreshTokenQuery : IRequest<IResponseWrapper<TokenResponse>>, IValidateMe
     {
         public RefreshTokenRequest RefreshTokenRequest { get; set; }
     }
