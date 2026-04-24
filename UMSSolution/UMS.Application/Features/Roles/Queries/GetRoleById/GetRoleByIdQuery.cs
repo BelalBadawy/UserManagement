@@ -1,6 +1,6 @@
 ﻿namespace UMS.Application.Features.Roles.Queries
 {
-    public class GetRoleByIdQuery : IRequest<IResponseWrapper<RoleResponse>>
+    public class GetRoleByIdQuery : IRequest<IResponseWrapper<RoleResponse>>, IValidateMe
     {
         public int RoleId { get; set; }
     }

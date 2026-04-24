@@ -2,7 +2,7 @@
 
 namespace UMS.Application.Features.Users.Queries
 {
-    public class GetUserRolesQuery : IRequest<IResponseWrapper<List<UserRoleViewModel>>>
+    public class GetUserRolesQuery : IRequest<IResponseWrapper<List<UserRoleViewModel>>>, IValidateMe
     {
         public int UserId { get; set; }
     }

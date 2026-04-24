@@ -14,33 +14,33 @@ public static class AccountEndpoints
                        .WithTags("Account")
                        .AllowAnonymous();
         
-        group.MapPost("login", async (TokenRequest tokenRequest, ISender sender) =>
+        group.MapPost("login", async (TokenRequest tokenRequest, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new GetTokenQuery { TokenRequest = tokenRequest });
+            var response = await sender.Send(new GetTokenQuery { TokenRequest = tokenRequest }, ct);
             return response.ToApiResult();
         })
         .Produces<IResponseWrapper<TokenResponse>>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapPost("refresh-token", async (RefreshTokenRequest refreshTokenRequest, ISender sender) =>
+        group.MapPost("refresh-token", async (RefreshTokenRequest refreshTokenRequest, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new GetRefreshTokenQuery { RefreshTokenRequest = refreshTokenRequest });
+            var response = await sender.Send(new GetRefreshTokenQuery { RefreshTokenRequest = refreshTokenRequest }, ct);
             return response.ToApiResult();
         })
         .Produces<IResponseWrapper<TokenResponse>>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapPost("forgot-password", async (string email, ISender sender) =>
+        group.MapPost("forgot-password", async (string email, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new ForgotPasswordCommand { Email = email });
+            var response = await sender.Send(new ForgotPasswordCommand { Email = email }, ct);
             return response.ToApiResult();
         })
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapPost("reset-password", async (ResetPasswordRequest request, ISender sender) =>
+        group.MapPost("reset-password", async (ResetPasswordRequest request, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new ResetPasswordCommand { ResetPasswordRequest = request });
+            var response = await sender.Send(new ResetPasswordCommand { ResetPasswordRequest = request }, ct);
             return response.ToApiResult();
         })
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)

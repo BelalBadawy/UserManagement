@@ -1,17 +1,26 @@
-﻿namespace UMS.Infrastructure.Persistence.DbInitializers
+using Microsoft.Extensions.Options;
+using UMS.Application.Authorization;
+using UMS.Infrastructure.Identity.Configurations;
+
+namespace UMS.Infrastructure.Persistence.DbInitializers
 {
     public class IdentityDbSeeder
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ApplicationDbContext _context;
+        private readonly SeedUsersConfiguration _seedUsersConfiguration;
 
-        public IdentityDbSeeder(ApplicationDbContext context,
-            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)
+        public IdentityDbSeeder(
+            ApplicationDbContext context,
+            RoleManager<ApplicationRole> roleManager,
+            UserManager<ApplicationUser> userManager,
+            IOptions<SeedUsersConfiguration> seedUsersConfiguration)
         {
             _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
+            _seedUsersConfiguration = seedUsersConfiguration.Value;
         }
 
         public async Task SeedIdentityDatabaseAsync()
@@ -24,7 +33,7 @@
 
         private async Task CheckAndApplyPendingMigrationAsync()
         {
-            if (_context.Database.GetPendingMigrations().Any())
+            if ((await _context.Database.GetPendingMigrationsAsync()).Any())
             {
                 await _context.Database.MigrateAsync();
             }
@@ -32,31 +41,29 @@
 
         private async Task SeedAdminUserAsync()
         {
+            var adminConfiguration = _seedUsersConfiguration.Admin;
             var user = new ApplicationUser
             {
-                FullName = "Belal Badawy",
-                Email = AppCredentials.Email,
-                UserName = AppCredentials.Email,
+                FullName = adminConfiguration.FullName,
+                Email = adminConfiguration.Email,
+                UserName = adminConfiguration.Email,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
-                PhoneNumber = "01025387387",
-                NormalizedEmail = AppCredentials.Email.ToUpperInvariant(),
-                NormalizedUserName = AppCredentials.Email.ToUpperInvariant(),
+                PhoneNumber = adminConfiguration.PhoneNumber,
+                NormalizedEmail = adminConfiguration.Email.ToUpperInvariant(),
+                NormalizedUserName = adminConfiguration.Email.ToUpperInvariant(),
                 IsActive = true,
-                CreatedDate = DateTime.Now,
-                RefreshToken = "123",
-                RefreshTokenExpiryDate = DateTime.Now.AddDays(1)
+                CreatedDate = DateTime.UtcNow,
+                RefreshToken = Guid.NewGuid().ToString("N"),
+                RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(1)
             };
 
-            if (!await _userManager.Users.AnyAsync(u => u.Email == AppCredentials.Email))
+            if (!await _userManager.Users.AnyAsync(u => u.Email == adminConfiguration.Email))
             {
-                var password = new PasswordHasher<ApplicationUser>();
-                user.PasswordHash = password.HashPassword(user, AppCredentials.Password);
-                await _userManager.CreateAsync(user);
+                await _userManager.CreateAsync(user, adminConfiguration.Password);
             }
 
-            user = await _userManager.FindByEmailAsync(AppCredentials.Email);
-            // Assign role(s) to user
+            user = await _userManager.FindByEmailAsync(adminConfiguration.Email);
             if (!await _userManager.IsInRoleAsync(user, AppRoles.Basic)
                 && !await _userManager.IsInRoleAsync(user, AppRoles.Admin))
             {
@@ -66,33 +73,31 @@
 
         private async Task SeedBasicUserAsync()
         {
-            var email = "asamy@gmail.com";
+            var basicConfiguration = _seedUsersConfiguration.Basic;
+            var email = basicConfiguration.Email;
             var user = new ApplicationUser
             {
-                FullName = "Ahmed Samy",
+                FullName = basicConfiguration.FullName,
                 Email = email,
                 UserName = email,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
-                PhoneNumber = "0112929333",
+                PhoneNumber = basicConfiguration.PhoneNumber,
                 NormalizedEmail = email.ToUpperInvariant(),
                 NormalizedUserName = email.ToUpperInvariant(),
                 IsActive = true,
-                CreatedDate = DateTime.Now,
-                RefreshToken = "321",
-                RefreshTokenExpiryDate = DateTime.Now.AddDays(7)
+                CreatedDate = DateTime.UtcNow,
+                RefreshToken = Guid.NewGuid().ToString("N"),
+                RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(7)
             };
 
             if (!await _userManager.Users.AnyAsync(u => u.Email == email))
             {
-                var password = new PasswordHasher<ApplicationUser>();
-                user.PasswordHash = password.HashPassword(user, AppCredentials.Password);
-                await _userManager.CreateAsync(user);
+                await _userManager.CreateAsync(user, basicConfiguration.Password);
             }
 
             user = await _userManager.FindByEmailAsync(email);
 
-            // Assign role(s) to user
             if (!await _userManager.IsInRoleAsync(user, AppRoles.Basic))
             {
                 await _userManager.AddToRoleAsync(user, AppRoles.Basic);
@@ -115,7 +120,6 @@
                     await _roleManager.CreateAsync(role);
                 }
 
-                // Assign permissions to role
                 if (roleName == AppRoles.Basic)
                 {
                     await AssignPermissionsToRoleAsync(role, AppPermissions.BasicPermissions);
@@ -142,8 +146,6 @@
                         ClaimValue = permission.Name,
                         Description = permission.Description
                     });
-
-
                 }
             }
 

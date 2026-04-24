@@ -1,6 +1,6 @@
 ﻿namespace UMS.Application.Features.Roles.Queries
 {
-    public class GetPermissionsQuery : IRequest<IResponseWrapper<RoleClaimResponse>>
+    public class GetPermissionsQuery : IRequest<IResponseWrapper<RoleClaimResponse>>, IValidateMe
     {
         public int RoleId { get; set; }
     }

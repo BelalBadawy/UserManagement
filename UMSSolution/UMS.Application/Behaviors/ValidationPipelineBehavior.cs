@@ -22,24 +22,41 @@
                 var validationResults = await Task
                     .WhenAll(_validators.Select(vr => vr.ValidateAsync(context, cancellationToken)));
 
-                if (!validationResults.Any(vr => vr.IsValid))
+                var failures = validationResults.SelectMany(vr => vr.Errors)
+                    .Where(f => f != null)
+                    .ToList();
+
+                if (failures.Count > 0)
                 {
                     var errorMessages = new List<string>();
-
-                    var failures = validationResults.SelectMany(vr => vr.Errors)
-                        .Where(f => f != null)
-                        .ToList();
 
                     foreach (var failure in failures)
                     {
                         errorMessages.Add(failure.ErrorMessage);
                     }
 
-                    return (TResponse)await ResponseWrapper.FailAsync(errorMessages);
+                    return CreateValidationFailureResponse(errorMessages);
                 }
             }
 
             return await next(request, cancellationToken);
+        }
+
+        private static TResponse CreateValidationFailureResponse(IReadOnlyList<string> errorMessages)
+        {
+            if (typeof(TResponse).IsGenericType &&
+                typeof(TResponse).GetGenericTypeDefinition() == typeof(IResponseWrapper<>))
+            {
+                var dataType = typeof(TResponse).GetGenericArguments()[0];
+                var wrapperType = typeof(ResponseWrapper<>).MakeGenericType(dataType);
+                var failMethod = wrapperType.GetMethod(
+                    nameof(ResponseWrapper<object>.Fail),
+                    [typeof(IReadOnlyList<string>), typeof(int)]);
+
+                return (TResponse)failMethod!.Invoke(null, [errorMessages, 500])!;
+            }
+
+            return (TResponse)ResponseWrapper.Fail(errorMessages);
         }
     }
 }

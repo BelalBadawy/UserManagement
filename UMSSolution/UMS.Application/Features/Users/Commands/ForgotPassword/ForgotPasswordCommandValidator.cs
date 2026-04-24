@@ -1,8 +1,8 @@
 ﻿namespace UMS.Application.Features.Users.Commands
 {
-    public class ForgotPasswordCommandValidatorValidator : AbstractValidator<ForgotPasswordCommand>
+    public class ForgotPasswordCommandValidator : AbstractValidator<ForgotPasswordCommand>
     {
-        public ForgotPasswordCommandValidatorValidator()
+        public ForgotPasswordCommandValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required.")

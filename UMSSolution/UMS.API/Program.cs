@@ -27,7 +27,6 @@ builder.Services.AddOpenApi("v1", options =>
 
 builder.Services.AddCorsAllowAll();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddApiVersioningConfig();
 builder.Services.AddApplicationServices();
@@ -63,7 +62,7 @@ app.UseStaticFiles();
 
 // CORS before authentication
 app.UseCorsAllowAll();
-app.UseInfrastructureAsync().GetAwaiter().GetResult();
+await app.UseInfrastructureAsync();
 app.MapAccountEndpoints();
 app.MapCategoryEndpoints();
 app.MapRoleEndpoints();

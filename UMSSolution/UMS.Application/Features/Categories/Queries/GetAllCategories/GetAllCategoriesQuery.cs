@@ -19,8 +19,9 @@ namespace UMS.Application.Features.Categories.Queries.GetAllCategories
         private readonly ICacheService _cacheService = cacheService;
         public async ValueTask<IResponseWrapper<List<CategoryListDto>>> Handle(GetAllCategoriesQuery request, CancellationToken ct)
         {
+            var cacheKey = CategoryCacheKeys.GetAll(request.isActive);
 
-            if (_cacheService.TryGet<List<CategoryListDto>>(CategoryCacheKeys.GetAll, out var cachedCategories))
+            if (_cacheService.TryGet<List<CategoryListDto>>(cacheKey, out var cachedCategories))
             {
                 return ResponseWrapper<List<CategoryListDto>>.Success(data: cachedCategories);
             }
@@ -38,7 +39,7 @@ namespace UMS.Application.Features.Categories.Queries.GetAllCategories
                                   ))
                 .ToListAsync(ct);
 
-            _cacheService.Set<List<CategoryListDto>>(CategoryCacheKeys.GetAll, categories);
+            _cacheService.Set<List<CategoryListDto>>(cacheKey, categories);
 
             return ResponseWrapper<List<CategoryListDto>>.Success(categories);
         }

@@ -1,6 +1,6 @@
 ﻿namespace UMS.Application.Features.Users.Commands
 {
-    public class UpdateUserRolesCommand : IRequest<IResponseWrapper>
+    public class UpdateUserRolesCommand : IRequest<IResponseWrapper>, IValidateMe
     {
         public UpdateUserRolesRequest UpdateUserRoles { get; set; }
     }

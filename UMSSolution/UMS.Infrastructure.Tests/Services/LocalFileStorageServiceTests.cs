@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using UMS.Application.Dtos.Common;
 using UMS.Infrastructure.Services;
 using UMS.Infrastructure.Tests.Fixtures;
 
@@ -22,7 +22,13 @@ public class LocalFileStorageServiceTests : IClassFixture<TempDirectoryFixture>
 
         var service = new LocalFileStorageService(environment.Object);
         await using var stream = new MemoryStream("seed-image"u8.ToArray());
-        IFormFile file = new FormFile(stream, 0, stream.Length, "banner", "banner.png");
+        var file = new FileData
+        {
+            Content = stream,
+            FileName = "banner.png",
+            ContentType = "image/png",
+            Length = stream.Length
+        };
 
         var savedFileName = await service.SaveFileAsync(file, "images", CancellationToken.None);
         var savedPath = Path.Combine(_fixture.RootPath, "images", savedFileName);
@@ -45,7 +51,13 @@ public class LocalFileStorageServiceTests : IClassFixture<TempDirectoryFixture>
 
             var service = new LocalFileStorageService(environment.Object);
             await using var stream = new MemoryStream("avatar"u8.ToArray());
-            IFormFile file = new FormFile(stream, 0, stream.Length, "avatar", "avatar.jpg");
+            var file = new FileData
+            {
+                Content = stream,
+                FileName = "avatar.jpg",
+                ContentType = "image/jpeg",
+                Length = stream.Length
+            };
 
             var savedFileName = await service.SaveFileAsync(file, "avatars", CancellationToken.None);
 
@@ -80,5 +92,64 @@ public class LocalFileStorageServiceTests : IClassFixture<TempDirectoryFixture>
         service.DeleteFile("missing.txt", "docs");
 
         File.Exists(fullPath).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SaveFileAsync_should_honor_cancellation_token_when_web_root_exists()
+    {
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.SetupGet(x => x.WebRootPath).Returns(_fixture.RootPath);
+
+        var service = new LocalFileStorageService(environment.Object);
+        await using var stream = new MemoryStream(new byte[1024]);
+        var file = new FileData
+        {
+            Content = stream,
+            FileName = "cancelled.bin",
+            ContentType = "application/octet-stream",
+            Length = stream.Length
+        };
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var act = () => service.SaveFileAsync(file, "cancel-rooted", cts.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task SaveFileAsync_should_honor_cancellation_token_when_falling_back_to_current_directory()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var wwwrootPath = Path.Combine(currentDirectory, "wwwroot");
+
+        try
+        {
+            var environment = new Mock<IWebHostEnvironment>();
+            environment.SetupGet(x => x.WebRootPath).Returns(string.Empty);
+
+            var service = new LocalFileStorageService(environment.Object);
+            await using var stream = new MemoryStream(new byte[1024]);
+            var file = new FileData
+            {
+                Content = stream,
+                FileName = "cancelled.bin",
+                ContentType = "application/octet-stream",
+                Length = stream.Length
+            };
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            var act = () => service.SaveFileAsync(file, "cancel-fallback", cts.Token);
+
+            await act.Should().ThrowAsync<OperationCanceledException>();
+        }
+        finally
+        {
+            if (Directory.Exists(wwwrootPath))
+            {
+                Directory.Delete(wwwrootPath, recursive: true);
+            }
+        }
     }
 }

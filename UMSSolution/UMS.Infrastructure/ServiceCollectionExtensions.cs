@@ -6,6 +6,7 @@ using UMS.Application.Dtos.JWT;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Common;
 using UMS.Infrastructure.Identity;
+using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Persistence.DbInitializers;
 using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
@@ -32,6 +33,7 @@ namespace UMS.Infrastructure
                 .AddPermissions()
                 .AddJwtAuthentication(configuration)
                 .Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"))
+                .Configure<SeedUsersConfiguration>(configuration.GetSection("SeedUsers"))
                 .Configure<CacheConfiguration>(configuration.GetSection("CacheConfiguration"))
                 .Configure<JwtConfiguration>(configuration.GetSection("JwtConfiguration"))
                 .AddMemoryCache()

@@ -7,6 +7,7 @@ using UMS.Application.Dtos.JWT;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Token;
 using UMS.Application.Features.Token.Queries;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -15,14 +16,17 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly JwtConfiguration _tokenSettings;
+        private readonly IDateTimeService _dateTimeService;
 
         public TokenService(UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            IOptions<JwtConfiguration> tokenSettings)
+            IOptions<JwtConfiguration> tokenSettings,
+            IDateTimeService dateTimeService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenSettings = tokenSettings.Value;
+            _dateTimeService = dateTimeService;
         }
 
         public async Task<IResponseWrapper<TokenResponse>> GetTokenAsync(TokenRequest tokenRequest)
@@ -69,7 +73,7 @@ namespace UMS.Infrastructure.Identity.Services
             // Generate token
 
             userInDb.RefreshToken = GenerateRefreshToken();
-            userInDb.RefreshTokenExpiryDate = DateTime.Now.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+            userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
 
             await _userManager.UpdateAsync(userInDb);
 
@@ -136,7 +140,7 @@ namespace UMS.Infrastructure.Identity.Services
                 issuer: _tokenSettings.Issuer,
                 audience: _tokenSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(_tokenSettings.TokenExpiryInMunites),
+                expires: _dateTimeService.NowUtc.AddMinutes(_tokenSettings.TokenExpiryInMunites),
                 signingCredentials: signingCredentials);
             var tokenHandler = new JwtSecurityTokenHandler();
             var encryptedToken = tokenHandler.WriteToken(token);
@@ -158,14 +162,14 @@ namespace UMS.Infrastructure.Identity.Services
             if (userInDb is not null)
             {
                 if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
-                    || userInDb.RefreshTokenExpiryDate <= DateTime.Now)
+                    || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
                 {
                     return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
                 }
 
                 var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
                 userInDb.RefreshToken = GenerateRefreshToken();
-                userInDb.RefreshTokenExpiryDate = DateTime.Now.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+                userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
 
                 await _userManager.UpdateAsync(userInDb);
 

@@ -95,11 +95,23 @@ namespace UMS.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedSlug")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Slug")
@@ -116,6 +128,14 @@ namespace UMS.Infrastructure.Migrations
                         .HasDefaultValue(0);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Categories_NormalizedName");
+
+                    b.HasIndex("NormalizedSlug")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Categories_NormalizedSlug");
 
                     b.HasIndex("ParentId");
 
