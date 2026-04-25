@@ -5,9 +5,12 @@ using System.Web;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users;
 using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.Logout;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Interfaces.Common;
@@ -24,6 +27,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly SeedUsersConfiguration _seedUsersConfiguration;
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly TwoFactorOptions _twoFactorOptions;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
@@ -32,7 +36,8 @@ namespace UMS.Infrastructure.Identity.Services
             IHttpContextAccessor contextAccessor,
             IOptions<SeedUsersConfiguration> seedUsersConfiguration,
             IDateTimeService dateTimeService,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IOptions<TwoFactorOptions> twoFactorOptions)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -41,6 +46,7 @@ namespace UMS.Infrastructure.Identity.Services
             _seedUsersConfiguration = seedUsersConfiguration.Value;
             _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
+            _twoFactorOptions = twoFactorOptions.Value;
         }
 
         public async Task<IResponseWrapper> RegisterUserAsync(UserRegistrationRequest userRegistration)
@@ -525,6 +531,191 @@ namespace UMS.Infrastructure.Identity.Services
             await _userManager.ResetAccessFailedCountAsync(user);
 
             return ResponseWrapper.Success("User unlocked successfully.");
+        }
+
+        public async Task<IResponseWrapper<ProfileResponse>> GetMyProfileAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<ProfileResponse>.Fail("User not found.");
+
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
+
+            var permissionsSet = new HashSet<string>();
+            foreach (var roleName in roles)
+            {
+                var role   = await _roleManager.FindByNameAsync(roleName);
+                var claims = await _roleManager.GetClaimsAsync(role);
+                foreach (var claim in claims)
+                    permissionsSet.Add(claim.Value);
+            }
+
+            return ResponseWrapper<ProfileResponse>.Success(new ProfileResponse
+            {
+                Id               = user.Id,
+                FullName         = user.FullName,
+                Email            = user.Email,
+                UserName         = user.UserName,
+                IsActive         = user.IsActive,
+                EmailConfirmed   = user.EmailConfirmed,
+                PhoneNumber      = user.PhoneNumber,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                CreatedDate      = user.CreatedDate,
+                Roles            = roles,
+                Permissions      = [.. permissionsSet]
+            });
+        }
+
+        public async Task<IResponseWrapper> LogoutAsync(LogoutRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            if (string.IsNullOrEmpty(request.RefreshToken))
+                return ResponseWrapper.Fail("Refresh token is required.");
+
+            if (user.RefreshToken != request.RefreshToken)
+                return ResponseWrapper.Fail("Invalid refresh token.");
+
+            user.RefreshToken           = string.Empty;
+            user.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(-1);
+            await _userManager.UpdateAsync(user);
+
+            return ResponseWrapper.Success("Logged out successfully.");
+        }
+
+        public async Task<IResponseWrapper<TwoFactorAuthViewModel>> SetupTwoFactorAuthAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<TwoFactorAuthViewModel>.Fail("User not found.");
+
+            if (user.TwoFactorEnabled)
+                return ResponseWrapper<TwoFactorAuthViewModel>.Fail(
+                    "Two-factor authentication is already enabled. Disable it first to reconfigure.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                key = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+
+            var issuer = Uri.EscapeDataString(_twoFactorOptions.Issuer);
+            var email  = Uri.EscapeDataString(user.Email);
+            var codeQR = $"otpauth://totp/{issuer}:{email}?secret={key}&issuer={issuer}";
+
+            return ResponseWrapper<TwoFactorAuthViewModel>.Success(
+                new TwoFactorAuthViewModel { KeySecret = key, CodeQR = codeQR });
+        }
+
+        public async Task<IResponseWrapper> ConfirmTwoFactorAuthAsync(TwoFactorCodeRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+                return ResponseWrapper.Fail(
+                    "No authenticator configured. Please call setup-2fa first.");
+
+            var valid = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!valid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                return ResponseWrapper.Fail("Invalid verification code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            return ResponseWrapper.Success("Verification code is valid.");
+        }
+
+        public async Task<IResponseWrapper<List<string>>> EnableTwoFactorAuthAsync(
+            TwoFactorCodeRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<List<string>>.Fail("User not found.");
+
+            if (user.TwoFactorEnabled)
+                return ResponseWrapper<List<string>>.Fail(
+                    "Two-factor authentication is already enabled.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+                return ResponseWrapper<List<string>>.Fail(
+                    "No authenticator configured. Please call setup-2fa first.");
+
+            var valid = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!valid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                    return ResponseWrapper<List<string>>.Fail(
+                        "Account locked due to multiple failed attempts.");
+                return ResponseWrapper<List<string>>.Fail("Invalid authenticator code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
+
+            var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+
+            return ResponseWrapper<List<string>>.Success(
+                codes!.ToList(),
+                "Two-factor authentication enabled. Store your recovery codes safely.");
+        }
+
+        public async Task<IResponseWrapper> DisableTwoFactorAuthAsync(
+            DisableTwoFactorAuthRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            if (!user.TwoFactorEnabled)
+                return ResponseWrapper.Fail("Two-factor authentication is not enabled.");
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!passwordValid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                    return ResponseWrapper.Fail("Account locked due to multiple failed attempts.");
+                return ResponseWrapper.Fail("Invalid password.");
+            }
+
+            if (!string.IsNullOrEmpty(request.Code))
+            {
+                var codeValid = await _userManager.VerifyTwoFactorTokenAsync(
+                    user,
+                    _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                    request.Code);
+
+                if (!codeValid)
+                    return ResponseWrapper.Fail("Invalid authenticator code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.SetTwoFactorEnabledAsync(user, false);
+
+            return ResponseWrapper.Success("Two-factor authentication disabled.");
         }
     }
 }

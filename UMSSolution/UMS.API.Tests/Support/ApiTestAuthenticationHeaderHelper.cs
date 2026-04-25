@@ -24,10 +24,19 @@ public static class ApiTestAuthenticationHeaderHelper
         client.DefaultRequestHeaders.Add(ApiTestAuthenticationHandler.RequiredPermissionHeaderName, requiredPermission);
     }
 
+    public static void ConfigureSelfServiceClient(HttpClient client, int userId)
+    {
+        Clear(client);
+        client.DefaultRequestHeaders.Add(ApiTestAuthenticationHandler.AuthModeHeaderName, "self-service");
+        client.DefaultRequestHeaders.Add(ApiTestAuthenticationHandler.RequiredPermissionHeaderName, "self-service");
+        client.DefaultRequestHeaders.Add(ApiTestAuthenticationHandler.TestUserIdHeaderName, userId.ToString());
+    }
+
     private static void Clear(HttpClient client)
     {
         client.DefaultRequestHeaders.Authorization = null;
         client.DefaultRequestHeaders.Remove(ApiTestAuthenticationHandler.AuthModeHeaderName);
         client.DefaultRequestHeaders.Remove(ApiTestAuthenticationHandler.RequiredPermissionHeaderName);
+        client.DefaultRequestHeaders.Remove(ApiTestAuthenticationHandler.TestUserIdHeaderName);
     }
 }

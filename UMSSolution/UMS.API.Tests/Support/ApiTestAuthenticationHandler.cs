@@ -14,9 +14,11 @@ public sealed class ApiTestAuthenticationHandler : AuthenticationHandler<Authent
     public const string SchemeName = "ApiTest";
     public const string AuthModeHeaderName = "X-Test-Auth-Mode";
     public const string RequiredPermissionHeaderName = "X-Test-Required-Permission";
+    public const string TestUserIdHeaderName = "X-Test-User-Id";
     private const string AnonymousMode = "anonymous";
     private const string LowPrivilegeMode = "low-privilege";
     private const string PrivilegedMode = "privileged";
+    private const string SelfServiceMode = "self-service";
 
     public ApiTestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -44,6 +46,32 @@ public sealed class ApiTestAuthenticationHandler : AuthenticationHandler<Authent
         {
             return Task.FromResult(AuthenticateResult.Fail(
                 $"{RequiredPermissionHeaderName} header is required for authenticated API test clients."));
+        }
+
+        if (string.Equals(authMode, SelfServiceMode, StringComparison.OrdinalIgnoreCase))
+        {
+            var userIdHeader = Request.Headers[TestUserIdHeaderName].ToString();
+            if (string.IsNullOrWhiteSpace(userIdHeader))
+                return Task.FromResult(AuthenticateResult.Fail(
+                    $"{TestUserIdHeaderName} header is required for self-service mode."));
+
+            var selfServiceIssuer = Context.RequestServices
+                .GetRequiredService<IConfiguration>()
+                .GetSection("JwtConfiguration")
+                .GetValue<string>("Issuer")
+                ?? "test-issuer";
+
+            var selfClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userIdHeader, ClaimValueTypes.String, selfServiceIssuer),
+                new(ClaimTypes.Email, $"user{userIdHeader}@test.com", ClaimValueTypes.String, selfServiceIssuer),
+                new(ClaimTypes.Name, "Self-Service Test User", ClaimValueTypes.String, selfServiceIssuer),
+                new(ClaimTypes.Role, "Basic", ClaimValueTypes.String, selfServiceIssuer)
+            };
+            var selfIdentity = new ClaimsIdentity(selfClaims, SchemeName, ClaimTypes.Name, ClaimTypes.Role);
+            var selfPrincipal = new ClaimsPrincipal(selfIdentity);
+            return Task.FromResult(AuthenticateResult.Success(
+                new AuthenticationTicket(selfPrincipal, SchemeName)));
         }
 
         var jwtIssuer = Context.RequestServices

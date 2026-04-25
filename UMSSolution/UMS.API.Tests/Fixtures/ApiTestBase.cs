@@ -41,4 +41,10 @@ public abstract class ApiTestBase : IClassFixture<CustomWebApplicationFactory>
         Client.Dispose();
         Client = Factory.CreatePrivilegedClient(requiredPermission);
     }
+
+    protected void UseSelfServiceClient(int userId)
+    {
+        Client.Dispose();
+        Client = Factory.CreateSelfServiceClient(userId);
+    }
 }

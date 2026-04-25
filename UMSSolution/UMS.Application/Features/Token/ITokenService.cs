@@ -1,4 +1,5 @@
 ﻿using UMS.Application.Features.Token.Queries;
+using UMS.Application.Features.Token.Queries.LoginWith2FA;
 
 namespace UMS.Application.Features.Token
 {
@@ -6,5 +7,6 @@ namespace UMS.Application.Features.Token
     {
         Task<IResponseWrapper<TokenResponse>> GetTokenAsync(TokenRequest tokenRequest);
         Task<IResponseWrapper<TokenResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest);
+        Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request);
     }
 }

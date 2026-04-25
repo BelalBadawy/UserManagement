@@ -66,3 +66,23 @@ public sealed record UserResponseContract(
 public sealed record UserRoleContract(
     string RoleName,
     string RoleDescription);
+
+public sealed record TwoFactorTokenResponseContract(
+    string? Token,
+    string? RefreshToken,
+    DateTime? RefreshTokenExpiryTime,
+    bool RequiresTwoFactor,
+    string? TwoFactorChallengeToken);
+
+public sealed record ProfileResponseContract(
+    int Id,
+    string FullName,
+    string Email,
+    string UserName,
+    bool IsActive,
+    bool EmailConfirmed,
+    bool TwoFactorEnabled);
+
+public sealed record TwoFactorSetupResponseContract(
+    string? KeySecret,
+    string? CodeQR);

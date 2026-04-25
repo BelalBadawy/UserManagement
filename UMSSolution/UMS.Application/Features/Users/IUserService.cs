@@ -1,5 +1,7 @@
 ﻿using UMS.Application.Dtos.Pagination;
 using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.Logout;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 
@@ -27,5 +29,12 @@ namespace UMS.Application.Features.Users
         Task<IResponseWrapper<List<string>>> GenerateNew2FARecoveryCodesAsync();
         Task<IResponseWrapper> LockUserAsync(int userId);
         Task<IResponseWrapper> UnlockUserAsync(int userId);
+
+        Task<IResponseWrapper<ProfileResponse>> GetMyProfileAsync();
+        Task<IResponseWrapper> LogoutAsync(LogoutRequest request);
+        Task<IResponseWrapper<TwoFactorAuthViewModel>> SetupTwoFactorAuthAsync();
+        Task<IResponseWrapper> ConfirmTwoFactorAuthAsync(TwoFactorCodeRequest request);
+        Task<IResponseWrapper<List<string>>> EnableTwoFactorAuthAsync(TwoFactorCodeRequest request);
+        Task<IResponseWrapper> DisableTwoFactorAuthAsync(DisableTwoFactorAuthRequest request);
     }
 }
