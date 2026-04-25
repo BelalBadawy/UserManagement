@@ -30,7 +30,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddApiVersioningConfig();
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 
 
 var app = builder.Build();

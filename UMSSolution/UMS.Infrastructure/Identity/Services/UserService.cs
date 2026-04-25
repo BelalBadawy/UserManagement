@@ -1,6 +1,7 @@
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using System.Web;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.Pagination;
@@ -22,6 +23,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SeedUsersConfiguration _seedUsersConfiguration;
         private readonly IDateTimeService _dateTimeService;
+        private readonly ICurrentUserService _currentUserService;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
@@ -29,7 +31,8 @@ namespace UMS.Infrastructure.Identity.Services
             IEmailService emailService,
             IHttpContextAccessor contextAccessor,
             IOptions<SeedUsersConfiguration> seedUsersConfiguration,
-            IDateTimeService dateTimeService)
+            IDateTimeService dateTimeService,
+            ICurrentUserService currentUserService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -37,6 +40,7 @@ namespace UMS.Infrastructure.Identity.Services
             _httpContextAccessor = contextAccessor;
             _seedUsersConfiguration = seedUsersConfiguration.Value;
             _dateTimeService = dateTimeService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IResponseWrapper> RegisterUserAsync(UserRegistrationRequest userRegistration)
@@ -65,6 +69,25 @@ namespace UMS.Infrastructure.Identity.Services
 
                 if (identityRoleResult.Succeeded)
                 {
+                    if (!userRegistration.AutoConfirmEmail)
+                    {
+                        var httpRequest = _httpContextAccessor.HttpContext?.Request;
+                        var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+                        var emailToken  = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                        var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+                                          $"?userId={newUser.Id}" +
+                                          $"&token={HttpUtility.UrlEncode(emailToken)}";
+
+                        await _emailService.SendAsync(new SendEmailDto
+                        {
+                            Subject     = "Confirm Your Email",
+                            MailTo      = newUser.Email,
+                            MessageBody = $"<p>Hello: {newUser.FullName}</p>" +
+                                          "<p>Please confirm your email by clicking the link below.</p>" +
+                                          $"<p><a href=\"{callbackUrl}\">Confirm Email</a></p>"
+                        });
+                    }
+
                     return ResponseWrapper.Success("User registered successfully.");
                 }
 
@@ -315,7 +338,8 @@ namespace UMS.Infrastructure.Identity.Services
             var request = _httpContextAccessor.HttpContext?.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callbackUrl = $"{baseUrl}/Account/ResetPassword?email={user.Email}&code={code}";
+            var callbackUrl =
+                $"{baseUrl}/Account/ResetPassword?email={HttpUtility.UrlEncode(user.Email)}&code={HttpUtility.UrlEncode(code)}";
 
             var emailModel = new SendEmailDto
             {
@@ -368,6 +392,139 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 return ResponseWrapper.Fail(SD.ErrorOccured);
             }
+        }
+
+        public async Task<IResponseWrapper> ConfirmEmailAsync(int userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (user.EmailConfirmed)
+                return ResponseWrapper.Success("Email is already confirmed.");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
+
+            return ResponseWrapper.Success("Email confirmed successfully.");
+        }
+
+        public async Task<IResponseWrapper> ConfirmEmailChangeAsync(int userId, string newEmail, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+            if (!result.Succeeded)
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
+
+            await _userManager.SetUserNameAsync(user, newEmail);
+            return ResponseWrapper.Success("Email changed successfully.");
+        }
+
+        public async Task<IResponseWrapper> ResendConfirmationEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+                return ResponseWrapper.Fail("This email doesn't exist.");
+
+            if (user.EmailConfirmed)
+                return ResponseWrapper.Fail("Email is already confirmed.");
+
+            var httpRequest = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var token       = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+                              $"?userId={user.Id}" +
+                              $"&token={HttpUtility.UrlEncode(token)}";
+
+            await _emailService.SendAsync(new SendEmailDto
+            {
+                Subject     = "Confirm Your Email",
+                MailTo      = user.Email,
+                MessageBody = $"<p>Hello: {user.FullName}</p>" +
+                              "<p>Please confirm your email by clicking the link below.</p>" +
+                              $"<p><a href=\"{callbackUrl}\">Confirm Email</a></p>"
+            });
+
+            return ResponseWrapper.Success("Confirmation email sent. Please check your inbox.");
+        }
+
+        public async Task<IResponseWrapper> GenerateChangeEmailTokenAsync(string newEmail)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (string.Equals(user.Email, newEmail, StringComparison.OrdinalIgnoreCase))
+                return ResponseWrapper.Fail("New email must be different from your current email.");
+
+            var httpRequest = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var token       = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            var callbackUrl = $"{baseUrl}/Account/ConfirmEmailChange" +
+                              $"?userId={user.Id}" +
+                              $"&newEmail={HttpUtility.UrlEncode(newEmail)}" +
+                              $"&token={HttpUtility.UrlEncode(token)}";
+
+            await _emailService.SendAsync(new SendEmailDto
+            {
+                Subject     = "Confirm Your Email Change",
+                MailTo      = user.Email,
+                MessageBody = $"<p>Hello: {user.FullName}</p>" +
+                              "<p>Click the link below to confirm your email change.</p>" +
+                              $"<p><a href=\"{callbackUrl}\">Confirm Email Change</a></p>"
+            });
+
+            return ResponseWrapper.Success("Email change confirmation sent. Please check your inbox.");
+        }
+
+        public async Task<IResponseWrapper<List<string>>> GenerateNew2FARecoveryCodesAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<List<string>>.Fail("User does not exist.");
+
+            if (!user.TwoFactorEnabled)
+                return ResponseWrapper<List<string>>.Fail("Two-factor authentication is not enabled.");
+
+            var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            return ResponseWrapper<List<string>>.Success(codes!.ToList(), "New recovery codes generated.");
+        }
+
+        public async Task<IResponseWrapper> LockUserAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (string.Equals(user.Email, _seedUsersConfiguration.Admin.Email,
+                    StringComparison.OrdinalIgnoreCase))
+                return ResponseWrapper.Fail("Cannot lock the system administrator.");
+
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+
+            user.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(-1);
+            await _userManager.UpdateAsync(user);
+
+            return ResponseWrapper.Success("User locked successfully.");
+        }
+
+        public async Task<IResponseWrapper> UnlockUserAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            return ResponseWrapper.Success("User unlocked successfully.");
         }
     }
 }

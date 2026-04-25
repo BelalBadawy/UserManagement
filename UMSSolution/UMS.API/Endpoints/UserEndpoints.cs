@@ -90,6 +90,40 @@ public static class UserEndpoints
           .Produces<IResponseWrapper<List<UserRoleViewModel>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
+        group.MapPost("generate-change-email-token", async (GenerateChangeEmailTokenRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new GenerateChangeEmailTokenCommand { GenerateChangeEmailToken = request }, ct);
+            return response.ToApiResult();
+        })
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("generate-2fa-recovery-codes", async (ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new GenerateNew2FARecoveryCodesCommand(), ct);
+            return response.ToApiResult();
+        })
+        .Produces<IResponseWrapper<List<string>>>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPut("lock-user", async (LockUserRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new LockUserCommand { LockUser = request }, ct);
+            return response.ToApiResult();
+        })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Lock))
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPut("unlock-user", async (UnlockUserRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new UnlockUserCommand { UnlockUser = request }, ct);
+            return response.ToApiResult();
+        })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Unlock))
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
         return app;
     }
 }

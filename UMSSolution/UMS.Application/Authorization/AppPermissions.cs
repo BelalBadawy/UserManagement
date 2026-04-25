@@ -8,6 +8,10 @@ namespace UMS.Application.Authorization
         public const string Read = nameof(Read);
         public const string Update = nameof(Update);
         public const string Delete = nameof(Delete);
+        public const string Lock        = nameof(Lock);
+        public const string Unlock      = nameof(Unlock);
+        public const string ChangeEmail = nameof(ChangeEmail);
+        public const string Manage2FA   = nameof(Manage2FA);
     }
 
     public static class AppFeature
@@ -57,6 +61,10 @@ namespace UMS.Application.Authorization
             new(AppService.Product, AppFeature.Categories, AppAction.Read, "Read Categories"),
             new(AppService.Product, AppFeature.Categories, AppAction.Update, "Update Categories"),
             new(AppService.Product, AppFeature.Categories, AppAction.Delete, "Delete Categories"),
+            new(AppService.Identity, AppFeature.Users, AppAction.Lock,        "Lock Users"),
+            new(AppService.Identity, AppFeature.Users, AppAction.Unlock,      "Unlock Users"),
+            new(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail, "Change User Email"),
+            new(AppService.Identity, AppFeature.Users, AppAction.Manage2FA,   "Manage User 2FA"),
         ];
 
         public static IReadOnlyList<AppPermission> AllPermissions { get; } =

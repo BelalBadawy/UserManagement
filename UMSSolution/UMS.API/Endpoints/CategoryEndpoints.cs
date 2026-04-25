@@ -1,4 +1,5 @@
 using Mediator;
+using Microsoft.AspNetCore.Mvc;
 using UMS.API.Extensions;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
@@ -61,9 +62,15 @@ namespace UMS.API.Endpoints
             .WithName("GetCategoryById")
             .AllowAnonymous();
 
-            group.MapPost("/", async (ISender sender, CreateCategoryCommand request, CancellationToken ct) =>
+            group.MapPost("/", async (ISender sender, CreateCategoryRequest request, CancellationToken ct) =>
             {
-                var response = await sender.Send(request, ct);
+                var command = new CreateCategoryCommand(
+                    request.Name,
+                    request.Slug,
+                    request.ParentId,
+                    request.IsActive,
+                    request.SortOrder);
+                var response = await sender.Send(command, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper>()

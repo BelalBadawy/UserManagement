@@ -19,7 +19,7 @@
                 .WithMessage("PageSize cannot exceed 100");
 
             RuleFor(x => x.SortDirection)
-                .Must(x => x == "asc" || x == "desc")
+                .Must(x => string.IsNullOrWhiteSpace(x) || x == "asc" || x == "desc")
                 .WithMessage("SortDirection must be 'asc' or 'desc'");
         }
     }
