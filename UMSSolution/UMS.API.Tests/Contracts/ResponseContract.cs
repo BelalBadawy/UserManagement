@@ -20,17 +20,49 @@ public sealed record CategoryResponseContract(
     int? ParentId,
     int SortOrder);
 
+public sealed record CategoryDetailsResponseContract(
+    int Id,
+    string Name,
+    string Slug,
+    string? ParentName);
+
+public sealed record CategoryLookupContract(
+    int Id,
+    string Name);
+
+public sealed class PagedResultContract<T>
+{
+    public List<T> Data { get; init; } = [];
+    public int CurrentPage { get; init; }
+    public int PageSize { get; init; }
+    public int TotalCount { get; init; }
+}
+
 public sealed record RoleResponseContract(
     int Id,
     string Name,
     string? Description);
 
+public sealed record RoleClaimContract(
+    string ClaimType,
+    string ClaimValue,
+    string Description);
+
+public sealed class RoleClaimResponseContract
+{
+    public RoleResponseContract Role { get; init; } = default!;
+    public List<RoleClaimContract> RoleClaims { get; init; } = [];
+}
+
 public sealed record UserResponseContract(
     int Id,
-    string FirstName,
-    string LastName,
+    string FullName,
     string UserName,
     string Email,
-    string? PhoneNumber,
-    string? ProfilePicture,
-    bool IsActive);
+    bool IsActive,
+    bool EmailConfirmed,
+    string? PhoneNumber);
+
+public sealed record UserRoleContract(
+    string RoleName,
+    string RoleDescription);

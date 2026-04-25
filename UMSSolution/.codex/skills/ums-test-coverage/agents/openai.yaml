@@ -1,0 +1,7 @@
+interface:
+  display_name: "UMS Test Coverage"
+  short_description: "Add UMS tests from the coverage plan"
+  default_prompt: "Use $ums-test-coverage to add or update tests for a UMS feature using the repository testing plan and conventions."
+
+policy:
+  allow_implicit_invocation: true

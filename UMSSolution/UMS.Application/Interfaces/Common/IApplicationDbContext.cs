@@ -15,7 +15,7 @@ namespace UMS.Application.Interfaces.Common
         DbSet<AuditTrail> AuditTrails { get; }
         DbSet<LogUserActivity> LogUserActivities { get; }
         DbSet<OutboxMessage> OutboxMessages { get; }
-        DbSet<RefreshToken> RefreshTokens { get; }
+     
 
         void AddOutboxMessage<TNotification>(TNotification notification) where TNotification : class;
         void SetOriginalRowVersion<TEntity>(TEntity entity, byte[] rowVersion) where TEntity : class, IDataConcurrency;

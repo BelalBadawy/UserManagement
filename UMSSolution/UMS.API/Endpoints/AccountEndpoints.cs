@@ -46,6 +46,30 @@ public static class AccountEndpoints
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
+        group.MapPost("confirm-email", async (ConfirmEmailRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new ConfirmEmailCommand { ConfirmEmail = request }, ct);
+            return response.ToApiResult();
+        })
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("confirm-email-change", async (ConfirmEmailChangeRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new ConfirmEmailChangeCommand { ConfirmEmailChange = request }, ct);
+            return response.ToApiResult();
+        })
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("resend-confirmation-email", async (ResendConfirmationEmailRequest request, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new ResendConfirmationEmailCommand { ResendConfirmation = request }, ct);
+            return response.ToApiResult();
+        })
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
         return app;
     }
 }

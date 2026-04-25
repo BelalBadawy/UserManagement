@@ -49,7 +49,6 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
 
             builder.Property(c => c.RowVersion)
                 .IsConcurrencyToken()
-                .ValueGeneratedOnAddOrUpdate()
                 .HasColumnType("varbinary(max)");
 
             builder.HasIndex(c => c.NormalizedName)

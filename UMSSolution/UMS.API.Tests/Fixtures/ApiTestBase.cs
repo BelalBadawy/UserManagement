@@ -1,7 +1,5 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
-using UMS.API.Tests.Contracts;
+using UMS.API.Tests.Support;
 
 namespace UMS.API.Tests.Fixtures;
 
@@ -10,11 +8,15 @@ public abstract class ApiTestBase : IClassFixture<CustomWebApplicationFactory>
     protected ApiTestBase(CustomWebApplicationFactory factory)
     {
         Factory = factory;
-        Client = factory.CreateClient();
+        Client = factory.CreateAnonymousClient();
+        Verifier = new ApiStateVerifier(factory);
+        Seeder = new ApiTestDataSeeder(factory);
     }
 
     protected CustomWebApplicationFactory Factory { get; }
-    protected HttpClient Client { get; }
+    protected HttpClient Client { get; private set; }
+    protected ApiStateVerifier Verifier { get; }
+    protected ApiTestDataSeeder Seeder { get; }
 
     protected T GetRequiredService<T>() where T : notnull
     {
@@ -22,21 +24,21 @@ public abstract class ApiTestBase : IClassFixture<CustomWebApplicationFactory>
         return scope.ServiceProvider.GetRequiredService<T>();
     }
 
-    protected async Task AuthenticateAsAdminAsync()
+    protected void UseAnonymousClient()
     {
-        var response = await Client.PostAsJsonAsync("/api/v1/account/login", new
-        {
-            Email = "admin@gmail.com",
-            Password = "Admin@123"
-        });
+        Client.Dispose();
+        Client = Factory.CreateAnonymousClient();
+    }
 
-        response.EnsureSuccessStatusCode();
+    protected void UseLowPrivilegeClient(string requiredPermission)
+    {
+        Client.Dispose();
+        Client = Factory.CreateLowPrivilegeClient(requiredPermission);
+    }
 
-        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<TokenResponseContract>>();
-        payload.Should().NotBeNull();
-        payload!.Data.Should().NotBeNull();
-
-        Client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", payload.Data!.Token);
+    protected void UsePrivilegedClient(string requiredPermission)
+    {
+        Client.Dispose();
+        Client = Factory.CreatePrivilegedClient(requiredPermission);
     }
 }

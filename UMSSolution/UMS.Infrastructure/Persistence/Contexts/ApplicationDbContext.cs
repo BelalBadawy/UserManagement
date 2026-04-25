@@ -46,7 +46,6 @@ namespace UMS.Infrastructure.Persistence.Contexts
         public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
         public DbSet<LogUserActivity> LogUserActivities => Set<LogUserActivity>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

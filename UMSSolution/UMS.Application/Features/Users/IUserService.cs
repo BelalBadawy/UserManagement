@@ -20,7 +20,12 @@ namespace UMS.Application.Features.Users
         Task<IResponseWrapper> UpdateUserRolesAsync(UpdateUserRolesRequest updateUserRoles,CancellationToken ct);
         Task<IResponseWrapper> ForgotPasswordAsync(string email);
         Task<IResponseWrapper> ResetPasswordAsync(ResetPasswordRequest request);
-
-        // End
+        Task<IResponseWrapper> ConfirmEmailAsync(int userId, string token);
+        Task<IResponseWrapper> ConfirmEmailChangeAsync(int userId, string newEmail, string token);
+        Task<IResponseWrapper> ResendConfirmationEmailAsync(string email);
+        Task<IResponseWrapper> GenerateChangeEmailTokenAsync(string newEmail);
+        Task<IResponseWrapper<List<string>>> GenerateNew2FARecoveryCodesAsync();
+        Task<IResponseWrapper> LockUserAsync(int userId);
+        Task<IResponseWrapper> UnlockUserAsync(int userId);
     }
 }
