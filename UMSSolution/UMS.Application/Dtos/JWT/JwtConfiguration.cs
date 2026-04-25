@@ -29,5 +29,7 @@
         /// Refresh token expiry duration in days.
         /// </summary>
         public int RefreshTokenExpiryInDays { get; set; }
+
+        public int TwoFactorChallengeTokenExpiryInMinutes { get; set; }
     }
 }

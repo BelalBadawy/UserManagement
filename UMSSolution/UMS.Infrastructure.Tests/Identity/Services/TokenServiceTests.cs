@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,6 +19,7 @@ public class TokenServiceTests
     private readonly Mock<UserManager<ApplicationUser>> _userManager;
     private readonly Mock<RoleManager<ApplicationRole>> _roleManager;
     private readonly Mock<IDateTimeService> _dateTimeService = new();
+    private readonly Mock<IMemoryCache> _cache = new();
     private readonly JwtConfiguration _jwtConfig;
     private readonly TokenService _sut;
 
@@ -35,14 +37,16 @@ public class TokenServiceTests
             Audience = "ums-audience",
             Secret = "super-secret-key-for-testing-123456",
             TokenExpiryInMunites = 60,
-            RefreshTokenExpiryInDays = 7
+            RefreshTokenExpiryInDays = 7,
+            TwoFactorChallengeTokenExpiryInMinutes = 5
         };
 
         _sut = new TokenService(
             _userManager.Object,
             _roleManager.Object,
             Options.Create(_jwtConfig),
-            _dateTimeService.Object);
+            _dateTimeService.Object,
+            _cache.Object);
     }
 
     private ApplicationUser MakeUser(string email = "user@test.com", bool active = true, bool confirmed = true, bool lockedOut = false) =>

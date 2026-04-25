@@ -1,30 +1,30 @@
-# Auth & 2FA Endpoints â€” Development Tasks
+# Auth & 2FA Endpoints — Development Tasks
 
 > **Scope:** 7 new endpoints (LoginWith2FA, Logout, Profile, Setup / Confirm / Enable / Disable 2FA) plus a security-critical modification to `GetTokenAsync`.
-> **Out of scope:** `GenerateRecoveryCodes` â€” already implemented as `POST /api/v{v}/users/generate-2fa-recovery-codes`.
+> **Out of scope:** `GenerateRecoveryCodes` — already implemented as `POST /api/v{v}/users/generate-2fa-recovery-codes`.
 
 ---
 
 ## Table of Contents
 
-1. [Section 0 â€” Prerequisites & Notes](#section-0--prerequisites--notes)
-2. [Section 1 â€” Configuration](#section-1--configuration)
-3. [Section 2 â€” Application: Modify Existing Models](#section-2--application-modify-existing-models)
-4. [Section 3 â€” Application: New DTOs](#section-3--application-new-dtos)
-5. [Section 4 â€” Application: New Queries & Commands](#section-4--application-new-queries--commands)
-6. [Section 5 â€” Application: Service Interface Extensions](#section-5--application-service-interface-extensions)
-7. [Section 6 â€” Infrastructure: TokenService](#section-6--infrastructure-tokenservice)
-8. [Section 7 â€” Infrastructure: UserService](#section-7--infrastructure-userservice)
-9. [Section 8 â€” Infrastructure: DI Registration](#section-8--infrastructure-di-registration)
-10. [Section 9 â€” API: AccountEndpoints](#section-9--api-accountendpoints)
-11. [Section 10 â€” API: UserEndpoints](#section-10--api-userendpoints)
-12. [Section 11 â€” Tests: Application Layer](#section-11--tests-application-layer)
-13. [Section 12 â€” Tests: Infrastructure Layer](#section-12--tests-infrastructure-layer)
-14. [Section 13 â€” Tests: API Layer](#section-13--tests-api-layer)
+1. [Section 0 — Prerequisites & Notes](#section-0--prerequisites--notes)
+2. [Section 1 — Configuration](#section-1--configuration)
+3. [Section 2 — Application: Modify Existing Models](#section-2--application-modify-existing-models)
+4. [Section 3 — Application: New DTOs](#section-3--application-new-dtos)
+5. [Section 4 — Application: New Queries & Commands](#section-4--application-new-queries--commands)
+6. [Section 5 — Application: Service Interface Extensions](#section-5--application-service-interface-extensions)
+7. [Section 6 — Infrastructure: TokenService](#section-6--infrastructure-tokenservice)
+8. [Section 7 — Infrastructure: UserService](#section-7--infrastructure-userservice)
+9. [Section 8 — Infrastructure: DI Registration](#section-8--infrastructure-di-registration)
+10. [Section 9 — API: AccountEndpoints](#section-9--api-accountendpoints)
+11. [Section 10 — API: UserEndpoints](#section-10--api-userendpoints)
+12. [Section 11 — Tests: Application Layer](#section-11--tests-application-layer)
+13. [Section 12 — Tests: Infrastructure Layer](#section-12--tests-infrastructure-layer)
+14. [Section 13 — Tests: API Layer](#section-13--tests-api-layer)
 
 ---
 
-## Section 0 â€” Prerequisites & Notes
+## Section 0 — Prerequisites & Notes
 
 ### Security Decisions Baked into This Task List
 
@@ -35,27 +35,27 @@
 | Replay prevention | Used `jti` values are stored in `IMemoryCache` with TTL = `TwoFactorChallengeTokenExpiryInMinutes`. |
 | `AccessFailedAsync` policy | Called on: wrong password (login, disable-2fa), wrong TOTP (login-2fa, confirm-2fa, enable-2fa). **Not** called for wrong TOTP on disable-2fa. |
 | `ResetAccessFailedCountAsync` timing | Called in Phase 2 (after TOTP success), never in Phase 1. |
-| Authenticator key on disable | Key is **preserved** â€” not reset. A future `/reset-authenticator` endpoint is explicitly deferred. |
-| `UpdateSecurityStampAsync` on disable | **Skipped** â€” no-op in this JWT-only API (stamp is not included in JWT claims). |
+| Authenticator key on disable | Key is **preserved** — not reset. A future `/reset-authenticator` endpoint is explicitly deferred. |
+| `UpdateSecurityStampAsync` on disable | **Skipped** — no-op in this JWT-only API (stamp is not included in JWT claims). |
 | Logout token mismatch | Return error and revoke nothing. Expired-but-matching tokens are cleared as cleanup. |
-| `IMemoryCache` | Must be explicitly registered â€” not registered by default. |
+| `IMemoryCache` | Must be explicitly registered — not registered by default. |
 
 ---
 
-## Section 1 â€” Configuration
+## Section 1 — Configuration
 
-### 1.1 â€” Extend JwtConfiguration POCO
+### 1.1 — Extend JwtConfiguration POCO
 
-- [ ] Open `UMS.Application/Dtos/JWT/JwtConfiguration.cs`.
-- [ ] Add the following property:
+- [x] Open `UMS.Application/Dtos/JWT/JwtConfiguration.cs`.
+- [x] Add the following property:
   ```csharp
   public int TwoFactorChallengeTokenExpiryInMinutes { get; set; }
   ```
 
-### 1.2 â€” Create TwoFactorOptions POCO
+### 1.2 — Create TwoFactorOptions POCO
 
-- [ ] Create file `UMS.Application/Dtos/TwoFactor/TwoFactorOptions.cs`.
-- [ ] Implement the class:
+- [x] Create file `UMS.Application/Dtos/TwoFactor/TwoFactorOptions.cs`.
+- [x] Implement the class:
   ```csharp
   namespace UMS.Application.Dtos.TwoFactor;
 
@@ -66,14 +66,14 @@
   ```
   > `Issuer` is the user-facing app name displayed inside Google Authenticator / Authy.
 
-### 1.3 â€” Update appsettings.json
+### 1.3 — Update appsettings.json
 
-- [ ] Open `UMS.API/appsettings.json`.
-- [ ] Inside the `"JwtConfiguration"` object, add:
+- [x] Open `UMS.API/appsettings.json`.
+- [x] Inside the `"JwtConfiguration"` object, add:
   ```json
   "TwoFactorChallengeTokenExpiryInMinutes": 5
   ```
-- [ ] Add a new root-level section:
+- [x] Add a new root-level section:
   ```json
   "TwoFactor": {
     "Issuer": "YOUR_APP_NAME"
@@ -81,20 +81,20 @@
   ```
   > Replace `"YOUR_APP_NAME"` with the real application display name before deploying.
 
-- [ ] If `appsettings.Development.json` exists, mirror the same two additions there.
+- [x] If `appsettings.Development.json` exists, mirror the same two additions there.
 
 ---
 
-## Section 2 â€” Application: Modify Existing Models
+## Section 2 — Application: Modify Existing Models
 
-### 2.1 â€” Modify TokenResponse
+### 2.1 — Modify TokenResponse
 
-- [ ] Open `UMS.Application/Features/Token/Queries/GetToken/TokenResponse.cs`.
-- [ ] Add `using System.Text.Json.Serialization;` at the top.
-- [ ] Change `Token` from `string` to `string?`.
-- [ ] Change `RefreshToken` from `string` to `string?`.
-- [ ] Change `RefreshTokenExpiryTime` from `DateTime` to `DateTime?`.
-- [ ] Add the following two new properties:
+- [x] Open `UMS.Application/Features/Token/Queries/GetToken/TokenResponse.cs`.
+- [x] Add `using System.Text.Json.Serialization;` at the top.
+- [x] Change `Token` from `string` to `string?`.
+- [x] Change `RefreshToken` from `string` to `string?`.
+- [x] Change `RefreshTokenExpiryTime` from `DateTime` to `DateTime?`.
+- [x] Add the following two new properties:
   ```csharp
   public bool RequiresTwoFactor { get; set; }
 
@@ -106,12 +106,12 @@
 
 ---
 
-## Section 3 â€” Application: New DTOs
+## Section 3 — Application: New DTOs
 
-### 3.1 â€” TwoFactorLoginRequest
+### 3.1 — TwoFactorLoginRequest
 
-- [ ] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/TwoFactorLoginRequest.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/TwoFactorLoginRequest.cs`.
+- [x] Implement:
   ```csharp
   namespace UMS.Application.Features.Token.Queries.LoginWith2FA;
 
@@ -122,10 +122,10 @@
   }
   ```
 
-### 3.2 â€” TwoFactorAuthViewModel
+### 3.2 — TwoFactorAuthViewModel
 
-- [ ] Create file `UMS.Application/Features/Users/Models/Responses/TwoFactorAuthViewModel.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Models/Responses/TwoFactorAuthViewModel.cs`.
+- [x] Implement:
   ```csharp
   using System.Text.Json.Serialization;
 
@@ -134,17 +134,17 @@
   public class TwoFactorAuthViewModel
   {
       public string? KeySecret { get; set; }
-      public string? CodeQR { get; set; }  // raw otpauth:// URI â€” client renders the QR image
+      public string? CodeQR { get; set; }  // raw otpauth:// URI — client renders the QR image
 
       [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
       public string? VerificationCode { get; set; }  // always null in server response
   }
   ```
 
-### 3.3 â€” ProfileResponse
+### 3.3 — ProfileResponse
 
-- [ ] Create file `UMS.Application/Features/Users/Models/Responses/ProfileResponse.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Models/Responses/ProfileResponse.cs`.
+- [x] Implement:
   ```csharp
   namespace UMS.Application.Features.Users.Models.Responses;
 
@@ -164,10 +164,10 @@
   }
   ```
 
-### 3.4 â€” TwoFactorCodeRequest (Shared)
+### 3.4 — TwoFactorCodeRequest (Shared)
 
-- [ ] Create file `UMS.Application/Features/Users/Models/Requests/TwoFactorCodeRequest.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Models/Requests/TwoFactorCodeRequest.cs`.
+- [x] Implement:
   ```csharp
   namespace UMS.Application.Features.Users.Models.Requests;
 
@@ -178,10 +178,10 @@
   ```
   > Used by both `ConfirmTwoFactorAuthCommand` and `EnableTwoFactorAuthCommand`.
 
-### 3.5 â€” DisableTwoFactorAuthRequest
+### 3.5 — DisableTwoFactorAuthRequest
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthRequest.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthRequest.cs`.
+- [x] Implement:
   ```csharp
   namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
 
@@ -192,10 +192,10 @@
   }
   ```
 
-### 3.6 â€” LogoutRequest
+### 3.6 — LogoutRequest
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutRequest.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutRequest.cs`.
+- [x] Implement:
   ```csharp
   namespace UMS.Application.Features.Users.Commands.Logout;
 
@@ -207,16 +207,16 @@
 
 ---
 
-## Section 4 â€” Application: New Queries & Commands
+## Section 4 — Application: New Queries & Commands
 
 > **Convention:** Every file in this section lives in `UMS.Application`. Handler method signature is `ValueTask<T> Handle(TRequest request, CancellationToken ct)`. All commands/queries that carry input implement `IValidateMe` and have a paired `*Validator.cs` file.
 
 ---
 
-### 4.1 â€” LoginWith2FAQuery + Handler
+### 4.1 — LoginWith2FAQuery + Handler
 
-- [ ] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs`.
-- [ ] Implement query and handler:
+- [x] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs`.
+- [x] Implement query and handler:
   ```csharp
   public class LoginWith2FAQuery
       : IRequest<IResponseWrapper<TokenResponse>>, IValidateMe
@@ -238,10 +238,10 @@
   }
   ```
 
-### 4.2 â€” LoginWith2FAQueryValidator
+### 4.2 — LoginWith2FAQueryValidator
 
-- [ ] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQueryValidator.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQueryValidator.cs`.
+- [x] Implement:
   ```csharp
   public class LoginWith2FAQueryValidator : AbstractValidator<LoginWith2FAQuery>
   {
@@ -253,10 +253,10 @@
   }
   ```
 
-### 4.3 â€” GetMyProfileQuery + Handler
+### 4.3 — GetMyProfileQuery + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Queries/GetMyProfile/GetMyProfileQuery.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Queries/GetMyProfile/GetMyProfileQuery.cs`.
+- [x] Implement:
   ```csharp
   public class GetMyProfileQuery : IRequest<IResponseWrapper<ProfileResponse>> { }
 
@@ -275,10 +275,10 @@
   ```
   > No input. No validator needed.
 
-### 4.4 â€” LogoutCommand + Handler
+### 4.4 — LogoutCommand + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutCommand.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutCommand.cs`.
+- [x] Implement:
   ```csharp
   public class LogoutCommand : IRequest<IResponseWrapper>, IValidateMe
   {
@@ -298,10 +298,10 @@
   }
   ```
 
-### 4.5 â€” LogoutCommandValidator
+### 4.5 — LogoutCommandValidator
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutCommandValidator.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/Logout/LogoutCommandValidator.cs`.
+- [x] Implement:
   ```csharp
   public class LogoutCommandValidator : AbstractValidator<LogoutCommand>
   {
@@ -312,10 +312,10 @@
   }
   ```
 
-### 4.6 â€” SetupTwoFactorAuthCommand + Handler
+### 4.6 — SetupTwoFactorAuthCommand + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/SetupTwoFactorAuth/SetupTwoFactorAuthCommand.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/SetupTwoFactorAuth/SetupTwoFactorAuthCommand.cs`.
+- [x] Implement:
   ```csharp
   public class SetupTwoFactorAuthCommand
       : IRequest<IResponseWrapper<TwoFactorAuthViewModel>> { }
@@ -335,10 +335,10 @@
   ```
   > No input. No validator needed.
 
-### 4.7 â€” ConfirmTwoFactorAuthCommand + Handler
+### 4.7 — ConfirmTwoFactorAuthCommand + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/ConfirmTwoFactorAuth/ConfirmTwoFactorAuthCommand.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/ConfirmTwoFactorAuth/ConfirmTwoFactorAuthCommand.cs`.
+- [x] Implement:
   ```csharp
   public class ConfirmTwoFactorAuthCommand : IRequest<IResponseWrapper>, IValidateMe
   {
@@ -359,10 +359,10 @@
   }
   ```
 
-### 4.8 â€” ConfirmTwoFactorAuthValidator
+### 4.8 — ConfirmTwoFactorAuthValidator
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/ConfirmTwoFactorAuth/ConfirmTwoFactorAuthValidator.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/ConfirmTwoFactorAuth/ConfirmTwoFactorAuthValidator.cs`.
+- [x] Implement:
   ```csharp
   public class ConfirmTwoFactorAuthValidator
       : AbstractValidator<ConfirmTwoFactorAuthCommand>
@@ -378,10 +378,10 @@
   ```
   > `confirm-2fa` accepts TOTP codes only (6 digits). Recovery codes are explicitly rejected.
 
-### 4.9 â€” EnableTwoFactorAuthCommand + Handler
+### 4.9 — EnableTwoFactorAuthCommand + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/EnableTwoFactorAuth/EnableTwoFactorAuthCommand.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/EnableTwoFactorAuth/EnableTwoFactorAuthCommand.cs`.
+- [x] Implement:
   ```csharp
   public class EnableTwoFactorAuthCommand
       : IRequest<IResponseWrapper<List<string>>>, IValidateMe
@@ -403,10 +403,10 @@
   }
   ```
 
-### 4.10 â€” EnableTwoFactorAuthValidator
+### 4.10 — EnableTwoFactorAuthValidator
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/EnableTwoFactorAuth/EnableTwoFactorAuthValidator.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/EnableTwoFactorAuth/EnableTwoFactorAuthValidator.cs`.
+- [x] Implement:
   ```csharp
   public class EnableTwoFactorAuthValidator
       : AbstractValidator<EnableTwoFactorAuthCommand>
@@ -421,10 +421,10 @@
   }
   ```
 
-### 4.11 â€” DisableTwoFactorAuthCommand + Handler
+### 4.11 — DisableTwoFactorAuthCommand + Handler
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthCommand.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthCommand.cs`.
+- [x] Implement:
   ```csharp
   public class DisableTwoFactorAuthCommand : IRequest<IResponseWrapper>, IValidateMe
   {
@@ -445,10 +445,10 @@
   }
   ```
 
-### 4.12 â€” DisableTwoFactorAuthValidator
+### 4.12 — DisableTwoFactorAuthValidator
 
-- [ ] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthValidator.cs`.
-- [ ] Implement:
+- [x] Create file `UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthValidator.cs`.
+- [x] Implement:
   ```csharp
   public class DisableTwoFactorAuthValidator
       : AbstractValidator<DisableTwoFactorAuthCommand>
@@ -470,20 +470,20 @@
 
 ---
 
-## Section 5 â€” Application: Service Interface Extensions
+## Section 5 — Application: Service Interface Extensions
 
-### 5.1 â€” Extend ITokenService
+### 5.1 — Extend ITokenService
 
-- [ ] Open `UMS.Application/Features/Token/ITokenService.cs`.
-- [ ] Add the following method signature:
+- [x] Open `UMS.Application/Features/Token/ITokenService.cs`.
+- [x] Add the following method signature:
   ```csharp
   Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request);
   ```
 
-### 5.2 â€” Extend IUserService
+### 5.2 — Extend IUserService
 
-- [ ] Open `UMS.Application/Features/Users/IUserService.cs`.
-- [ ] Add the following six method signatures:
+- [x] Open `UMS.Application/Features/Users/IUserService.cs`.
+- [x] Add the following six method signatures:
   ```csharp
   Task<IResponseWrapper<ProfileResponse>> GetMyProfileAsync();
 
@@ -500,28 +500,28 @@
 
 ---
 
-## Section 6 â€” Infrastructure: TokenService
+## Section 6 — Infrastructure: TokenService
 
 > File: `UMS.Infrastructure/Identity/Services/TokenService.cs`
 
-### 6.1 â€” Inject IMemoryCache
+### 6.1 — Inject IMemoryCache
 
-- [ ] Add `IMemoryCache _cache` as a constructor parameter and field.
-- [ ] Add `using Microsoft.Extensions.Caching.Memory;` if not already present.
+- [x] Add `IMemoryCache _cache` as a constructor parameter and field.
+- [x] Add `using Microsoft.Extensions.Caching.Memory;` if not already present.
 
-### 6.2 â€” Add Private Challenge Token Constants
+### 6.2 — Add Private Challenge Token Constants
 
-- [ ] Add the following private members inside `TokenService`:
+- [x] Add the following private members inside `TokenService`:
   ```csharp
   private string ChallengeIssuer   => $"{_tokenSettings.Issuer}:2fa-challenge";
   private const string ChallengeAudience = "2fa-challenge";
   private const string ChallengeClaim    = "2fa_challenge";
   ```
 
-### 6.3 â€” Modify GetTokenAsync â€” Insert 2FA Branch
+### 6.3 — Modify GetTokenAsync — Insert 2FA Branch
 
-- [ ] Locate the block in `GetTokenAsync` that begins after the lockout check and before `ResetAccessFailedCountAsync`.
-- [ ] Insert the following branch **before** the reset + token generation:
+- [x] Locate the block in `GetTokenAsync` that begins after the lockout check and before `ResetAccessFailedCountAsync`.
+- [x] Insert the following branch **before** the reset + token generation:
   ```csharp
   if (userInDb.TwoFactorEnabled)
   {
@@ -539,9 +539,9 @@
   ```
   > The existing `ResetAccessFailedCountAsync` call and token-generation block execute only for non-2FA users.
 
-### 6.4 â€” Add Private GenerateChallengeToken Method
+### 6.4 — Add Private GenerateChallengeToken Method
 
-- [ ] Add the following private method to `TokenService`:
+- [x] Add the following private method to `TokenService`:
   ```csharp
   private string GenerateChallengeToken(ApplicationUser user, string jti)
   {
@@ -564,12 +564,12 @@
   }
   ```
 
-### 6.5 â€” Implement LoginWith2FAAsync
+### 6.5 — Implement LoginWith2FAAsync
 
-- [ ] Add the public `LoginWith2FAAsync(TwoFactorLoginRequest request)` method.
-- [ ] Implement in this exact order:
+- [x] Add the public `LoginWith2FAAsync(TwoFactorLoginRequest request)` method.
+- [x] Implement in this exact order:
 
-  **Step A â€” Validate the challenge token:**
+  **Step A — Validate the challenge token:**
   ```csharp
   var validationParams = new TokenValidationParameters
   {
@@ -596,20 +596,20 @@
   }
   ```
 
-  **Step B â€” Verify the 2fa_challenge claim is present:**
+  **Step B — Verify the 2fa_challenge claim is present:**
   ```csharp
   if (principal.FindFirstValue(ChallengeClaim) is null)
       return ResponseWrapper<TokenResponse>.Fail("Invalid or expired challenge token.");
   ```
 
-  **Step C â€” Replay check:**
+  **Step C — Replay check:**
   ```csharp
   var jti = principal.FindFirstValue(JwtRegisteredClaimNames.Jti);
   if (_cache.TryGetValue($"2fa_jti:{jti}", out _))
       return ResponseWrapper<TokenResponse>.Fail("Challenge token has already been used.");
   ```
 
-  **Step D â€” Load and validate user:**
+  **Step D — Load and validate user:**
   ```csharp
   var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
   var user   = await _userManager.FindByIdAsync(userId);
@@ -624,7 +624,7 @@
       return ResponseWrapper<TokenResponse>.Fail("Two-factor authentication is not enabled.");
   ```
 
-  **Step E â€” Verify the code (TOTP first, then recovery code):**
+  **Step E — Verify the code (TOTP first, then recovery code):**
   ```csharp
   bool success = await _userManager.VerifyTwoFactorTokenAsync(
       user,
@@ -639,7 +639,7 @@
   }
   ```
 
-  **Step F â€” Handle failure:**
+  **Step F — Handle failure:**
   ```csharp
   if (!success)
   {
@@ -651,7 +651,7 @@
   }
   ```
 
-  **Step G â€” Handle success (Phase 2 complete):**
+  **Step G — Handle success (Phase 2 complete):**
   ```csharp
   await _userManager.ResetAccessFailedCountAsync(user);
 
@@ -681,19 +681,19 @@
 
 ---
 
-## Section 7 â€” Infrastructure: UserService
+## Section 7 — Infrastructure: UserService
 
 > File: `UMS.Infrastructure/Identity/Services/UserService.cs`
 
-### 7.1 â€” Inject TwoFactorOptions
+### 7.1 — Inject TwoFactorOptions
 
-- [ ] Add `IOptions<TwoFactorOptions> twoFactorOptions` to the constructor signature.
-- [ ] Store as `private readonly TwoFactorOptions _twoFactorOptions = twoFactorOptions.Value;`.
-- [ ] Add `using Microsoft.Extensions.Options;` and `using UMS.Application.Dtos.TwoFactor;` if not present.
+- [x] Add `IOptions<TwoFactorOptions> twoFactorOptions` to the constructor signature.
+- [x] Store as `private readonly TwoFactorOptions _twoFactorOptions = twoFactorOptions.Value;`.
+- [x] Add `using Microsoft.Extensions.Options;` and `using UMS.Application.Dtos.TwoFactor;` if not present.
 
-### 7.2 â€” Implement GetMyProfileAsync
+### 7.2 — Implement GetMyProfileAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper<ProfileResponse>> GetMyProfileAsync()
   {
@@ -730,9 +730,9 @@
   }
   ```
 
-### 7.3 â€” Implement LogoutAsync
+### 7.3 — Implement LogoutAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper> LogoutAsync(LogoutRequest request)
   {
@@ -756,9 +756,9 @@
   }
   ```
 
-### 7.4 â€” Implement SetupTwoFactorAuthAsync
+### 7.4 — Implement SetupTwoFactorAuthAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper<TwoFactorAuthViewModel>> SetupTwoFactorAuthAsync()
   {
@@ -788,9 +788,9 @@
   ```
   > If the user calls `setup-2fa` again before enabling, the existing key is returned (not reset).
 
-### 7.5 â€” Implement ConfirmTwoFactorAuthAsync
+### 7.5 — Implement ConfirmTwoFactorAuthAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper> ConfirmTwoFactorAuthAsync(TwoFactorCodeRequest request)
   {
@@ -820,11 +820,11 @@
   }
   ```
   > Works for both pending setup (`TwoFactorEnabled=false`) and active users testing their authenticator (`TwoFactorEnabled=true`).
-  > Accepts TOTP only â€” the validator enforces 6 digits before this method is reached.
+  > Accepts TOTP only — the validator enforces 6 digits before this method is reached.
 
-### 7.6 â€” Implement EnableTwoFactorAuthAsync
+### 7.6 — Implement EnableTwoFactorAuthAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper<List<string>>> EnableTwoFactorAuthAsync(
       TwoFactorCodeRequest request)
@@ -868,9 +868,9 @@
   }
   ```
 
-### 7.7 â€” Implement DisableTwoFactorAuthAsync
+### 7.7 — Implement DisableTwoFactorAuthAsync
 
-- [ ] Add the method:
+- [x] Add the method:
   ```csharp
   public async Task<IResponseWrapper> DisableTwoFactorAuthAsync(
       DisableTwoFactorAuthRequest request)
@@ -917,21 +917,21 @@
 
 ---
 
-## Section 8 â€” Infrastructure: DI Registration
+## Section 8 — Infrastructure: DI Registration
 
 > File: `UMS.API/Program.cs` or the service-registration extension file.
 
-### 8.1 â€” Register IMemoryCache
+### 8.1 — Register IMemoryCache
 
-- [ ] Add the following line to the service registration block:
+- [x] Add the following line to the service registration block:
   ```csharp
   builder.Services.AddMemoryCache();
   ```
-  > `IMemoryCache` is **not** registered by default â€” this call is mandatory.
+  > `IMemoryCache` is **not** registered by default — this call is mandatory.
 
-### 8.2 â€” Register TwoFactorOptions
+### 8.2 — Register TwoFactorOptions
 
-- [ ] Add the following line:
+- [x] Add the following line:
   ```csharp
   builder.Services.Configure<TwoFactorOptions>(
       builder.Configuration.GetSection("TwoFactor"));
@@ -940,13 +940,13 @@
 
 ---
 
-## Section 9 â€” API: AccountEndpoints
+## Section 9 — API: AccountEndpoints
 
 > File: `UMS.API/Endpoints/AccountEndpoints.cs`
 
-### 9.1 â€” Add login-2fa to the Existing Anonymous Group
+### 9.1 — Add login-2fa to the Existing Anonymous Group
 
-- [ ] Inside `MapAccountEndpoints`, append the following endpoint to the existing `group` (the anonymous group):
+- [x] Inside `MapAccountEndpoints`, append the following endpoint to the existing `group` (the anonymous group):
   ```csharp
   group.MapPost("login-2fa",
       async (TwoFactorLoginRequest request, ISender sender, CancellationToken ct) =>
@@ -960,9 +960,9 @@
   .Produces<IResponseWrapper>(StatusCodes.Status401Unauthorized);
   ```
 
-### 9.2 â€” Add Authenticated Group for logout + profile
+### 9.2 — Add Authenticated Group for logout + profile
 
-- [ ] Create a **second** `MapGroup` call with the **same route prefix** but `RequireAuthorization()`:
+- [x] Create a **second** `MapGroup` call with the **same route prefix** but `RequireAuthorization()`:
   ```csharp
   var authGroup = app
       .MapGroup("api/v{version:apiVersion}/account")
@@ -971,9 +971,9 @@
   ```
   > A separate group object is required because the existing group has `AllowAnonymous()` applied at group level, which would suppress any `RequireAuthorization()` added to individual endpoints within that same group.
 
-### 9.3 â€” Add logout Endpoint
+### 9.3 — Add logout Endpoint
 
-- [ ] Append to `authGroup`:
+- [x] Append to `authGroup`:
   ```csharp
   authGroup.MapPost("logout",
       async (LogoutRequest request, ISender sender, CancellationToken ct) =>
@@ -987,9 +987,9 @@
   .Produces<IResponseWrapper>(StatusCodes.Status401Unauthorized);
   ```
 
-### 9.4 â€” Add profile Endpoint
+### 9.4 — Add profile Endpoint
 
-- [ ] Append to `authGroup`:
+- [x] Append to `authGroup`:
   ```csharp
   authGroup.MapGet("profile",
       async (ISender sender, CancellationToken ct) =>
@@ -1003,21 +1003,21 @@
   .Produces<IResponseWrapper>(StatusCodes.Status401Unauthorized);
   ```
 
-### 9.5 â€” Verify return statement
+### 9.5 — Verify return statement
 
-- [ ] Ensure `return app;` is the last statement in `MapAccountEndpoints` and is after both group definitions.
+- [x] Ensure `return app;` is the last statement in `MapAccountEndpoints` and is after both group definitions.
 
 ---
 
-## Section 10 â€” API: UserEndpoints
+## Section 10 — API: UserEndpoints
 
 > File: `UMS.API/Endpoints/UserEndpoints.cs`
 > All four endpoints are appended to the **existing** `group` (which already calls `.RequireAuthorization()`).
-> No per-endpoint permission is added â€” all are self-service.
+> No per-endpoint permission is added — all are self-service.
 
-### 10.1 â€” Add setup-2fa Endpoint
+### 10.1 — Add setup-2fa Endpoint
 
-- [ ] Append to the existing `group`:
+- [x] Append to the existing `group`:
   ```csharp
   group.MapPost("setup-2fa",
       async (ISender sender, CancellationToken ct) =>
@@ -1029,9 +1029,9 @@
   .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
   ```
 
-### 10.2 â€” Add confirm-2fa Endpoint
+### 10.2 — Add confirm-2fa Endpoint
 
-- [ ] Append to the existing `group`:
+- [x] Append to the existing `group`:
   ```csharp
   group.MapPost("confirm-2fa",
       async (TwoFactorCodeRequest request, ISender sender, CancellationToken ct) =>
@@ -1044,9 +1044,9 @@
   .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
   ```
 
-### 10.3 â€” Add enable-2fa Endpoint
+### 10.3 — Add enable-2fa Endpoint
 
-- [ ] Append to the existing `group`:
+- [x] Append to the existing `group`:
   ```csharp
   group.MapPut("enable-2fa",
       async (TwoFactorCodeRequest request, ISender sender, CancellationToken ct) =>
@@ -1059,9 +1059,9 @@
   .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
   ```
 
-### 10.4 â€” Add disable-2fa Endpoint
+### 10.4 — Add disable-2fa Endpoint
 
-- [ ] Append to the existing `group`:
+- [x] Append to the existing `group`:
   ```csharp
   group.MapPut("disable-2fa",
       async (DisableTwoFactorAuthRequest request, ISender sender, CancellationToken ct) =>
@@ -1076,266 +1076,266 @@
 
 ---
 
-## Section 11 â€” Tests: Application Layer
+## Section 11 — Tests: Application Layer
 
 > Project: `UMS.Application.Tests`
 > Convention: xUnit + FluentAssertions + Moq. Arrange / Act / Assert. `MethodName_Scenario_ExpectedResult`.
 > All handlers in this feature are pass-through (delegate to service). Test dependency invocation and result passthrough.
 
-### 11.1 â€” LoginWith2FAQueryHandler Tests
+### 11.1 — LoginWith2FAQueryHandler Tests
 
-- [ ] Create `Features/Token/Queries/LoginWith2FAQueryHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsTokenServiceLoginWith2FAWithCorrectRequest`
-  - [ ] `Handle_WhenCalled_PassesThroughServiceResult`
+- [x] Create `Features/Token/Queries/LoginWith2FAQueryHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsTokenServiceLoginWith2FAWithCorrectRequest`
+  - [x] `Handle_WhenCalled_PassesThroughServiceResult`
 
-### 11.2 â€” GetMyProfileQueryHandler Tests
+### 11.2 — GetMyProfileQueryHandler Tests
 
-- [ ] Create `Features/Users/Queries/GetMyProfileQueryHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceGetMyProfile`
-  - [ ] `Handle_WhenCalled_PassesThroughProfileResult`
+- [x] Create `Features/Users/Queries/GetMyProfileQueryHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceGetMyProfile`
+  - [x] `Handle_WhenCalled_PassesThroughProfileResult`
 
-### 11.3 â€” LogoutCommandHandler Tests
+### 11.3 — LogoutCommandHandler Tests
 
-- [ ] Create `Features/Users/Commands/LogoutCommandHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceLogoutWithCorrectRequest`
-  - [ ] `Handle_WhenCalled_PassesThroughServiceResult`
+- [x] Create `Features/Users/Commands/LogoutCommandHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceLogoutWithCorrectRequest`
+  - [x] `Handle_WhenCalled_PassesThroughServiceResult`
 
-### 11.4 â€” SetupTwoFactorAuthCommandHandler Tests
+### 11.4 — SetupTwoFactorAuthCommandHandler Tests
 
-- [ ] Create `Features/Users/Commands/SetupTwoFactorAuthCommandHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceSetupTwoFactorAuth`
-  - [ ] `Handle_WhenCalled_PassesThroughViewModelResult`
+- [x] Create `Features/Users/Commands/SetupTwoFactorAuthCommandHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceSetupTwoFactorAuth`
+  - [x] `Handle_WhenCalled_PassesThroughViewModelResult`
 
-### 11.5 â€” ConfirmTwoFactorAuthCommandHandler Tests
+### 11.5 — ConfirmTwoFactorAuthCommandHandler Tests
 
-- [ ] Create `Features/Users/Commands/ConfirmTwoFactorAuthCommandHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceConfirmWithCorrectRequest`
-  - [ ] `Handle_WhenCalled_PassesThroughServiceResult`
+- [x] Create `Features/Users/Commands/ConfirmTwoFactorAuthCommandHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceConfirmWithCorrectRequest`
+  - [x] `Handle_WhenCalled_PassesThroughServiceResult`
 
-### 11.6 â€” EnableTwoFactorAuthCommandHandler Tests
+### 11.6 — EnableTwoFactorAuthCommandHandler Tests
 
-- [ ] Create `Features/Users/Commands/EnableTwoFactorAuthCommandHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceEnableWithCorrectRequest`
-  - [ ] `Handle_WhenCalled_PassesThroughRecoveryCodesList`
+- [x] Create `Features/Users/Commands/EnableTwoFactorAuthCommandHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceEnableWithCorrectRequest`
+  - [x] `Handle_WhenCalled_PassesThroughRecoveryCodesList`
 
-### 11.7 â€” DisableTwoFactorAuthCommandHandler Tests
+### 11.7 — DisableTwoFactorAuthCommandHandler Tests
 
-- [ ] Create `Features/Users/Commands/DisableTwoFactorAuthCommandHandlerTests.cs`.
-- [ ] Implement:
-  - [ ] `Handle_WhenCalled_CallsUserServiceDisableWithCorrectRequest`
-  - [ ] `Handle_WhenCalled_PassesThroughServiceResult`
+- [x] Create `Features/Users/Commands/DisableTwoFactorAuthCommandHandlerTests.cs`.
+- [x] Implement:
+  - [x] `Handle_WhenCalled_CallsUserServiceDisableWithCorrectRequest`
+  - [x] `Handle_WhenCalled_PassesThroughServiceResult`
 
-### 11.8 â€” LoginWith2FAQueryValidator Tests
+### 11.8 — LoginWith2FAQueryValidator Tests
 
-- [ ] Create `Features/Token/Queries/LoginWith2FAQueryValidatorTests.cs`.
-- [ ] Implement:
-  - [ ] `Validate_EmptyChallengeToken_ReturnsValidationFailure`
-  - [ ] `Validate_EmptyCode_ReturnsValidationFailure`
-  - [ ] `Validate_BothFieldsPopulated_PassesValidation`
+- [x] Create `Features/Token/Queries/LoginWith2FAQueryValidatorTests.cs`.
+- [x] Implement:
+  - [x] `Validate_EmptyChallengeToken_ReturnsValidationFailure`
+  - [x] `Validate_EmptyCode_ReturnsValidationFailure`
+  - [x] `Validate_BothFieldsPopulated_PassesValidation`
 
-### 11.9 â€” LogoutCommandValidator Tests
+### 11.9 — LogoutCommandValidator Tests
 
-- [ ] Create `Features/Users/Commands/LogoutCommandValidatorTests.cs`.
-- [ ] Implement:
-  - [ ] `Validate_EmptyRefreshToken_ReturnsValidationFailure`
-  - [ ] `Validate_NonEmptyRefreshToken_PassesValidation`
+- [x] Create `Features/Users/Commands/LogoutCommandValidatorTests.cs`.
+- [x] Implement:
+  - [x] `Validate_EmptyRefreshToken_ReturnsValidationFailure`
+  - [x] `Validate_NonEmptyRefreshToken_PassesValidation`
 
-### 11.10 â€” ConfirmTwoFactorAuthValidator Tests
+### 11.10 — ConfirmTwoFactorAuthValidator Tests
 
-- [ ] Create `Features/Users/Commands/ConfirmTwoFactorAuthValidatorTests.cs`.
-- [ ] Implement:
-  - [ ] `Validate_EmptyCode_ReturnsValidationFailure`
-  - [ ] `Validate_NonNumericCode_ReturnsValidationFailure`
-  - [ ] `Validate_CodeShorterThanSixDigits_ReturnsValidationFailure`
-  - [ ] `Validate_SixDigitNumericCode_PassesValidation`
+- [x] Create `Features/Users/Commands/ConfirmTwoFactorAuthValidatorTests.cs`.
+- [x] Implement:
+  - [x] `Validate_EmptyCode_ReturnsValidationFailure`
+  - [x] `Validate_NonNumericCode_ReturnsValidationFailure`
+  - [x] `Validate_CodeShorterThanSixDigits_ReturnsValidationFailure`
+  - [x] `Validate_SixDigitNumericCode_PassesValidation`
 
-### 11.11 â€” EnableTwoFactorAuthValidator Tests
+### 11.11 — EnableTwoFactorAuthValidator Tests
 
-- [ ] Create `Features/Users/Commands/EnableTwoFactorAuthValidatorTests.cs`.
-- [ ] Implement (same four cases as 11.10):
-  - [ ] `Validate_EmptyCode_ReturnsValidationFailure`
-  - [ ] `Validate_NonNumericCode_ReturnsValidationFailure`
-  - [ ] `Validate_CodeShorterThanSixDigits_ReturnsValidationFailure`
-  - [ ] `Validate_SixDigitNumericCode_PassesValidation`
+- [x] Create `Features/Users/Commands/EnableTwoFactorAuthValidatorTests.cs`.
+- [x] Implement (same four cases as 11.10):
+  - [x] `Validate_EmptyCode_ReturnsValidationFailure`
+  - [x] `Validate_NonNumericCode_ReturnsValidationFailure`
+  - [x] `Validate_CodeShorterThanSixDigits_ReturnsValidationFailure`
+  - [x] `Validate_SixDigitNumericCode_PassesValidation`
 
-### 11.12 â€” DisableTwoFactorAuthValidator Tests
+### 11.12 — DisableTwoFactorAuthValidator Tests
 
-- [ ] Create `Features/Users/Commands/DisableTwoFactorAuthValidatorTests.cs`.
-- [ ] Implement:
-  - [ ] `Validate_EmptyPassword_ReturnsValidationFailure`
-  - [ ] `Validate_PasswordPresentAndCodeNull_PassesValidation`
-  - [ ] `Validate_PasswordPresentAndSixDigitCode_PassesValidation`
-  - [ ] `Validate_PasswordPresentAndNonNumericCode_ReturnsValidationFailure`
+- [x] Create `Features/Users/Commands/DisableTwoFactorAuthValidatorTests.cs`.
+- [x] Implement:
+  - [x] `Validate_EmptyPassword_ReturnsValidationFailure`
+  - [x] `Validate_PasswordPresentAndCodeNull_PassesValidation`
+  - [x] `Validate_PasswordPresentAndSixDigitCode_PassesValidation`
+  - [x] `Validate_PasswordPresentAndNonNumericCode_ReturnsValidationFailure`
 
 ---
 
-## Section 12 â€” Tests: Infrastructure Layer
+## Section 12 — Tests: Infrastructure Layer
 
 > Project: `UMS.Infrastructure.Tests`
 > Convention: xUnit + FluentAssertions + Moq. Strict branch coverage. Decode JWT claims where relevant.
 
-### 12.1 â€” TokenService: GetTokenAsync Modification Tests
+### 12.1 — TokenService: GetTokenAsync Modification Tests
 
-- [ ] In `Identity/Services/TokenServiceTests.cs` (create or extend):
-  - [ ] `GetTokenAsync_UserNotFound_ReturnsFail`
-  - [ ] `GetTokenAsync_WrongPassword_ReturnsFailAndCallsAccessFailed`
-  - [ ] `GetTokenAsync_InactiveUser_ReturnsFail`
-  - [ ] `GetTokenAsync_EmailNotConfirmed_ReturnsFail`
-  - [ ] `GetTokenAsync_LockedOutUser_ReturnsFail`
-  - [ ] `GetTokenAsync_TwoFactorEnabled_ReturnsRequiresTwoFactorTrue`
-  - [ ] `GetTokenAsync_TwoFactorEnabled_ReturnsChallengeTokenWithCorrectIssuerAndAudience`
-  - [ ] `GetTokenAsync_TwoFactorEnabled_ChallengeTokenExpiresAfterConfiguredMinutes`
-  - [ ] `GetTokenAsync_TwoFactorEnabled_DoesNotCallResetAccessFailedCount`
-  - [ ] `GetTokenAsync_TwoFactorDisabled_ReturnsRealTokensWithRequiresTwoFactorFalse`
+- [x] In `Identity/Services/TokenServiceTests.cs` (create or extend):
+  - [x] `GetTokenAsync_UserNotFound_ReturnsFail`
+  - [x] `GetTokenAsync_WrongPassword_ReturnsFailAndCallsAccessFailed`
+  - [x] `GetTokenAsync_InactiveUser_ReturnsFail`
+  - [x] `GetTokenAsync_EmailNotConfirmed_ReturnsFail`
+  - [x] `GetTokenAsync_LockedOutUser_ReturnsFail`
+  - [x] `GetTokenAsync_TwoFactorEnabled_ReturnsRequiresTwoFactorTrue`
+  - [x] `GetTokenAsync_TwoFactorEnabled_ReturnsChallengeTokenWithCorrectIssuerAndAudience`
+  - [x] `GetTokenAsync_TwoFactorEnabled_ChallengeTokenExpiresAfterConfiguredMinutes`
+  - [x] `GetTokenAsync_TwoFactorEnabled_DoesNotCallResetAccessFailedCount`
+  - [x] `GetTokenAsync_TwoFactorDisabled_ReturnsRealTokensWithRequiresTwoFactorFalse`
 
-### 12.2 â€” TokenService: LoginWith2FAAsync Tests
+### 12.2 — TokenService: LoginWith2FAAsync Tests
 
-- [ ] In `Identity/Services/TokenServiceTests.cs`:
-  - [ ] `LoginWith2FAAsync_InvalidChallengeTokenSignature_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_ExpiredChallengeToken_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_MissingChallengeClaim_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_JtiAlreadyInCache_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_UserLockedOut_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_TwoFactorNotEnabledOnAccount_ReturnsFail`
-  - [ ] `LoginWith2FAAsync_BothTOTPAndRecoveryCodeFail_ReturnsFailAndCallsAccessFailed`
-  - [ ] `LoginWith2FAAsync_WrongCodeExceedsThreshold_ReturnsLockedOutMessage`
-  - [ ] `LoginWith2FAAsync_ValidTOTPCode_ReturnsRealTokens`
-  - [ ] `LoginWith2FAAsync_ValidTOTPCode_StoresJtiInCacheWithCorrectTTL`
-  - [ ] `LoginWith2FAAsync_ValidTOTPCode_CallsResetAccessFailedCount`
-  - [ ] `LoginWith2FAAsync_ValidRecoveryCode_ReturnsRealTokens`
+- [x] In `Identity/Services/TokenServiceTests.cs`:
+  - [x] `LoginWith2FAAsync_InvalidChallengeTokenSignature_ReturnsFail`
+  - [x] `LoginWith2FAAsync_ExpiredChallengeToken_ReturnsFail`
+  - [x] `LoginWith2FAAsync_MissingChallengeClaim_ReturnsFail`
+  - [x] `LoginWith2FAAsync_JtiAlreadyInCache_ReturnsFail`
+  - [x] `LoginWith2FAAsync_UserLockedOut_ReturnsFail`
+  - [x] `LoginWith2FAAsync_TwoFactorNotEnabledOnAccount_ReturnsFail`
+  - [x] `LoginWith2FAAsync_BothTOTPAndRecoveryCodeFail_ReturnsFailAndCallsAccessFailed`
+  - [x] `LoginWith2FAAsync_WrongCodeExceedsThreshold_ReturnsLockedOutMessage`
+  - [x] `LoginWith2FAAsync_ValidTOTPCode_ReturnsRealTokens`
+  - [x] `LoginWith2FAAsync_ValidTOTPCode_StoresJtiInCacheWithCorrectTTL`
+  - [x] `LoginWith2FAAsync_ValidTOTPCode_CallsResetAccessFailedCount`
+  - [x] `LoginWith2FAAsync_ValidRecoveryCode_ReturnsRealTokens`
 
-### 12.3 â€” UserService: LogoutAsync Tests
+### 12.3 — UserService: LogoutAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs` (create or extend):
-  - [ ] `LogoutAsync_EmptyRefreshToken_ReturnsFail`
-  - [ ] `LogoutAsync_RefreshTokenDoesNotMatchStored_ReturnsFail`
-  - [ ] `LogoutAsync_ExpiredButMatchingToken_ClearsTokenAndReturnsSuccess`
-  - [ ] `LogoutAsync_ValidToken_ClearsRefreshTokenAndSetsExpiryToThePast`
+- [x] In `Identity/Services/UserServiceAuthTests.cs` (create or extend):
+  - [x] `LogoutAsync_EmptyRefreshToken_ReturnsFail`
+  - [x] `LogoutAsync_RefreshTokenDoesNotMatchStored_ReturnsFail`
+  - [x] `LogoutAsync_ExpiredButMatchingToken_ClearsTokenAndReturnsSuccess`
+  - [x] `LogoutAsync_ValidToken_ClearsRefreshTokenAndSetsExpiryToThePast`
 
-### 12.4 â€” UserService: GetMyProfileAsync Tests
+### 12.4 — UserService: GetMyProfileAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs`:
-  - [ ] `GetMyProfileAsync_ReturnsProfileWithCorrectUserFields`
-  - [ ] `GetMyProfileAsync_ReturnsDeduplicatedPermissionsFromAllRoles`
-  - [ ] `GetMyProfileAsync_ReturnsFlatPermissionClaimValues`
+- [x] In `Identity/Services/UserServiceAuthTests.cs`:
+  - [x] `GetMyProfileAsync_ReturnsProfileWithCorrectUserFields`
+  - [x] `GetMyProfileAsync_ReturnsDeduplicatedPermissionsFromAllRoles`
+  - [x] `GetMyProfileAsync_ReturnsFlatPermissionClaimValues`
 
-### 12.5 â€” UserService: SetupTwoFactorAuthAsync Tests
+### 12.5 — UserService: SetupTwoFactorAuthAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs`:
-  - [ ] `SetupTwoFactorAuthAsync_TwoFactorAlreadyEnabled_ReturnsFail`
-  - [ ] `SetupTwoFactorAuthAsync_ExistingKeyPresent_ReturnsExistingKeyWithoutCallingReset`
-  - [ ] `SetupTwoFactorAuthAsync_NoKeyPresent_GeneratesAndReturnsNewKey`
-  - [ ] `SetupTwoFactorAuthAsync_ReturnedCodeQRIsValidOtpauthUri`
-  - [ ] `SetupTwoFactorAuthAsync_OtpauthUriContainsEncodedIssuerAndEmail`
+- [x] In `Identity/Services/UserServiceAuthTests.cs`:
+  - [x] `SetupTwoFactorAuthAsync_TwoFactorAlreadyEnabled_ReturnsFail`
+  - [x] `SetupTwoFactorAuthAsync_ExistingKeyPresent_ReturnsExistingKeyWithoutCallingReset`
+  - [x] `SetupTwoFactorAuthAsync_NoKeyPresent_GeneratesAndReturnsNewKey`
+  - [x] `SetupTwoFactorAuthAsync_ReturnedCodeQRIsValidOtpauthUri`
+  - [x] `SetupTwoFactorAuthAsync_OtpauthUriContainsEncodedIssuerAndEmail`
 
-### 12.6 â€” UserService: ConfirmTwoFactorAuthAsync Tests
+### 12.6 — UserService: ConfirmTwoFactorAuthAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs`:
-  - [ ] `ConfirmTwoFactorAuthAsync_NoAuthenticatorKeyExists_ReturnsFail`
-  - [ ] `ConfirmTwoFactorAuthAsync_WrongCode_ReturnsFailAndCallsAccessFailed`
-  - [ ] `ConfirmTwoFactorAuthAsync_ValidCode_ReturnsSuccessAndCallsResetAccessFailed`
-  - [ ] `ConfirmTwoFactorAuthAsync_WorksWhenTwoFactorIsAlreadyEnabled`
+- [x] In `Identity/Services/UserServiceAuthTests.cs`:
+  - [x] `ConfirmTwoFactorAuthAsync_NoAuthenticatorKeyExists_ReturnsFail`
+  - [x] `ConfirmTwoFactorAuthAsync_WrongCode_ReturnsFailAndCallsAccessFailed`
+  - [x] `ConfirmTwoFactorAuthAsync_ValidCode_ReturnsSuccessAndCallsResetAccessFailed`
+  - [x] `ConfirmTwoFactorAuthAsync_WorksWhenTwoFactorIsAlreadyEnabled`
 
-### 12.7 â€” UserService: EnableTwoFactorAuthAsync Tests
+### 12.7 — UserService: EnableTwoFactorAuthAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs`:
-  - [ ] `EnableTwoFactorAuthAsync_AlreadyEnabled_ReturnsFail`
-  - [ ] `EnableTwoFactorAuthAsync_NoAuthenticatorKey_ReturnsFail`
-  - [ ] `EnableTwoFactorAuthAsync_WrongCode_ReturnsFailAndCallsAccessFailed`
-  - [ ] `EnableTwoFactorAuthAsync_WrongCodeExceedsThreshold_ReturnsLockedOutMessage`
-  - [ ] `EnableTwoFactorAuthAsync_ValidCode_SetsTwoFactorEnabledTrue`
-  - [ ] `EnableTwoFactorAuthAsync_ValidCode_ReturnsTenRecoveryCodes`
+- [x] In `Identity/Services/UserServiceAuthTests.cs`:
+  - [x] `EnableTwoFactorAuthAsync_AlreadyEnabled_ReturnsFail`
+  - [x] `EnableTwoFactorAuthAsync_NoAuthenticatorKey_ReturnsFail`
+  - [x] `EnableTwoFactorAuthAsync_WrongCode_ReturnsFailAndCallsAccessFailed`
+  - [x] `EnableTwoFactorAuthAsync_WrongCodeExceedsThreshold_ReturnsLockedOutMessage`
+  - [x] `EnableTwoFactorAuthAsync_ValidCode_SetsTwoFactorEnabledTrue`
+  - [x] `EnableTwoFactorAuthAsync_ValidCode_ReturnsTenRecoveryCodes`
 
-### 12.8 â€” UserService: DisableTwoFactorAuthAsync Tests
+### 12.8 — UserService: DisableTwoFactorAuthAsync Tests
 
-- [ ] In `Identity/Services/UserServiceAuthTests.cs`:
-  - [ ] `DisableTwoFactorAuthAsync_TwoFactorNotEnabled_ReturnsFail`
-  - [ ] `DisableTwoFactorAuthAsync_WrongPassword_ReturnsFailAndCallsAccessFailed`
-  - [ ] `DisableTwoFactorAuthAsync_WrongPasswordExceedsThreshold_ReturnsLockedOutMessage`
-  - [ ] `DisableTwoFactorAuthAsync_WrongTOTPCode_ReturnsFailWithoutCallingAccessFailed`
-  - [ ] `DisableTwoFactorAuthAsync_ValidPasswordNoCode_SetsTwoFactorEnabledFalse`
-  - [ ] `DisableTwoFactorAuthAsync_ValidPasswordValidCode_SetsTwoFactorEnabledFalse`
-  - [ ] `DisableTwoFactorAuthAsync_DoesNotCallResetAuthenticatorKey`
+- [x] In `Identity/Services/UserServiceAuthTests.cs`:
+  - [x] `DisableTwoFactorAuthAsync_TwoFactorNotEnabled_ReturnsFail`
+  - [x] `DisableTwoFactorAuthAsync_WrongPassword_ReturnsFailAndCallsAccessFailed`
+  - [x] `DisableTwoFactorAuthAsync_WrongPasswordExceedsThreshold_ReturnsLockedOutMessage`
+  - [x] `DisableTwoFactorAuthAsync_WrongTOTPCode_ReturnsFailWithoutCallingAccessFailed`
+  - [x] `DisableTwoFactorAuthAsync_ValidPasswordNoCode_SetsTwoFactorEnabledFalse`
+  - [x] `DisableTwoFactorAuthAsync_ValidPasswordValidCode_SetsTwoFactorEnabledFalse`
+  - [x] `DisableTwoFactorAuthAsync_DoesNotCallResetAuthenticatorKey`
 
 ---
 
-## Section 13 â€” Tests: API Layer
+## Section 13 — Tests: API Layer
 
 > Project: `UMS.API.Tests`
 > Convention: xUnit + FluentAssertions. Read `references/api-testing.md` before writing.
-> Self-service endpoints (no specific permission) use a **2-row Theory**: anonymous â†’ 401, authenticated â†’ 2xx.
+> Self-service endpoints (no specific permission) use a **2-row Theory**: anonymous ? 401, authenticated ? 2xx.
 > Response-shape assertions: assert field presence and key values, not only status codes.
 
-### 13.1 â€” login-2fa Endpoint Tests
+### 13.1 — login-2fa Endpoint Tests
 
-- [ ] Create `Endpoints/Account/LoginWith2FAEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `LoginWith2FA_MissingBody_Returns400`
-  - [ ] `LoginWith2FA_InvalidChallengeToken_Returns400`
-  - [ ] `LoginWith2FA_ValidTwoStepFlow_Returns200WithAccessTokenAndRefreshToken`
+- [x] Create `Endpoints/Account/LoginWith2FAEndpointTests.cs`.
+- [x] Implement:
+  - [x] `LoginWith2FA_MissingBody_Returns400`
+  - [x] `LoginWith2FA_InvalidChallengeToken_Returns400`
+  - [x] `LoginWith2FA_ValidTwoStepFlow_Returns200WithAccessTokenAndRefreshToken`
     > Full happy-path integration test: call `/login` first to get the challenge token, then call `/login-2fa` with a valid TOTP code and assert real tokens are returned.
 
-### 13.2 â€” logout Endpoint Tests
+### 13.2 — logout Endpoint Tests
 
-- [ ] Create `Endpoints/Account/LogoutEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `Logout_Anonymous_Returns401`
-  - [ ] `Logout_Authenticated_ValidRefreshToken_Returns200`
-  - [ ] `Logout_Authenticated_MismatchedRefreshToken_Returns400`
+- [x] Create `Endpoints/Account/LogoutEndpointTests.cs`.
+- [x] Implement:
+  - [x] `Logout_Anonymous_Returns401`
+  - [x] `Logout_Authenticated_ValidRefreshToken_Returns200`
+  - [x] `Logout_Authenticated_MismatchedRefreshToken_Returns400`
 
-### 13.3 â€” profile Endpoint Tests
+### 13.3 — profile Endpoint Tests
 
-- [ ] Create `Endpoints/Account/ProfileEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `GetProfile_Anonymous_Returns401`
-  - [ ] `GetProfile_Authenticated_Returns200`
-  - [ ] `GetProfile_Authenticated_ResponseContainsExpectedFields`
+- [x] Create `Endpoints/Account/ProfileEndpointTests.cs`.
+- [x] Implement:
+  - [x] `GetProfile_Anonymous_Returns401`
+  - [x] `GetProfile_Authenticated_Returns200`
+  - [x] `GetProfile_Authenticated_ResponseContainsExpectedFields`
     > Assert: `id`, `email`, `twoFactorEnabled`, `roles`, `permissions` are present in the response body.
 
-### 13.4 â€” setup-2fa Endpoint Tests
+### 13.4 — setup-2fa Endpoint Tests
 
-- [ ] Create `Endpoints/Users/SetupTwoFactorAuthEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `SetupTwoFactorAuth_Anonymous_Returns401`
-  - [ ] `SetupTwoFactorAuth_Authenticated_TwoFactorNotEnabled_Returns200WithKeySecretAndCodeQR`
-  - [ ] `SetupTwoFactorAuth_Authenticated_CalledTwiceBeforeEnable_ReturnsSameKey`
-  - [ ] `SetupTwoFactorAuth_Authenticated_TwoFactorAlreadyEnabled_Returns400`
+- [x] Create `Endpoints/Users/SetupTwoFactorAuthEndpointTests.cs`.
+- [x] Implement:
+  - [x] `SetupTwoFactorAuth_Anonymous_Returns401`
+  - [x] `SetupTwoFactorAuth_Authenticated_TwoFactorNotEnabled_Returns200WithKeySecretAndCodeQR`
+  - [x] `SetupTwoFactorAuth_Authenticated_CalledTwiceBeforeEnable_ReturnsSameKey`
+  - [x] `SetupTwoFactorAuth_Authenticated_TwoFactorAlreadyEnabled_Returns400`
 
-### 13.5 â€” confirm-2fa Endpoint Tests
+### 13.5 — confirm-2fa Endpoint Tests
 
-- [ ] Create `Endpoints/Users/ConfirmTwoFactorAuthEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `ConfirmTwoFactorAuth_Anonymous_Returns401`
-  - [ ] `ConfirmTwoFactorAuth_Authenticated_NoSetupPerformed_Returns400`
-  - [ ] `ConfirmTwoFactorAuth_Authenticated_ValidCode_Returns200`
-  - [ ] `ConfirmTwoFactorAuth_Authenticated_InvalidCode_Returns400`
+- [x] Create `Endpoints/Users/ConfirmTwoFactorAuthEndpointTests.cs`.
+- [x] Implement:
+  - [x] `ConfirmTwoFactorAuth_Anonymous_Returns401`
+  - [x] `ConfirmTwoFactorAuth_Authenticated_NoSetupPerformed_Returns400`
+  - [x] `ConfirmTwoFactorAuth_Authenticated_ValidCode_Returns200`
+  - [x] `ConfirmTwoFactorAuth_Authenticated_InvalidCode_Returns400`
 
-### 13.6 â€” enable-2fa Endpoint Tests
+### 13.6 — enable-2fa Endpoint Tests
 
-- [ ] Create `Endpoints/Users/EnableTwoFactorAuthEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `EnableTwoFactorAuth_Anonymous_Returns401`
-  - [ ] `EnableTwoFactorAuth_Authenticated_ValidCode_Returns200WithRecoveryCodes`
+- [x] Create `Endpoints/Users/EnableTwoFactorAuthEndpointTests.cs`.
+- [x] Implement:
+  - [x] `EnableTwoFactorAuth_Anonymous_Returns401`
+  - [x] `EnableTwoFactorAuth_Authenticated_ValidCode_Returns200WithRecoveryCodes`
     > Assert response body contains a list of 10 recovery code strings.
-  - [ ] `EnableTwoFactorAuth_Authenticated_AlreadyEnabled_Returns400`
-  - [ ] `EnableTwoFactorAuth_Authenticated_InvalidCode_Returns400`
+  - [x] `EnableTwoFactorAuth_Authenticated_AlreadyEnabled_Returns400`
+  - [x] `EnableTwoFactorAuth_Authenticated_InvalidCode_Returns400`
 
-### 13.7 â€” disable-2fa Endpoint Tests
+### 13.7 — disable-2fa Endpoint Tests
 
-- [ ] Create `Endpoints/Users/DisableTwoFactorAuthEndpointTests.cs`.
-- [ ] Implement:
-  - [ ] `DisableTwoFactorAuth_Anonymous_Returns401`
-  - [ ] `DisableTwoFactorAuth_Authenticated_ValidPassword_Returns200`
-  - [ ] `DisableTwoFactorAuth_Authenticated_ValidPasswordAndValidCode_Returns200`
-  - [ ] `DisableTwoFactorAuth_Authenticated_WrongPassword_Returns400`
-  - [ ] `DisableTwoFactorAuth_Authenticated_WrongTOTPCode_Returns400`
-  - [ ] `DisableTwoFactorAuth_Authenticated_TwoFactorNotEnabled_Returns400`
+- [x] Create `Endpoints/Users/DisableTwoFactorAuthEndpointTests.cs`.
+- [x] Implement:
+  - [x] `DisableTwoFactorAuth_Anonymous_Returns401`
+  - [x] `DisableTwoFactorAuth_Authenticated_ValidPassword_Returns200`
+  - [x] `DisableTwoFactorAuth_Authenticated_ValidPasswordAndValidCode_Returns200`
+  - [x] `DisableTwoFactorAuth_Authenticated_WrongPassword_Returns400`
+  - [x] `DisableTwoFactorAuth_Authenticated_WrongTOTPCode_Returns400`
+  - [x] `DisableTwoFactorAuth_Authenticated_TwoFactorNotEnabled_Returns400`
 
 ---
 
@@ -1344,19 +1344,19 @@
 | Section | Area | Tasks |
 |---|---|---|
 | 0 | Prerequisites | Review security decisions table before starting |
-| 1 | Configuration | 1.1 â†’ 1.3 |
-| 2 | Application â€” Modify Models | 2.1 |
-| 3 | Application â€” New DTOs | 3.1 â†’ 3.6 |
-| 4 | Application â€” Queries & Commands | 4.1 â†’ 4.12 |
-| 5 | Application â€” Interfaces | 5.1 â†’ 5.2 |
-| 6 | Infrastructure â€” TokenService | 6.1 â†’ 6.5 |
-| 7 | Infrastructure â€” UserService | 7.1 â†’ 7.7 |
-| 8 | Infrastructure â€” DI | 8.1 â†’ 8.2 |
-| 9 | API â€” AccountEndpoints | 9.1 â†’ 9.5 |
-| 10 | API â€” UserEndpoints | 10.1 â†’ 10.4 |
-| 11 | Tests â€” Application | 11.1 â†’ 11.12 |
-| 12 | Tests â€” Infrastructure | 12.1 â†’ 12.8 |
-| 13 | Tests â€” API | 13.1 â†’ 13.7 |
+| 1 | Configuration | 1.1 ? 1.3 |
+| 2 | Application — Modify Models | 2.1 |
+| 3 | Application — New DTOs | 3.1 ? 3.6 |
+| 4 | Application — Queries & Commands | 4.1 ? 4.12 |
+| 5 | Application — Interfaces | 5.1 ? 5.2 |
+| 6 | Infrastructure — TokenService | 6.1 ? 6.5 |
+| 7 | Infrastructure — UserService | 7.1 ? 7.7 |
+| 8 | Infrastructure — DI | 8.1 ? 8.2 |
+| 9 | API — AccountEndpoints | 9.1 ? 9.5 |
+| 10 | API — UserEndpoints | 10.1 ? 10.4 |
+| 11 | Tests — Application | 11.1 ? 11.12 |
+| 12 | Tests — Infrastructure | 12.1 ? 12.8 |
+| 13 | Tests — API | 13.1 ? 13.7 |
 
 > **Total tracked tasks: 150+**
 > Mark each checkbox `[x]` as tasks are completed. Do not mark a task complete if its tests are failing or its implementation is partial.

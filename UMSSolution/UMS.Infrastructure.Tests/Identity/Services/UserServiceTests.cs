@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands;
 using UMS.Application.Interfaces.Common;
@@ -44,6 +45,8 @@ public class UserServiceTests
         mockHttpContext.Setup(c => c.Request).Returns(mockRequest.Object);
         _httpContextAccessor.Setup(a => a.HttpContext).Returns(mockHttpContext.Object);
 
+        var twoFactorOptions = Options.Create(new TwoFactorOptions { Issuer = "TestApp" });
+
         _sut = new UserService(
             _userManager.Object,
             _roleManager.Object,
@@ -51,7 +54,8 @@ public class UserServiceTests
             _httpContextAccessor.Object,
             seedConfig,
             _dateTimeService.Object,
-            _currentUserService.Object);
+            _currentUserService.Object,
+            twoFactorOptions);
     }
 
     private static ApplicationUser MakeUser(int id = 1, string email = "user@test.com", bool confirmed = true, bool active = true) =>

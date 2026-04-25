@@ -1,12 +1,16 @@
 ﻿using Mediator;
 using UMS.API.Extensions;
+using UMS.Application.Authorization;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.EnableTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Features.Users.Queries;
-using UMS.Application.Authorization;
 
 namespace WebApi.Endpoints;
 
@@ -121,6 +125,45 @@ public static class UserEndpoints
             return response.ToApiResult();
         })
         .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Unlock))
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("setup-2fa",
+            async (ISender sender, CancellationToken ct) =>
+            {
+                var response = await sender.Send(new SetupTwoFactorAuthCommand(), ct);
+                return response.ToApiResult();
+            })
+        .Produces<IResponseWrapper<TwoFactorAuthViewModel>>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPost("confirm-2fa",
+            async (TwoFactorCodeRequest request, ISender sender, CancellationToken ct) =>
+            {
+                var response = await sender.Send(
+                    new ConfirmTwoFactorAuthCommand { Request = request }, ct);
+                return response.ToApiResult();
+            })
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPut("enable-2fa",
+            async (TwoFactorCodeRequest request, ISender sender, CancellationToken ct) =>
+            {
+                var response = await sender.Send(
+                    new EnableTwoFactorAuthCommand { Request = request }, ct);
+                return response.ToApiResult();
+            })
+        .Produces<IResponseWrapper<List<string>>>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+
+        group.MapPut("disable-2fa",
+            async (DisableTwoFactorAuthRequest request, ISender sender, CancellationToken ct) =>
+            {
+                var response = await sender.Send(
+                    new DisableTwoFactorAuthCommand { Request = request }, ct);
+                return response.ToApiResult();
+            })
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 

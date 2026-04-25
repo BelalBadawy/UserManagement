@@ -67,6 +67,13 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
         return client;
     }
 
+    public HttpClient CreateSelfServiceClient(int userId)
+    {
+        var client = CreateClient();
+        ApiTestAuthenticationHeaderHelper.ConfigureSelfServiceClient(client, userId);
+        return client;
+    }
+
     internal async Task EnsureDatabaseInitializedAsync()
     {
         Task initializationTask;
