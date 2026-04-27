@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using UMS.Application.Dtos.TwoFactor;
@@ -58,7 +59,8 @@ public class UserServiceAuthTests
             seedConfig,
             _dateTimeService.Object,
             _currentUserService.Object,
-            twoFactorOptions);
+            twoFactorOptions,
+            new Mock<ILogger<UserService>>().Object);
     }
 
     private ApplicationUser MakeUser(bool twoFactorEnabled = false) =>

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using UMS.Application.Authorization;
 using UMS.Application.Dtos.JWT;
 using UMS.Application.Dtos.Wrappers;
@@ -42,9 +42,9 @@ namespace UMS.Infrastructure.Identity
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders()
                 .Services
-                .AddTransient<IUserService, UserService>()
-                .AddTransient<IRoleService, RoleService>()
-                .AddTransient<ITokenService, TokenService>()
+                .AddScoped<IUserService, UserService>()
+                .AddScoped<IRoleService, RoleService>()
+                .AddScoped<ITokenService, TokenService>()
                 .AddScoped<CurrentUserMiddleware>()
                 .AddTransient<IdentityDbSeeder>()
                 .Configure<JwtConfiguration>(config.GetSection("JwtConfiguration"));
@@ -92,7 +92,7 @@ namespace UMS.Infrastructure.Identity
               })
               .AddJwtBearer(bearer =>
               {
-                  bearer.RequireHttpsMetadata = false;
+                  bearer.RequireHttpsMetadata = true;
                   bearer.SaveToken = true;
                   bearer.TokenValidationParameters = new TokenValidationParameters
                   {
@@ -126,7 +126,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The token has expired. Please log in again.")
                               );
                               return context.Response.WriteAsync(result);
@@ -135,7 +135,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The provided token format is invalid.")
                               );
                               return context.Response.WriteAsync(result);
@@ -144,7 +144,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The token signature is invalid.")
                               );
                               return context.Response.WriteAsync(result);
@@ -153,7 +153,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("You are not authorized to access this resource.")
                               );
                               return context.Response.WriteAsync(result);
@@ -166,7 +166,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(ResponseWrapper.Fail("You are not Authorized."));
+                              var result = JsonSerializer.Serialize(ResponseWrapper.Fail("You are not Authorized."));
                               return context.Response.WriteAsync(result);
                           }
 
@@ -176,7 +176,7 @@ namespace UMS.Infrastructure.Identity
                       {
                           context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                           context.Response.ContentType = "application/json";
-                          var result = JsonConvert.SerializeObject(
+                          var result = JsonSerializer.Serialize(
                               ResponseWrapper.Fail("You are not authorized to access this resource."));
                           return context.Response.WriteAsync(result);
                       }

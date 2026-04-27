@@ -275,7 +275,7 @@ public class AccountEndpointsTests : ApiTestBase
     }
 
     [Fact]
-    public async Task ResendConfirmationEmail_UnknownEmail_ReturnsUnsuccessfulPayload()
+    public async Task ResendConfirmationEmail_UnknownEmail_ReturnsSafeSuccessResponse()
     {
         var response = await Client.PostAsJsonAsync("/api/v1/account/resend-confirmation-email", new
         {
@@ -283,13 +283,13 @@ public class AccountEndpointsTests : ApiTestBase
         });
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         payload.Should().NotBeNull();
-        payload!.IsSuccessful.Should().BeFalse();
+        payload!.IsSuccessful.Should().BeTrue();
     }
 
     [Fact]
-    public async Task ResendConfirmationEmail_AlreadyConfirmedEmail_ReturnsUnsuccessfulPayload()
+    public async Task ResendConfirmationEmail_AlreadyConfirmedEmail_ReturnsSafeSuccessResponse()
     {
         var email = $"confirmed-resend-{Guid.NewGuid():N}@example.com";
         await Seeder.SeedUserAsync(email, "Admin@123", ["Basic"]);
@@ -300,9 +300,9 @@ public class AccountEndpointsTests : ApiTestBase
         });
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         payload.Should().NotBeNull();
-        payload!.IsSuccessful.Should().BeFalse();
+        payload!.IsSuccessful.Should().BeTrue();
     }
 
     [Fact]

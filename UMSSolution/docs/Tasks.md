@@ -729,3 +729,344 @@ Acceptance Criteria:
 - [x] `dotnet test UMSSolution.slnx` completes successfully.
 - [x] All maintained test projects included in the solution pass.
 - [x] No failing test remains in the maintained solution test surface.
+
+---
+
+## Phase 5: Security Review Findings (2026-04-26)
+
+> **Legend:** 🔴 Critical · 🟡 Important · 🔵 Minor  
+> Fix the critical items in the order listed below before any non-local deployment.
+
+### Priority Queue
+
+| # | Severity | Task |
+|---|----------|------|
+| 1 | 🔴 | Rotate & externalize all secrets (→ Task 5.3) |
+| 2 | 🔴 | Restrict CORS + enable HTTPS enforcement (→ Tasks 5.9, 5.10) |
+| 3 | 🔴 | Fix claim injection in `UpdateRolePermissionsAsync` (→ Task 5.11) |
+| 4 | 🔴 | Fix user enumeration in ForgotPassword & ResendConfirmation (→ Task 5.12) |
+| 5 | 🟡 | Fix validation status code (500→400) + IDOR in ChangePassword (→ Tasks 5.1, 5.13) |
+
+---
+
+### A. Clean Code & Modern C#
+
+#### Task 5.1: Fix validation pipeline returns HTTP 500 for client errors
+
+Status: - [x]  
+Description: `CreateValidationFailureResponse` passes `500` as the default `statusCode`, causing validation failures to be reported as Internal Server Error instead of Bad Request.  
+File(s): `UMS.Application/Behaviors/ValidationPipelineBehavior.cs:56`  
+Acceptance Criteria:
+
+- [x] The default `statusCode` argument is changed from `500` to `400`.
+- [x] A validation failure request returns HTTP 400.
+
+#### Task 5.2: Replace runtime reflection in `CreateValidationFailureResponse`
+
+Status: - [ ]  
+Description: `CreateValidationFailureResponse` uses `GetMethod` / `MakeGenericType` at runtime on every validation failure — fragile and slow.  
+File(s): `UMS.Application/Behaviors/ValidationPipelineBehavior.cs:45-59`  
+Acceptance Criteria:
+
+- [ ] Runtime reflection is removed from the failure response path.
+- [ ] A `IValidationFailureFactory` interface or non-generic approach is used instead.
+
+#### Task 5.3: Stop leaking internal exceptions in production responses
+
+Status: - [x]  
+Description: `ex.Message` is written directly to the HTTP response body, exposing internal paths, DB connection strings, or framework internals to callers.  
+File(s): `UMS.API/Middlewares/ErrorHandlingMiddleware.cs:69`  
+Acceptance Criteria:
+
+- [x] Production responses return a generic error message.
+- [x] The full exception is logged server-side only.
+- [x] `ex.Message` is only surfaced when the environment is Development.
+
+#### Task 5.4: Remove commented-out dead code from Program.cs
+
+Status: - [x]  
+Description: A significant block of commented-out code (`AddControllers`, `MapScalarApiReference`, etc.) remains in `Program.cs`.  
+File(s): `UMS.API/Program.cs:22-28`  
+Acceptance Criteria:
+
+- [x] All commented-out dead code is removed.
+- [x] The file still compiles and the application starts.
+
+#### Task 5.5: Fix `TokenExpiryInMunites` typo
+
+Status: - [x]  
+Description: `JwtConfiguration.cs` contains the typo `TokenExpiryInMunites` propagated to `appsettings.json` and all test configs.  
+File(s): `UMS.Application/Dtos/JWT/JwtConfiguration.cs`, `UMS.API/appsettings.json`, test config files  
+Acceptance Criteria:
+
+- [x] Property renamed to `TokenExpiryInMinutes` everywhere.
+- [x] All references (configs, tests, usages) are updated consistently.
+- [x] A text search for `Munites` returns zero matches.
+
+#### Task 5.6: Replace bare `string email` with a DTO on `forgot-password`
+
+Status: - [x]  
+Description: The `forgot-password` endpoint accepts a bare `string email` parameter. Minimal API binds this as a raw JSON string, which is non-standard for clients.  
+File(s): `UMS.API/Endpoints/AccountEndpoints.cs:37`  
+Acceptance Criteria:
+
+- [x] A `record ForgotPasswordRequest(string Email)` DTO is created.
+- [x] The endpoint binds the new DTO instead of a bare string.
+
+---
+
+### B. Architecture Best Practices
+
+#### Task 5.7: Replace concrete `ApplicationDbContext` injection in `RoleService`
+
+Status: - [x]  
+Description: `RoleService` directly injects `ApplicationDbContext` instead of `IApplicationDbContext`, breaking the abstraction every other service uses.  
+File(s): `UMS.Infrastructure/Identity/Services/RoleService.cs:13`  
+Acceptance Criteria:
+
+- [x] `RoleService` injects `IApplicationDbContext`.
+- [x] `RoleClaims` query is moved to the interface or accessed through it.
+
+#### Task 5.8: Move `UseStaticFiles()` before `UseRouting()`
+
+Status: - [x]  
+Description: `UseStaticFiles()` is called after `UseRouting()`, causing unnecessary route evaluation for static file requests.  
+File(s): `UMS.API/Program.cs:57-68`  
+Acceptance Criteria:
+
+- [x] `app.UseStaticFiles()` is positioned before `app.UseRouting()`.
+
+#### Task 5.9: Consolidate JSON serialization — remove `Newtonsoft.Json`
+
+Status: - [ ]  
+Description: Both `System.Text.Json` and `Newtonsoft.Json` are used. JWT event handlers use `JsonConvert.SerializeObject`, doubling the serialization surface.  
+File(s): `UMS.Infrastructure/Identity/IdentityServiceExtensions.cs`  
+Acceptance Criteria:
+
+- [ ] `Newtonsoft.Json` package reference is removed from the solution.
+- [ ] JWT event handlers are rewritten using `System.Text.Json`.
+
+#### Task 5.10: Add explicit permission constraints to unprotected user endpoints
+
+Status: - [x]  
+Description: `generate-change-email-token` and `generate-2fa-recovery-codes` fall inside a `RequireAuthorization()` group but have no specific permission constraint — any authenticated user can call them.  
+File(s): `UMS.API/Endpoints/UserEndpoints.cs`  
+Acceptance Criteria:
+
+- [x] `generate-change-email-token` requires an explicit `ChangeEmail` permission.
+- [x] `generate-2fa-recovery-codes` requires an explicit `Manage2FA` permission.
+
+#### Task 5.11: Change `IUserService`, `IRoleService`, `ITokenService` from `Transient` to `Scoped`
+
+Status: - [x]  
+Description: The three services are registered as `Transient` but wrap `UserManager<T>` which is `Scoped`, creating a potential lifetime mismatch.  
+File(s): `UMS.Infrastructure/Identity/IdentityServiceExtensions.cs:47-49`  
+Acceptance Criteria:
+
+- [x] All three services are registered as `Scoped`.
+- [x] No `Transient` registration wraps a `Scoped` dependency.
+
+#### Task 5.12: Fix `BasicPermissions` always being empty
+
+Status: - [x]  
+Description: `BasicPermissions` is always empty because all permissions default `IsBasic = false`, so the `Basic` role is seeded with zero permissions.  
+File(s): `UMS.Application/Authorization/AppPermissions.cs:76`  
+Acceptance Criteria:
+
+- [x] Either mark the intended basic permissions with `IsBasic = true`, or remove the `BasicPermissions`/`AdminPermissions` distinction.
+- [x] The `Basic` role receives the intended permission set after seeding.
+
+---
+
+### C. Security & Vulnerabilities
+
+#### Task 5.13: Remove all plain-text secrets from `appsettings.json`
+
+Status: - [x]  
+Description: JWT signing key, `IdProtection.SecretKey`, SMTP password, and seed user passwords are committed in plain text. All values must be treated as **compromised** and rotated.  
+File(s): `UMS.API/appsettings.json`  
+Acceptance Criteria:
+
+- [x] No real secrets remain in any tracked config file.
+- [x] Local dev uses ASP.NET Core User Secrets; staging/prod uses env vars or Azure Key Vault.
+- [x] Every committed secret value has been rotated.
+
+#### Task 5.14: Replace wildcard CORS with a strict origin allowlist
+
+Status: - [x]  
+Description: `AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()` allows any website to make cross-origin requests.  
+File(s): `UMS.API/ServiceCollectionExtensions.cs:33-38`  
+Acceptance Criteria:
+
+- [x] `AllowAnyOrigin()` is replaced with `.WithOrigins(…)` containing only the known frontend origin(s).
+- [x] No wildcard origin is present in the CORS policy.
+
+#### Task 5.15: Enable HTTPS enforcement (`RequireHttpsMetadata` + HSTS)
+
+Status: - [x]  
+Description: `bearer.RequireHttpsMetadata = false` allows JWT tokens over plain HTTP. `UseHsts()` is also absent.  
+File(s): `UMS.Infrastructure/Identity/IdentityServiceExtensions.cs:95`  
+Acceptance Criteria:
+
+- [x] `RequireHttpsMetadata = true`.
+- [x] `app.UseHsts()` is added for non-Development environments.
+
+#### Task 5.16: Fix user enumeration in `ForgotPasswordAsync` and `ResendConfirmationEmailAsync`
+
+Status: - [x]  
+Description: Both methods return `"This email doesn't exist."`, leaking whether an email is registered.  
+File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:338,434`  
+Acceptance Criteria:
+
+- [x] Both methods return `"If the email is registered, you will receive an email shortly."` unconditionally.
+- [x] The response is identical whether the email exists or not.
+
+#### Task 5.17: Fix claim injection in `UpdateRolePermissionsAsync`
+
+Status: - [x]  
+Description: `UpdateRolePermissionsAsync` uses `rc.ClaimType` directly from the client request, allowing a caller to inject arbitrary claim types into a role.  
+File(s): `UMS.Infrastructure/Identity/Services/RoleService.cs:193-195`  
+Acceptance Criteria:
+
+- [x] `ClaimType` is forced to `AppClaim.Permission` regardless of what the client sends.
+- [x] `ClaimValue` is validated against `AppPermissions.AllPermissions` before persisting.
+- [x] Requests with unrecognized claim types or values are rejected.
+
+#### Task 5.18: Remove `TrustServerCertificate=True` from connection string
+
+Status: - [x]  
+Description: `TrustServerCertificate=True` disables TLS certificate validation for SQL Server.  
+File(s): `UMS.API/appsettings.json:3`  
+Acceptance Criteria:
+
+- [x] The flag is removed from the connection string.
+- [x] SQL Server connectivity is secured with a valid cert or proper CA chain.
+
+#### Task 5.19: Fix IDOR in `ChangePasswordRequest` — derive `UserId` from JWT
+
+Status: - [x]  
+Description: `ChangePasswordRequest.UserId` comes from the request body, allowing any user with `Update` permission to change another user's password.  
+File(s): `UMS.Application/Features/Users/Commands/ChangeUserPassword/ChangePasswordRequest.cs`  
+Acceptance Criteria:
+
+- [x] `UserId` is removed from the request DTO.
+- [x] The handler derives `UserId` from `ICurrentUserService.GetUserId()`.
+- [x] A user cannot change another user's password by supplying a different ID.
+
+#### Task 5.20: Fix N+1 role claim loading in `GetClaimsAsync`
+
+Status: - [x]  
+Description: `GetClaimsAsync` calls `_roleManager.GetClaimsAsync` once per role in a loop, causing N database round-trips.  
+File(s): `UMS.Infrastructure/Identity/Services/TokenService.cs:239-266`  
+Acceptance Criteria:
+
+- [x] A single `_context.RoleClaims.Where(rc => roleIds.Contains(rc.RoleId))` query replaces the loop.
+- [x] The method makes one DB round-trip for claims regardless of role count.
+
+#### Task 5.21: Replace `IMemoryCache` with `IDistributedCache` for 2FA JTI replay protection
+
+Status: - [ ]  
+Description: `IMemoryCache` is process-local — in multi-instance deployments the same 2FA challenge token can be replayed against a different instance.  
+File(s): `UMS.Infrastructure/Identity/Services/TokenService.cs:187-194`  
+Acceptance Criteria:
+
+- [ ] The JTI replay cache uses `IDistributedCache` (Redis or SQL-backed).
+- [ ] Replay protection works correctly across multiple application instances.
+
+#### Task 5.22: Replace email-based admin lockout guard with a role/flag-based guard
+
+Status: - [ ]  
+Description: The admin lockout guard compares by email from `SeedUsersConfiguration` — brittle if the admin email changes post-deployment.  
+File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:511-512`  
+Acceptance Criteria:
+
+- [ ] The guard uses a dedicated `IsSystemAdmin` flag on `ApplicationUser` or an immutable role-based check.
+- [ ] Changing the admin email in config does not break lockout protection.
+
+#### Task 5.23: Protect Scalar API UI with authorization in Development
+
+Status: - [x]  
+Description: The Scalar API UI is publicly accessible without authentication (`.RequireAuthorization()` is commented out).  
+File(s): `UMS.API/Program.cs:43-55`  
+Acceptance Criteria:
+
+- [x] `.RequireAuthorization()` is uncommented or re-added on the Scalar endpoint.
+- [x] Unauthenticated requests to the API UI are rejected.
+
+#### Task 5.24: Enable SSL for SMTP in non-test environments
+
+Status: - [x]  
+Description: `EmailConfiguration.EnableSsl = false` causes email to be sent over plain SMTP.  
+File(s): `UMS.API/appsettings.json:25`  
+Acceptance Criteria:
+
+- [x] `EnableSsl` is `true` for staging and production environment configs.
+- [x] A per-environment override is in place so test environments can still opt out.
+
+---
+
+### D. Maintainability & Performance
+
+#### Task 5.25: Deprecate or paginate `GetAllUsersAsync`
+
+Status: - [ ]  
+Description: `GetAllUsersAsync()` loads every user into memory with `ToListAsync()` — no pagination, no projection.  
+File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:154-168`  
+Acceptance Criteria:
+
+- [ ] The endpoint is either removed from public access or replaced with the existing paged variant.
+- [ ] No unbounded `ToListAsync()` user load is reachable from a public API route.
+
+#### Task 5.26: Replace N+1 role check in `GetUserRolesAsync`
+
+Status: - [x]  
+Description: `GetUserRolesAsync` calls `_userManager.IsInRoleAsync` per role — N database calls.  
+File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:280-295`  
+Acceptance Criteria:
+
+- [x] A single `_userManager.GetRolesAsync(user)` call replaces the per-role loop.
+- [x] Role membership is computed in memory after a single query.
+
+#### Task 5.27: Move lockout check before password verification and `AccessFailedAsync`
+
+Status: - [x]  
+Description: `AccessFailedAsync` is called before the lockout check — a locked-out user who enters the wrong password gets "Invalid Credentials" instead of "Account is locked."  
+File(s): `UMS.Infrastructure/Identity/Services/TokenService.cs:63-66`  
+Acceptance Criteria:
+
+- [x] `IsLockedOutAsync` is checked before the password check and before `AccessFailedAsync`.
+- [x] A locked-out user receives the lockout message regardless of the supplied password.
+
+#### Task 5.28: Replace predictable refresh token seed value
+
+Status: - [x]  
+Description: `RefreshToken` is initialized to `_dateTimeService.NowUtc.Ticks.ToString()` during registration — a predictable, low-entropy value.  
+File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:66`  
+Acceptance Criteria:
+
+- [x] The registration path uses `GenerateRefreshToken()` (already in `TokenService`) or an equivalent high-entropy generator.
+- [x] No `Ticks.ToString()` refresh token value is assigned during registration.
+
+---
+
+### E. Refactoring Backlog
+
+#### Task 5.29: Add rate limiting to auth endpoints
+
+Status: - [ ]  
+Description: Add `app.UseRateLimiter()` with a sliding-window policy to defend against brute-force attacks.  
+File(s): `UMS.API/Program.cs`  
+Acceptance Criteria:
+
+- [ ] Rate limiting is applied to `/account/login`, `/account/forgot-password`, and `/account/login-2fa`.
+- [ ] Exceeding the limit returns HTTP 429.
+
+#### Task 5.30: Verify `OutboxMessage` is excluded from soft-delete global filter
+
+Status: - [ ]  
+Description: The `OnModelCreating` loop already skips `AuditTrail` from soft-delete filters; verify `OutboxMessage` is also excluded correctly.  
+File(s): `UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs`  
+Acceptance Criteria:
+
+- [ ] `OutboxMessage` is confirmed to be excluded from the soft-delete query filter.
+- [ ] A test or code comment documents the exclusion intent.

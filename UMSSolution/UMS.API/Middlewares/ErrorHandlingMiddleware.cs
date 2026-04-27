@@ -9,11 +9,13 @@ namespace UMS.API
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlingMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger, IWebHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -28,31 +30,18 @@ namespace UMS.API
 
                 if (context.Response.HasStarted)
                 {
-                    // Cannot modify headers or write a new body
                     _logger.LogWarning(
                         "The response has already started, the error handling middleware will not modify the response.");
-                    throw; // or just return
+                    throw;
                 }
 
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, ex, _env.IsDevelopment());
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
+        private static async Task HandleExceptionAsync(HttpContext context, Exception ex, bool isDevelopment)
         {
             context.Response.Clear();
-          
-            //context.Response.StatusCode = ex switch
-            //{
-            //    ConflictException ce => (int)ce.StatusCode,
-            //    NotFoundException nfe => (int)nfe.StatusCode,
-            //    ForbiddenException fe => (int)fe.StatusCode,
-            //    UnauthorizedException ue => (int)ue.StatusCode,
-            //    ValidationException ve => (int)ve.StatusCode,
-            //    _ => (int)HttpStatusCode.InternalServerError
-            //};
-
-            //context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             context.Response.StatusCode = ex switch
             {
@@ -66,7 +55,8 @@ namespace UMS.API
 
             context.Response.ContentType = "application/json";
 
-            var responseWrapper =  ResponseWrapper.Fail(ex.Message, context.Response.StatusCode);
+            var message = isDevelopment ? ex.Message : "An unexpected error occurred. Please try again later.";
+            var responseWrapper = ResponseWrapper.Fail(message, context.Response.StatusCode);
             var result = JsonSerializer.Serialize(responseWrapper);
 
             await context.Response.WriteAsync(result);

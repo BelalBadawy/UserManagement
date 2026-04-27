@@ -1,4 +1,6 @@
-﻿namespace UMS.Application.Features.Users.Commands
+﻿using UMS.Application.Interfaces.Common;
+
+namespace UMS.Application.Features.Users.Commands
 {
     public class ChangeUserPasswordCommand : IRequest<IResponseWrapper>, IValidateMe
     {
@@ -8,15 +10,21 @@
     public class ChangeUserPasswordCommandHandler : IRequestHandler<ChangeUserPasswordCommand, IResponseWrapper>
     {
         private readonly IUserService _userService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ChangeUserPasswordCommandHandler(IUserService userService)
+        public ChangeUserPasswordCommandHandler(IUserService userService, ICurrentUserService currentUserService)
         {
             _userService = userService;
+            _currentUserService = currentUserService;
         }
 
         public async ValueTask<IResponseWrapper> Handle(ChangeUserPasswordCommand request, CancellationToken ct)
         {
-            return await _userService.ChangeUserPasswordAsync(request.ChangePassword);
+            var userId = _currentUserService.GetUserId();
+            if (userId is null)
+                return ResponseWrapper.Fail("User is not authenticated.");
+
+            return await _userService.ChangeUserPasswordAsync(userId.Value, request.ChangePassword);
         }
     }
 }

@@ -48,7 +48,6 @@ internal static class TestData
 
     public static ChangePasswordRequest ChangePasswordRequest(int? userId = null) => new()
     {
-        UserId = userId ?? Fixture.Create<int>(),
         CurrentPassword = "Current@123",
         NewPassword = "Valid@123",
         ConfirmedNewPassword = "Valid@123"

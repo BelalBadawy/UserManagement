@@ -58,13 +58,13 @@ namespace UMS.Application.Authorization
             new(AppService.Identity, AppFeature.RoleClaims, AppAction.Read, "Read Role Claims/Permissions"),
             new(AppService.Identity, AppFeature.RoleClaims, AppAction.Update, "Update Role Claims/Permissions"),
             new(AppService.Product, AppFeature.Categories, AppAction.Create, "Create Categories"),
-            new(AppService.Product, AppFeature.Categories, AppAction.Read, "Read Categories"),
+            new(AppService.Product, AppFeature.Categories, AppAction.Read, "Read Categories", IsBasic: true),
             new(AppService.Product, AppFeature.Categories, AppAction.Update, "Update Categories"),
             new(AppService.Product, AppFeature.Categories, AppAction.Delete, "Delete Categories"),
             new(AppService.Identity, AppFeature.Users, AppAction.Lock,        "Lock Users"),
             new(AppService.Identity, AppFeature.Users, AppAction.Unlock,      "Unlock Users"),
-            new(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail, "Change User Email"),
-            new(AppService.Identity, AppFeature.Users, AppAction.Manage2FA,   "Manage User 2FA"),
+            new(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail, "Change User Email", IsBasic: true),
+            new(AppService.Identity, AppFeature.Users, AppAction.Manage2FA,   "Manage User 2FA",   IsBasic: true),
         ];
 
         public static IReadOnlyList<AppPermission> AllPermissions { get; } =

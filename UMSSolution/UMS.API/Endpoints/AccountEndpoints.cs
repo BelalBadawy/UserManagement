@@ -10,6 +10,8 @@ using UMS.Application.Features.Users.Queries.GetMyProfile;
 
 namespace UMS.API.Endpoints;
 
+public record ForgotPasswordRequest(string Email);
+
 public static class AccountEndpoints
 {
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder app)
@@ -34,9 +36,9 @@ public static class AccountEndpoints
         .Produces<IResponseWrapper<TokenResponse>>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapPost("forgot-password", async (string email, ISender sender, CancellationToken ct) =>
+        group.MapPost("forgot-password", async ([AsParameters] ForgotPasswordRequest request, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new ForgotPasswordCommand { Email = email }, ct);
+            var response = await sender.Send(new ForgotPasswordCommand { Email = request.Email }, ct);
             return response.ToApiResult();
         })
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)

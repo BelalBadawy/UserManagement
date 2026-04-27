@@ -41,7 +41,7 @@ public class TokenService2FATests
             Issuer = "ums-issuer",
             Audience = "ums-audience",
             Secret = "super-secret-key-for-testing-123456",
-            TokenExpiryInMunites = 60,
+            TokenExpiryInMinutes = 60,
             RefreshTokenExpiryInDays = 7,
             TwoFactorChallengeTokenExpiryInMinutes = 5
         };
