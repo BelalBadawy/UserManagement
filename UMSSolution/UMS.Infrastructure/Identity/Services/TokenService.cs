@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +11,7 @@ using UMS.Application.Features.Token;
 using UMS.Application.Features.Token.Queries;
 using UMS.Application.Features.Token.Queries.LoginWith2FA;
 using UMS.Application.Interfaces.Common;
+using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -20,6 +22,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly JwtConfiguration _tokenSettings;
         private readonly IDateTimeService _dateTimeService;
         private readonly IMemoryCache _cache;
+        private readonly ApplicationDbContext? _dbContext;
 
         private string ChallengeIssuer => $"{_tokenSettings.Issuer}:2fa-challenge";
         private const string ChallengeAudience = "2fa-challenge";
@@ -29,13 +32,15 @@ namespace UMS.Infrastructure.Identity.Services
             RoleManager<ApplicationRole> roleManager,
             IOptions<JwtConfiguration> tokenSettings,
             IDateTimeService dateTimeService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            ApplicationDbContext? dbContext = null)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenSettings = tokenSettings.Value;
             _dateTimeService = dateTimeService;
             _cache = cache;
+            _dbContext = dbContext;
         }
 
         public async Task<IResponseWrapper<TokenResponse>> GetTokenAsync(TokenRequest tokenRequest)
@@ -57,6 +62,11 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
             }
+            // Check if locked out before verifying password so the right message is shown
+            if (await _userManager.IsLockedOutAsync(userInDb))
+            {
+                return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later or contact support.");
+            }
             // Check password
             var isPasswordValid = await _userManager.CheckPasswordAsync(userInDb, tokenRequest.Password);
 
@@ -64,12 +74,6 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 await _userManager.AccessFailedAsync(userInDb);
                 return ResponseWrapper<TokenResponse>.Fail("Invalid Credentials.");
-            }
-
-            // Check if locked out
-            if (await _userManager.IsLockedOutAsync(userInDb))
-            {
-                return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later or contact support.");
             }
 
             #endregion
@@ -239,20 +243,42 @@ namespace UMS.Infrastructure.Identity.Services
         private async Task<IEnumerable<Claim>> GetClaimsAsync(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            var permissionClaims = new List<Claim>();
+            var roleNames = await _userManager.GetRolesAsync(user);
 
-            foreach (var role in roles)
+            var roleClaims = roleNames.Select(r => new Claim(ClaimTypes.Role, r)).ToList();
+
+            List<Claim> permissionClaims;
+            if (_dbContext is not null)
             {
-                roleClaims.Add(new Claim(ClaimTypes.Role, role));
-                var currentRole = await _roleManager.FindByNameAsync(role);
-                var allPermissionsForCurrentRole = await _roleManager.GetClaimsAsync(currentRole);
+                // Single batch query: join roles → role claims in two round-trips instead of N+1
+                var roleIds = await _roleManager.Roles
+                    .Where(r => roleNames.Contains(r.Name!))
+                    .Select(r => r.Id)
+                    .ToListAsync();
 
-                permissionClaims.AddRange(allPermissionsForCurrentRole);
+                permissionClaims = await _dbContext.RoleClaims
+                    .Where(rc => roleIds.Contains(rc.RoleId) && rc.ClaimValue != null)
+                    .Select(rc => new Claim(rc.ClaimType!, rc.ClaimValue!))
+                    .ToListAsync();
+            }
+            else
+            {
+                // Fallback path used in unit tests where DbContext is not injected
+                var roleClaimSets = await Task.WhenAll(
+                    roleNames.Select(async role =>
+                    {
+                        var roleEntity = await _roleManager.FindByNameAsync(role);
+                        return roleEntity is null
+                            ? []
+                            : await _roleManager.GetClaimsAsync(roleEntity);
+                    }));
+
+                permissionClaims = roleClaimSets
+                    .SelectMany(claims => claims.Select(c => new Claim(c.Type, c.Value)))
+                    .ToList();
             }
 
-            var claims = new List<Claim>
+            return new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email),
@@ -262,8 +288,6 @@ namespace UMS.Infrastructure.Identity.Services
             .Union(roleClaims)
             .Union(userClaims)
             .Union(permissionClaims);
-
-            return claims;
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -278,7 +302,7 @@ namespace UMS.Infrastructure.Identity.Services
                 issuer: _tokenSettings.Issuer,
                 audience: _tokenSettings.Audience,
                 claims: claims,
-                expires: _dateTimeService.NowUtc.AddMinutes(_tokenSettings.TokenExpiryInMunites),
+                expires: _dateTimeService.NowUtc.AddMinutes(_tokenSettings.TokenExpiryInMinutes),
                 signingCredentials: signingCredentials);
             var tokenHandler = new JwtSecurityTokenHandler();
             var encryptedToken = tokenHandler.WriteToken(token);

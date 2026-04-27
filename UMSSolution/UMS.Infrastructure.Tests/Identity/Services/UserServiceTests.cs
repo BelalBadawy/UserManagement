@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using UMS.Application.Dtos.TwoFactor;
@@ -55,7 +56,8 @@ public class UserServiceTests
             seedConfig,
             _dateTimeService.Object,
             _currentUserService.Object,
-            twoFactorOptions);
+            twoFactorOptions,
+            new Mock<ILogger<UserService>>().Object);
     }
 
     private static ApplicationUser MakeUser(int id = 1, string email = "user@test.com", bool confirmed = true, bool active = true) =>
@@ -279,10 +281,10 @@ public class UserServiceTests
     [Fact]
     public async Task ChangeUserPasswordAsync_WhenUserNotFound_ReturnsFail()
     {
-        var req = new ChangePasswordRequest { UserId = 10, CurrentPassword = "old", NewPassword = "new" };
+        var req = new ChangePasswordRequest { CurrentPassword = "old", NewPassword = "new" };
         _userManager.Setup(m => m.FindByIdAsync("10")).ReturnsAsync((ApplicationUser?)null);
 
-        var result = await _sut.ChangeUserPasswordAsync(req);
+        var result = await _sut.ChangeUserPasswordAsync(10, req);
 
         result.IsSuccessful.Should().BeFalse();
         result.Messages.Should().ContainSingle().Which.Should().Be("User does not exist.");
@@ -292,12 +294,12 @@ public class UserServiceTests
     public async Task ChangeUserPasswordAsync_WhenPasswordChangeFails_ReturnsFail()
     {
         var user = MakeUser(10);
-        var req = new ChangePasswordRequest { UserId = 10, CurrentPassword = "old", NewPassword = "new" };
+        var req = new ChangePasswordRequest { CurrentPassword = "old", NewPassword = "new" };
         _userManager.Setup(m => m.FindByIdAsync("10")).ReturnsAsync(user);
         _userManager.Setup(m => m.ChangePasswordAsync(user, "old", "new"))
                     .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Incorrect current password." }));
 
-        var result = await _sut.ChangeUserPasswordAsync(req);
+        var result = await _sut.ChangeUserPasswordAsync(10, req);
 
         result.IsSuccessful.Should().BeFalse();
         result.Messages.Should().ContainSingle().Which.Should().Be("Incorrect current password.");
@@ -307,12 +309,12 @@ public class UserServiceTests
     public async Task ChangeUserPasswordAsync_WhenSuccessful_ReturnsSuccess()
     {
         var user = MakeUser(10);
-        var req = new ChangePasswordRequest { UserId = 10, CurrentPassword = "old", NewPassword = "New@123" };
+        var req = new ChangePasswordRequest { CurrentPassword = "old", NewPassword = "New@123" };
         _userManager.Setup(m => m.FindByIdAsync("10")).ReturnsAsync(user);
         _userManager.Setup(m => m.ChangePasswordAsync(user, "old", "New@123"))
                     .ReturnsAsync(IdentityResult.Success);
 
-        var result = await _sut.ChangeUserPasswordAsync(req);
+        var result = await _sut.ChangeUserPasswordAsync(10, req);
 
         result.IsSuccessful.Should().BeTrue();
         result.Messages.Should().ContainSingle().Which.Should().Be("User password updated.");
@@ -398,8 +400,7 @@ public class UserServiceTests
         _userManager.Setup(m => m.FindByIdAsync("5")).ReturnsAsync(user);
         _roleManager.Setup(m => m.Roles)
                     .Returns(new TestAsyncEnumerable<ApplicationRole>(roles));
-        _userManager.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(true);
-        _userManager.Setup(m => m.IsInRoleAsync(user, "Basic")).ReturnsAsync(false);
+        _userManager.Setup(m => m.GetRolesAsync(user)).ReturnsAsync(["Admin"]);
 
         var result = await _sut.GetUserRolesAsync(5);
 
@@ -492,30 +493,30 @@ public class UserServiceTests
     // ── ForgotPasswordAsync ────────────────────────────────────────────────
 
     [Fact]
-    public async Task ForgotPasswordAsync_WhenUserNotFound_ReturnsFail()
+    public async Task ForgotPasswordAsync_WhenUserNotFound_ReturnsSafeSuccessResponse()
     {
         _userManager.Setup(m => m.FindByEmailAsync("ghost@test.com")).ReturnsAsync((ApplicationUser?)null);
 
         var result = await _sut.ForgotPasswordAsync("ghost@test.com");
 
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("This email doesn't exist.");
+        result.IsSuccessful.Should().BeTrue();
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
     }
 
     [Fact]
-    public async Task ForgotPasswordAsync_WhenEmailNotConfirmed_ReturnsFail()
+    public async Task ForgotPasswordAsync_WhenEmailNotConfirmed_ReturnsSafeSuccessResponse()
     {
         var user = MakeUser(1, "u@t.com", confirmed: false);
         _userManager.Setup(m => m.FindByEmailAsync("u@t.com")).ReturnsAsync(user);
 
         var result = await _sut.ForgotPasswordAsync("u@t.com");
 
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("This email is not confirmed.");
+        result.IsSuccessful.Should().BeTrue();
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
     }
 
     [Fact]
-    public async Task ForgotPasswordAsync_WhenEmailServiceThrows_ReturnsFail()
+    public async Task ForgotPasswordAsync_WhenEmailServiceThrows_StillReturnsSafeSuccessResponse()
     {
         var user = MakeUser(1, "u@t.com");
         _userManager.Setup(m => m.FindByEmailAsync("u@t.com")).ReturnsAsync(user);
@@ -525,8 +526,8 @@ public class UserServiceTests
 
         var result = await _sut.ForgotPasswordAsync("u@t.com");
 
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("SMTP error");
+        result.IsSuccessful.Should().BeTrue();
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
     }
 
     [Fact]
@@ -541,7 +542,7 @@ public class UserServiceTests
         var result = await _sut.ForgotPasswordAsync("u@t.com");
 
         result.IsSuccessful.Should().BeTrue();
-        result.Messages.Should().ContainSingle().Which.Should().Be("Reset password email sent successfully.");
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
         _emailService.Verify(e => e.SendAsync(
             It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -756,26 +757,26 @@ public class UserServiceTests
     // ── ResendConfirmationEmailAsync ───────────────────────────────────────
 
     [Fact]
-    public async Task ResendConfirmationEmailAsync_WhenUserNotFound_ReturnsFail()
+    public async Task ResendConfirmationEmailAsync_WhenUserNotFound_ReturnsSafeSuccessResponse()
     {
         _userManager.Setup(m => m.FindByEmailAsync("ghost@test.com")).ReturnsAsync((ApplicationUser?)null);
 
         var result = await _sut.ResendConfirmationEmailAsync("ghost@test.com");
 
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("This email doesn't exist.");
+        result.IsSuccessful.Should().BeTrue();
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
     }
 
     [Fact]
-    public async Task ResendConfirmationEmailAsync_WhenAlreadyConfirmed_ReturnsFail()
+    public async Task ResendConfirmationEmailAsync_WhenAlreadyConfirmed_ReturnsSafeSuccessResponse()
     {
         var user = MakeUser(1, "u@t.com", confirmed: true);
         _userManager.Setup(m => m.FindByEmailAsync("u@t.com")).ReturnsAsync(user);
 
         var result = await _sut.ResendConfirmationEmailAsync("u@t.com");
 
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("Email is already confirmed.");
+        result.IsSuccessful.Should().BeTrue();
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
     }
 
     [Fact]
@@ -790,7 +791,7 @@ public class UserServiceTests
         var result = await _sut.ResendConfirmationEmailAsync("u@t.com");
 
         result.IsSuccessful.Should().BeTrue();
-        result.Messages.Should().ContainSingle().Which.Should().Be("Confirmation email sent. Please check your inbox.");
+        result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
         _emailService.Verify(e => e.SendAsync(
             It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
             It.IsAny<CancellationToken>()), Times.Once);

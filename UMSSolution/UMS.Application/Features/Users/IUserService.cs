@@ -16,7 +16,7 @@ namespace UMS.Application.Features.Users
         Task<IResponseWrapper<UserResponse>> GetUserByIdAsync(int userId);
         Task<IResponseWrapper<List<UserResponse>>> GetAllUsersAsync();
         Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct);
-        Task<IResponseWrapper> ChangeUserPasswordAsync(ChangePasswordRequest changePassword);
+        Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword);
         Task<IResponseWrapper> ChangeUserStatusAsync(ChangeUserStatusRequest changeUserStatus);
         Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId);
         Task<IResponseWrapper> UpdateUserRolesAsync(UpdateUserRolesRequest updateUserRoles,CancellationToken ct);

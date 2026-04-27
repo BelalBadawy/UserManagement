@@ -3,6 +3,7 @@ using UMS.Application.Authorization;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Roles;
 using UMS.Application.Features.Roles.Commands;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -10,9 +11,9 @@ namespace UMS.Infrastructure.Identity.Services
     {
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;
 
-        public RoleService(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public RoleService(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, IApplicationDbContext context)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -189,10 +190,16 @@ namespace UMS.Infrastructure.Identity.Services
             if (roleInDb.Name == AppRoles.Admin)
                 return ResponseWrapper.Fail("Cannot change permissions for this role.");
 
-            var existingClaims = await _roleManager.GetClaimsAsync(roleInDb);
+            var allowedValues = AppPermissions.AllPermissions
+                .Select(p => p.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             var newClaims = updateRoleClaims.RoleClaims
-                .Select(rc => new Claim(rc.ClaimType, rc.ClaimValue))
+                .Where(rc => rc.ClaimValue != null && allowedValues.Contains(rc.ClaimValue))
+                .Select(rc => new Claim(AppClaim.Permission, rc.ClaimValue!))
                 .ToList();
+
+            var existingClaims = await _roleManager.GetClaimsAsync(roleInDb);
 
             var claimsToAdd = newClaims
                 .Where(nc => !existingClaims.Any(ec => ec.Type == nc.Type && ec.Value == nc.Value))
@@ -205,27 +212,23 @@ namespace UMS.Infrastructure.Identity.Services
             if (!claimsToAdd.Any() && !claimsToRemove.Any())
                 return ResponseWrapper.Success("No changes detected.");
 
-            var strategy = _context.Database.CreateExecutionStrategy();
-
-            await strategy.ExecuteAsync(async () =>
+            try
             {
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    foreach (var claim in claimsToRemove)
-                        await _roleManager.RemoveClaimAsync(roleInDb, claim);
+                await _context.StartTransaction();
 
-                    foreach (var claim in claimsToAdd)
-                        await _roleManager.AddClaimAsync(roleInDb, claim);
+                foreach (var claim in claimsToRemove)
+                    await _roleManager.RemoveClaimAsync(roleInDb, claim);
 
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-            });
+                foreach (var claim in claimsToAdd)
+                    await _roleManager.AddClaimAsync(roleInDb, claim);
+
+                await _context.CommitTransaction();
+            }
+            catch
+            {
+                await _context.RollbackTransaction();
+                throw;
+            }
 
             return ResponseWrapper.Success("Role permissions updated successfully.");
         }
@@ -243,17 +246,13 @@ namespace UMS.Infrastructure.Identity.Services
 
         private async Task<List<RoleClaimViewModel>> GetAllClaimsForRoleAsync(int roleId)
         {
-            var roleClaims = await _context.RoleClaims
-                .Where(rc => rc.RoleId == roleId)
-                .ToListAsync();
+            var role = await _roleManager.FindByIdAsync(roleId.ToString());
+            if (role is null) return [];
 
-            if (roleClaims.Count > 0)
-            {
-                var mappedRoleClaims = roleClaims.Adapt<List<RoleClaimViewModel>>();
-                return mappedRoleClaims;
-            }
-
-            return [];
+            var claims = await _roleManager.GetClaimsAsync(role);
+            return claims
+                .Select(c => new RoleClaimViewModel { ClaimType = c.Type, ClaimValue = c.Value })
+                .ToList();
         }
     }
 }

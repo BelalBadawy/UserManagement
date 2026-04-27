@@ -181,23 +181,36 @@ public class UserEndpointsTests : ApiTestBase
         updatedUser.PhoneNumber.Should().Be(request.PhoneNumber);
     }
 
-    [Theory]
-    [InlineData("anonymous", HttpStatusCode.Unauthorized)]
-    [InlineData("low-privilege", HttpStatusCode.Forbidden)]
-    [InlineData("privileged", HttpStatusCode.OK)]
-    public async Task Change_user_password_should_follow_authorization_matrix(string authMode, HttpStatusCode expectedStatusCode)
+    [Fact]
+    public async Task Change_password_returns_unauthorized_when_not_authenticated()
     {
         var email = $"password-user-{Guid.NewGuid():N}@example.com";
+        var user = await Seeder.SeedUserAsync(email, "Admin@123", ["Basic"]);
+
+        var request = new
+        {
+            CurrentPassword = "Admin@123",
+            NewPassword = "NewPassword@123",
+            ConfirmedNewPassword = "NewPassword@123"
+        };
+
+        var response = await Client.PutAsJsonAsync("/api/v1/users/change-password", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Change_password_succeeds_when_user_changes_own_password()
+    {
+        var email = $"password-self-{Guid.NewGuid():N}@example.com";
         const string currentPassword = "Admin@123";
         const string newPassword = "NewPassword@123";
         var user = await Seeder.SeedUserAsync(email, currentPassword, ["Basic"]);
 
-        var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update);
-        UseUserClient(authMode, requiredPermission);
+        UseSelfServiceClient(user.Id);
 
         var request = new
         {
-            UserId = user.Id,
             CurrentPassword = currentPassword,
             NewPassword = newPassword,
             ConfirmedNewPassword = newPassword
@@ -205,12 +218,11 @@ public class UserEndpointsTests : ApiTestBase
 
         var response = await Client.PutAsJsonAsync("/api/v1/users/change-password", request);
 
-        response.StatusCode.Should().Be(expectedStatusCode);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        if (expectedStatusCode != HttpStatusCode.OK)
-        {
-            return;
-        }
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
 
         UseAnonymousClient();
         var loginResponse = await Client.PostAsJsonAsync("/api/v1/account/login", new
@@ -322,7 +334,7 @@ public class UserEndpointsTests : ApiTestBase
     [Fact]
     public async Task Generate_change_email_token_returns_error_when_authenticated_user_not_in_db()
     {
-        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read));
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail));
 
         var response = await Client.PostAsJsonAsync("/api/v1/users/generate-change-email-token", new
         {
@@ -346,7 +358,7 @@ public class UserEndpointsTests : ApiTestBase
     [Fact]
     public async Task Generate_2fa_recovery_codes_returns_error_when_authenticated_user_not_in_db()
     {
-        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read));
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Manage2FA));
 
         var response = await Client.PostAsJsonAsync("/api/v1/users/generate-2fa-recovery-codes", new { });
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();

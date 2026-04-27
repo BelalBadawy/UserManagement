@@ -193,6 +193,7 @@ public class RoleServiceTests : IDisposable
     {
         var role = MakeRole(5, "Viewer");
         _roleManager.Setup(m => m.FindByIdAsync("5")).ReturnsAsync(role);
+        _roleManager.Setup(m => m.GetClaimsAsync(role)).ReturnsAsync(new List<Claim>());
 
         var result = await _sut.GetPermissionsAsync(5);
 

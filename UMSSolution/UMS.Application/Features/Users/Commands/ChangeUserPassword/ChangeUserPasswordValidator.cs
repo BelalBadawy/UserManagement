@@ -4,10 +4,6 @@
     {
         public ChangeUserPasswordValidator()
         {
-
-            RuleFor(x => x.ChangePassword.UserId)
-                .NotEqual(0).WithMessage("User Id is required.");
-
             RuleFor(x => x.ChangePassword.CurrentPassword)
                 .NotEmpty().WithMessage("Current password is required.");
 

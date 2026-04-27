@@ -23,7 +23,7 @@
         /// <summary>
         /// Token expiry duration in minutes.
         /// </summary>
-        public int TokenExpiryInMunites { get; set; }
+        public int TokenExpiryInMinutes { get; set; }
 
         /// <summary>
         /// Refresh token expiry duration in days.

@@ -1,6 +1,8 @@
 using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using System.Web;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
@@ -28,6 +30,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly TwoFactorOptions _twoFactorOptions;
+        private readonly ILogger<UserService> _logger;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
@@ -37,7 +40,8 @@ namespace UMS.Infrastructure.Identity.Services
             IOptions<SeedUsersConfiguration> seedUsersConfiguration,
             IDateTimeService dateTimeService,
             ICurrentUserService currentUserService,
-            IOptions<TwoFactorOptions> twoFactorOptions)
+            IOptions<TwoFactorOptions> twoFactorOptions,
+            ILogger<UserService> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -47,6 +51,14 @@ namespace UMS.Infrastructure.Identity.Services
             _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
             _twoFactorOptions = twoFactorOptions.Value;
+            _logger = logger;
+        }
+
+        private static string GenerateSecureToken()
+        {
+            var bytes = new byte[32];
+            RandomNumberGenerator.Fill(bytes);
+            return Convert.ToBase64String(bytes);
         }
 
         public async Task<IResponseWrapper> RegisterUserAsync(UserRegistrationRequest userRegistration)
@@ -63,7 +75,7 @@ namespace UMS.Infrastructure.Identity.Services
                 PhoneNumber = userRegistration.PhoneNumber,
                 IsActive = userRegistration.ActivateUser,
                 EmailConfirmed = userRegistration.AutoConfirmEmail,
-                RefreshToken = _dateTimeService.NowUtc.Ticks.ToString(),
+                RefreshToken = GenerateSecureToken(),
                 RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(1)
             };
 
@@ -227,9 +239,9 @@ namespace UMS.Infrastructure.Identity.Services
             return ResponseWrapper<PagedResult<UserResponse>>.Success(data: data);
         }
 
-        public async Task<IResponseWrapper> ChangeUserPasswordAsync(ChangePasswordRequest changePassword)
+        public async Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword)
         {
-            var userInDb = await _userManager.FindByIdAsync(changePassword.UserId.ToString());
+            var userInDb = await _userManager.FindByIdAsync(userId.ToString());
             if (userInDb is not null)
             {
                 var identityResult = await _userManager.ChangePasswordAsync(
@@ -273,26 +285,16 @@ namespace UMS.Infrastructure.Identity.Services
 
         public async Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId)
         {
-            var userRolesViewModel = new List<UserRoleViewModel>();
             var userInDb = await _userManager.FindByIdAsync(userId.ToString());
 
             if (userInDb is not null)
             {
-                var allRoles = await _roleManager.Roles.ToListAsync();
+                var assignedRoleNames = (await _userManager.GetRolesAsync(userInDb)).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var role in allRoles)
-                {
-                    var userRoleViewModel = new UserRoleViewModel
-                    {
-                        RoleName = role.Name,
-                        RoleDescription = role.Description
-                    };
-
-                    if (await _userManager.IsInRoleAsync(userInDb, role.Name))
-                    {
-                        userRolesViewModel.Add(userRoleViewModel);
-                    }
-                }
+                var userRolesViewModel = (await _roleManager.Roles.ToListAsync())
+                    .Where(r => assignedRoleNames.Contains(r.Name!))
+                    .Select(r => new UserRoleViewModel { RoleName = r.Name, RoleDescription = r.Description })
+                    .ToList();
 
                 return ResponseWrapper<List<UserRoleViewModel>>.Success(userRolesViewModel);
             }
@@ -334,12 +336,11 @@ namespace UMS.Infrastructure.Identity.Services
 
         public async Task<IResponseWrapper> ForgotPasswordAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-                return ResponseWrapper.Fail("This email doesn't exist.");
+            const string safeMessage = "If the email is registered, you will receive an email shortly.";
 
-            if (!user.EmailConfirmed)
-                return ResponseWrapper.Fail("This email is not confirmed.");
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || !user.EmailConfirmed)
+                return ResponseWrapper.Success(safeMessage);
 
             var request = _httpContextAccessor.HttpContext?.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
@@ -360,17 +361,14 @@ namespace UMS.Infrastructure.Identity.Services
 
             try
             {
-                var result = await _emailService.SendAsync(emailModel);
-
-                if (string.IsNullOrEmpty(result))
-                    return ResponseWrapper.Success("Reset password email sent successfully.");
-
-                return ResponseWrapper.Fail(result);
+                await _emailService.SendAsync(emailModel);
             }
             catch (Exception ex)
             {
-                return ResponseWrapper.Fail(ex.Message);
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
             }
+
+            return ResponseWrapper.Success(safeMessage);
         }
 
         public async Task<IResponseWrapper> ResetPasswordAsync(ResetPasswordRequest request)
@@ -432,12 +430,11 @@ namespace UMS.Infrastructure.Identity.Services
 
         public async Task<IResponseWrapper> ResendConfirmationEmailAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-                return ResponseWrapper.Fail("This email doesn't exist.");
+            const string safeMessage = "If the email is registered, you will receive an email shortly.";
 
-            if (user.EmailConfirmed)
-                return ResponseWrapper.Fail("Email is already confirmed.");
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || user.EmailConfirmed)
+                return ResponseWrapper.Success(safeMessage);
 
             var httpRequest = _httpContextAccessor.HttpContext?.Request;
             var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
@@ -455,7 +452,7 @@ namespace UMS.Infrastructure.Identity.Services
                               $"<p><a href=\"{callbackUrl}\">Confirm Email</a></p>"
             });
 
-            return ResponseWrapper.Success("Confirmation email sent. Please check your inbox.");
+            return ResponseWrapper.Success(safeMessage);
         }
 
         public async Task<IResponseWrapper> GenerateChangeEmailTokenAsync(string newEmail)

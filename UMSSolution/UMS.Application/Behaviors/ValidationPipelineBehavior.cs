@@ -28,13 +28,7 @@
 
                 if (failures.Count > 0)
                 {
-                    var errorMessages = new List<string>();
-
-                    foreach (var failure in failures)
-                    {
-                        errorMessages.Add(failure.ErrorMessage);
-                    }
-
+                    var errorMessages = failures.Select(f => f.ErrorMessage).ToList();
                     return CreateValidationFailureResponse(errorMessages);
                 }
             }
@@ -53,10 +47,10 @@
                     nameof(ResponseWrapper<object>.Fail),
                     [typeof(IReadOnlyList<string>), typeof(int)]);
 
-                return (TResponse)failMethod!.Invoke(null, [errorMessages, 500])!;
+                return (TResponse)failMethod!.Invoke(null, [errorMessages, 400])!;
             }
 
-            return (TResponse)ResponseWrapper.Fail(errorMessages);
+            return (TResponse)ResponseWrapper.Fail(errorMessages, 400);
         }
     }
 }

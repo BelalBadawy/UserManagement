@@ -21,18 +21,6 @@ public class ChangeUserPasswordValidatorTests
     }
 
     [Fact]
-    public void Validate_should_fail_when_user_id_is_missing()
-    {
-        var request = TestData.ChangePasswordRequest(userId: 0);
-        var command = new ChangeUserPasswordCommand { ChangePassword = request };
-
-        var result = _validator.Validate(command);
-
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(error => error.PropertyName == "ChangePassword.UserId");
-    }
-
-    [Fact]
     public void Validate_should_fail_when_confirmed_password_does_not_match()
     {
         var request = TestData.ChangePasswordRequest();

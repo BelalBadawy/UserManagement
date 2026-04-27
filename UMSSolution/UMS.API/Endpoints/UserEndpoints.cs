@@ -66,8 +66,7 @@ public static class UserEndpoints
         {
             var response = await sender.Send(new ChangeUserPasswordCommand { ChangePassword = changePassword }, ct);
             return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
-        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
-          .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        }).Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
         group.MapPut("change-status", async (ChangeUserStatusRequest changeUserStatus, ISender sender, CancellationToken ct) =>
@@ -99,6 +98,7 @@ public static class UserEndpoints
             var response = await sender.Send(new GenerateChangeEmailTokenCommand { GenerateChangeEmailToken = request }, ct);
             return response.ToApiResult();
         })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail))
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
@@ -107,6 +107,7 @@ public static class UserEndpoints
             var response = await sender.Send(new GenerateNew2FARecoveryCodesCommand(), ct);
             return response.ToApiResult();
         })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Manage2FA))
         .Produces<IResponseWrapper<List<string>>>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
