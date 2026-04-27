@@ -1,9 +1,17 @@
-using UMS.Application.Features.Categories.Events;
 using UMS.Application.Features.Categories.Commands;
+using UMS.Application.Features.Categories.Events;
 using UMS.Application.Interfaces.Common;
 
 namespace UMS.Application.Features.Categories.Commands.Create
 {
+    public class CreateCategoryRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
+        public int? ParentId { get; set; }
+        public bool IsActive { get; set; }
+        public int SortOrder { get; set; }
+    }
 
     public record CreateCategoryCommand(
         string Name,
@@ -38,14 +46,14 @@ namespace UMS.Application.Features.Categories.Commands.Create
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedName") == normalizedName,
+                    o => o.NormalizedName == normalizedName,
                     ct))
             {
                 return ResponseWrapper<int>.Fail("Category with this name already exists.");
             }
 
             if (await _applicationDbContext.Categories.AnyAsync(
-                    o => EF.Property<string>(o, "NormalizedSlug") == normalizedSlug,
+                    o => o.NormalizedSlug == normalizedSlug,
                     ct))
             {
                 return ResponseWrapper<int>.Fail("Category with this slug already exists.");
@@ -54,54 +62,26 @@ namespace UMS.Application.Features.Categories.Commands.Create
             var category = new Category
             {
                 Name = request.Name.Trim(),
+                NormalizedName = normalizedName,
                 Slug = request.Slug.Trim(),
+                NormalizedSlug = normalizedSlug,
                 ParentId = request.ParentId,
                 IsActive = request.IsActive,
-                SortOrder = request.SortOrder
+                SortOrder = request.SortOrder,
+                RowVersion = [0]
             };
-
-            var transactionStarted = false;
-
-            async Task TryRollbackAsync()
-            {
-                if (!transactionStarted)
-                {
-                    return;
-                }
-
-                try
-                {
-                    await _applicationDbContext.RollbackTransaction(ct);
-                }
-                catch (InvalidOperationException)
-                {
-                    // Transaction may already be completed/disposed.
-                }
-            }
 
             try
             {
-                await _applicationDbContext.StartTransaction(ct);
-                transactionStarted = true;
-
                 await _applicationDbContext.Categories.AddAsync(category, ct);
                 await _applicationDbContext.SaveChangesAsync(ct);
 
                 _applicationDbContext.AddOutboxMessage(new CategoryCreatedEvent(category.Id));
                 await _applicationDbContext.SaveChangesAsync(ct);
-
-                await _applicationDbContext.CommitTransaction(ct);
-                transactionStarted = false;
             }
             catch (DbUpdateException ex) when (CategoryWriteGuards.IsUniqueConstraintViolation(ex))
             {
-                await TryRollbackAsync();
                 return ResponseWrapper<int>.Fail(CategoryWriteGuards.GetUniqueConstraintMessage(ex));
-            }
-            catch
-            {
-                await TryRollbackAsync();
-                throw;
             }
 
             foreach (var key in CategoryCacheKeys.All)

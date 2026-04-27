@@ -1,9 +1,15 @@
-﻿namespace UMS.Application.Features.Token.Queries
+using System.Text.Json.Serialization;
+
+namespace UMS.Application.Features.Token.Queries
 {
     public class TokenResponse
     {
-        public string Token { get; set; } = string.Empty;
-        public string RefreshToken { get; set; } = string.Empty;
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public bool RequiresTwoFactor { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? TwoFactorChallengeToken { get; set; }
     }
 }

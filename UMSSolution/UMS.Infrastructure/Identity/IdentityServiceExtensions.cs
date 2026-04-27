@@ -1,18 +1,17 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System.Net;
-using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using UMS.Application.Authorization;
 using UMS.Application.Dtos.JWT;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Roles;
 using UMS.Application.Features.Token;
 using UMS.Application.Features.Users;
-using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Identity.Permissions;
 using UMS.Infrastructure.Identity.Services;
 using UMS.Infrastructure.Persistence.DbInitializers;
@@ -26,43 +25,29 @@ namespace UMS.Infrastructure.Identity
             return services
                 .AddIdentity<ApplicationUser, ApplicationRole>(options =>
                 {
-                    // Configure password requirements
                     options.Password.RequiredLength = 8;
                     options.Password.RequireDigit = true;
                     options.Password.RequireLowercase = true;
                     options.Password.RequireUppercase = true;
                     options.Password.RequireNonAlphanumeric = true;
-
-                    // Require unique email addresses
                     options.User.RequireUniqueEmail = true;
                     options.SignIn.RequireConfirmedEmail = true;
-
-                    // Lockout settings
                     options.Lockout = new LockoutOptions
                     {
-                        // How long the user will be locked out after exceeding failed attempts
                         DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15),
-
-                        // Number of failed attempts before lockout
                         MaxFailedAccessAttempts = 5,
-
-                        // Should new users also be subject to lockout?
                         AllowedForNewUsers = true
                     };
-
                 })
-                // Use Entity Framework Core for identity storage
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                // Add default token providers for password reset, email confirmation, etc.
                 .AddDefaultTokenProviders()
                 .Services
-                .AddTransient<IUserService, UserService>()
-                .AddTransient<IRoleService, RoleService>()
-                .AddTransient<ITokenService, TokenService>()
+                .AddScoped<IUserService, UserService>()
+                .AddScoped<IRoleService, RoleService>()
+                .AddScoped<ITokenService, TokenService>()
                 .AddScoped<CurrentUserMiddleware>()
-                .AddScoped<ICurrentUserService, CurrentUserService>()
                 .AddTransient<IdentityDbSeeder>()
-                .Configure<JwtConfiguration>(config.GetSection("JwtConfiguration")); 
+                .Configure<JwtConfiguration>(config.GetSection("JwtConfiguration"));
         }
 
         internal static IApplicationBuilder UseCurrentUser(this IApplicationBuilder app)
@@ -92,7 +77,6 @@ namespace UMS.Infrastructure.Identity
                 .GetSection("JwtConfiguration")
                 .Get<JwtConfiguration>();
 
-            // It's good practice to ensure the settings are loaded correctly
             if (jwtSettings == null)
             {
                 throw new InvalidOperationException("JwtConfiguration section is not configured in appsettings.json");
@@ -108,7 +92,7 @@ namespace UMS.Infrastructure.Identity
               })
               .AddJwtBearer(bearer =>
               {
-                  bearer.RequireHttpsMetadata = false;
+                  bearer.RequireHttpsMetadata = true;
                   bearer.SaveToken = true;
                   bearer.TokenValidationParameters = new TokenValidationParameters
                   {
@@ -127,10 +111,8 @@ namespace UMS.Infrastructure.Identity
                   {
                       OnMessageReceived = context =>
                       {
-                          // 🟢 Skip token validation if hitting the refresh-token endpoint
                           var path = context.HttpContext.Request.Path.Value ?? string.Empty;
 
-                          // 🟢 Skip JWT validation for any request containing "refresh-token" in the path
                           if (path.Contains("refresh-token", StringComparison.OrdinalIgnoreCase))
                           {
                               context.NoResult();
@@ -144,7 +126,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The token has expired. Please log in again.")
                               );
                               return context.Response.WriteAsync(result);
@@ -153,7 +135,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The provided token format is invalid.")
                               );
                               return context.Response.WriteAsync(result);
@@ -162,7 +144,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("The token signature is invalid.")
                               );
                               return context.Response.WriteAsync(result);
@@ -171,7 +153,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(
+                              var result = JsonSerializer.Serialize(
                                   ResponseWrapper.Fail("You are not authorized to access this resource.")
                               );
                               return context.Response.WriteAsync(result);
@@ -184,7 +166,7 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonConvert.SerializeObject(ResponseWrapper.Fail("You are not Authorized."));
+                              var result = JsonSerializer.Serialize(ResponseWrapper.Fail("You are not Authorized."));
                               return context.Response.WriteAsync(result);
                           }
 
@@ -194,26 +176,19 @@ namespace UMS.Infrastructure.Identity
                       {
                           context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                           context.Response.ContentType = "application/json";
-                          var result = JsonConvert
-                          .SerializeObject(ResponseWrapper.Fail("You are not authorized to access this resource."));
+                          var result = JsonSerializer.Serialize(
+                              ResponseWrapper.Fail("You are not authorized to access this resource."));
                           return context.Response.WriteAsync(result);
                       }
                   };
               });
 
-            // Authorization policies based on permissions
             services.AddAuthorization(options =>
             {
-                foreach (var prop in typeof(AppPermissions)
-                    .GetNestedTypes()
-                    .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)))
+                foreach (var permission in AppPermissions.AllPermissions)
                 {
-                    var value = prop.GetValue(null)?.ToString();
-                    if (!string.IsNullOrWhiteSpace(value))
-                    {
-                        options.AddPolicy(value, policy =>
-                            policy.RequireClaim(AppClaim.Permission, value));
-                    }
+                    options.AddPolicy(permission.Name, policy =>
+                        policy.RequireClaim(AppClaim.Permission, permission.Name));
                 }
             });
 

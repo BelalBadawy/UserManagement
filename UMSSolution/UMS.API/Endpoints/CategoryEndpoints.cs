@@ -1,4 +1,5 @@
 using Mediator;
+using Microsoft.AspNetCore.Mvc;
 using UMS.API.Extensions;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
@@ -9,7 +10,7 @@ using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
-using UMS.Infrastructure.Identity.Constants;
+using UMS.Application.Authorization;
 
 namespace UMS.API.Endpoints
 {
@@ -20,69 +21,75 @@ namespace UMS.API.Endpoints
             var group = app.MapGroup("api/v{version:apiVersion}/categories")
                 .WithTags("Categories");
 
-            group.MapGet("/", async (ISender sender, bool? isActive) =>
+            group.MapGet("/", async (ISender sender, bool? isActive, CancellationToken ct) =>
             {
                 var query = new GetAllCategoriesQuery(isActive);
-                var response = await sender.Send(query);
+                var response = await sender.Send(query, ct);
                   return response.ToApiResult(); 
             })
             .Produces<IResponseWrapper<List<CategoryResponse>>>()
             .WithName("GetAllCategories")
             .AllowAnonymous();
 
-            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter) =>
+            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter, CancellationToken ct) =>
             {
                 // Use object initializer syntax instead of a constructor
                 var query = new GetCategoriesPagedQuery { PagedFilterRequest = filter };
-                var response = await sender.Send(query);
+                var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper<PagedResult<CategoryResponse>>>()
             .WithName("GetCategoriesPaged")
             .AllowAnonymous();
 
-            group.MapGet("/for-list", async (ISender sender) =>
+            group.MapGet("/for-list", async (ISender sender, CancellationToken ct) =>
             {
                 var query = new GetAllCategoriesForListQuery();
-                var response = await sender.Send(query);
+                var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper<List<CategoryLookupDto>>>()
             .WithName("GetCategoriesForList")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
 
-            group.MapGet("/{categoryId:int}", async (ISender sender, int categoryId) =>
+            group.MapGet("/{categoryId:int}", async (ISender sender, int categoryId, CancellationToken ct) =>
             {
                 var query = new GetCategoryByIdQuery(categoryId);
-                var response = await sender.Send(query);
+                var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper<CategoryResponse>>()
             .WithName("GetCategoryById")
             .AllowAnonymous();
 
-            group.MapPost("/", async (ISender sender, CreateCategoryCommand request) =>
+            group.MapPost("/", async (ISender sender, CreateCategoryRequest request, CancellationToken ct) =>
             {
-                var response = await sender.Send(request);
+                var command = new CreateCategoryCommand(
+                    request.Name,
+                    request.Slug,
+                    request.ParentId,
+                    request.IsActive,
+                    request.SortOrder);
+                var response = await sender.Send(command, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper>()
             .WithName("CreateCategory")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Create));
 
-            group.MapPut("/", async (ISender sender, UpdateCategoryCommand request) =>
+            group.MapPut("/", async (ISender sender, UpdateCategoryCommand request, CancellationToken ct) =>
             {
-                var response = await sender.Send(request);
+                var response = await sender.Send(request, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper>()
             .WithName("UpdateCategory")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
 
-            group.MapDelete("/{categoryId:int}", async (ISender sender, int categoryId) =>
+            group.MapDelete("/{categoryId:int}", async (ISender sender, int categoryId, CancellationToken ct) =>
             {
                 var command = new DeleteCategoryCommand(categoryId);
-                var response = await sender.Send(command);
+                var response = await sender.Send(command, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper>()

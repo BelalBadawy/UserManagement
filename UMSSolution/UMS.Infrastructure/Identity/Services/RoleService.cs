@@ -1,7 +1,9 @@
-﻿using Mapster;
+using Mapster;
+using UMS.Application.Authorization;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Roles;
 using UMS.Application.Features.Roles.Commands;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -9,8 +11,9 @@ namespace UMS.Infrastructure.Identity.Services
     {
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _context;
-        public RoleService(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        private readonly IApplicationDbContext _context;
+
+        public RoleService(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, IApplicationDbContext context)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -35,16 +38,17 @@ namespace UMS.Infrastructure.Identity.Services
 
             if (identityResult.Succeeded)
             {
-                return  ResponseWrapper.Success(message: "Role created successfully");
+                return ResponseWrapper.Success(message: "Role created successfully");
             }
 
-            return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
+            return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
         }
+
         public async Task<IResponseWrapper> DeleteRoleAsync(int roleId)
         {
             if (roleId == 0)
             {
-                return  ResponseWrapper.Fail("Role Id is required.");
+                return ResponseWrapper.Fail("Role Id is required.");
             }
 
             var roleInDb = await _roleManager.FindByIdAsync(roleId.ToString());
@@ -57,22 +61,25 @@ namespace UMS.Infrastructure.Identity.Services
 
                     if (usersInRole.Any())
                     {
-                        return  ResponseWrapper
-                            .Fail($"Role: {roleInDb.Name} is currently assigned to a user.");
+                        return ResponseWrapper.Fail($"Role: {roleInDb.Name} is currently assigned to a user.");
                     }
 
                     var identityResult = await _roleManager.DeleteAsync(roleInDb);
 
                     if (identityResult.Succeeded)
                     {
-                        return  ResponseWrapper.Success("Role successfully deleted.");
+                        return ResponseWrapper.Success("Role successfully deleted.");
                     }
-                    return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
+
+                    return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
                 }
-                return  ResponseWrapper.Fail("Cannot delete Admin role.");
+
+                return ResponseWrapper.Fail("Cannot delete Admin role.");
             }
-            return  ResponseWrapper.Fail("Role does not exist.");
+
+            return ResponseWrapper.Fail("Role does not exist.");
         }
+
         public async Task<IResponseWrapper<RoleClaimResponse>> GetPermissionsAsync(int roleId)
         {
             var roleInDb = await _roleManager.FindByIdAsync(roleId.ToString());
@@ -94,10 +101,10 @@ namespace UMS.Infrastructure.Identity.Services
 
                 var currentlyAssignedClaims = await GetAllClaimsForRoleAsync(roleId);
 
-                var allPermissionNames = allPermissions.Select(p => p.Name).ToList(); // Permission.Identity.Users.Create
+                var allPermissionNames = allPermissions.Select(p => p.Name).ToList();
 
                 var currentlyAssignedClaimsValues = currentlyAssignedClaims
-                    .Select(rc => rc.ClaimValue).ToList();// Permission.Identity.Users.Create
+                    .Select(rc => rc.ClaimValue).ToList();
 
                 var currentlyAssignedRoleClaimsNames = allPermissionNames
                     .Intersect(currentlyAssignedClaimsValues)
@@ -113,11 +120,12 @@ namespace UMS.Infrastructure.Identity.Services
                     });
                 }
 
-                return  ResponseWrapper<RoleClaimResponse>.Success(data: roleClaimResponse);
+                return ResponseWrapper<RoleClaimResponse>.Success(data: roleClaimResponse);
             }
 
             return ResponseWrapper<RoleClaimResponse>.Fail(message: "Role does not exist.");
         }
+
         public async Task<IResponseWrapper<RoleResponse>> GetRoleByIdAsync(int roleId)
         {
             var roleInDb = await _roleManager.FindByIdAsync(roleId.ToString());
@@ -126,10 +134,12 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 var mappedRole = roleInDb.Adapt<RoleResponse>();
 
-                return  ResponseWrapper<RoleResponse>.Success(data: mappedRole);
+                return ResponseWrapper<RoleResponse>.Success(data: mappedRole);
             }
-            return  ResponseWrapper<RoleResponse>.Fail("Role does not exist.");
+
+            return ResponseWrapper<RoleResponse>.Fail("Role does not exist.");
         }
+
         public async Task<IResponseWrapper<List<RoleResponse>>> GetRolesAsync()
         {
             var allRoles = await _roleManager.Roles.ToListAsync();
@@ -143,6 +153,7 @@ namespace UMS.Infrastructure.Identity.Services
 
             return ResponseWrapper<List<RoleResponse>>.Fail("No roles were found.");
         }
+
         public async Task<IResponseWrapper> UpdateRoleAsync(UpdateRoleRequest updateRole)
         {
             var roleInDb = await _roleManager.FindByIdAsync(updateRole.RoleId.ToString());
@@ -152,35 +163,43 @@ namespace UMS.Infrastructure.Identity.Services
                 if (roleInDb.Name != AppRoles.Admin)
                 {
                     roleInDb.Name = updateRole.Name;
-
                     roleInDb.Description = updateRole.Description;
 
                     var identityResult = await _roleManager.UpdateAsync(roleInDb);
 
                     if (identityResult.Succeeded)
                     {
-                        return  ResponseWrapper.Success("Role updated successfully");
+                        return ResponseWrapper.Success("Role updated successfully");
                     }
-                    return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
 
+                    return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
                 }
-                return  ResponseWrapper.Fail("Cannot update Admin role.");
+
+                return ResponseWrapper.Fail("Cannot update Admin role.");
             }
-            return  ResponseWrapper.Fail("Role does not exist.");
+
+            return ResponseWrapper.Fail("Role does not exist.");
         }
+
         public async Task<IResponseWrapper> UpdateRolePermissionsAsync(UpdateRoleClaimsRequest updateRoleClaims)
         {
             var roleInDb = await _roleManager.FindByIdAsync(updateRoleClaims.RoleId.ToString());
             if (roleInDb is null)
-                return  ResponseWrapper.Fail("Role does not exist.");
+                return ResponseWrapper.Fail("Role does not exist.");
 
             if (roleInDb.Name == AppRoles.Admin)
-                return  ResponseWrapper.Fail("Cannot change permissions for this role.");
+                return ResponseWrapper.Fail("Cannot change permissions for this role.");
+
+            var allowedValues = AppPermissions.AllPermissions
+                .Select(p => p.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var newClaims = updateRoleClaims.RoleClaims
+                .Where(rc => rc.ClaimValue != null && allowedValues.Contains(rc.ClaimValue))
+                .Select(rc => new Claim(AppClaim.Permission, rc.ClaimValue!))
+                .ToList();
 
             var existingClaims = await _roleManager.GetClaimsAsync(roleInDb);
-            var newClaims = updateRoleClaims.RoleClaims
-                .Select(rc => new Claim(rc.ClaimType, rc.ClaimValue))
-                .ToList();
 
             var claimsToAdd = newClaims
                 .Where(nc => !existingClaims.Any(ec => ec.Type == nc.Type && ec.Value == nc.Value))
@@ -191,35 +210,29 @@ namespace UMS.Infrastructure.Identity.Services
                 .ToList();
 
             if (!claimsToAdd.Any() && !claimsToRemove.Any())
-                return  ResponseWrapper.Success("No changes detected.");
+                return ResponseWrapper.Success("No changes detected.");
 
-            // Use execution strategy
-            var strategy = _context.Database.CreateExecutionStrategy();
-
-            await strategy.ExecuteAsync(async () =>
+            try
             {
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    foreach (var claim in claimsToRemove)
-                        await _roleManager.RemoveClaimAsync(roleInDb, claim);
+                await _context.StartTransaction();
 
-                    foreach (var claim in claimsToAdd)
-                        await _roleManager.AddClaimAsync(roleInDb, claim);
+                foreach (var claim in claimsToRemove)
+                    await _roleManager.RemoveClaimAsync(roleInDb, claim);
 
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-                    throw; // Important for retry
-                }
-            });
+                foreach (var claim in claimsToAdd)
+                    await _roleManager.AddClaimAsync(roleInDb, claim);
 
-            return  ResponseWrapper.Success("Role permissions updated successfully.");
+                await _context.CommitTransaction();
+            }
+            catch
+            {
+                await _context.RollbackTransaction();
+                throw;
+            }
+
+            return ResponseWrapper.Success("Role permissions updated successfully.");
         }
 
-        #region Private Helpers
         private List<string> GetIdentityResultErrorDescriptions(IdentityResult identityResult)
         {
             var errorDescriptions = new List<string>();
@@ -227,22 +240,19 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 errorDescriptions.Add(error.Description);
             }
+
             return errorDescriptions;
         }
 
         private async Task<List<RoleClaimViewModel>> GetAllClaimsForRoleAsync(int roleId)
         {
-            var roleClaims = await _context.RoleClaims
-                .Where(rc => rc.RoleId == roleId)
-                .ToListAsync();
+            var role = await _roleManager.FindByIdAsync(roleId.ToString());
+            if (role is null) return [];
 
-            if (roleClaims.Count > 0)
-            {
-                var mappedRoleClaims = roleClaims.Adapt<List<RoleClaimViewModel>>();
-                return mappedRoleClaims;
-            }
-            return [];
+            var claims = await _roleManager.GetClaimsAsync(role);
+            return claims
+                .Select(c => new RoleClaimViewModel { ClaimType = c.Type, ClaimValue = c.Value })
+                .ToList();
         }
-        #endregion
     }
 }

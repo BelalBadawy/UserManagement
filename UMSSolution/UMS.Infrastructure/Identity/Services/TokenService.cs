@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
@@ -7,6 +9,9 @@ using UMS.Application.Dtos.JWT;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Token;
 using UMS.Application.Features.Token.Queries;
+using UMS.Application.Features.Token.Queries.LoginWith2FA;
+using UMS.Application.Interfaces.Common;
+using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -15,14 +20,27 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly JwtConfiguration _tokenSettings;
+        private readonly IDateTimeService _dateTimeService;
+        private readonly IMemoryCache _cache;
+        private readonly ApplicationDbContext? _dbContext;
+
+        private string ChallengeIssuer => $"{_tokenSettings.Issuer}:2fa-challenge";
+        private const string ChallengeAudience = "2fa-challenge";
+        private const string ChallengeClaim = "2fa_challenge";
 
         public TokenService(UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            IOptions<JwtConfiguration> tokenSettings)
+            IOptions<JwtConfiguration> tokenSettings,
+            IDateTimeService dateTimeService,
+            IMemoryCache cache,
+            ApplicationDbContext? dbContext = null)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenSettings = tokenSettings.Value;
+            _dateTimeService = dateTimeService;
+            _cache = cache;
+            _dbContext = dbContext;
         }
 
         public async Task<IResponseWrapper<TokenResponse>> GetTokenAsync(TokenRequest tokenRequest)
@@ -42,38 +60,47 @@ namespace UMS.Infrastructure.Identity.Services
             // Check email if email confirmed
             if (!userInDb.EmailConfirmed)
             {
-                return  ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
+                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
+            }
+            // Check if locked out before verifying password so the right message is shown
+            if (await _userManager.IsLockedOutAsync(userInDb))
+            {
+                return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later or contact support.");
             }
             // Check password
             var isPasswordValid = await _userManager.CheckPasswordAsync(userInDb, tokenRequest.Password);
 
             if (!isPasswordValid)
             {
-                // Increment failed access count (optional if lockout enabled)
                 await _userManager.AccessFailedAsync(userInDb);
-
                 return ResponseWrapper<TokenResponse>.Fail("Invalid Credentials.");
             }
 
-            // Check if locked out
-            if (await _userManager.IsLockedOutAsync(userInDb))
-            {
-                return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later or contact support.");
-            }
-
             #endregion
+
+            // 2FA branch — defer ResetAccessFailedCount to Phase 2
+            if (userInDb.TwoFactorEnabled)
+            {
+                var jti = Guid.NewGuid().ToString();
+                var challenge = GenerateChallengeToken(userInDb, jti);
+                return ResponseWrapper<TokenResponse>.Success(
+                    new TokenResponse
+                    {
+                        RequiresTwoFactor = true,
+                        TwoFactorChallengeToken = challenge
+                    },
+                    "Two-factor authentication required.");
+            }
 
             // Reset failed access count after successful login
             await _userManager.ResetAccessFailedCountAsync(userInDb);
 
             // Generate token
-
             userInDb.RefreshToken = GenerateRefreshToken();
-            userInDb.RefreshTokenExpiryDate = DateTime.Now.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+            userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
 
             await _userManager.UpdateAsync(userInDb);
 
-            // Generate auth token
             var token = await GenerateJwtAsync(userInDb);
 
             var tokenResponse = new TokenResponse
@@ -83,7 +110,126 @@ namespace UMS.Infrastructure.Identity.Services
                 RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
             };
 
-            return  ResponseWrapper<TokenResponse>.Success(data: tokenResponse);
+            return ResponseWrapper<TokenResponse>.Success(data: tokenResponse);
+        }
+
+        public async Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request)
+        {
+            // Step A — Validate the challenge token
+            var validationParams = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidIssuer = ChallengeIssuer,
+                ValidAudience = ChallengeAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_tokenSettings.Secret)),
+                ClockSkew = TimeSpan.Zero
+            };
+
+            ClaimsPrincipal principal;
+            try
+            {
+                principal = new JwtSecurityTokenHandler()
+                    .ValidateToken(request.TwoFactorChallengeToken, validationParams, out _);
+            }
+            catch (Exception)
+            {
+                return ResponseWrapper<TokenResponse>.Fail("Invalid or expired challenge token.");
+            }
+
+            // Step B — Verify the 2fa_challenge claim is present
+            if (principal.FindFirstValue(ChallengeClaim) is null)
+                return ResponseWrapper<TokenResponse>.Fail("Invalid or expired challenge token.");
+
+            // Step C — Replay check
+            var jti = principal.FindFirstValue(JwtRegisteredClaimNames.Jti);
+            if (_cache.TryGetValue($"2fa_jti:{jti}", out _))
+                return ResponseWrapper<TokenResponse>.Fail("Challenge token has already been used.");
+
+            // Step D — Load and validate user
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null || !user.IsActive)
+                return ResponseWrapper<TokenResponse>.Fail("Invalid credentials.");
+            if (!user.EmailConfirmed)
+                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
+            if (await _userManager.IsLockedOutAsync(user))
+                return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later.");
+            if (!user.TwoFactorEnabled)
+                return ResponseWrapper<TokenResponse>.Fail("Two-factor authentication is not enabled.");
+
+            // Step E — Verify the code (TOTP first, then recovery code)
+            bool success = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!success)
+            {
+                var recoveryResult = await _userManager.RedeemTwoFactorRecoveryCodeAsync(
+                    user, request.Code);
+                success = recoveryResult.Succeeded;
+            }
+
+            // Step F — Handle failure
+            if (!success)
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                    return ResponseWrapper<TokenResponse>.Fail(
+                        "Account locked due to multiple failed attempts.");
+                return ResponseWrapper<TokenResponse>.Fail("Invalid authenticator code.");
+            }
+
+            // Step G — Handle success (Phase 2 complete)
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            _cache.Set(
+                $"2fa_jti:{jti}",
+                true,
+                new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow =
+                        TimeSpan.FromMinutes(_tokenSettings.TwoFactorChallengeTokenExpiryInMinutes)
+                });
+
+            user.RefreshToken = GenerateRefreshToken();
+            user.RefreshTokenExpiryDate = _dateTimeService.NowUtc
+                .AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+            await _userManager.UpdateAsync(user);
+
+            var token = await GenerateJwtAsync(user);
+
+            return ResponseWrapper<TokenResponse>.Success(new TokenResponse
+            {
+                Token = token,
+                RefreshToken = user.RefreshToken,
+                RefreshTokenExpiryTime = user.RefreshTokenExpiryDate
+            });
+        }
+
+        private string GenerateChallengeToken(ApplicationUser user, string jti)
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ChallengeClaim, "true"),
+                new(JwtRegisteredClaimNames.Jti, jti)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: ChallengeIssuer,
+                audience: ChallengeAudience,
+                claims: claims,
+                expires: _dateTimeService.NowUtc.AddMinutes(
+                    _tokenSettings.TwoFactorChallengeTokenExpiryInMinutes),
+                signingCredentials: GetSigningCredentials());
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         private string GenerateRefreshToken()
@@ -97,20 +243,42 @@ namespace UMS.Infrastructure.Identity.Services
         private async Task<IEnumerable<Claim>> GetClaimsAsync(ApplicationUser user)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            var permissionClaims = new List<Claim>();
+            var roleNames = await _userManager.GetRolesAsync(user);
 
-            foreach (var role in roles)
+            var roleClaims = roleNames.Select(r => new Claim(ClaimTypes.Role, r)).ToList();
+
+            List<Claim> permissionClaims;
+            if (_dbContext is not null)
             {
-                roleClaims.Add(new Claim(ClaimTypes.Role, role));
-                var currentRole = await _roleManager.FindByNameAsync(role);
-                var allPermissionsForCurrentRole = await _roleManager.GetClaimsAsync(currentRole);
+                // Single batch query: join roles → role claims in two round-trips instead of N+1
+                var roleIds = await _roleManager.Roles
+                    .Where(r => roleNames.Contains(r.Name!))
+                    .Select(r => r.Id)
+                    .ToListAsync();
 
-                permissionClaims.AddRange(allPermissionsForCurrentRole);
+                permissionClaims = await _dbContext.RoleClaims
+                    .Where(rc => roleIds.Contains(rc.RoleId) && rc.ClaimValue != null)
+                    .Select(rc => new Claim(rc.ClaimType!, rc.ClaimValue!))
+                    .ToListAsync();
+            }
+            else
+            {
+                // Fallback path used in unit tests where DbContext is not injected
+                var roleClaimSets = await Task.WhenAll(
+                    roleNames.Select(async role =>
+                    {
+                        var roleEntity = await _roleManager.FindByNameAsync(role);
+                        return roleEntity is null
+                            ? []
+                            : await _roleManager.GetClaimsAsync(roleEntity);
+                    }));
+
+                permissionClaims = roleClaimSets
+                    .SelectMany(claims => claims.Select(c => new Claim(c.Type, c.Value)))
+                    .ToList();
             }
 
-            var claims = new List<Claim>
+            return new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email),
@@ -120,8 +288,6 @@ namespace UMS.Infrastructure.Identity.Services
             .Union(roleClaims)
             .Union(userClaims)
             .Union(permissionClaims);
-
-            return claims;
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -136,7 +302,7 @@ namespace UMS.Infrastructure.Identity.Services
                 issuer: _tokenSettings.Issuer,
                 audience: _tokenSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(_tokenSettings.TokenExpiryInMunites),
+                expires: _dateTimeService.NowUtc.AddMinutes(_tokenSettings.TokenExpiryInMinutes),
                 signingCredentials: signingCredentials);
             var tokenHandler = new JwtSecurityTokenHandler();
             var encryptedToken = tokenHandler.WriteToken(token);
@@ -158,14 +324,14 @@ namespace UMS.Infrastructure.Identity.Services
             if (userInDb is not null)
             {
                 if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
-                    || userInDb.RefreshTokenExpiryDate <= DateTime.Now)
+                    || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
                 {
                     return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
                 }
 
                 var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
                 userInDb.RefreshToken = GenerateRefreshToken();
-                userInDb.RefreshTokenExpiryDate = DateTime.Now.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+                userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
 
                 await _userManager.UpdateAsync(userInDb);
 
@@ -176,9 +342,9 @@ namespace UMS.Infrastructure.Identity.Services
                     RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
                 };
 
-                return  ResponseWrapper<TokenResponse>.Success(tokenResponse);
+                return ResponseWrapper<TokenResponse>.Success(tokenResponse);
             }
-            return  ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
+            return ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
         }
 
         private ClaimsPrincipal GetClaimPrincipalFromExpiredToken(string expiredToken)

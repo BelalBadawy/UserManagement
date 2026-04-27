@@ -4,7 +4,7 @@ using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Roles;
 using UMS.Application.Features.Roles.Commands;
 using UMS.Application.Features.Roles.Queries;
-using UMS.Infrastructure.Identity.Constants;
+using UMS.Application.Authorization;
 
 namespace WebApi.Endpoints;
 
@@ -16,57 +16,57 @@ public static class RoleEndpoints
                        .WithTags("Roles")
                        .RequireAuthorization();
 
-        group.MapPost("/", async (CreateRoleRequest request, ISender sender) =>
+        group.MapPost("/", async (CreateRoleRequest request, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new CreateRoleCommand { CreateRole = request });
+            var response = await sender.Send(new CreateRoleCommand { CreateRole = request }, ct);
             return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Create))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapGet("all", async (ISender sender) =>
+        group.MapGet("all", async (ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new GetRolesQuery());
+            var response = await sender.Send(new GetRolesQuery(), ct);
             return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
           .Produces<IResponseWrapper<List<RoleResponse>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapPut("/", async (UpdateRoleRequest updateRole, ISender sender) =>
+        group.MapPut("/", async (UpdateRoleRequest updateRole, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new UpdateRoleCommand { UpdateRole = updateRole });
+            var response = await sender.Send(new UpdateRoleCommand { UpdateRole = updateRole }, ct);
             return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapGet("{roleId:int}", async (int roleId, ISender sender) =>
+        group.MapGet("{roleId:int}", async (int roleId, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new GetRoleByIdQuery { RoleId = roleId });
+            var response = await sender.Send(new GetRoleByIdQuery { RoleId = roleId }, ct);
             return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
           .Produces<IResponseWrapper<RoleResponse>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapDelete("{roleId:int}", async (int roleId, ISender sender) =>
+        group.MapDelete("{roleId:int}", async (int roleId, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new DeleteRoleCommand { RoleId = roleId });
+            var response = await sender.Send(new DeleteRoleCommand { RoleId = roleId }, ct);
             return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Delete))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
-        group.MapGet("permissions/{roleId:int}", async (int roleId, ISender sender) =>
+        group.MapGet("permissions/{roleId:int}", async (int roleId, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new GetPermissionsQuery { RoleId = roleId });
+            var response = await sender.Send(new GetPermissionsQuery { RoleId = roleId }, ct);
             return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Read))
           .Produces<IResponseWrapper<RoleClaimResponse>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapPut("update-permissions", async (UpdateRoleClaimsRequest request, ISender sender) =>
+        group.MapPut("update-permissions", async (UpdateRoleClaimsRequest request, ISender sender, CancellationToken ct) =>
         {
-            var response = await sender.Send(new UpdateRolePermissionsCommand { UpdateRoleClaims = request });
+            var response = await sender.Send(new UpdateRolePermissionsCommand { UpdateRoleClaims = request }, ct);
             return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Roles, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)

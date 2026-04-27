@@ -1,14 +1,22 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Web;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users;
 using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+using UMS.Application.Features.Users.Commands.Logout;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Interfaces.Common;
+using UMS.Infrastructure.Identity.Configurations;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -18,23 +26,46 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IEmailService _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly SeedUsersConfiguration _seedUsersConfiguration;
+        private readonly IDateTimeService _dateTimeService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly TwoFactorOptions _twoFactorOptions;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(UserManager<ApplicationUser> userManager,
+        public UserService(
+            UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             IEmailService emailService,
-            IHttpContextAccessor contextAccessor)
+            IHttpContextAccessor contextAccessor,
+            IOptions<SeedUsersConfiguration> seedUsersConfiguration,
+            IDateTimeService dateTimeService,
+            ICurrentUserService currentUserService,
+            IOptions<TwoFactorOptions> twoFactorOptions,
+            ILogger<UserService> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
             _httpContextAccessor = contextAccessor;
+            _seedUsersConfiguration = seedUsersConfiguration.Value;
+            _dateTimeService = dateTimeService;
+            _currentUserService = currentUserService;
+            _twoFactorOptions = twoFactorOptions.Value;
+            _logger = logger;
+        }
+
+        private static string GenerateSecureToken()
+        {
+            var bytes = new byte[32];
+            RandomNumberGenerator.Fill(bytes);
+            return Convert.ToBase64String(bytes);
         }
 
         public async Task<IResponseWrapper> RegisterUserAsync(UserRegistrationRequest userRegistration)
         {
             var userWithSameEmail = await _userManager.FindByEmailAsync(userRegistration.Email);
             if (userWithSameEmail is not null)
-                return  ResponseWrapper.Fail("Email address already taken.");
+                return ResponseWrapper.Fail("Email address already taken.");
 
             var newUser = new ApplicationUser
             {
@@ -44,16 +75,11 @@ namespace UMS.Infrastructure.Identity.Services
                 PhoneNumber = userRegistration.PhoneNumber,
                 IsActive = userRegistration.ActivateUser,
                 EmailConfirmed = userRegistration.AutoConfirmEmail,
-                RefreshToken = DateTime.Now.Ticks.ToString(),
-                RefreshTokenExpiryDate = DateTime.Now.AddDays(1)
+                RefreshToken = GenerateSecureToken(),
+                RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(1)
             };
 
-            // Password Hash
-            var password = new PasswordHasher<ApplicationUser>();
-
-            newUser.PasswordHash = password.HashPassword(newUser, userRegistration.Password);
-
-            var identityUserResult = await _userManager.CreateAsync(newUser);
+            var identityUserResult = await _userManager.CreateAsync(newUser, userRegistration.Password);
 
             if (identityUserResult.Succeeded)
             {
@@ -61,11 +87,32 @@ namespace UMS.Infrastructure.Identity.Services
 
                 if (identityRoleResult.Succeeded)
                 {
-                    return  ResponseWrapper.Success("User registered successfully.");
+                    if (!userRegistration.AutoConfirmEmail)
+                    {
+                        var httpRequest = _httpContextAccessor.HttpContext?.Request;
+                        var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+                        var emailToken  = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+                        var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+                                          $"?userId={newUser.Id}" +
+                                          $"&token={HttpUtility.UrlEncode(emailToken)}";
+
+                        await _emailService.SendAsync(new SendEmailDto
+                        {
+                            Subject     = "Confirm Your Email",
+                            MailTo      = newUser.Email,
+                            MessageBody = $"<p>Hello: {newUser.FullName}</p>" +
+                                          "<p>Please confirm your email by clicking the link below.</p>" +
+                                          $"<p><a href=\"{callbackUrl}\">Confirm Email</a></p>"
+                        });
+                    }
+
+                    return ResponseWrapper.Success("User registered successfully.");
                 }
-                return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityRoleResult));
+
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityRoleResult));
             }
-            return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityUserResult));
+
+            return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityUserResult));
         }
 
         public async Task<IResponseWrapper> UpdateUserAsync(UpdateUserRequest userUpdate)
@@ -81,13 +128,13 @@ namespace UMS.Infrastructure.Identity.Services
 
                 if (identityResult.Succeeded)
                 {
-                    return  ResponseWrapper.Success("User updated successfully.");
+                    return ResponseWrapper.Success("User updated successfully.");
                 }
 
-                return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
             }
 
-            return  ResponseWrapper.Fail("User does not exists.");
+            return ResponseWrapper.Fail("User does not exists.");
         }
 
         #region Private Helpers
@@ -98,6 +145,7 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 errorDescriptions.Add(error.Description);
             }
+
             return errorDescriptions;
         }
         #endregion
@@ -109,10 +157,10 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 var mappedUser = userInDb.Adapt<UserResponse>();
 
-                return  ResponseWrapper<UserResponse>.Success(data: mappedUser);
+                return ResponseWrapper<UserResponse>.Success(data: mappedUser);
             }
 
-            return  ResponseWrapper<UserResponse>.Fail("User does not exists.");
+            return ResponseWrapper<UserResponse>.Fail("User does not exists.");
         }
 
         public async Task<IResponseWrapper<List<UserResponse>>> GetAllUsersAsync()
@@ -125,30 +173,29 @@ namespace UMS.Infrastructure.Identity.Services
             {
                 var mappedUsers = usersInDb.Adapt<List<UserResponse>>();
 
-                return  ResponseWrapper<List<UserResponse>>.Success(data: mappedUsers);
+                return ResponseWrapper<List<UserResponse>>.Success(data: mappedUsers);
             }
 
-            return  ResponseWrapper<List<UserResponse>>.Fail("No Users were found.");
+            return ResponseWrapper<List<UserResponse>>.Fail("No Users were found.");
         }
 
-
-        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct)
+        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            CancellationToken ct)
         {
-
             var usersQuery = _userManager.Users.AsQueryable();
 
-            // Search
             if (!string.IsNullOrWhiteSpace(pagedFilterRequest.SearchTerm))
             {
-                var term = pagedFilterRequest.SearchTerm.ToLower();
+                var term = pagedFilterRequest.SearchTerm.Trim();
+                var searchPattern = $"%{term}%";
 
                 usersQuery = usersQuery.Where(u =>
-                    u.FullName.ToLower().Contains(term) ||
-                    u.Email.ToLower().Contains(term)
+                    EF.Functions.Like(u.FullName, searchPattern) ||
+                    EF.Functions.Like(u.Email, searchPattern)
                 );
             }
 
-            // Sorting — no helper method
             usersQuery = pagedFilterRequest.SortBy?.ToLower() switch
             {
                 "email" => pagedFilterRequest.SortDirection == "desc"
@@ -164,13 +211,12 @@ namespace UMS.Infrastructure.Identity.Services
                     : usersQuery.OrderBy(u => u.FullName),
             };
 
-            // Pagination
             var totalRecords = await usersQuery.CountAsync(ct);
 
             var users = await usersQuery
                 .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
                 .Take(pagedFilterRequest.PageSize)
-                .Select(o => new UserResponse()
+                .Select(o => new UserResponse
                 {
                     FullName = o.FullName,
                     Email = o.Email,
@@ -188,31 +234,30 @@ namespace UMS.Infrastructure.Identity.Services
                 TotalCount = totalRecords,
                 CurrentPage = pagedFilterRequest.PageNumber,
                 PageSize = pagedFilterRequest.PageSize,
-
             };
 
-            return  ResponseWrapper<PagedResult<UserResponse>>.Success(data: data);
-
+            return ResponseWrapper<PagedResult<UserResponse>>.Success(data: data);
         }
 
-
-        public async Task<IResponseWrapper> ChangeUserPasswordAsync(ChangePasswordRequest changePassword)
+        public async Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword)
         {
-            var userInDb = await _userManager.FindByIdAsync(changePassword.UserId.ToString());
+            var userInDb = await _userManager.FindByIdAsync(userId.ToString());
             if (userInDb is not null)
             {
                 var identityResult = await _userManager.ChangePasswordAsync(
-                userInDb,
+                    userInDb,
                     changePassword.CurrentPassword,
                     changePassword.NewPassword);
 
                 if (identityResult.Succeeded)
                 {
-                    return  ResponseWrapper.Success(message: "User password updated.");
+                    return ResponseWrapper.Success(message: "User password updated.");
                 }
-                return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
+
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
             }
-            return  ResponseWrapper.Fail("User does not exist.");
+
+            return ResponseWrapper.Fail("User does not exist.");
         }
 
         public async Task<IResponseWrapper> ChangeUserStatusAsync(ChangeUserStatusRequest changeUserStatus)
@@ -220,117 +265,93 @@ namespace UMS.Infrastructure.Identity.Services
             var userInDb = await _userManager.FindByIdAsync(changeUserStatus.UserId.ToString());
             if (userInDb is not null)
             {
-                // Change status
                 userInDb.IsActive = changeUserStatus.ActivateOrDeactivate;
 
                 var identityResult = await _userManager.UpdateAsync(userInDb);
 
                 if (identityResult.Succeeded)
                 {
-                    return  ResponseWrapper
-                        .Success(changeUserStatus.ActivateOrDeactivate ? "User activated successfully."
+                    return ResponseWrapper
+                        .Success(changeUserStatus.ActivateOrDeactivate
+                            ? "User activated successfully."
                             : "User de-activated successfully");
                 }
-                return  ResponseWrapper
-                    .Fail(GetIdentityResultErrorDescriptions(identityResult));
+
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(identityResult));
             }
-            return  ResponseWrapper.Fail("User does not exist.");
+
+            return ResponseWrapper.Fail("User does not exist.");
         }
 
         public async Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId)
         {
-            var userRolesViewModel = new List<UserRoleViewModel>();
             var userInDb = await _userManager.FindByIdAsync(userId.ToString());
 
             if (userInDb is not null)
             {
-                var allRoles = await _roleManager.Roles.ToListAsync();
+                var assignedRoleNames = (await _userManager.GetRolesAsync(userInDb)).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var role in allRoles)
-                {
-                    var userRoleViewModel = new UserRoleViewModel
-                    {
-                        RoleName = role.Name,
-                        RoleDescription = role.Description
-                    };
+                var userRolesViewModel = (await _roleManager.Roles.ToListAsync())
+                    .Where(r => assignedRoleNames.Contains(r.Name!))
+                    .Select(r => new UserRoleViewModel { RoleName = r.Name, RoleDescription = r.Description })
+                    .ToList();
 
-                    if (await _userManager.IsInRoleAsync(userInDb, role.Name))
-                    {
-                        //userRoleViewModel.IsAssignedToUser = true;
-                        userRolesViewModel.Add(userRoleViewModel);
-                    }
-                    //else
-                    //{
-                    //    userRoleViewModel.IsAssignedToUser = false;
-                    //}
-                }
-
-                return  ResponseWrapper<List<UserRoleViewModel>>.Success(userRolesViewModel);
+                return ResponseWrapper<List<UserRoleViewModel>>.Success(userRolesViewModel);
             }
+
             return ResponseWrapper<List<UserRoleViewModel>>.Fail("User does not exist.");
         }
 
         public async Task<IResponseWrapper> UpdateUserRolesAsync(UpdateUserRolesRequest request, CancellationToken ct)
         {
-            // Find user (supports CancellationToken via EF query)
             var user = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.Id == request.UserId, ct);
 
             if (user is null)
-                return  ResponseWrapper.Fail("User does not exist.");
+                return ResponseWrapper.Fail("User does not exist.");
 
-            // Optional system protection
-            if (user.Email == AppCredentials.Email)
-                return  ResponseWrapper.Fail("User roles update not permitted.");
+            if (string.Equals(user.Email, _seedUsersConfiguration.Admin.Email, StringComparison.OrdinalIgnoreCase))
+                return ResponseWrapper.Fail("User roles update not permitted.");
 
-            // Roles to assign (all roles sent are to be assigned)
             var rolesToAssign = request.Roles.ToList();
 
-            // Validate each role exists
             foreach (var roleName in rolesToAssign)
             {
                 if (!await _roleManager.RoleExistsAsync(roleName))
-                    return  ResponseWrapper.Fail($"Role '{roleName}' does not exist.");
+                    return ResponseWrapper.Fail($"Role '{roleName}' does not exist.");
             }
 
-            // Get current roles
             var currentRoles = await _userManager.GetRolesAsync(user);
 
-            // Remove all roles
             var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!removeResult.Succeeded)
-                return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(removeResult));
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(removeResult));
 
-            // Assign new roles
             var addResult = await _userManager.AddToRolesAsync(user, rolesToAssign);
             if (!addResult.Succeeded)
-                return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(addResult));
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(addResult));
 
-            return  ResponseWrapper.Success("Updated user roles successfully.");
+            return ResponseWrapper.Success("Updated user roles successfully.");
         }
 
         public async Task<IResponseWrapper> ForgotPasswordAsync(string email)
         {
-            // Find user by email
+            const string safeMessage = "If the email is registered, you will receive an email shortly.";
+
             var user = await _userManager.FindByEmailAsync(email);
-            if (user is null)
-                return  ResponseWrapper.Fail("This email doesn't exist.");
+            if (user is null || !user.EmailConfirmed)
+                return ResponseWrapper.Success(safeMessage);
 
-            if (!user.EmailConfirmed)
-                return  ResponseWrapper.Fail("This email is not confirmed.");
-
-            // Build reset password URL
             var request = _httpContextAccessor.HttpContext?.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callbackUrl = $"{baseUrl}/Account/ResetPassword?email={user.Email}&code={code}";
+            var callbackUrl =
+                $"{baseUrl}/Account/ResetPassword?email={HttpUtility.UrlEncode(user.Email)}&code={HttpUtility.UrlEncode(code)}";
 
-            // Prepare email
             var emailModel = new SendEmailDto
             {
                 Subject = "Reset Password",
                 MailTo = user.Email,
-                //MessageBody = $"Please reset your password by clicking here: <a href=\"{callbackUrl}\">link</a>"
                 MessageBody = $"<p>Hello: {user.FullName}</p>" +
                 $"<p>Username: {user.UserName}.</p>" +
                 "<p>In order to reset your password, please click on the following link.</p>" +
@@ -340,28 +361,24 @@ namespace UMS.Infrastructure.Identity.Services
 
             try
             {
-                var result = await _emailService.SendAsync(emailModel);
-
-                if (string.IsNullOrEmpty(result))
-                    return  ResponseWrapper.Success("Reset password email sent successfully.");
-
-                return  ResponseWrapper.Fail(result);
+                await _emailService.SendAsync(emailModel);
             }
             catch (Exception ex)
             {
-                return  ResponseWrapper.Fail(ex.Message);
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
             }
+
+            return ResponseWrapper.Success(safeMessage);
         }
 
         public async Task<IResponseWrapper> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            // Find user by email
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user is null)
-                return  ResponseWrapper.Fail("This email doesn't exist.");
+                return ResponseWrapper.Fail("This email doesn't exist.");
 
             if (!user.EmailConfirmed)
-                return  ResponseWrapper.Fail("This email is not confirmed.");
+                return ResponseWrapper.Fail("This email is not confirmed.");
 
             try
             {
@@ -369,23 +386,333 @@ namespace UMS.Infrastructure.Identity.Services
 
                 if (result.Succeeded)
                 {
-                    //That immediately invalidates all existing tokens for that user.
                     await _userManager.UpdateSecurityStampAsync(user);
-
-                    return  ResponseWrapper.Success("Your password has changed successfully.");
-                }
-                else
-                {
-                    return  ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
+                    return ResponseWrapper.Success("Your password has changed successfully.");
                 }
 
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return  ResponseWrapper.Fail(SD.ErrorOccured);
+                return ResponseWrapper.Fail(SD.ErrorOccured);
             }
         }
 
-       
+        public async Task<IResponseWrapper> ConfirmEmailAsync(int userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (user.EmailConfirmed)
+                return ResponseWrapper.Success("Email is already confirmed.");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
+
+            return ResponseWrapper.Success("Email confirmed successfully.");
+        }
+
+        public async Task<IResponseWrapper> ConfirmEmailChangeAsync(int userId, string newEmail, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+            if (!result.Succeeded)
+                return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
+
+            await _userManager.SetUserNameAsync(user, newEmail);
+            return ResponseWrapper.Success("Email changed successfully.");
+        }
+
+        public async Task<IResponseWrapper> ResendConfirmationEmailAsync(string email)
+        {
+            const string safeMessage = "If the email is registered, you will receive an email shortly.";
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null || user.EmailConfirmed)
+                return ResponseWrapper.Success(safeMessage);
+
+            var httpRequest = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var token       = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+                              $"?userId={user.Id}" +
+                              $"&token={HttpUtility.UrlEncode(token)}";
+
+            await _emailService.SendAsync(new SendEmailDto
+            {
+                Subject     = "Confirm Your Email",
+                MailTo      = user.Email,
+                MessageBody = $"<p>Hello: {user.FullName}</p>" +
+                              "<p>Please confirm your email by clicking the link below.</p>" +
+                              $"<p><a href=\"{callbackUrl}\">Confirm Email</a></p>"
+            });
+
+            return ResponseWrapper.Success(safeMessage);
+        }
+
+        public async Task<IResponseWrapper> GenerateChangeEmailTokenAsync(string newEmail)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (string.Equals(user.Email, newEmail, StringComparison.OrdinalIgnoreCase))
+                return ResponseWrapper.Fail("New email must be different from your current email.");
+
+            var httpRequest = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var token       = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            var callbackUrl = $"{baseUrl}/Account/ConfirmEmailChange" +
+                              $"?userId={user.Id}" +
+                              $"&newEmail={HttpUtility.UrlEncode(newEmail)}" +
+                              $"&token={HttpUtility.UrlEncode(token)}";
+
+            await _emailService.SendAsync(new SendEmailDto
+            {
+                Subject     = "Confirm Your Email Change",
+                MailTo      = user.Email,
+                MessageBody = $"<p>Hello: {user.FullName}</p>" +
+                              "<p>Click the link below to confirm your email change.</p>" +
+                              $"<p><a href=\"{callbackUrl}\">Confirm Email Change</a></p>"
+            });
+
+            return ResponseWrapper.Success("Email change confirmation sent. Please check your inbox.");
+        }
+
+        public async Task<IResponseWrapper<List<string>>> GenerateNew2FARecoveryCodesAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<List<string>>.Fail("User does not exist.");
+
+            if (!user.TwoFactorEnabled)
+                return ResponseWrapper<List<string>>.Fail("Two-factor authentication is not enabled.");
+
+            var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            return ResponseWrapper<List<string>>.Success(codes!.ToList(), "New recovery codes generated.");
+        }
+
+        public async Task<IResponseWrapper> LockUserAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            if (string.Equals(user.Email, _seedUsersConfiguration.Admin.Email,
+                    StringComparison.OrdinalIgnoreCase))
+                return ResponseWrapper.Fail("Cannot lock the system administrator.");
+
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+
+            user.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(-1);
+            await _userManager.UpdateAsync(user);
+
+            return ResponseWrapper.Success("User locked successfully.");
+        }
+
+        public async Task<IResponseWrapper> UnlockUserAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User does not exist.");
+
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow);
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            return ResponseWrapper.Success("User unlocked successfully.");
+        }
+
+        public async Task<IResponseWrapper<ProfileResponse>> GetMyProfileAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<ProfileResponse>.Fail("User not found.");
+
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
+
+            var permissionsSet = new HashSet<string>();
+            foreach (var roleName in roles)
+            {
+                var role   = await _roleManager.FindByNameAsync(roleName);
+                var claims = await _roleManager.GetClaimsAsync(role);
+                foreach (var claim in claims)
+                    permissionsSet.Add(claim.Value);
+            }
+
+            return ResponseWrapper<ProfileResponse>.Success(new ProfileResponse
+            {
+                Id               = user.Id,
+                FullName         = user.FullName,
+                Email            = user.Email,
+                UserName         = user.UserName,
+                IsActive         = user.IsActive,
+                EmailConfirmed   = user.EmailConfirmed,
+                PhoneNumber      = user.PhoneNumber,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                CreatedDate      = user.CreatedDate,
+                Roles            = roles,
+                Permissions      = [.. permissionsSet]
+            });
+        }
+
+        public async Task<IResponseWrapper> LogoutAsync(LogoutRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            if (string.IsNullOrEmpty(request.RefreshToken))
+                return ResponseWrapper.Fail("Refresh token is required.");
+
+            if (user.RefreshToken != request.RefreshToken)
+                return ResponseWrapper.Fail("Invalid refresh token.");
+
+            user.RefreshToken           = string.Empty;
+            user.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(-1);
+            await _userManager.UpdateAsync(user);
+
+            return ResponseWrapper.Success("Logged out successfully.");
+        }
+
+        public async Task<IResponseWrapper<TwoFactorAuthViewModel>> SetupTwoFactorAuthAsync()
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<TwoFactorAuthViewModel>.Fail("User not found.");
+
+            if (user.TwoFactorEnabled)
+                return ResponseWrapper<TwoFactorAuthViewModel>.Fail(
+                    "Two-factor authentication is already enabled. Disable it first to reconfigure.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                key = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+
+            var issuer = Uri.EscapeDataString(_twoFactorOptions.Issuer);
+            var email  = Uri.EscapeDataString(user.Email);
+            var codeQR = $"otpauth://totp/{issuer}:{email}?secret={key}&issuer={issuer}";
+
+            return ResponseWrapper<TwoFactorAuthViewModel>.Success(
+                new TwoFactorAuthViewModel { KeySecret = key, CodeQR = codeQR });
+        }
+
+        public async Task<IResponseWrapper> ConfirmTwoFactorAuthAsync(TwoFactorCodeRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+                return ResponseWrapper.Fail(
+                    "No authenticator configured. Please call setup-2fa first.");
+
+            var valid = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!valid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                return ResponseWrapper.Fail("Invalid verification code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            return ResponseWrapper.Success("Verification code is valid.");
+        }
+
+        public async Task<IResponseWrapper<List<string>>> EnableTwoFactorAuthAsync(
+            TwoFactorCodeRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper<List<string>>.Fail("User not found.");
+
+            if (user.TwoFactorEnabled)
+                return ResponseWrapper<List<string>>.Fail(
+                    "Two-factor authentication is already enabled.");
+
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(key))
+                return ResponseWrapper<List<string>>.Fail(
+                    "No authenticator configured. Please call setup-2fa first.");
+
+            var valid = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                request.Code);
+
+            if (!valid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                    return ResponseWrapper<List<string>>.Fail(
+                        "Account locked due to multiple failed attempts.");
+                return ResponseWrapper<List<string>>.Fail("Invalid authenticator code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
+
+            var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+
+            return ResponseWrapper<List<string>>.Success(
+                codes!.ToList(),
+                "Two-factor authentication enabled. Store your recovery codes safely.");
+        }
+
+        public async Task<IResponseWrapper> DisableTwoFactorAuthAsync(
+            DisableTwoFactorAuthRequest request)
+        {
+            var userId = _currentUserService.GetUserId();
+            var user   = await _userManager.FindByIdAsync(userId?.ToString());
+            if (user is null)
+                return ResponseWrapper.Fail("User not found.");
+
+            if (!user.TwoFactorEnabled)
+                return ResponseWrapper.Fail("Two-factor authentication is not enabled.");
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!passwordValid)
+            {
+                await _userManager.AccessFailedAsync(user);
+                if (await _userManager.IsLockedOutAsync(user))
+                    return ResponseWrapper.Fail("Account locked due to multiple failed attempts.");
+                return ResponseWrapper.Fail("Invalid password.");
+            }
+
+            if (!string.IsNullOrEmpty(request.Code))
+            {
+                var codeValid = await _userManager.VerifyTwoFactorTokenAsync(
+                    user,
+                    _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                    request.Code);
+
+                if (!codeValid)
+                    return ResponseWrapper.Fail("Invalid authenticator code.");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+            await _userManager.SetTwoFactorEnabledAsync(user, false);
+
+            return ResponseWrapper.Success("Two-factor authentication disabled.");
+        }
     }
 }

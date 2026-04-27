@@ -13,7 +13,7 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin
    );
 
 
-    public record GetCategoryByIdAdminQuery(int Id) : IRequest<IResponseWrapper<CategoryAdminDto>>;
+    public record GetCategoryByIdAdminQuery(int Id) : IRequest<IResponseWrapper<CategoryAdminDto>>, IValidateMe;
 
     public class GetCategoryByIdAdminQueryHandler(IApplicationDbContext applicationDbContext)
         : IRequestHandler<GetCategoryByIdAdminQuery, IResponseWrapper<CategoryAdminDto>>

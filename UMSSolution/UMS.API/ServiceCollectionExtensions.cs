@@ -24,24 +24,33 @@ namespace UMS.API
             return services;
         }
 
-        public static IServiceCollection AddCorsAllowAll(this IServiceCollection services)
+        public static IServiceCollection AddCorsConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            // Add CORS policy
+            var allowedOrigins = configuration
+                .GetSection("AllowedOrigins")
+                .Get<string[]>() ?? [];
+
             return services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
+                options.AddPolicy("AllowedOrigins", policy =>
                 {
-                    policy
-                        .AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    if (allowedOrigins.Length > 0)
+                    {
+                        policy
+                            .WithOrigins(allowedOrigins)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    }
+                    else
+                    {
+                        // Fallback for local development when no origins are configured
+                        policy
+                            .WithOrigins("https://localhost:4200", "http://localhost:4200")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    }
                 });
             });
-        }
-
-        public static IApplicationBuilder UseCorsAllowAll(this IApplicationBuilder app)
-        {
-            return app.UseCors("AllowAll");
         }
 
 

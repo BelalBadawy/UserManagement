@@ -1,6 +1,6 @@
 ﻿using UMS.Application.Features.Token.Queries;
 
-namespace UMS.Application.Features.Users.Validators
+namespace UMS.Application.Features.Token.Queries
 {
     public class GetRefreshTokenQueryValidator : AbstractValidator<GetRefreshTokenQuery>
     {

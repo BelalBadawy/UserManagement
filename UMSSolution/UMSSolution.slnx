@@ -15,4 +15,8 @@
     <Build Solution="Debug|*" Project="false" />
   </Project>
   <Project Path="UMS.Infrastructure/UMS.Infrastructure.csproj" />
+  <Project Path="UMS.Domain.Tests/UMS.Domain.Tests.csproj" />
+  <Project Path="UMS.Application.Tests/UMS.Application.Tests.csproj" />
+  <Project Path="UMS.Infrastructure.Tests/UMS.Infrastructure.Tests.csproj" />
+  <Project Path="UMS.API.Tests/UMS.API.Tests.csproj" />
 </Solution>

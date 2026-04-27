@@ -9,4 +9,4 @@ global using Mapster;
 global using Microsoft.EntityFrameworkCore;
 global using System.Collections.Generic;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UMS.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UMS.Application.Tests")]

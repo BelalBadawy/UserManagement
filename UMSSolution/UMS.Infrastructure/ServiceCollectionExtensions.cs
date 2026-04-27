@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using UMS.Application.Dtos.Cache;
 using UMS.Application.Dtos.Email;
@@ -6,6 +7,7 @@ using UMS.Application.Dtos.JWT;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Common;
 using UMS.Infrastructure.Identity;
+using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Persistence.DbInitializers;
 using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
@@ -24,14 +26,18 @@ namespace UMS.Infrastructure
         /// <param name="services">The service collection.</param>
         /// <param name="configuration">Application configuration.</param>
         /// <returns>The modified service collection.</returns>
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureServices(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            IHostEnvironment environment)
         {
             return services
-                .AddDatabase(configuration)
+                .AddDatabase(configuration, environment)
                 .AddIdentityServices(configuration)
                 .AddPermissions()
                 .AddJwtAuthentication(configuration)
                 .Configure<EmailConfiguration>(configuration.GetSection("EmailConfiguration"))
+                .Configure<SeedUsersConfiguration>(configuration.GetSection("SeedUsers"))
                 .Configure<CacheConfiguration>(configuration.GetSection("CacheConfiguration"))
                 .Configure<JwtConfiguration>(configuration.GetSection("JwtConfiguration"))
                 .AddMemoryCache()
@@ -55,15 +61,23 @@ namespace UMS.Infrastructure
         }
 
 
-        internal static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
+        internal static IServiceCollection AddDatabase(
+            this IServiceCollection services,
+            IConfiguration config,
+            IHostEnvironment environment)
         {
             var dbProvider = config.GetValue<string>("DbProvider", "SqlServer");
+            var connectionStringName = environment.IsEnvironment("Testing")
+                ? "TestConnection"
+                : "DefaultConnection";
+            var connectionString = config.GetConnectionString(connectionStringName)
+                ?? config.GetConnectionString("DefaultConnection");
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 if (dbProvider == "Sqlite")
                 {
-                    options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                    options.UseSqlite(connectionString);
                 }
                 else if (dbProvider == "InMemory")
                 {
@@ -71,7 +85,7 @@ namespace UMS.Infrastructure
                 }
                 else
                 {
-                    options.UseSqlServer(config.GetConnectionString("DefaultConnection"), builder =>
+                    options.UseSqlServer(connectionString, builder =>
                     {
                         builder.MigrationsHistoryTable("Migrations", "EFCore");
                         builder.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: new TimeSpan(0, 0, 0, 100), errorNumbersToAdd: [1]);
@@ -90,14 +104,15 @@ namespace UMS.Infrastructure
 
         public static async Task<IApplicationBuilder> UseInfrastructureAsync(this IApplicationBuilder app)
         {
+            var configuration = app.ApplicationServices.GetRequiredService<IConfiguration>();
+            var runApplicationSeeder = configuration.GetValue("RunApplicationSeeder", true);
 
-            //  Run migration & seeder at startup
-            using (var scope = app.ApplicationServices.CreateScope())
+            if (runApplicationSeeder)
             {
+                using var scope = app.ApplicationServices.CreateScope();
                 var seeder = scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>();
                 await seeder.SeedApplicationDatabaseAsync();
             }
-
 
             return app
                 .UseAuthentication()
