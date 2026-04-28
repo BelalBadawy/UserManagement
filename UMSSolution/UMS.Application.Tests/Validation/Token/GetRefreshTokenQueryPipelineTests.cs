@@ -1,5 +1,6 @@
-using UMS.Application.Dtos.Wrappers;
+using Moq;
 using UMS.Application.Behaviors;
+using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Token.Queries;
 
 namespace UMS.Application.Tests.Validation.Token;
@@ -9,8 +10,11 @@ public class GetRefreshTokenQueryPipelineTests
     [Fact]
     public async Task Handle_should_reject_invalid_refresh_token_query_before_handler_runs()
     {
+        var mockFactory = new Mock<IValidationFailureFactory<IResponseWrapper<TokenResponse>>>();
+        mockFactory.Setup(f => f.CreateFailure(It.IsAny<IReadOnlyList<string>>(), It.IsAny<int>()))
+                   .Returns<IReadOnlyList<string>, int>((msgs, code) => ResponseWrapper<TokenResponse>.Fail(msgs, code));
         var behavior = new ValidationPipelineBehavior<GetRefreshTokenQuery, IResponseWrapper<TokenResponse>>(
-            [new GetRefreshTokenQueryValidator()]);
+            [new GetRefreshTokenQueryValidator()], mockFactory.Object);
         var handlerWasCalled = false;
         var query = new GetRefreshTokenQuery
         {

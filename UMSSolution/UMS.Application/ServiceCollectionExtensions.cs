@@ -27,6 +27,7 @@ namespace UMS.Application
                 options.Namespace = "UMS.Application";
             });
 
+            services.AddSingleton(typeof(IValidationFailureFactory<>), typeof(ValidationFailureFactory<>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
            // services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
 

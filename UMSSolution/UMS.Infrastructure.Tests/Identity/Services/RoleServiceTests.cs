@@ -1,14 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 using UMS.Application.Features.Roles;
 using UMS.Application.Features.Roles.Commands;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Identity.Models;
 using UMS.Infrastructure.Identity.Services;
-using UMS.Infrastructure.Persistence.Contexts;
-using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Tests.Support;
 
 namespace UMS.Infrastructure.Tests.Identity.Services;
@@ -17,43 +13,18 @@ public class RoleServiceTests : IDisposable
 {
     private readonly Mock<RoleManager<ApplicationRole>> _roleManager;
     private readonly Mock<UserManager<ApplicationUser>> _userManager;
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IApplicationDbContext> _context;
     private readonly RoleService _sut;
 
     public RoleServiceTests()
     {
         _roleManager = IdentityMockFactory.CreateRoleManager();
         _userManager = IdentityMockFactory.CreateUserManager();
-        _context = BuildTestContext();
-        _sut = new RoleService(_roleManager.Object, _userManager.Object, _context);
+        _context = new Mock<IApplicationDbContext>();
+        _sut = new RoleService(_roleManager.Object, _userManager.Object, _context.Object);
     }
 
-    public void Dispose() => _context.Dispose();
-
-    private static ApplicationDbContext BuildTestContext()
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.Testing.json", optional: false)
-            .Build();
-
-        var connectionString = config.GetConnectionString("TestConnection")!;
-
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer(connectionString, sql =>
-            {
-                sql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null);
-            })
-            .AddInterceptors(new TrimStringInterceptor())
-            .Options;
-
-        var appConfig = new Mock<IConfiguration>();
-        var currentUser = new Mock<ICurrentUserService>();
-        var dateTime = new Mock<IDateTimeService>();
-        dateTime.Setup(d => d.NowUtc).Returns(DateTime.UtcNow);
-
-        return new ApplicationDbContext(options, appConfig.Object, currentUser.Object, dateTime.Object);
-    }
+    public void Dispose() { }
 
     private static ApplicationRole MakeRole(int id = 1, string name = "TestRole", string description = "Desc") =>
         new() { Id = id, Name = name, Description = description };

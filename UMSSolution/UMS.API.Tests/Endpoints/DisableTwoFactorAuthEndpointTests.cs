@@ -37,7 +37,7 @@ public class DisableTwoFactorAuthEndpointTests : ApiTestBase
             Code = (string?)null
         });
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
         payload.Should().NotBeNull();
         payload!.IsSuccessful.Should().BeFalse();

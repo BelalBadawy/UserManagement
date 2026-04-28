@@ -234,6 +234,9 @@ namespace UMS.Infrastructure.Persistence.Contexts
                     property.SetScale(6);
                 }
 
+                // Only entities implementing ISoftDelete get the filter.
+                // OutboxMessage and AuditTrail inherit BaseEntity<T> without ISoftDelete,
+                // so they are intentionally excluded from soft-delete filtering.
                 if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
                 {
                     entityType.AddSoftDeleteQueryFilter();

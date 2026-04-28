@@ -7,6 +7,6 @@ namespace UMS.Application.Features.Token
     {
         Task<IResponseWrapper<TokenResponse>> GetTokenAsync(TokenRequest tokenRequest);
         Task<IResponseWrapper<TokenResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest);
-        Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request);
+        Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request, CancellationToken ct = default);
     }
 }

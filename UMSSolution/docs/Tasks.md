@@ -763,13 +763,13 @@ Acceptance Criteria:
 
 #### Task 5.2: Replace runtime reflection in `CreateValidationFailureResponse`
 
-Status: - [ ]  
+Status: - [x]  
 Description: `CreateValidationFailureResponse` uses `GetMethod` / `MakeGenericType` at runtime on every validation failure — fragile and slow.  
 File(s): `UMS.Application/Behaviors/ValidationPipelineBehavior.cs:45-59`  
 Acceptance Criteria:
 
-- [ ] Runtime reflection is removed from the failure response path.
-- [ ] A `IValidationFailureFactory` interface or non-generic approach is used instead.
+- [x] Runtime reflection is removed from the failure response path.
+- [x] A `IValidationFailureFactory` interface or non-generic approach is used instead.
 
 #### Task 5.3: Stop leaking internal exceptions in production responses
 
@@ -838,13 +838,13 @@ Acceptance Criteria:
 
 #### Task 5.9: Consolidate JSON serialization — remove `Newtonsoft.Json`
 
-Status: - [ ]  
+Status: - [x]  
 Description: Both `System.Text.Json` and `Newtonsoft.Json` are used. JWT event handlers use `JsonConvert.SerializeObject`, doubling the serialization surface.  
 File(s): `UMS.Infrastructure/Identity/IdentityServiceExtensions.cs`  
 Acceptance Criteria:
 
-- [ ] `Newtonsoft.Json` package reference is removed from the solution.
-- [ ] JWT event handlers are rewritten using `System.Text.Json`.
+- [x] `Newtonsoft.Json` package reference is removed from the solution.
+- [x] JWT event handlers are rewritten using `System.Text.Json`.
 
 #### Task 5.10: Add explicit permission constraints to unprotected user endpoints
 
@@ -965,23 +965,23 @@ Acceptance Criteria:
 
 #### Task 5.21: Replace `IMemoryCache` with `IDistributedCache` for 2FA JTI replay protection
 
-Status: - [ ]  
+Status: - [x]  
 Description: `IMemoryCache` is process-local — in multi-instance deployments the same 2FA challenge token can be replayed against a different instance.  
 File(s): `UMS.Infrastructure/Identity/Services/TokenService.cs:187-194`  
 Acceptance Criteria:
 
-- [ ] The JTI replay cache uses `IDistributedCache` (Redis or SQL-backed).
-- [ ] Replay protection works correctly across multiple application instances.
+- [x] The JTI replay cache uses `IDistributedCache` (Redis or SQL-backed).
+- [x] Replay protection works correctly across multiple application instances.
 
 #### Task 5.22: Replace email-based admin lockout guard with a role/flag-based guard
 
-Status: - [ ]  
+Status: - [x]  
 Description: The admin lockout guard compares by email from `SeedUsersConfiguration` — brittle if the admin email changes post-deployment.  
 File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:511-512`  
 Acceptance Criteria:
 
-- [ ] The guard uses a dedicated `IsSystemAdmin` flag on `ApplicationUser` or an immutable role-based check.
-- [ ] Changing the admin email in config does not break lockout protection.
+- [x] The guard uses a dedicated `IsSystemAdmin` flag on `ApplicationUser` or an immutable role-based check.
+- [x] Changing the admin email in config does not break lockout protection.
 
 #### Task 5.23: Protect Scalar API UI with authorization in Development
 
@@ -1009,13 +1009,13 @@ Acceptance Criteria:
 
 #### Task 5.25: Deprecate or paginate `GetAllUsersAsync`
 
-Status: - [ ]  
+Status: - [x]  
 Description: `GetAllUsersAsync()` loads every user into memory with `ToListAsync()` — no pagination, no projection.  
 File(s): `UMS.Infrastructure/Identity/Services/UserService.cs:154-168`  
 Acceptance Criteria:
 
-- [ ] The endpoint is either removed from public access or replaced with the existing paged variant.
-- [ ] No unbounded `ToListAsync()` user load is reachable from a public API route.
+- [x] The endpoint is either removed from public access or replaced with the existing paged variant.
+- [x] No unbounded `ToListAsync()` user load is reachable from a public API route.
 
 #### Task 5.26: Replace N+1 role check in `GetUserRolesAsync`
 
@@ -1053,20 +1053,20 @@ Acceptance Criteria:
 
 #### Task 5.29: Add rate limiting to auth endpoints
 
-Status: - [ ]  
+Status: - [x]  
 Description: Add `app.UseRateLimiter()` with a sliding-window policy to defend against brute-force attacks.  
 File(s): `UMS.API/Program.cs`  
 Acceptance Criteria:
 
-- [ ] Rate limiting is applied to `/account/login`, `/account/forgot-password`, and `/account/login-2fa`.
-- [ ] Exceeding the limit returns HTTP 429.
+- [x] Rate limiting is applied to `/account/login`, `/account/forgot-password`, and `/account/login-2fa`.
+- [x] Exceeding the limit returns HTTP 429.
 
 #### Task 5.30: Verify `OutboxMessage` is excluded from soft-delete global filter
 
-Status: - [ ]  
+Status: - [x]  
 Description: The `OnModelCreating` loop already skips `AuditTrail` from soft-delete filters; verify `OutboxMessage` is also excluded correctly.  
 File(s): `UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs`  
 Acceptance Criteria:
 
-- [ ] `OutboxMessage` is confirmed to be excluded from the soft-delete query filter.
-- [ ] A test or code comment documents the exclusion intent.
+- [x] `OutboxMessage` is confirmed to be excluded from the soft-delete query filter.
+- [x] A test or code comment documents the exclusion intent.
