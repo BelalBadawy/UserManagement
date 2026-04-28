@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,7 +21,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly JwtConfiguration _tokenSettings;
         private readonly IDateTimeService _dateTimeService;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly ApplicationDbContext? _dbContext;
 
         private string ChallengeIssuer => $"{_tokenSettings.Issuer}:2fa-challenge";
@@ -32,7 +32,7 @@ namespace UMS.Infrastructure.Identity.Services
             RoleManager<ApplicationRole> roleManager,
             IOptions<JwtConfiguration> tokenSettings,
             IDateTimeService dateTimeService,
-            IMemoryCache cache,
+            IDistributedCache cache,
             ApplicationDbContext? dbContext = null)
         {
             _userManager = userManager;
@@ -113,7 +113,7 @@ namespace UMS.Infrastructure.Identity.Services
             return ResponseWrapper<TokenResponse>.Success(data: tokenResponse);
         }
 
-        public async Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request)
+        public async Task<IResponseWrapper<TokenResponse>> LoginWith2FAAsync(TwoFactorLoginRequest request, CancellationToken ct = default)
         {
             // Step A — Validate the challenge token
             var validationParams = new TokenValidationParameters
@@ -144,9 +144,9 @@ namespace UMS.Infrastructure.Identity.Services
             if (principal.FindFirstValue(ChallengeClaim) is null)
                 return ResponseWrapper<TokenResponse>.Fail("Invalid or expired challenge token.");
 
-            // Step C — Replay check
+            // Step C — Replay check (distributed so it works across multiple instances)
             var jti = principal.FindFirstValue(JwtRegisteredClaimNames.Jti);
-            if (_cache.TryGetValue($"2fa_jti:{jti}", out _))
+            if (await _cache.GetAsync($"2fa_jti:{jti}", ct) is not null)
                 return ResponseWrapper<TokenResponse>.Fail("Challenge token has already been used.");
 
             // Step D — Load and validate user
@@ -188,14 +188,15 @@ namespace UMS.Infrastructure.Identity.Services
             // Step G — Handle success (Phase 2 complete)
             await _userManager.ResetAccessFailedCountAsync(user);
 
-            _cache.Set(
+            await _cache.SetAsync(
                 $"2fa_jti:{jti}",
-                true,
-                new MemoryCacheEntryOptions
+                [1],
+                new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow =
                         TimeSpan.FromMinutes(_tokenSettings.TwoFactorChallengeTokenExpiryInMinutes)
-                });
+                },
+                ct);
 
             user.RefreshToken = GenerateRefreshToken();
             user.RefreshTokenExpiryDate = _dateTimeService.NowUtc

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Scalar.AspNetCore;
+using System.Threading.RateLimiting;
 using UMS.API;
 using UMS.API.Endpoints;
 using UMS.API.Helpers;
@@ -19,10 +21,22 @@ builder.Services.AddOpenApi("v1", options =>
 builder.Services.AddCorsConfig(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddSlidingWindowLimiter("auth", limiter =>
+    {
+        limiter.PermitLimit = 10;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.SegmentsPerWindow = 4;
+        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiter.QueueLimit = 0;
+    });
+});
+
 builder.Services.AddApiVersioningConfig();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
-builder.Services.AddMemoryCache();
 builder.Services.Configure<TwoFactorOptions>(builder.Configuration.GetSection("TwoFactor"));
 
 
@@ -50,6 +64,7 @@ app.UseStaticFiles();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseRouting();
+app.UseRateLimiter();
 
 // CORS before authentication
 app.UseCors("AllowedOrigins");

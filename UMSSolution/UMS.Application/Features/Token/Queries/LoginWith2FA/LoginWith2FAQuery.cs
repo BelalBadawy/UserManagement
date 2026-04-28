@@ -16,6 +16,6 @@ namespace UMS.Application.Features.Token.Queries.LoginWith2FA
 
         public async ValueTask<IResponseWrapper<TokenResponse>> Handle(
             LoginWith2FAQuery request, CancellationToken ct)
-            => await _tokenService.LoginWith2FAAsync(request.Request);
+            => await _tokenService.LoginWith2FAAsync(request.Request, ct);
     }
 }

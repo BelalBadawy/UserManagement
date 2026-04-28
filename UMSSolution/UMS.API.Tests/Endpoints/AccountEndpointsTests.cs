@@ -122,7 +122,7 @@ public class AccountEndpointsTests : ApiTestBase
         });
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<TokenResponseContract>>();
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         payload.Should().NotBeNull();
         payload!.IsSuccessful.Should().BeFalse();
         payload.Messages.Should().Contain(message => !string.IsNullOrWhiteSpace(message));

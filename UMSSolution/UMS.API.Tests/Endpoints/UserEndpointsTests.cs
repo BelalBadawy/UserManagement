@@ -33,23 +33,6 @@ public class UserEndpointsTests : ApiTestBase
     }
 
     [Fact]
-    public async Task Get_all_users_should_return_successful_response_when_authorized()
-    {
-        await Seeder.SeedUserAsync($"all-users-{Guid.NewGuid():N}@example.com", "Admin@123", ["Basic"]);
-        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read));
-
-        var response = await Client.GetAsync("/api/v1/users/all");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<List<UserResponseContract>>>();
-
-        payload.Should().NotBeNull();
-        payload!.IsSuccessful.Should().BeTrue();
-        payload.Data.Should().NotBeEmpty();
-    }
-
-    [Fact]
     public async Task Get_user_by_id_should_return_successful_response_when_user_exists()
     {
         var email = $"get-user-{Guid.NewGuid():N}@example.com";

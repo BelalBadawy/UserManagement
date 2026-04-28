@@ -40,7 +40,6 @@ namespace UMS.Infrastructure
                 .Configure<SeedUsersConfiguration>(configuration.GetSection("SeedUsers"))
                 .Configure<CacheConfiguration>(configuration.GetSection("CacheConfiguration"))
                 .Configure<JwtConfiguration>(configuration.GetSection("JwtConfiguration"))
-                .AddMemoryCache()
                 .AddDistributedMemoryCache()
                 .AddScoped<ISessionWrapper, InMemorySessionWrapper>()
                 .AddScoped<ICacheService, DistributedCacheService>()

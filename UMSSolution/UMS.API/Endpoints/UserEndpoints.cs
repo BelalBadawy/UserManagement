@@ -38,14 +38,6 @@ public static class UserEndpoints
           .Produces<IResponseWrapper<UserResponse>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapGet("all", async (ISender sender, CancellationToken ct) =>
-        {
-            var response = await sender.Send(new GetAllUsersQuery(), ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
-        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
-          .Produces<IResponseWrapper<List<UserResponse>>>(StatusCodes.Status200OK)
-          .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
-
         group.MapGet("paged-list", async ([AsParameters] PagedFilterRequest query, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUsersPagedQuery { PagedFilterRequest = query }, ct);

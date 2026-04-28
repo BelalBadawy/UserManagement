@@ -1,5 +1,6 @@
-using UMS.Application.Dtos.Wrappers;
+using Moq;
 using UMS.Application.Behaviors;
+using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands;
 
 namespace UMS.Application.Tests.Validation.Users;
@@ -9,8 +10,11 @@ public class UpdateUserRolesCommandPipelineTests
     [Fact]
     public async Task Handle_should_reject_invalid_update_user_roles_command_before_handler_runs()
     {
+        var mockFactory = new Mock<IValidationFailureFactory<IResponseWrapper>>();
+        mockFactory.Setup(f => f.CreateFailure(It.IsAny<IReadOnlyList<string>>(), It.IsAny<int>()))
+                   .Returns<IReadOnlyList<string>, int>((msgs, code) => ResponseWrapper.Fail(msgs, code));
         var behavior = new ValidationPipelineBehavior<UpdateUserRolesCommand, IResponseWrapper>(
-            [new UpdateUserRolesCommandValidator()]);
+            [new UpdateUserRolesCommandValidator()], mockFactory.Object);
         var handlerWasCalled = false;
         var command = new UpdateUserRolesCommand
         {
