@@ -1,19 +1,7 @@
 <Solution>
-  <Project Path="UMS.API.Tests/UMS.API.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="UMS.API/UMS.API.csproj" />
-  <Project Path="UMS.Application.Tests/UMS.Application.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="UMS.Application/UMS.Application.csproj" />
-  <Project Path="UMS.Domain.Tests/UMS.Domain.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="UMS.Domain/UMS.Domain.csproj" />
-  <Project Path="UMS.Infrastructure.Tests/UMS.Infrastructure.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="UMS.Infrastructure/UMS.Infrastructure.csproj" />
   <Project Path="UMS.Domain.Tests/UMS.Domain.Tests.csproj" />
   <Project Path="UMS.Application.Tests/UMS.Application.Tests.csproj" />
