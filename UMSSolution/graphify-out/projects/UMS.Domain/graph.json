@@ -1,0 +1,877 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "GlobalUsings.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\GlobalUsings.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_globalusings_cs",
+      "community": 11,
+      "norm_label": "globalusings.cs"
+    },
+    {
+      "label": "BaseEntity.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "community": 3,
+      "norm_label": "baseentity.cs"
+    },
+    {
+      "label": "UMS.Domain.Common",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L1",
+      "id": "baseentity_ums_domain_common",
+      "community": 3,
+      "norm_label": "ums.domain.common"
+    },
+    {
+      "label": "BaseEntity",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L7",
+      "id": "baseentity_baseentity",
+      "community": 3,
+      "norm_label": "baseentity"
+    },
+    {
+      "label": "IEntity",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "ientity",
+      "community": 3,
+      "norm_label": "ientity"
+    },
+    {
+      "label": "DomainEvent.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "community": 4,
+      "norm_label": "domainevent.cs"
+    },
+    {
+      "label": "UMS.Domain.Common",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L1",
+      "id": "domainevent_ums_domain_common",
+      "community": 4,
+      "norm_label": "ums.domain.common"
+    },
+    {
+      "label": "DomainEvent",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L7",
+      "id": "domainevent_domainevent",
+      "community": 4,
+      "norm_label": "domainevent"
+    },
+    {
+      "label": "IDomainEvent",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "idomainevent",
+      "community": 4,
+      "norm_label": "idomainevent"
+    },
+    {
+      "label": "AuditTrail.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "community": 0,
+      "norm_label": "audittrail.cs"
+    },
+    {
+      "label": "UMS.Domain.Entities",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L1",
+      "id": "audittrail_ums_domain_entities",
+      "community": 0,
+      "norm_label": "ums.domain.entities"
+    },
+    {
+      "label": "AuditTrail",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L3",
+      "id": "audittrail_audittrail",
+      "community": 0,
+      "norm_label": "audittrail"
+    },
+    {
+      "label": "BaseEntity",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "baseentity",
+      "community": 0,
+      "norm_label": "baseentity"
+    },
+    {
+      "label": "Category.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "community": 1,
+      "norm_label": "category.cs"
+    },
+    {
+      "label": "UMS.Domain.Entities",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L1",
+      "id": "category_ums_domain_entities",
+      "community": 1,
+      "norm_label": "ums.domain.entities"
+    },
+    {
+      "label": "Category",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L3",
+      "id": "category_category",
+      "community": 1,
+      "norm_label": "category"
+    },
+    {
+      "label": "IFullEntity",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "ifullentity",
+      "community": 1,
+      "norm_label": "ifullentity"
+    },
+    {
+      "label": "IDataConcurrency",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "idataconcurrency",
+      "community": 1,
+      "norm_label": "idataconcurrency"
+    },
+    {
+      "label": "LogUserActivity.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\LogUserActivity.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_loguseractivity_cs",
+      "community": 0,
+      "norm_label": "loguseractivity.cs"
+    },
+    {
+      "label": "LogUserActivity",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\LogUserActivity.cs",
+      "source_location": "L6",
+      "id": "loguseractivity_loguseractivity",
+      "community": 0,
+      "norm_label": "loguseractivity"
+    },
+    {
+      "label": "OutboxMessage.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "community": 0,
+      "norm_label": "outboxmessage.cs"
+    },
+    {
+      "label": "UMS.Domain.Entities",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L1",
+      "id": "outboxmessage_ums_domain_entities",
+      "community": 0,
+      "norm_label": "ums.domain.entities"
+    },
+    {
+      "label": "OutboxMessage",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L6",
+      "id": "outboxmessage_outboxmessage",
+      "community": 0,
+      "norm_label": "outboxmessage"
+    },
+    {
+      "label": "DomainEnums.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Enums\\DomainEnums.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_enums_domainenums_cs",
+      "community": 12,
+      "norm_label": "domainenums.cs"
+    },
+    {
+      "label": "IAuditable.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "community": 5,
+      "norm_label": "iauditable.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "source_location": "L1",
+      "id": "iauditable_ums_domain_interfaces",
+      "community": 5,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IAuditable",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "source_location": "L7",
+      "id": "iauditable_iauditable",
+      "community": 5,
+      "norm_label": "iauditable"
+    },
+    {
+      "label": "IDataConcurrency.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "community": 6,
+      "norm_label": "idataconcurrency.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "source_location": "L1",
+      "id": "idataconcurrency_ums_domain_interfaces",
+      "community": 6,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IDataConcurrency",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "source_location": "L10",
+      "id": "idataconcurrency_idataconcurrency",
+      "community": 6,
+      "norm_label": "idataconcurrency"
+    },
+    {
+      "label": "IDomainEvent.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "community": 7,
+      "norm_label": "idomainevent.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "source_location": "L1",
+      "id": "idomainevent_ums_domain_interfaces",
+      "community": 7,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IDomainEvent",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "source_location": "L6",
+      "id": "idomainevent_idomainevent",
+      "community": 7,
+      "norm_label": "idomainevent"
+    },
+    {
+      "label": "IEntity.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "community": 8,
+      "norm_label": "ientity.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L1",
+      "id": "ientity_ums_domain_interfaces",
+      "community": 8,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IEntity",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L7",
+      "id": "ientity_ientity",
+      "community": 8,
+      "norm_label": "ientity"
+    },
+    {
+      "label": "IFullEntity.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "community": 2,
+      "norm_label": "ifullentity.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L1",
+      "id": "ifullentity_ums_domain_interfaces",
+      "community": 2,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IFullEntity",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L7",
+      "id": "ifullentity_ifullentity",
+      "community": 2,
+      "norm_label": "ifullentity"
+    },
+    {
+      "label": "IAuditable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "iauditable",
+      "community": 2,
+      "norm_label": "iauditable"
+    },
+    {
+      "label": "ISoftDelete",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "isoftdelete",
+      "community": 2,
+      "norm_label": "isoftdelete"
+    },
+    {
+      "label": "IMustHaveTenant.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "community": 9,
+      "norm_label": "imusthavetenant.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "source_location": "L1",
+      "id": "imusthavetenant_ums_domain_interfaces",
+      "community": 9,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "IMustHaveTenant",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "source_location": "L6",
+      "id": "imusthavetenant_imusthavetenant",
+      "community": 9,
+      "norm_label": "imusthavetenant"
+    },
+    {
+      "label": "ISoftDelete.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "community": 10,
+      "norm_label": "isoftdelete.cs"
+    },
+    {
+      "label": "UMS.Domain.Interfaces",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs",
+      "source_location": "L1",
+      "id": "isoftdelete_ums_domain_interfaces",
+      "community": 10,
+      "norm_label": "ums.domain.interfaces"
+    },
+    {
+      "label": "ISoftDelete",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs",
+      "source_location": "L6",
+      "id": "isoftdelete_isoftdelete",
+      "community": 10,
+      "norm_label": "isoftdelete"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "_tgt": "baseentity_ums_domain_common",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "target": "baseentity_ums_domain_common",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "_tgt": "baseentity_baseentity",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "target": "baseentity_baseentity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "baseentity_baseentity",
+      "_tgt": "ientity",
+      "source": "baseentity_baseentity",
+      "target": "ientity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "_tgt": "domainevent_ums_domain_common",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "target": "domainevent_ums_domain_common",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "_tgt": "domainevent_domainevent",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "target": "domainevent_domainevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "domainevent_domainevent",
+      "_tgt": "idomainevent",
+      "source": "domainevent_domainevent",
+      "target": "idomainevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "_tgt": "audittrail_ums_domain_entities",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "target": "audittrail_ums_domain_entities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "_tgt": "audittrail_audittrail",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "target": "audittrail_audittrail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "audittrail_audittrail",
+      "_tgt": "baseentity",
+      "source": "audittrail_audittrail",
+      "target": "baseentity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "category_category",
+      "_tgt": "baseentity",
+      "source": "baseentity",
+      "target": "category_category",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\LogUserActivity.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "loguseractivity_loguseractivity",
+      "_tgt": "baseentity",
+      "source": "baseentity",
+      "target": "loguseractivity_loguseractivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "outboxmessage_outboxmessage",
+      "_tgt": "baseentity",
+      "source": "baseentity",
+      "target": "outboxmessage_outboxmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "_tgt": "category_ums_domain_entities",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "target": "category_ums_domain_entities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "_tgt": "category_category",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "target": "category_category",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "category_category",
+      "_tgt": "ifullentity",
+      "source": "category_category",
+      "target": "ifullentity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "category_category",
+      "_tgt": "idataconcurrency",
+      "source": "category_category",
+      "target": "idataconcurrency",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "ifullentity_ifullentity",
+      "_tgt": "idataconcurrency",
+      "source": "idataconcurrency",
+      "target": "ifullentity_ifullentity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\LogUserActivity.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_loguseractivity_cs",
+      "_tgt": "loguseractivity_loguseractivity",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_loguseractivity_cs",
+      "target": "loguseractivity_loguseractivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "_tgt": "outboxmessage_ums_domain_entities",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "target": "outboxmessage_ums_domain_entities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "_tgt": "outboxmessage_outboxmessage",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "target": "outboxmessage_outboxmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "_tgt": "iauditable_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "target": "iauditable_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "_tgt": "iauditable_iauditable",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "target": "iauditable_iauditable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "_tgt": "idataconcurrency_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "target": "idataconcurrency_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "_tgt": "idataconcurrency_idataconcurrency",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "target": "idataconcurrency_idataconcurrency",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "_tgt": "idomainevent_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "target": "idomainevent_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "_tgt": "idomainevent_idomainevent",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "target": "idomainevent_idomainevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "_tgt": "ientity_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "target": "ientity_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "_tgt": "ientity_ientity",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "target": "ientity_ientity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "ientity_ientity",
+      "_tgt": "ientity_ientity",
+      "source": "ientity_ientity",
+      "target": "ientity_ientity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "_tgt": "ifullentity_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "target": "ifullentity_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "_tgt": "ifullentity_ifullentity",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "target": "ifullentity_ifullentity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "ifullentity_ifullentity",
+      "_tgt": "iauditable",
+      "source": "ifullentity_ifullentity",
+      "target": "iauditable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "ifullentity_ifullentity",
+      "_tgt": "isoftdelete",
+      "source": "ifullentity_ifullentity",
+      "target": "isoftdelete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "_tgt": "imusthavetenant_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "target": "imusthavetenant_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "_tgt": "imusthavetenant_imusthavetenant",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "target": "imusthavetenant_imusthavetenant",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "_tgt": "isoftdelete_ums_domain_interfaces",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "target": "isoftdelete_ums_domain_interfaces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "_tgt": "isoftdelete_isoftdelete",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "target": "isoftdelete_isoftdelete",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}

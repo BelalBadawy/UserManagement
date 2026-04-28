@@ -1,0 +1,358 @@
+{
+  "communities": {
+    "0": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_identity_services_userserviceauthtests_cs",
+      "userserviceauthtests_userserviceauthtests",
+      "userserviceauthtests_userserviceauthtests_confirmtwofactorauthasync_noauthenticatorkeyexists_returnsfail",
+      "userserviceauthtests_userserviceauthtests_confirmtwofactorauthasync_validcode_returnssuccessandcallsresetaccessfailed",
+      "userserviceauthtests_userserviceauthtests_confirmtwofactorauthasync_workswhentwofactorisalreadyenabled",
+      "userserviceauthtests_userserviceauthtests_confirmtwofactorauthasync_wrongcode_returnsfailandcallsaccessfailed",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_doesnotcallresetauthenticatorkey",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_twofactornotenabled_returnsfail",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_validpasswordnocode_setstwofactorenabledfalse",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_validpasswordvalidcode_setstwofactorenabledfalse",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_wrongpassword_returnsfailandcallsaccessfailed",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_wrongpasswordexceedsthreshold_returnslockedoutmessage",
+      "userserviceauthtests_userserviceauthtests_disabletwofactorauthasync_wrongtotpcode_returnsfailwithoutcallingaccessfailed",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_alreadyenabled_returnsfail",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_noauthenticatorkey_returnsfail",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_validcode_returnstenrecoverycodes",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_validcode_setstwofactorenabledtrue",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_wrongcode_returnsfailandcallsaccessfailed",
+      "userserviceauthtests_userserviceauthtests_enabletwofactorauthasync_wrongcodeexceedsthreshold_returnslockedoutmessage",
+      "userserviceauthtests_userserviceauthtests_getmyprofileasync_returnsdeduplicatedpermissionsfromallroles",
+      "userserviceauthtests_userserviceauthtests_getmyprofileasync_returnsflatpermissionclaimvalues",
+      "userserviceauthtests_userserviceauthtests_getmyprofileasync_returnsprofilewithcorrectuserfields",
+      "userserviceauthtests_userserviceauthtests_logoutasync_emptyrefreshtoken_returnsfail",
+      "userserviceauthtests_userserviceauthtests_logoutasync_expiredbutmatchingtoken_clearstokenandreturnssuccess",
+      "userserviceauthtests_userserviceauthtests_logoutasync_refreshtokendoesnotmatchstored_returnsfail",
+      "userserviceauthtests_userserviceauthtests_logoutasync_validtoken_clearsrefreshtokenandsetsexpirytothepast",
+      "userserviceauthtests_userserviceauthtests_makeuser",
+      "userserviceauthtests_userserviceauthtests_setuptwofactorauthasync_existingkeypresent_returnsexistingkeywithoutcallingreset",
+      "userserviceauthtests_userserviceauthtests_setuptwofactorauthasync_nokeypresent_generatesandreturnsnewkey",
+      "userserviceauthtests_userserviceauthtests_setuptwofactorauthasync_otpauthuricontainsencodedissuerandemail",
+      "userserviceauthtests_userserviceauthtests_setuptwofactorauthasync_returnedcodeqrisvalidotpauthuri",
+      "userserviceauthtests_userserviceauthtests_setuptwofactorauthasync_twofactoralreadyenabled_returnsfail"
+    ],
+    "1": [
+      "userservicetests_userservicetests_changeuserpasswordasync_whenpasswordchangefails_returnsfail",
+      "userservicetests_userservicetests_changeuserstatusasync_whenactivating_returnsactivatedmessage",
+      "userservicetests_userservicetests_changeuserstatusasync_whendeactivating_returnsdeactivatedmessage",
+      "userservicetests_userservicetests_changeuserstatusasync_whenupdatefails_returnsfail",
+      "userservicetests_userservicetests_confirmemailasync_whenalreadyconfirmed_returnssuccesssilently",
+      "userservicetests_userservicetests_confirmemailasync_whentokeninvalid_returnsfail",
+      "userservicetests_userservicetests_confirmemailchangeasync_whensuccessful_syncsusernameandreturnssuccess",
+      "userservicetests_userservicetests_confirmemailchangeasync_whentokeninvalid_returnsfail",
+      "userservicetests_userservicetests_forgotpasswordasync_whenemailnotconfirmed_returnssafesuccessresponse",
+      "userservicetests_userservicetests_forgotpasswordasync_whenemailsent_returnssuccess",
+      "userservicetests_userservicetests_forgotpasswordasync_whenemailservicethrows_stillreturnssafesuccessresponse",
+      "userservicetests_userservicetests_generatenew2farecoverycodesasync_whensuccessful_returnstencodes",
+      "userservicetests_userservicetests_getuserbyidasync_whenuserfound_returnsmappeduserresponse",
+      "userservicetests_userservicetests_getuserrolesasync_whenuserfound_returnsroleviewmodels",
+      "userservicetests_userservicetests_getuserspagedqueryasync_returnspaginatedresult",
+      "userservicetests_userservicetests_getuserspagedqueryasync_sortbyiddesc_orderscorrectly",
+      "userservicetests_userservicetests_lockuserasync_whenseedadmin_returnsfail",
+      "userservicetests_userservicetests_lockuserasync_whensuccessful_invalidatesrefreshtokenandreturnssuccess",
+      "userservicetests_userservicetests_makeuser",
+      "userservicetests_userservicetests_registeruserasync_whenemailalreadytaken_returnsfail",
+      "userservicetests_userservicetests_resendconfirmationemailasync_whenalreadyconfirmed_returnssafesuccessresponse",
+      "userservicetests_userservicetests_resetpasswordasync_whenemailnotconfirmed_returnsfail",
+      "userservicetests_userservicetests_resetpasswordasync_whenresetfails_returnsfail",
+      "userservicetests_userservicetests_resetpasswordasync_whensuccessful_returnssuccess",
+      "userservicetests_userservicetests_unlockuserasync_whensuccessful_resetsfailedcountandreturnssuccess",
+      "userservicetests_userservicetests_updateuserasync_whensuccessful_returnssuccess",
+      "userservicetests_userservicetests_updateuserasync_whenupdatefails_returnsfail",
+      "userservicetests_userservicetests_updateuserrolesasync_whenadminemail_returnsforbidden",
+      "userservicetests_userservicetests_updateuserrolesasync_whenroledoesnotexist_returnsfail",
+      "userservicetests_userservicetests_updateuserrolesasync_whensuccessful_returnssuccess"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_identity_services_userservicetests_cs",
+      "userservicetests_userservicetests",
+      "userservicetests_userservicetests_changeuserpasswordasync_whensuccessful_returnssuccess",
+      "userservicetests_userservicetests_changeuserpasswordasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_changeuserstatusasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_confirmemailasync_whensuccessful_returnssuccess",
+      "userservicetests_userservicetests_confirmemailasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_confirmemailchangeasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_forgotpasswordasync_whenusernotfound_returnssafesuccessresponse",
+      "userservicetests_userservicetests_generatechangeemailtokenasync_whensameemail_returnsfail",
+      "userservicetests_userservicetests_generatechangeemailtokenasync_whensuccessful_sendsemailandreturnssuccess",
+      "userservicetests_userservicetests_generatechangeemailtokenasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_generatenew2farecoverycodesasync_whentwofactornotenabled_returnsfail",
+      "userservicetests_userservicetests_generatenew2farecoverycodesasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_getuserbyidasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_getuserrolesasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_lockuserasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_registeruserasync_whenautoconfirmemailfalse_sendsconfirmationemail",
+      "userservicetests_userservicetests_registeruserasync_whenautoconfirmemailtrue_doesnotsendemail",
+      "userservicetests_userservicetests_registeruserasync_whenroleassignmentfails_returnsfail",
+      "userservicetests_userservicetests_registeruserasync_whensuccessful_returnssuccess",
+      "userservicetests_userservicetests_registeruserasync_whenusercreationfails_returnsfail",
+      "userservicetests_userservicetests_resendconfirmationemailasync_whenunconfirmed_sendsemailandreturnssuccess",
+      "userservicetests_userservicetests_resendconfirmationemailasync_whenusernotfound_returnssafesuccessresponse",
+      "userservicetests_userservicetests_resetpasswordasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_unlockuserasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_updateuserasync_whenusernotfound_returnsfail",
+      "userservicetests_userservicetests_updateuserrolesasync_whenremovefails_returnsfail",
+      "userservicetests_userservicetests_updateuserrolesasync_whenusernotfound_returnsfail"
+    ],
+    "3": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_identity_services_roleservicetests_cs",
+      "roleservicetests_roleservicetests",
+      "roleservicetests_roleservicetests_createroleasync_whencreatefails_returnsfail",
+      "roleservicetests_roleservicetests_createroleasync_whenrolealreadyexists_returnsfail",
+      "roleservicetests_roleservicetests_createroleasync_whensuccessful_returnssuccess",
+      "roleservicetests_roleservicetests_deleteroleasync_whenadminrole_returnsfail",
+      "roleservicetests_roleservicetests_deleteroleasync_whendeletefails_returnsfail",
+      "roleservicetests_roleservicetests_deleteroleasync_whenroleidiszero_returnsfail",
+      "roleservicetests_roleservicetests_deleteroleasync_whenrolenotfound_returnsfail",
+      "roleservicetests_roleservicetests_deleteroleasync_whensuccessful_returnssuccess",
+      "roleservicetests_roleservicetests_deleteroleasync_whenusersassignedtorole_returnsfail",
+      "roleservicetests_roleservicetests_getpermissionsasync_whenrolefound_returnsallapppermissionswithroleinfo",
+      "roleservicetests_roleservicetests_getpermissionsasync_whenrolenotfound_returnsfail",
+      "roleservicetests_roleservicetests_getrolebyidasync_whenrolefound_returnsmappedresponse",
+      "roleservicetests_roleservicetests_getrolebyidasync_whenrolenotfound_returnsfail",
+      "roleservicetests_roleservicetests_getrolesasync_whennorolesexist_returnsfail",
+      "roleservicetests_roleservicetests_getrolesasync_whenrolesexist_returnsmappedlist",
+      "roleservicetests_roleservicetests_makerole",
+      "roleservicetests_roleservicetests_updateroleasync_whenadminrole_returnsfail",
+      "roleservicetests_roleservicetests_updateroleasync_whenrolenotfound_returnsfail",
+      "roleservicetests_roleservicetests_updateroleasync_whensuccessful_returnssuccess",
+      "roleservicetests_roleservicetests_updateroleasync_whenupdatefails_returnsfail",
+      "roleservicetests_roleservicetests_updaterolepermissionsasync_whenadminrole_returnsfail",
+      "roleservicetests_roleservicetests_updaterolepermissionsasync_whenclaimsadded_callsaddclaimandreturnssuccess",
+      "roleservicetests_roleservicetests_updaterolepermissionsasync_whenclaimsremoved_callsremoveclaimandreturnssuccess",
+      "roleservicetests_roleservicetests_updaterolepermissionsasync_whennochanges_returnsnochangesmessage",
+      "roleservicetests_roleservicetests_updaterolepermissionsasync_whenrolenotfound_returnsfail"
+    ],
+    "4": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_common_currentuserservicetests_cs",
+      "currentuserservicetests_currentuserservicetests",
+      "currentuserservicetests_currentuserservicetests_authenticatedprincipal",
+      "currentuserservicetests_currentuserservicetests_buildservice",
+      "currentuserservicetests_currentuserservicetests_getclaims_whenauthenticated_returnsallclaims",
+      "currentuserservicetests_currentuserservicetests_getroles_whenuserhasroleclaim_returnsroles",
+      "currentuserservicetests_currentuserservicetests_getuseremail_whenauthenticated_returnsemail",
+      "currentuserservicetests_currentuserservicetests_getuseremail_whennohttpcontext_returnsemptystring",
+      "currentuserservicetests_currentuserservicetests_getuserid_whennameidentifierclaimpresent_returnsid",
+      "currentuserservicetests_currentuserservicetests_getuserid_whennohttpcontext_returnsnull",
+      "currentuserservicetests_currentuserservicetests_hasclaim_whenuserdoesnothaveclaim_returnsfalse",
+      "currentuserservicetests_currentuserservicetests_hasclaim_whenuserhasclaim_returnstrue",
+      "currentuserservicetests_currentuserservicetests_hasrole_whenuserisinrole_returnstrue",
+      "currentuserservicetests_currentuserservicetests_hasrole_whenuserisnotinrole_returnsfalse",
+      "currentuserservicetests_currentuserservicetests_isauthenticated_whencontexthasauthenticatedprincipal_returnstrue",
+      "currentuserservicetests_currentuserservicetests_isauthenticated_whennohttpcontext_returnsfalse",
+      "currentuserservicetests_currentuserservicetests_name_whencontexthasnameclaim_returnsname",
+      "currentuserservicetests_currentuserservicetests_user_whenexplicitprincipalisset_overrideshttpcontextuser",
+      "currentuserservicetests_currentuserservicetests_user_whenhttpcontexthasuser_returnshttpcontextuser"
+    ],
+    "5": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_support_testasyncqueryprovider_cs",
+      "enumerablequery",
+      "iasyncenumerable",
+      "iasyncenumerator",
+      "iasyncqueryprovider",
+      "iqueryable",
+      "roleservicetests_roleservicetests_dispose",
+      "testasyncqueryprovider_testasyncenumerable",
+      "testasyncqueryprovider_testasyncenumerable_getasyncenumerator",
+      "testasyncqueryprovider_testasyncenumerator",
+      "testasyncqueryprovider_testasyncenumerator_disposeasync",
+      "testasyncqueryprovider_testasyncenumerator_movenextasync",
+      "testasyncqueryprovider_testasyncqueryprovider",
+      "testasyncqueryprovider_testasyncqueryprovider_createquery",
+      "testasyncqueryprovider_testasyncqueryprovider_execute",
+      "testasyncqueryprovider_testasyncqueryprovider_executeasync"
+    ],
+    "6": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_common_inmemorysessionwrappertests_cs",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_build",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_getfromsession_whenkeyabsent_returnsdefault",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_getfromsession_whenkeypresent_returnsdeserializedvalue",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_removefromsession_delegatestosession",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_setinsession_whenvalueisnotnull_storesserializedbytes",
+      "inmemorysessionwrappertests_inmemorysessionwrappertests_setinsession_whenvalueisnull_nevercallsset",
+      "inmemorysessionwrappertests_sessionpayload"
+    ],
+    "7": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_localfilestorageservicetests_cs",
+      "iclassfixture",
+      "localfilestorageservicetests_localfilestorageservicetests",
+      "localfilestorageservicetests_localfilestorageservicetests_deletefile_should_remove_existing_file_and_ignore_missing_ones",
+      "localfilestorageservicetests_localfilestorageservicetests_savefileasync_should_fall_back_to_current_directory_when_web_root_is_missing",
+      "localfilestorageservicetests_localfilestorageservicetests_savefileasync_should_honor_cancellation_token_when_falling_back_to_current_directory",
+      "localfilestorageservicetests_localfilestorageservicetests_savefileasync_should_honor_cancellation_token_when_web_root_exists",
+      "localfilestorageservicetests_localfilestorageservicetests_savefileasync_should_persist_file_under_web_root_folder"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_common_distributedcacheservicetests_cs",
+      "distributedcacheservicetests_distributedcacheservicetests",
+      "distributedcacheservicetests_distributedcacheservicetests_remove_delegatestounderlyingcache",
+      "distributedcacheservicetests_distributedcacheservicetests_set_serializesvaluecachesitwithslidingexpirationandreturnsvalue",
+      "distributedcacheservicetests_distributedcacheservicetests_tryget_whenkeyfound_returnstrueanddeserializedvalue",
+      "distributedcacheservicetests_distributedcacheservicetests_tryget_whenkeynotfound_returnsfalseanddefaultvalue"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_fixtures_tempdirectoryfixture_cs",
+      "idisposable",
+      "tempdirectoryfixture_tempdirectoryfixture",
+      "tempdirectoryfixture_tempdirectoryfixture_dispose"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_common_datetimeservicetests_cs",
+      "datetimeservicetests_datetimeservicetests",
+      "datetimeservicetests_datetimeservicetests_nowutc_kindisutc",
+      "datetimeservicetests_datetimeservicetests_nowutc_returnsvaluewithincurrentsecond"
+    ],
+    "11": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_support_identitymockfactory_cs",
+      "identitymockfactory_identitymockfactory",
+      "identitymockfactory_identitymockfactory_createrolemanager",
+      "identitymockfactory_identitymockfactory_createusermanager"
+    ],
+    "12": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_services_mailsenderservicetests_cs",
+      "mailsenderservicetests_mailsenderservicetests",
+      "mailsenderservicetests_mailsenderservicetests_sendasync_should_configure_smtp_ssl_from_options"
+    ],
+    "13": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_tests_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.12,
+    "1": 0.07,
+    "2": 0.07,
+    "3": 0.12,
+    "4": 0.26,
+    "5": 0.12,
+    "6": 0.36,
+    "7": 0.25,
+    "8": 0.33,
+    "9": 0.5,
+    "10": 0.5,
+    "11": 0.5,
+    "12": 0.67,
+    "13": 1.0
+  },
+  "gods": [
+    {
+      "id": "userservicetests_userservicetests",
+      "label": "UserServiceTests",
+      "degree": 58
+    },
+    {
+      "id": "userserviceauthtests_userserviceauthtests",
+      "label": "UserServiceAuthTests",
+      "degree": 31
+    },
+    {
+      "id": "roleservicetests_roleservicetests",
+      "label": "RoleServiceTests",
+      "degree": 28
+    },
+    {
+      "id": "currentuserservicetests_currentuserservicetests",
+      "label": "CurrentUserServiceTests",
+      "degree": 18
+    },
+    {
+      "id": "localfilestorageservicetests_localfilestorageservicetests",
+      "label": "LocalFileStorageServiceTests",
+      "degree": 7
+    },
+    {
+      "id": "inmemorysessionwrappertests_inmemorysessionwrappertests",
+      "label": "InMemorySessionWrapperTests",
+      "degree": 7
+    },
+    {
+      "id": "distributedcacheservicetests_distributedcacheservicetests",
+      "label": "DistributedCacheServiceTests",
+      "degree": 5
+    },
+    {
+      "id": "testasyncqueryprovider_testasyncqueryprovider",
+      "label": "TestAsyncQueryProvider",
+      "degree": 5
+    },
+    {
+      "id": "testasyncqueryprovider_testasyncenumerable",
+      "label": "TestAsyncEnumerable",
+      "degree": 5
+    },
+    {
+      "id": "testasyncqueryprovider_testasyncenumerator",
+      "label": "TestAsyncEnumerator",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "RoleServiceTests",
+      "target": "IDisposable",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\RoleServiceTests.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 9 \u2192 community 3"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `UserServiceTests` connect `UserServiceTests / ChangeUserPasswordAsync_WhenSuccessful_ReturnsSuccess` to `ChangeUserPasswordAsync_WhenPasswordChangeFails_ReturnsFail / ChangeUserStatusAsync_WhenActivating_ReturnsActivatedMessage`?",
+      "why": "High betweenness centrality (0.072) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `RoleServiceTests` connect `RoleServiceTests / CreateRoleAsync_WhenCreateFails_ReturnsFail` to `IDisposable / TempDirectoryFixture`, `EnumerableQuery / IAsyncEnumerable`?",
+      "why": "High betweenness centrality (0.046) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `SessionPayload` to the rest of the system?",
+      "why": "1 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `UserServiceAuthTests / ConfirmTwoFactorAuthAsync_NoAuthenticatorKeyExists_ReturnsFail` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `ChangeUserPasswordAsync_WhenPasswordChangeFails_ReturnsFail / ChangeUserStatusAsync_WhenActivating_ReturnsActivatedMessage` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `UserServiceTests / ChangeUserPasswordAsync_WhenSuccessful_ReturnsSuccess` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `RoleServiceTests / CreateRoleAsync_WhenCreateFails_ReturnsFail` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "labels": {
+    "0": "UserServiceAuthTests / ConfirmTwoFactorAuthAsync_NoAuthenticatorKeyExists_ReturnsFail",
+    "1": "ChangeUserPasswordAsync_WhenPasswordChangeFails_ReturnsFail / ChangeUserStatusAsync_WhenActivating_ReturnsActivatedMessage",
+    "2": "UserServiceTests / ChangeUserPasswordAsync_WhenSuccessful_ReturnsSuccess",
+    "3": "RoleServiceTests / CreateRoleAsync_WhenCreateFails_ReturnsFail",
+    "4": "CurrentUserServiceTests / AuthenticatedPrincipal",
+    "5": "EnumerableQuery / IAsyncEnumerable",
+    "6": "InMemorySessionWrapperTests / Build",
+    "7": "IClassFixture / LocalFileStorageServiceTests",
+    "8": "DistributedCacheServiceTests / Remove_DelegatesToUnderlyingCache",
+    "9": "IDisposable / TempDirectoryFixture",
+    "10": "DateTimeServiceTests / NowUtc_KindIsUtc",
+    "11": "IdentityMockFactory / CreateRoleManager",
+    "12": "MailSenderServiceTests / SendAsync_should_configure_smtp_ssl_from_options",
+    "13": "Community 13"
+  }
+}

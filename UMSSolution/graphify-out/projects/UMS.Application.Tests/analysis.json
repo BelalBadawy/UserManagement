@@ -1,0 +1,589 @@
+{
+  "communities": {
+    "0": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_categories_categorycommandhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_categories_categoryqueryhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_support_categories_categoryhandlertestsupport_cs",
+      "categorycommandhandlertests_createcategorycommandhandlertests",
+      "categorycommandhandlertests_createcategorycommandhandlertests_handle_should_create_category_add_outbox_message_and_clear_category_caches",
+      "categorycommandhandlertests_createcategorycommandhandlertests_handle_should_fail_when_category_name_already_exists",
+      "categorycommandhandlertests_deletecategorycommandhandlertests",
+      "categorycommandhandlertests_deletecategorycommandhandlertests_handle_should_delete_category_add_outbox_message_and_clear_category_caches",
+      "categorycommandhandlertests_deletecategorycommandhandlertests_handle_should_fail_when_category_has_children",
+      "categorycommandhandlertests_updatecategorycommandhandlertests",
+      "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_fail_when_category_does_not_exist",
+      "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_fail_when_update_hits_concurrency_conflict",
+      "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_update_category_add_outbox_message_and_clear_category_caches",
+      "categoryhandlertestsupport_categoryhandlertestscope",
+      "categoryhandlertestsupport_categoryhandlertestscope_createasync",
+      "categoryhandlertestsupport_categoryhandlertestscope_disposeasync",
+      "categoryhandlertestsupport_categoryhandlertestscope_seedcategoryasync",
+      "categoryhandlertestsupport_recordingcacheservice",
+      "categoryhandlertestsupport_recordingcacheservice_remove",
+      "categoryhandlertestsupport_recordingcacheservice_set",
+      "categoryhandlertestsupport_recordingcacheservice_tryget",
+      "categoryqueryhandlertests_getallcategoriesadminqueryhandlertests",
+      "categoryqueryhandlertests_getallcategoriesadminqueryhandlertests_handle_should_return_admin_categories_sorted_and_excluding_soft_deleted_records",
+      "categoryqueryhandlertests_getallcategoriesadminqueryhandlertests_handle_should_return_cached_admin_categories_when_cache_contains_value",
+      "categoryqueryhandlertests_getallcategoriesforlistqueryhandlertests",
+      "categoryqueryhandlertests_getallcategoriesforlistqueryhandlertests_handle_should_return_cached_lookup_list_when_cache_contains_value",
+      "categoryqueryhandlertests_getallcategoriesforlistqueryhandlertests_handle_should_return_only_active_categories_sorted_for_lookup_when_cache_misses",
+      "categoryqueryhandlertests_getallcategoriesqueryhandlertests",
+      "categoryqueryhandlertests_getallcategoriesqueryhandlertests_handle_should_filter_sort_and_cache_categories_when_cache_misses",
+      "categoryqueryhandlertests_getallcategoriesqueryhandlertests_handle_should_return_cached_categories_when_cache_contains_value",
+      "categoryqueryhandlertests_getcategoriespagedadminqueryhandlertests",
+      "categoryqueryhandlertests_getcategoriespagedadminqueryhandlertests_handle_should_filter_sort_and_page_admin_categories",
+      "categoryqueryhandlertests_getcategoriespagedqueryhandlertests",
+      "categoryqueryhandlertests_getcategoriespagedqueryhandlertests_handle_should_filter_sort_and_page_active_categories",
+      "categoryqueryhandlertests_getcategorybyidadminqueryhandlertests",
+      "categoryqueryhandlertests_getcategorybyidadminqueryhandlertests_handle_should_return_admin_category_details_when_match_exists",
+      "categoryqueryhandlertests_getcategorybyidadminqueryhandlertests_handle_should_return_failure_when_category_is_soft_deleted_or_missing",
+      "categoryqueryhandlertests_getcategorybyidqueryhandlertests",
+      "categoryqueryhandlertests_getcategorybyidqueryhandlertests_handle_should_return_category_with_parent_name_when_match_exists",
+      "categoryqueryhandlertests_getcategorybyidqueryhandlertests_handle_should_return_failure_when_category_is_inactive_or_missing",
+      "iasyncdisposable",
+      "icacheservice"
+    ],
+    "1": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_fixtures_testdata_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_roles_rolehandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_updaterolecommandvalidatortests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_updaterolepermissionscommandvalidatortests_cs",
+      "rolehandlertests_deleterolecommandhandlertests",
+      "rolehandlertests_deleterolecommandhandlertests_handle_should_delegate_to_role_service_and_return_success_response",
+      "rolehandlertests_getpermissionsqueryhandlertests",
+      "rolehandlertests_getpermissionsqueryhandlertests_handle_should_return_permissions_when_service_finds_match",
+      "rolehandlertests_getrolebyidqueryhandlertests",
+      "rolehandlertests_getrolebyidqueryhandlertests_handle_should_return_failure_when_service_cannot_find_role",
+      "rolehandlertests_getrolebyidqueryhandlertests_handle_should_return_role_when_service_finds_match",
+      "rolehandlertests_getrolesqueryhandlertests",
+      "rolehandlertests_getrolesqueryhandlertests_handle_should_return_roles_when_service_finds_matches",
+      "rolehandlertests_updaterolecommandhandlertests",
+      "rolehandlertests_updaterolecommandhandlertests_handle_should_delegate_to_role_service_and_return_success_response",
+      "rolehandlertests_updaterolepermissionscommandhandlertests",
+      "rolehandlertests_updaterolepermissionscommandhandlertests_handle_should_delegate_to_role_service_and_return_success_response",
+      "testdata_testdata",
+      "testdata_testdata_changepasswordrequest",
+      "testdata_testdata_generatechangeemailtokenrequest",
+      "testdata_testdata_refreshtokenrequest",
+      "testdata_testdata_resetpasswordrequest",
+      "testdata_testdata_roleclaimresponse",
+      "testdata_testdata_roleclaimviewmodel",
+      "testdata_testdata_roleresponse",
+      "testdata_testdata_tokenrequest",
+      "testdata_testdata_updateroleclaimsrequest",
+      "testdata_testdata_updaterolerequest",
+      "updaterolecommandvalidatortests_updaterolecommandvalidatortests",
+      "updaterolecommandvalidatortests_updaterolecommandvalidatortests_validate_should_fail_when_role_id_is_missing",
+      "updaterolecommandvalidatortests_updaterolecommandvalidatortests_validate_should_pass_for_well_formed_request",
+      "updaterolepermissionscommandvalidatortests_updaterolepermissionscommandvalidatortests",
+      "updaterolepermissionscommandvalidatortests_updaterolepermissionscommandvalidatortests_validate_should_fail_when_role_claim_contains_missing_required_fields",
+      "updaterolepermissionscommandvalidatortests_updaterolepermissionscommandvalidatortests_validate_should_fail_when_role_id_is_not_positive",
+      "updaterolepermissionscommandvalidatortests_updaterolepermissionscommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_getuserbyidqueryhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_getuserspagedqueryhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_getcategoriespagedadminqueryvalidatortests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_getcategoriespagedqueryvalidatortests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_shared_pagedfiltervalidatortests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_getuserspagedqueryvalidatortests_cs",
+      "getcategoriespagedadminqueryvalidatortests_getcategoriespagedadminqueryvalidatortests",
+      "getcategoriespagedadminqueryvalidatortests_getcategoriespagedadminqueryvalidatortests_validate_should_fail_when_nested_paged_filter_is_invalid",
+      "getcategoriespagedadminqueryvalidatortests_getcategoriespagedadminqueryvalidatortests_validate_should_fail_when_sort_by_is_not_supported",
+      "getcategoriespagedadminqueryvalidatortests_getcategoriespagedadminqueryvalidatortests_validate_should_pass_for_supported_sort_field",
+      "getcategoriespagedqueryvalidatortests_getcategoriespagedqueryvalidatortests",
+      "getcategoriespagedqueryvalidatortests_getcategoriespagedqueryvalidatortests_validate_should_fail_when_nested_paged_filter_is_invalid",
+      "getcategoriespagedqueryvalidatortests_getcategoriespagedqueryvalidatortests_validate_should_fail_when_sort_by_is_not_supported",
+      "getcategoriespagedqueryvalidatortests_getcategoriespagedqueryvalidatortests_validate_should_pass_for_supported_sort_field",
+      "getuserbyidqueryhandlertests_getuserbyidqueryhandlertests",
+      "getuserbyidqueryhandlertests_getuserbyidqueryhandlertests_handle_should_return_failure_when_service_cannot_find_user",
+      "getuserbyidqueryhandlertests_getuserbyidqueryhandlertests_handle_should_return_user_when_service_finds_match",
+      "getuserspagedqueryhandlertests_getuserspagedqueryhandlertests",
+      "getuserspagedqueryhandlertests_getuserspagedqueryhandlertests_handle_should_return_failure_when_service_cannot_load_paged_users",
+      "getuserspagedqueryhandlertests_getuserspagedqueryhandlertests_handle_should_return_paged_users_when_service_finds_matches",
+      "getuserspagedqueryvalidatortests_getuserspagedqueryvalidatortests",
+      "getuserspagedqueryvalidatortests_getuserspagedqueryvalidatortests_validate_should_fail_when_nested_paged_filter_is_invalid",
+      "getuserspagedqueryvalidatortests_getuserspagedqueryvalidatortests_validate_should_fail_when_sort_field_is_not_supported",
+      "getuserspagedqueryvalidatortests_getuserspagedqueryvalidatortests_validate_should_pass_for_supported_sort_field",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests_validate_should_fail_when_page_number_is_not_positive",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests_validate_should_fail_when_page_size_is_out_of_range",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests_validate_should_fail_when_sort_direction_is_invalid",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests_validate_should_pass_for_well_formed_request",
+      "pagedfiltervalidatortests_pagedfiltervalidatortests_validate_should_pass_when_sort_direction_is_supported",
+      "testdata_testdata_pagedfilterrequest",
+      "testdata_testdata_userresponse"
+    ],
+    "3": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_updateuserrolescommandhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_updateuserrolescommandvalidatortests_cs",
+      "testdata_testdata_updateuserrolesrequest",
+      "updateuserrolescommandhandlertests_updateuserrolescommandhandlertests",
+      "updateuserrolescommandhandlertests_updateuserrolescommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "updateuserrolescommandhandlertests_updateuserrolescommandhandlertests_handle_should_propagate_failure_response_without_wrapping_it",
+      "updateuserrolescommandvalidatortests_updateuserrolescommandvalidatortests",
+      "updateuserrolescommandvalidatortests_updateuserrolescommandvalidatortests_validate_should_fail_when_a_role_name_is_empty",
+      "updateuserrolescommandvalidatortests_updateuserrolescommandvalidatortests_validate_should_fail_when_roles_are_empty",
+      "updateuserrolescommandvalidatortests_updateuserrolescommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "4": [
+      "categoryhandlertestsupport_categoryhandlertestdbcontext",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_addoutboxmessage",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_committransaction",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_onmodelcreating",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_rollbacktransaction",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_savechangesasync",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_setoriginalrowversion",
+      "categoryhandlertestsupport_categoryhandlertestdbcontext_starttransaction",
+      "dbcontext",
+      "iapplicationdbcontext"
+    ],
+    "5": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_updateusercommandhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_updateusercommandvalidatortests_cs",
+      "testdata_testdata_updateuserrequest",
+      "updateusercommandhandlertests_updateusercommandhandlertests",
+      "updateusercommandhandlertests_updateusercommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "updateusercommandhandlertests_updateusercommandhandlertests_handle_should_propagate_failure_response_without_wrapping_it",
+      "updateusercommandvalidatortests_updateusercommandvalidatortests",
+      "updateusercommandvalidatortests_updateusercommandvalidatortests_validate_should_fail_when_full_name_is_missing",
+      "updateusercommandvalidatortests_updateusercommandvalidatortests_validate_should_fail_when_phone_number_has_invalid_characters",
+      "updateusercommandvalidatortests_updateusercommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "6": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_userregistrationcommandhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_userregistrationcommandvalidatortests_cs",
+      "testdata_testdata_userregistrationrequest",
+      "userregistrationcommandhandlertests_userregistrationcommandhandlertests",
+      "userregistrationcommandhandlertests_userregistrationcommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "userregistrationcommandhandlertests_userregistrationcommandhandlertests_handle_should_propagate_failure_response_without_wrapping_it",
+      "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests",
+      "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_fail_when_email_is_invalid",
+      "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_fail_when_password_confirmation_does_not_match",
+      "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "7": [
+      "abstractvalidator",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_behaviors_validationpipelinebehaviortests_cs",
+      "irequest",
+      "ivalidateme",
+      "validationpipelinebehaviortests_failingpipelinetestvalidator",
+      "validationpipelinebehaviortests_passingpipelinetestvalidator",
+      "validationpipelinebehaviortests_pipelinetestrequest",
+      "validationpipelinebehaviortests_validationpipelinebehaviortests",
+      "validationpipelinebehaviortests_validationpipelinebehaviortests_handle_should_fail_when_any_validator_fails_even_if_another_validator_passes"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_changeuserstatuscommandhandlertests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_changeuserstatusvalidatortests_cs",
+      "changeuserstatuscommandhandlertests_changeuserstatuscommandhandlertests",
+      "changeuserstatuscommandhandlertests_changeuserstatuscommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "changeuserstatuscommandhandlertests_changeuserstatuscommandhandlertests_handle_should_propagate_failure_response_without_wrapping_it",
+      "changeuserstatusvalidatortests_changeuserstatusvalidatortests",
+      "changeuserstatusvalidatortests_changeuserstatusvalidatortests_validate_should_fail_when_user_id_is_missing",
+      "changeuserstatusvalidatortests_changeuserstatusvalidatortests_validate_should_pass_for_well_formed_request",
+      "testdata_testdata_changeuserstatusrequest"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_confirmemailchangevalidatortests_cs",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests_validate_should_fail_when_new_email_is_empty",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests_validate_should_fail_when_new_email_is_invalid_format",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests_validate_should_fail_when_token_is_empty",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests_validate_should_fail_when_user_id_is_zero",
+      "confirmemailchangevalidatortests_confirmemailchangevalidatortests_validate_should_pass_for_well_formed_request",
+      "testdata_testdata_confirmemailchangerequest"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_createrolecommandvalidatortests_cs",
+      "createrolecommandvalidatortests_createrolecommandvalidatortests",
+      "createrolecommandvalidatortests_createrolecommandvalidatortests_validate_should_fail_when_name_is_missing",
+      "createrolecommandvalidatortests_createrolecommandvalidatortests_validate_should_pass_for_well_formed_request",
+      "rolehandlertests_createrolecommandhandlertests",
+      "rolehandlertests_createrolecommandhandlertests_handle_should_delegate_to_role_service_and_return_success_response",
+      "testdata_testdata_createrolerequest"
+    ],
+    "11": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_confirmemailvalidatortests_cs",
+      "confirmemailvalidatortests_confirmemailvalidatortests",
+      "confirmemailvalidatortests_confirmemailvalidatortests_validate_should_fail_when_token_is_empty",
+      "confirmemailvalidatortests_confirmemailvalidatortests_validate_should_fail_when_user_id_is_zero",
+      "confirmemailvalidatortests_confirmemailvalidatortests_validate_should_pass_for_well_formed_request",
+      "testdata_testdata_confirmemailrequest"
+    ],
+    "12": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_confirmtwofactorauthvalidatortests_cs",
+      "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests",
+      "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests_validate_codeshorterthansixdigits_returnsvalidationfailure",
+      "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests_validate_emptycode_returnsvalidationfailure",
+      "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests_validate_nonnumericcode_returnsvalidationfailure",
+      "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests_validate_sixdigitnumericcode_passesvalidation"
+    ],
+    "13": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_disabletwofactorauthvalidatortests_cs",
+      "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests",
+      "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests_validate_emptypassword_returnsvalidationfailure",
+      "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests_validate_passwordpresentandcodenull_passesvalidation",
+      "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests_validate_passwordpresentandnonnumericcode_returnsvalidationfailure",
+      "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests_validate_passwordpresentandsixdigitcode_passesvalidation"
+    ],
+    "14": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_enabletwofactorauthvalidatortests_cs",
+      "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests",
+      "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests_validate_codeshorterthansixdigits_returnsvalidationfailure",
+      "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests_validate_emptycode_returnsvalidationfailure",
+      "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests_validate_nonnumericcode_returnsvalidationfailure",
+      "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests_validate_sixdigitnumericcode_passesvalidation"
+    ],
+    "15": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_resendconfirmationemailvalidatortests_cs",
+      "resendconfirmationemailvalidatortests_resendconfirmationemailvalidatortests",
+      "resendconfirmationemailvalidatortests_resendconfirmationemailvalidatortests_validate_should_fail_when_email_is_empty",
+      "resendconfirmationemailvalidatortests_resendconfirmationemailvalidatortests_validate_should_fail_when_email_is_invalid_format",
+      "resendconfirmationemailvalidatortests_resendconfirmationemailvalidatortests_validate_should_pass_for_well_formed_request",
+      "testdata_testdata_resendconfirmationemailrequest"
+    ],
+    "16": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_getuserrolesqueryhandlertests_cs",
+      "getuserrolesqueryhandlertests_getuserrolesqueryhandlertests",
+      "getuserrolesqueryhandlertests_getuserrolesqueryhandlertests_handle_should_return_failure_when_service_cannot_find_roles",
+      "getuserrolesqueryhandlertests_getuserrolesqueryhandlertests_handle_should_return_user_roles_when_service_finds_matches",
+      "testdata_testdata_userroleviewmodel"
+    ],
+    "17": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_createcategorycommandvalidatortests_cs",
+      "createcategorycommandvalidatortests_createcategorycommandvalidatortests",
+      "createcategorycommandvalidatortests_createcategorycommandvalidatortests_validate_should_fail_when_name_is_missing",
+      "createcategorycommandvalidatortests_createcategorycommandvalidatortests_validate_should_fail_when_parent_id_is_not_positive",
+      "createcategorycommandvalidatortests_createcategorycommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "18": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_updatecategorycommandvalidatortests_cs",
+      "updatecategorycommandvalidatortests_updatecategorycommandvalidatortests",
+      "updatecategorycommandvalidatortests_updatecategorycommandvalidatortests_validate_should_fail_when_category_is_its_own_parent",
+      "updatecategorycommandvalidatortests_updatecategorycommandvalidatortests_validate_should_fail_when_row_version_is_missing",
+      "updatecategorycommandvalidatortests_updatecategorycommandvalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "19": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_lockuservalidatortests_cs",
+      "lockuservalidatortests_lockuservalidatortests",
+      "lockuservalidatortests_lockuservalidatortests_validate_should_fail_when_user_id_is_zero",
+      "lockuservalidatortests_lockuservalidatortests_validate_should_pass_for_well_formed_request",
+      "testdata_testdata_lockuserrequest"
+    ],
+    "20": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_unlockuservalidatortests_cs",
+      "testdata_testdata_unlockuserrequest",
+      "unlockuservalidatortests_unlockuservalidatortests",
+      "unlockuservalidatortests_unlockuservalidatortests_validate_should_fail_when_user_id_is_zero",
+      "unlockuservalidatortests_unlockuservalidatortests_validate_should_pass_for_well_formed_request"
+    ],
+    "21": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_confirmemailchangecommandhandlertests_cs",
+      "confirmemailchangecommandhandlertests_confirmemailchangecommandhandlertests",
+      "confirmemailchangecommandhandlertests_confirmemailchangecommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "confirmemailchangecommandhandlertests_confirmemailchangecommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "22": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_confirmemailcommandhandlertests_cs",
+      "confirmemailcommandhandlertests_confirmemailcommandhandlertests",
+      "confirmemailcommandhandlertests_confirmemailcommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "confirmemailcommandhandlertests_confirmemailcommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "23": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_confirmtwofactorauthcommandhandlertests_cs",
+      "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests",
+      "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests_handle_whencalled_callsuserserviceconfirmwithcorrectrequest",
+      "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests_handle_whencalled_passesthroughserviceresult"
+    ],
+    "24": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_disabletwofactorauthcommandhandlertests_cs",
+      "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests",
+      "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests_handle_whencalled_callsuserservicedisablewithcorrectrequest",
+      "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests_handle_whencalled_passesthroughserviceresult"
+    ],
+    "25": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_enabletwofactorauthcommandhandlertests_cs",
+      "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests",
+      "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests_handle_whencalled_callsuserserviceenablewithcorrectrequest",
+      "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests_handle_whencalled_passesthroughrecoverycodeslist"
+    ],
+    "26": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_generatenew2farecoverycodescommandhandlertests_cs",
+      "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests",
+      "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests_handle_should_delegate_to_user_service_and_return_codes",
+      "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "27": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_getmyprofilequeryhandlertests_cs",
+      "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests",
+      "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests_handle_whencalled_callsuserservicegetmyprofile",
+      "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests_handle_whencalled_passesthroughprofileresult"
+    ],
+    "28": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_lockusercommandhandlertests_cs",
+      "lockusercommandhandlertests_lockusercommandhandlertests",
+      "lockusercommandhandlertests_lockusercommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "lockusercommandhandlertests_lockusercommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "29": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_logoutcommandhandlertests_cs",
+      "logoutcommandhandlertests_logoutcommandhandlertests",
+      "logoutcommandhandlertests_logoutcommandhandlertests_handle_whencalled_callsuserservicelogoutwithcorrectrequest",
+      "logoutcommandhandlertests_logoutcommandhandlertests_handle_whencalled_passesthroughserviceresult"
+    ],
+    "30": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_resendconfirmationemailcommandhandlertests_cs",
+      "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests",
+      "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "31": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_setuptwofactorauthcommandhandlertests_cs",
+      "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests",
+      "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests_handle_whencalled_callsuserservicesetuptwofactorauth",
+      "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests_handle_whencalled_passesthroughviewmodelresult"
+    ],
+    "32": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_unlockusercommandhandlertests_cs",
+      "unlockusercommandhandlertests_unlockusercommandhandlertests",
+      "unlockusercommandhandlertests_unlockusercommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response",
+      "unlockusercommandhandlertests_unlockusercommandhandlertests_handle_should_propagate_failure_without_wrapping"
+    ],
+    "33": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_deletecategorycommandvalidatortests_cs",
+      "deletecategorycommandvalidatortests_deletecategorycommandvalidatortests",
+      "deletecategorycommandvalidatortests_deletecategorycommandvalidatortests_validate_should_fail_for_non_positive_category_ids",
+      "deletecategorycommandvalidatortests_deletecategorycommandvalidatortests_validate_should_pass_for_positive_category_id"
+    ],
+    "34": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_getcategorybyidadminqueryvalidatortests_cs",
+      "getcategorybyidadminqueryvalidatortests_getcategorybyidadminqueryvalidatortests",
+      "getcategorybyidadminqueryvalidatortests_getcategorybyidadminqueryvalidatortests_validate_should_fail_for_non_positive_category_ids",
+      "getcategorybyidadminqueryvalidatortests_getcategorybyidadminqueryvalidatortests_validate_should_pass_for_positive_category_id"
+    ],
+    "35": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_categories_getcategorybyidqueryvalidatortests_cs",
+      "getcategorybyidqueryvalidatortests_getcategorybyidqueryvalidatortests",
+      "getcategorybyidqueryvalidatortests_getcategorybyidqueryvalidatortests_validate_should_fail_for_non_positive_category_ids",
+      "getcategorybyidqueryvalidatortests_getcategorybyidqueryvalidatortests_validate_should_pass_for_positive_category_id"
+    ],
+    "36": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_deleterolecommandvalidatortests_cs",
+      "deleterolecommandvalidatortests_deleterolecommandvalidatortests",
+      "deleterolecommandvalidatortests_deleterolecommandvalidatortests_validate_should_fail_for_non_positive_role_ids",
+      "deleterolecommandvalidatortests_deleterolecommandvalidatortests_validate_should_pass_for_positive_role_id"
+    ],
+    "37": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_getpermissionsqueryvalidatortests_cs",
+      "getpermissionsqueryvalidatortests_getpermissionsqueryvalidatortests",
+      "getpermissionsqueryvalidatortests_getpermissionsqueryvalidatortests_validate_should_fail_for_non_positive_role_ids",
+      "getpermissionsqueryvalidatortests_getpermissionsqueryvalidatortests_validate_should_pass_for_positive_role_id"
+    ],
+    "38": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_roles_getrolebyidqueryvalidatortests_cs",
+      "getrolebyidqueryvalidatortests_getrolebyidqueryvalidatortests",
+      "getrolebyidqueryvalidatortests_getrolebyidqueryvalidatortests_validate_should_fail_for_non_positive_role_ids",
+      "getrolebyidqueryvalidatortests_getrolebyidqueryvalidatortests_validate_should_pass_for_positive_role_id"
+    ],
+    "39": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_getuserbyidqueryvalidatortests_cs",
+      "getuserbyidqueryvalidatortests_getuserbyidqueryvalidatortests",
+      "getuserbyidqueryvalidatortests_getuserbyidqueryvalidatortests_validate_should_fail_for_non_positive_ids",
+      "getuserbyidqueryvalidatortests_getuserbyidqueryvalidatortests_validate_should_pass_for_positive_ids"
+    ],
+    "40": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_getuserrolesqueryvalidatortests_cs",
+      "getuserrolesqueryvalidatortests_getuserrolesqueryvalidatortests",
+      "getuserrolesqueryvalidatortests_getuserrolesqueryvalidatortests_validate_should_fail_for_non_positive_user_ids",
+      "getuserrolesqueryvalidatortests_getuserrolesqueryvalidatortests_validate_should_pass_for_positive_user_id"
+    ],
+    "41": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_logoutcommandvalidatortests_cs",
+      "logoutcommandvalidatortests_logoutcommandvalidatortests",
+      "logoutcommandvalidatortests_logoutcommandvalidatortests_validate_emptyrefreshtoken_returnsvalidationfailure",
+      "logoutcommandvalidatortests_logoutcommandvalidatortests_validate_nonemptyrefreshtoken_passesvalidation"
+    ],
+    "42": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_validation_users_updateuserrolescommandpipelinetests_cs",
+      "updateuserrolescommandpipelinetests_updateuserrolescommandpipelinetests",
+      "updateuserrolescommandpipelinetests_updateuserrolescommandpipelinetests_handle_should_reject_invalid_update_user_roles_command_before_handler_runs"
+    ],
+    "43": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_tests_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.09,
+    "1": 0.07,
+    "2": 0.08,
+    "3": 0.27,
+    "4": 0.2,
+    "5": 0.27,
+    "6": 0.27,
+    "7": 0.25,
+    "8": 0.28,
+    "9": 0.39,
+    "10": 0.33,
+    "11": 0.47,
+    "12": 0.33,
+    "13": 0.33,
+    "14": 0.33,
+    "15": 0.47,
+    "16": 0.4,
+    "17": 0.4,
+    "18": 0.4,
+    "19": 0.5,
+    "20": 0.5,
+    "21": 0.5,
+    "22": 0.5,
+    "23": 0.5,
+    "24": 0.5,
+    "25": 0.5,
+    "26": 0.5,
+    "27": 0.5,
+    "28": 0.5,
+    "29": 0.5,
+    "30": 0.5,
+    "31": 0.5,
+    "32": 0.5,
+    "33": 0.5,
+    "34": 0.5,
+    "35": 0.5,
+    "36": 0.5,
+    "37": 0.5,
+    "38": 0.5,
+    "39": 0.5,
+    "40": 0.5,
+    "41": 0.5,
+    "42": 0.67,
+    "43": 1.0
+  },
+  "gods": [
+    {
+      "id": "testdata_testdata",
+      "label": "TestData",
+      "degree": 24
+    },
+    {
+      "id": "categoryhandlertestsupport_categoryhandlertestdbcontext",
+      "label": "CategoryHandlerTestDbContext",
+      "degree": 10
+    },
+    {
+      "id": "pagedfiltervalidatortests_pagedfiltervalidatortests",
+      "label": "PagedFilterValidatorTests",
+      "degree": 6
+    },
+    {
+      "id": "confirmemailchangevalidatortests_confirmemailchangevalidatortests",
+      "label": "ConfirmEmailChangeValidatorTests",
+      "degree": 6
+    },
+    {
+      "id": "categoryhandlertestsupport_recordingcacheservice",
+      "label": "RecordingCacheService",
+      "degree": 5
+    },
+    {
+      "id": "categoryhandlertestsupport_categoryhandlertestscope",
+      "label": "CategoryHandlerTestScope",
+      "degree": 5
+    },
+    {
+      "id": "confirmtwofactorauthvalidatortests_confirmtwofactorauthvalidatortests",
+      "label": "ConfirmTwoFactorAuthValidatorTests",
+      "degree": 5
+    },
+    {
+      "id": "disabletwofactorauthvalidatortests_disabletwofactorauthvalidatortests",
+      "label": "DisableTwoFactorAuthValidatorTests",
+      "degree": 5
+    },
+    {
+      "id": "enabletwofactorauthvalidatortests_enabletwofactorauthvalidatortests",
+      "label": "EnableTwoFactorAuthValidatorTests",
+      "degree": 5
+    },
+    {
+      "id": "categorycommandhandlertests_updatecategorycommandhandlertests",
+      "label": "UpdateCategoryCommandHandlerTests",
+      "degree": 4
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `TestData` connect `DeleteRoleCommandHandlerTests / Handle_should_delegate_to_role_service_and_return_success_response` to `GetCategoriesPagedAdminQueryValidatorTests / Validate_should_fail_when_nested_paged_filter_is_invalid`, `UpdateUserRolesRequest / UpdateUserRolesCommandHandlerTests`, `UpdateUserRequest / UpdateUserCommandHandlerTests`, `UserRegistrationRequest / UserRegistrationCommandHandlerTests`, `ChangeUserStatusCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response`, `ConfirmEmailChangeValidatorTests / Validate_should_fail_when_new_email_is_empty`, `CreateRoleCommandValidatorTests / Validate_should_fail_when_name_is_missing`, `ConfirmEmailValidatorTests / Validate_should_fail_when_token_is_empty`, `ResendConfirmationEmailValidatorTests / Validate_should_fail_when_email_is_empty`, `GetUserRolesQueryHandlerTests / Handle_should_return_failure_when_service_cannot_find_roles`, `LockUserValidatorTests / Validate_should_fail_when_user_id_is_zero`, `UnlockUserRequest / UnlockUserValidatorTests`?",
+      "why": "High betweenness centrality (0.186) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `CategoryHandlerTestDbContext` connect `CategoryHandlerTestDbContext / AddOutboxMessage` to `CreateCategoryCommandHandlerTests / Handle_should_create_category_add_outbox_message_and_clear_category_caches`?",
+      "why": "High betweenness centrality (0.007) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `CreateCategoryCommandHandlerTests / Handle_should_create_category_add_outbox_message_and_clear_category_caches` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.09 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `DeleteRoleCommandHandlerTests / Handle_should_delegate_to_role_service_and_return_success_response` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `GetCategoriesPagedAdminQueryValidatorTests / Validate_should_fail_when_nested_paged_filter_is_invalid` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "labels": {
+    "0": "CreateCategoryCommandHandlerTests / Handle_should_create_category_add_outbox_message_and_clear_category_caches",
+    "1": "DeleteRoleCommandHandlerTests / Handle_should_delegate_to_role_service_and_return_success_response",
+    "2": "GetCategoriesPagedAdminQueryValidatorTests / Validate_should_fail_when_nested_paged_filter_is_invalid",
+    "3": "UpdateUserRolesRequest / UpdateUserRolesCommandHandlerTests",
+    "4": "CategoryHandlerTestDbContext / AddOutboxMessage",
+    "5": "UpdateUserRequest / UpdateUserCommandHandlerTests",
+    "6": "UserRegistrationRequest / UserRegistrationCommandHandlerTests",
+    "7": "AbstractValidator / IRequest",
+    "8": "ChangeUserStatusCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "9": "ConfirmEmailChangeValidatorTests / Validate_should_fail_when_new_email_is_empty",
+    "10": "CreateRoleCommandValidatorTests / Validate_should_fail_when_name_is_missing",
+    "11": "ConfirmEmailValidatorTests / Validate_should_fail_when_token_is_empty",
+    "12": "ConfirmTwoFactorAuthValidatorTests / Validate_CodeShorterThanSixDigits_ReturnsValidationFailure",
+    "13": "DisableTwoFactorAuthValidatorTests / Validate_EmptyPassword_ReturnsValidationFailure",
+    "14": "EnableTwoFactorAuthValidatorTests / Validate_CodeShorterThanSixDigits_ReturnsValidationFailure",
+    "15": "ResendConfirmationEmailValidatorTests / Validate_should_fail_when_email_is_empty",
+    "16": "GetUserRolesQueryHandlerTests / Handle_should_return_failure_when_service_cannot_find_roles",
+    "17": "CreateCategoryCommandValidatorTests / Validate_should_fail_when_name_is_missing",
+    "18": "UpdateCategoryCommandValidatorTests / Validate_should_fail_when_category_is_its_own_parent",
+    "19": "LockUserValidatorTests / Validate_should_fail_when_user_id_is_zero",
+    "20": "UnlockUserRequest / UnlockUserValidatorTests",
+    "21": "ConfirmEmailChangeCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "22": "ConfirmEmailCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "23": "ConfirmTwoFactorAuthCommandHandlerTests / Handle_WhenCalled_CallsUserServiceConfirmWithCorrectRequest",
+    "24": "DisableTwoFactorAuthCommandHandlerTests / Handle_WhenCalled_CallsUserServiceDisableWithCorrectRequest",
+    "25": "EnableTwoFactorAuthCommandHandlerTests / Handle_WhenCalled_CallsUserServiceEnableWithCorrectRequest",
+    "26": "GenerateNew2FARecoveryCodesCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_codes",
+    "27": "GetMyProfileQueryHandlerTests / Handle_WhenCalled_CallsUserServiceGetMyProfile",
+    "28": "LockUserCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "29": "LogoutCommandHandlerTests / Handle_WhenCalled_CallsUserServiceLogoutWithCorrectRequest",
+    "30": "ResendConfirmationEmailCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "31": "SetupTwoFactorAuthCommandHandlerTests / Handle_WhenCalled_CallsUserServiceSetupTwoFactorAuth",
+    "32": "UnlockUserCommandHandlerTests / Handle_should_delegate_to_user_service_and_return_success_response",
+    "33": "DeleteCategoryCommandValidatorTests / Validate_should_fail_for_non_positive_category_ids",
+    "34": "GetCategoryByIdAdminQueryValidatorTests / Validate_should_fail_for_non_positive_category_ids",
+    "35": "GetCategoryByIdQueryValidatorTests / Validate_should_fail_for_non_positive_category_ids",
+    "36": "DeleteRoleCommandValidatorTests / Validate_should_fail_for_non_positive_role_ids",
+    "37": "GetPermissionsQueryValidatorTests / Validate_should_fail_for_non_positive_role_ids",
+    "38": "GetRoleByIdQueryValidatorTests / Validate_should_fail_for_non_positive_role_ids",
+    "39": "GetUserByIdQueryValidatorTests / Validate_should_fail_for_non_positive_ids",
+    "40": "GetUserRolesQueryValidatorTests / Validate_should_fail_for_non_positive_user_ids",
+    "41": "LogoutCommandValidatorTests / Validate_EmptyRefreshToken_ReturnsValidationFailure",
+    "42": "UpdateUserRolesCommandPipelineTests / Handle_should_reject_invalid_update_user_roles_command_before_handler_runs",
+    "43": "Community 43"
+  }
+}

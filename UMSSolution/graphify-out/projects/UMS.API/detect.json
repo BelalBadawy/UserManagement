@@ -1,0 +1,28 @@
+{
+  "files": {
+    "code": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Program.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\ServiceCollectionExtensions.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Endpoints\\AccountEndpoints.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Endpoints\\CategoryEndpoints.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Endpoints\\RoleEndpoints.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Endpoints\\UserEndpoints.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Extensions\\ResponseResultExtensions.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Helpers\\BearerSchemeTransformer.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Helpers\\SD.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs"
+    ],
+    "document": [],
+    "paper": [],
+    "image": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API\\wwwroot\\images\\banners\\1.jpg"
+    ],
+    "video": []
+  },
+  "total_files": 11,
+  "total_words": 7316,
+  "needs_graph": false,
+  "warning": "Corpus is ~7,316 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 2
+}

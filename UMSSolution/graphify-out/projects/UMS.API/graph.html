@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - C:\_MyFolder\MyApps\UserManagement\UMSSolution\graphify-out\projects\UMS.API\graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">41 nodes &middot; 38 edges &middot; 9 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "ums_api_program_cs", "label": "Program.cs", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Program.cs", "community": 8, "community_name": "Program", "source_file": "UMS.API\\Program.cs", "file_type": "code", "degree": 1}, {"id": "program_program", "label": "Program", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Program", "community": 8, "community_name": "Program", "source_file": "UMS.API\\Program.cs", "file_type": "code", "degree": 1}, {"id": "ums_api_servicecollectionextensions_cs", "label": "ServiceCollectionExtensions.cs", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ServiceCollectionExtensions.cs", "community": 1, "community_name": "ServiceCollectionExtensions / AddApiVersioningConfig", "source_file": "UMS.API\\ServiceCollectionExtensions.cs", "file_type": "code", "degree": 2}, {"id": "servicecollectionextensions_ums_api", "label": "UMS.API", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UMS.API", "community": 1, "community_name": "ServiceCollectionExtensions / AddApiVersioningConfig", "source_file": "UMS.API\\ServiceCollectionExtensions.cs", "file_type": "code", "degree": 1}, {"id": "servicecollectionextensions_servicecollectionextensions", "label": "ServiceCollectionExtensions", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 28.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ServiceCollectionExtensions", "community": 1, "community_name": "ServiceCollectionExtensions / AddApiVersioningConfig", "source_file": "UMS.API\\ServiceCollectionExtensions.cs", "file_type": "code", "degree": 3}, {"id": "servicecollectionextensions_servicecollectionextensions_addapiversioningconfig", "label": ".AddApiVersioningConfig()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".AddApiVersioningConfig()", "community": 1, "community_name": "ServiceCollectionExtensions / AddApiVersioningConfig", "source_file": "UMS.API\\ServiceCollectionExtensions.cs", "file_type": "code", "degree": 1}, {"id": "servicecollectionextensions_servicecollectionextensions_addcorsconfig", "label": ".AddCorsConfig()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".AddCorsConfig()", "community": 1, "community_name": "ServiceCollectionExtensions / AddApiVersioningConfig", "source_file": "UMS.API\\ServiceCollectionExtensions.cs", "file_type": "code", "degree": 1}, {"id": "ums_api_endpoints_accountendpoints_cs", "label": "AccountEndpoints.cs", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "AccountEndpoints.cs", "community": 5, "community_name": "AccountEndpoints / MapAccountEndpoints", "source_file": "UMS.API\\Endpoints\\AccountEndpoints.cs", "file_type": "code", "degree": 1}, {"id": "accountendpoints_accountendpoints", "label": "AccountEndpoints", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "AccountEndpoints", "community": 5, "community_name": "AccountEndpoints / MapAccountEndpoints", "source_file": "UMS.API\\Endpoints\\AccountEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "accountendpoints_accountendpoints_mapaccountendpoints", "label": ".MapAccountEndpoints()", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".MapAccountEndpoints()", "community": 5, "community_name": "AccountEndpoints / MapAccountEndpoints", "source_file": "UMS.API\\Endpoints\\AccountEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "ums_api_endpoints_categoryendpoints_cs", "label": "CategoryEndpoints.cs", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "CategoryEndpoints.cs", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\CategoryEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "categoryendpoints_ums_api_endpoints", "label": "UMS.API.Endpoints", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UMS.API.Endpoints", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\CategoryEndpoints.cs", "file_type": "code", "degree": 1}, {"id": "categoryendpoints_categoryendpoints", "label": "CategoryEndpoints", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "CategoryEndpoints", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\CategoryEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "categoryendpoints_categoryendpoints_mapcategoryendpoints", "label": ".MapCategoryEndpoints()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".MapCategoryEndpoints()", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\CategoryEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "ums_api_endpoints_roleendpoints_cs", "label": "RoleEndpoints.cs", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "RoleEndpoints.cs", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\RoleEndpoints.cs", "file_type": "code", "degree": 1}, {"id": "roleendpoints_roleendpoints", "label": "RoleEndpoints", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "RoleEndpoints", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\RoleEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "roleendpoints_roleendpoints_maproleendpoints", "label": ".MapRoleEndpoints()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".MapRoleEndpoints()", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Endpoints\\RoleEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "ums_api_endpoints_userendpoints_cs", "label": "UserEndpoints.cs", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UserEndpoints.cs", "community": 6, "community_name": "UserEndpoints / MapUserEndpoints", "source_file": "UMS.API\\Endpoints\\UserEndpoints.cs", "file_type": "code", "degree": 1}, {"id": "userendpoints_userendpoints", "label": "UserEndpoints", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UserEndpoints", "community": 6, "community_name": "UserEndpoints / MapUserEndpoints", "source_file": "UMS.API\\Endpoints\\UserEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "userendpoints_userendpoints_mapuserendpoints", "label": ".MapUserEndpoints()", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".MapUserEndpoints()", "community": 6, "community_name": "UserEndpoints / MapUserEndpoints", "source_file": "UMS.API\\Endpoints\\UserEndpoints.cs", "file_type": "code", "degree": 2}, {"id": "ums_api_extensions_responseresultextensions_cs", "label": "ResponseResultExtensions.cs", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ResponseResultExtensions.cs", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Extensions\\ResponseResultExtensions.cs", "file_type": "code", "degree": 1}, {"id": "responseresultextensions_responseresultextensions", "label": "ResponseResultExtensions", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ResponseResultExtensions", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Extensions\\ResponseResultExtensions.cs", "file_type": "code", "degree": 2}, {"id": "responseresultextensions_responseresultextensions_toapiresult", "label": ".ToApiResult()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".ToApiResult()", "community": 0, "community_name": "CategoryEndpoints / MapCategoryEndpoints", "source_file": "UMS.API\\Extensions\\ResponseResultExtensions.cs", "file_type": "code", "degree": 5}, {"id": "ums_api_helpers_bearerschemetransformer_cs", "label": "BearerSchemeTransformer.cs", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "BearerSchemeTransformer.cs", "community": 2, "community_name": "BearerSchemeTransformer / TransformAsync", "source_file": "UMS.API\\Helpers\\BearerSchemeTransformer.cs", "file_type": "code", "degree": 2}, {"id": "bearerschemetransformer_ums_api_helpers", "label": "UMS.API.Helpers", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UMS.API.Helpers", "community": 2, "community_name": "BearerSchemeTransformer / TransformAsync", "source_file": "UMS.API\\Helpers\\BearerSchemeTransformer.cs", "file_type": "code", "degree": 1}, {"id": "bearerschemetransformer_bearerschemetransformer", "label": "BearerSchemeTransformer", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 28.0, "font": {"size": 12, "color": "#ffffff"}, "title": "BearerSchemeTransformer", "community": 2, "community_name": "BearerSchemeTransformer / TransformAsync", "source_file": "UMS.API\\Helpers\\BearerSchemeTransformer.cs", "file_type": "code", "degree": 3}, {"id": "iopenapidocumenttransformer", "label": "IOpenApiDocumentTransformer", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "IOpenApiDocumentTransformer", "community": 2, "community_name": "BearerSchemeTransformer / TransformAsync", "source_file": "", "file_type": "code", "degree": 1}, {"id": "bearerschemetransformer_bearerschemetransformer_transformasync", "label": ".TransformAsync()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".TransformAsync()", "community": 2, "community_name": "BearerSchemeTransformer / TransformAsync", "source_file": "UMS.API\\Helpers\\BearerSchemeTransformer.cs", "file_type": "code", "degree": 1}, {"id": "ums_api_helpers_sd_cs", "label": "SD.cs", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "SD.cs", "community": 7, "community_name": "SD", "source_file": "UMS.API\\Helpers\\SD.cs", "file_type": "code", "degree": 2}, {"id": "sd_ums_api_helpers", "label": "UMS.API.Helpers", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UMS.API.Helpers", "community": 7, "community_name": "SD", "source_file": "UMS.API\\Helpers\\SD.cs", "file_type": "code", "degree": 1}, {"id": "sd_sd", "label": "SD", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "SD", "community": 7, "community_name": "SD", "source_file": "UMS.API\\Helpers\\SD.cs", "file_type": "code", "degree": 1}, {"id": "ums_api_middlewares_errorhandlingmiddleware_cs", "label": "ErrorHandlingMiddleware.cs", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ErrorHandlingMiddleware.cs", "community": 3, "community_name": "ErrorHandlingMiddleware / HandleExceptionAsync", "source_file": "UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs", "file_type": "code", "degree": 2}, {"id": "errorhandlingmiddleware_ums_api", "label": "UMS.API", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "UMS.API", "community": 3, "community_name": "ErrorHandlingMiddleware / HandleExceptionAsync", "source_file": "UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs", "file_type": "code", "degree": 1}, {"id": "errorhandlingmiddleware_errorhandlingmiddleware", "label": "ErrorHandlingMiddleware", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 28.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ErrorHandlingMiddleware", "community": 3, "community_name": "ErrorHandlingMiddleware / HandleExceptionAsync", "source_file": "UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs", "file_type": "code", "degree": 3}, {"id": "errorhandlingmiddleware_errorhandlingmiddleware_invokeasync", "label": ".InvokeAsync()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".InvokeAsync()", "community": 3, "community_name": "ErrorHandlingMiddleware / HandleExceptionAsync", "source_file": "UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs", "file_type": "code", "degree": 2}, {"id": "errorhandlingmiddleware_errorhandlingmiddleware_handleexceptionasync", "label": ".HandleExceptionAsync()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".HandleExceptionAsync()", "community": 3, "community_name": "ErrorHandlingMiddleware / HandleExceptionAsync", "source_file": "UMS.API\\Middlewares\\ErrorHandlingMiddleware.cs", "file_type": "code", "degree": 2}, {"id": "1_jpg", "label": "Banner Image 1", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 34.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Banner Image 1", "community": 4, "community_name": "Banner Image 1 / Folded Clothes Stack", "source_file": "UMS.API/wwwroot/images/banners/1.jpg", "file_type": "image", "degree": 4}, {"id": "white_chair", "label": "White Chair", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "White Chair", "community": 4, "community_name": "Banner Image 1 / Folded Clothes Stack", "source_file": "UMS.API/wwwroot/images/banners/1.jpg", "file_type": "image", "degree": 2}, {"id": "folded_clothes_stack", "label": "Folded Clothes Stack", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 22.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Folded Clothes Stack", "community": 4, "community_name": "Banner Image 1 / Folded Clothes Stack", "source_file": "UMS.API/wwwroot/images/banners/1.jpg", "file_type": "image", "degree": 2}, {"id": "minimalist_aesthetic", "label": "Minimalist Aesthetic", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 28.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Minimalist Aesthetic", "community": 4, "community_name": "Banner Image 1 / Folded Clothes Stack", "source_file": "UMS.API/wwwroot/images/banners/1.jpg", "file_type": "image", "degree": 3}, {"id": "wardrobe_or_lifestyle_promotion", "label": "Wardrobe or Lifestyle Promotion", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 28.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Wardrobe or Lifestyle Promotion", "community": 4, "community_name": "Banner Image 1 / Folded Clothes Stack", "source_file": "UMS.API/wwwroot/images/banners/1.jpg", "file_type": "image", "degree": 3}];
+const RAW_EDGES = [{"from": "ums_api_program_cs", "to": "program_program", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_servicecollectionextensions_cs", "to": "servicecollectionextensions_ums_api", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_servicecollectionextensions_cs", "to": "servicecollectionextensions_servicecollectionextensions", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "servicecollectionextensions_servicecollectionextensions", "to": "servicecollectionextensions_servicecollectionextensions_addapiversioningconfig", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "servicecollectionextensions_servicecollectionextensions", "to": "servicecollectionextensions_servicecollectionextensions_addcorsconfig", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_endpoints_accountendpoints_cs", "to": "accountendpoints_accountendpoints", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "accountendpoints_accountendpoints", "to": "accountendpoints_accountendpoints_mapaccountendpoints", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "accountendpoints_accountendpoints_mapaccountendpoints", "to": "responseresultextensions_responseresultextensions_toapiresult", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "ums_api_endpoints_categoryendpoints_cs", "to": "categoryendpoints_ums_api_endpoints", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_endpoints_categoryendpoints_cs", "to": "categoryendpoints_categoryendpoints", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "categoryendpoints_categoryendpoints", "to": "categoryendpoints_categoryendpoints_mapcategoryendpoints", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "categoryendpoints_categoryendpoints_mapcategoryendpoints", "to": "responseresultextensions_responseresultextensions_toapiresult", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "ums_api_endpoints_roleendpoints_cs", "to": "roleendpoints_roleendpoints", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "roleendpoints_roleendpoints", "to": "roleendpoints_roleendpoints_maproleendpoints", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "roleendpoints_roleendpoints_maproleendpoints", "to": "responseresultextensions_responseresultextensions_toapiresult", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "ums_api_endpoints_userendpoints_cs", "to": "userendpoints_userendpoints", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "userendpoints_userendpoints", "to": "userendpoints_userendpoints_mapuserendpoints", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "userendpoints_userendpoints_mapuserendpoints", "to": "responseresultextensions_responseresultextensions_toapiresult", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "ums_api_extensions_responseresultextensions_cs", "to": "responseresultextensions_responseresultextensions", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "responseresultextensions_responseresultextensions", "to": "responseresultextensions_responseresultextensions_toapiresult", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_helpers_bearerschemetransformer_cs", "to": "bearerschemetransformer_ums_api_helpers", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_helpers_bearerschemetransformer_cs", "to": "bearerschemetransformer_bearerschemetransformer", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "bearerschemetransformer_bearerschemetransformer", "to": "iopenapidocumenttransformer", "label": "inherits", "title": "inherits [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "bearerschemetransformer_bearerschemetransformer", "to": "bearerschemetransformer_bearerschemetransformer_transformasync", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_helpers_sd_cs", "to": "sd_ums_api_helpers", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_helpers_sd_cs", "to": "sd_sd", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_middlewares_errorhandlingmiddleware_cs", "to": "errorhandlingmiddleware_ums_api", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "ums_api_middlewares_errorhandlingmiddleware_cs", "to": "errorhandlingmiddleware_errorhandlingmiddleware", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "errorhandlingmiddleware_errorhandlingmiddleware", "to": "errorhandlingmiddleware_errorhandlingmiddleware_invokeasync", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "errorhandlingmiddleware_errorhandlingmiddleware", "to": "errorhandlingmiddleware_errorhandlingmiddleware_handleexceptionasync", "label": "method", "title": "method [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "errorhandlingmiddleware_errorhandlingmiddleware_invokeasync", "to": "errorhandlingmiddleware_errorhandlingmiddleware_handleexceptionasync", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "1_jpg", "to": "white_chair", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "1_jpg", "to": "folded_clothes_stack", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "1_jpg", "to": "minimalist_aesthetic", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "1_jpg", "to": "wardrobe_or_lifestyle_promotion", "label": "conceptually_related_to", "title": "conceptually_related_to [AMBIGUOUS]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "AMBIGUOUS"}, {"from": "white_chair", "to": "minimalist_aesthetic", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "folded_clothes_stack", "to": "wardrobe_or_lifestyle_promotion", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "minimalist_aesthetic", "to": "wardrobe_or_lifestyle_promotion", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "CategoryEndpoints / MapCategoryEndpoints", "count": 10}, {"cid": 1, "color": "#F28E2B", "label": "ServiceCollectionExtensions / AddApiVersioningConfig", "count": 5}, {"cid": 2, "color": "#E15759", "label": "BearerSchemeTransformer / TransformAsync", "count": 5}, {"cid": 3, "color": "#76B7B2", "label": "ErrorHandlingMiddleware / HandleExceptionAsync", "count": 5}, {"cid": 4, "color": "#59A14F", "label": "Banner Image 1 / Folded Clothes Stack", "count": 5}, {"cid": 5, "color": "#EDC948", "label": "AccountEndpoints / MapAccountEndpoints", "count": 3}, {"cid": 6, "color": "#B07AA1", "label": "UserEndpoints / MapUserEndpoints", "count": 3}, {"cid": 7, "color": "#FF9DA7", "label": "SD", "count": 3}, {"cid": 8, "color": "#9C755F", "label": "Program", "count": 2}];
+
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" onclick="focusNode(${JSON.stringify(nid)})">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.onclick = () => {
+    if (hiddenCommunities.has(c.cid)) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: hiddenCommunities.has(c.cid) }));
+    nodesDS.update(updates);
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Centroid and expanded hull in network coordinates
+        const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+        const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+        const expanded = positions.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "files": {
+    "code": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\GlobalUsings.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Fixtures\\TempDirectoryFixture.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\RoleServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\UserServiceAuthTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\UserServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\LocalFileStorageServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\MailSenderServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\Common\\CurrentUserServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\Common\\DateTimeServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\Common\\DistributedCacheServiceTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Services\\Common\\InMemorySessionWrapperTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Support\\IdentityMockFactory.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Support\\TestAsyncQueryProvider.cs"
+    ],
+    "document": [],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 13,
+  "total_words": 6258,
+  "needs_graph": false,
+  "warning": "Corpus is ~6,258 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [
+    "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\TokenService2FATests.cs",
+    "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Infrastructure.Tests\\Identity\\Services\\TokenServiceTests.cs"
+  ],
+  "graphifyignore_patterns": 2
+}

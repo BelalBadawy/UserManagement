@@ -1,0 +1,382 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "GlobalUsings.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\GlobalUsings.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_globalusings_cs",
+      "community": 3,
+      "norm_label": "globalusings.cs"
+    },
+    {
+      "label": "CategoryBuilder.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_builders_categorybuilder_cs",
+      "community": 0,
+      "norm_label": "categorybuilder.cs"
+    },
+    {
+      "label": "CategoryBuilder",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L5",
+      "id": "categorybuilder_categorybuilder",
+      "community": 0,
+      "norm_label": "categorybuilder"
+    },
+    {
+      "label": ".WithId()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L15",
+      "id": "categorybuilder_categorybuilder_withid",
+      "community": 0,
+      "norm_label": ".withid()"
+    },
+    {
+      "label": ".WithParent()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L21",
+      "id": "categorybuilder_categorybuilder_withparent",
+      "community": 1,
+      "norm_label": ".withparent()"
+    },
+    {
+      "label": ".Deleted()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L28",
+      "id": "categorybuilder_categorybuilder_deleted",
+      "community": 0,
+      "norm_label": ".deleted()"
+    },
+    {
+      "label": ".WithConcurrencyToken()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L36",
+      "id": "categorybuilder_categorybuilder_withconcurrencytoken",
+      "community": 0,
+      "norm_label": ".withconcurrencytoken()"
+    },
+    {
+      "label": ".Build()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L42",
+      "id": "categorybuilder_categorybuilder_build",
+      "community": 1,
+      "norm_label": ".build()"
+    },
+    {
+      "label": "CategoryTests.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_entities_categorytests_cs",
+      "community": 1,
+      "norm_label": "categorytests.cs"
+    },
+    {
+      "label": "CategoryTests",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L5",
+      "id": "categorytests_categorytests",
+      "community": 1,
+      "norm_label": "categorytests"
+    },
+    {
+      "label": ".New_category_should_start_with_expected_defaults()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L7",
+      "id": "categorytests_categorytests_new_category_should_start_with_expected_defaults",
+      "community": 1,
+      "norm_label": ".new_category_should_start_with_expected_defaults()"
+    },
+    {
+      "label": ".Category_should_support_parent_child_relationships()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L20",
+      "id": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "community": 1,
+      "norm_label": ".category_should_support_parent_child_relationships()"
+    },
+    {
+      "label": ".Category_should_preserve_soft_delete_and_concurrency_metadata()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L33",
+      "id": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "community": 0,
+      "norm_label": ".category_should_preserve_soft_delete_and_concurrency_metadata()"
+    },
+    {
+      "label": "EntityTestExtensions.cs",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs",
+      "source_location": "L1",
+      "id": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_support_entitytestextensions_cs",
+      "community": 2,
+      "norm_label": "entitytestextensions.cs"
+    },
+    {
+      "label": "EntityTestExtensions",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs",
+      "source_location": "L5",
+      "id": "entitytestextensions_entitytestextensions",
+      "community": 2,
+      "norm_label": "entitytestextensions"
+    },
+    {
+      "label": ".WithId()",
+      "file_type": "code",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs",
+      "source_location": "L7",
+      "id": "entitytestextensions_entitytestextensions_withid",
+      "community": 2,
+      "norm_label": ".withid()"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_builders_categorybuilder_cs",
+      "_tgt": "categorybuilder_categorybuilder",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_builders_categorybuilder_cs",
+      "target": "categorybuilder_categorybuilder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "categorybuilder_categorybuilder",
+      "_tgt": "categorybuilder_categorybuilder_withid",
+      "source": "categorybuilder_categorybuilder",
+      "target": "categorybuilder_categorybuilder_withid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_src": "categorybuilder_categorybuilder",
+      "_tgt": "categorybuilder_categorybuilder_withparent",
+      "source": "categorybuilder_categorybuilder",
+      "target": "categorybuilder_categorybuilder_withparent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_src": "categorybuilder_categorybuilder",
+      "_tgt": "categorybuilder_categorybuilder_deleted",
+      "source": "categorybuilder_categorybuilder",
+      "target": "categorybuilder_categorybuilder_deleted",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "categorybuilder_categorybuilder",
+      "_tgt": "categorybuilder_categorybuilder_withconcurrencytoken",
+      "source": "categorybuilder_categorybuilder",
+      "target": "categorybuilder_categorybuilder_withconcurrencytoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "categorybuilder_categorybuilder",
+      "_tgt": "categorybuilder_categorybuilder_build",
+      "source": "categorybuilder_categorybuilder",
+      "target": "categorybuilder_categorybuilder_build",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "_tgt": "categorybuilder_categorybuilder_withparent",
+      "source": "categorybuilder_categorybuilder_withparent",
+      "target": "categorytests_categorytests_category_should_support_parent_child_relationships"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "_tgt": "categorybuilder_categorybuilder_deleted",
+      "source": "categorybuilder_categorybuilder_deleted",
+      "target": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "_tgt": "categorybuilder_categorybuilder_withconcurrencytoken",
+      "source": "categorybuilder_categorybuilder_withconcurrencytoken",
+      "target": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_new_category_should_start_with_expected_defaults",
+      "_tgt": "categorybuilder_categorybuilder_build",
+      "source": "categorybuilder_categorybuilder_build",
+      "target": "categorytests_categorytests_new_category_should_start_with_expected_defaults"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "_tgt": "categorybuilder_categorybuilder_build",
+      "source": "categorybuilder_categorybuilder_build",
+      "target": "categorytests_categorytests_category_should_support_parent_child_relationships"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "_tgt": "categorybuilder_categorybuilder_build",
+      "source": "categorybuilder_categorybuilder_build",
+      "target": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_entities_categorytests_cs",
+      "_tgt": "categorytests_categorytests",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_entities_categorytests_cs",
+      "target": "categorytests_categorytests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests",
+      "_tgt": "categorytests_categorytests_new_category_should_start_with_expected_defaults",
+      "source": "categorytests_categorytests",
+      "target": "categorytests_categorytests_new_category_should_start_with_expected_defaults",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests",
+      "_tgt": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "source": "categorytests_categorytests",
+      "target": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests",
+      "_tgt": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "source": "categorytests_categorytests",
+      "target": "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_src": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "_tgt": "entitytestextensions_entitytestextensions_withid",
+      "source": "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "target": "entitytestextensions_entitytestextensions_withid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_support_entitytestextensions_cs",
+      "_tgt": "entitytestextensions_entitytestextensions",
+      "source": "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_support_entitytestextensions_cs",
+      "target": "entitytestextensions_entitytestextensions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "entitytestextensions_entitytestextensions",
+      "_tgt": "entitytestextensions_entitytestextensions_withid",
+      "source": "entitytestextensions_entitytestextensions",
+      "target": "entitytestextensions_entitytestextensions_withid",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}

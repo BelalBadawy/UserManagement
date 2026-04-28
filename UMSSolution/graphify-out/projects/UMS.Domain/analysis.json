@@ -1,0 +1,200 @@
+{
+  "communities": {
+    "0": [
+      "audittrail_audittrail",
+      "audittrail_ums_domain_entities",
+      "baseentity",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_audittrail_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_loguseractivity_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_outboxmessage_cs",
+      "loguseractivity_loguseractivity",
+      "outboxmessage_outboxmessage",
+      "outboxmessage_ums_domain_entities"
+    ],
+    "1": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_entities_category_cs",
+      "category_category",
+      "category_ums_domain_entities",
+      "idataconcurrency",
+      "ifullentity"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ifullentity_cs",
+      "iauditable",
+      "ifullentity_ifullentity",
+      "ifullentity_ums_domain_interfaces",
+      "isoftdelete"
+    ],
+    "3": [
+      "baseentity_baseentity",
+      "baseentity_ums_domain_common",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_baseentity_cs",
+      "ientity"
+    ],
+    "4": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_common_domainevent_cs",
+      "domainevent_domainevent",
+      "domainevent_ums_domain_common",
+      "idomainevent"
+    ],
+    "5": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_iauditable_cs",
+      "iauditable_iauditable",
+      "iauditable_ums_domain_interfaces"
+    ],
+    "6": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idataconcurrency_cs",
+      "idataconcurrency_idataconcurrency",
+      "idataconcurrency_ums_domain_interfaces"
+    ],
+    "7": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_idomainevent_cs",
+      "idomainevent_idomainevent",
+      "idomainevent_ums_domain_interfaces"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_ientity_cs",
+      "ientity_ientity",
+      "ientity_ums_domain_interfaces"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_imusthavetenant_cs",
+      "imusthavetenant_imusthavetenant",
+      "imusthavetenant_ums_domain_interfaces"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_interfaces_isoftdelete_cs",
+      "isoftdelete_isoftdelete",
+      "isoftdelete_ums_domain_interfaces"
+    ],
+    "11": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_globalusings_cs"
+    ],
+    "12": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_enums_domainenums_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.22,
+    "1": 0.4,
+    "2": 0.4,
+    "3": 0.5,
+    "4": 0.5,
+    "5": 0.67,
+    "6": 0.67,
+    "7": 0.67,
+    "8": 1.0,
+    "9": 0.67,
+    "10": 0.67,
+    "11": 1.0,
+    "12": 1.0
+  },
+  "gods": [
+    {
+      "id": "category_category",
+      "label": "Category",
+      "degree": 4
+    },
+    {
+      "id": "ifullentity_ifullentity",
+      "label": "IFullEntity",
+      "degree": 4
+    },
+    {
+      "id": "ientity_ientity",
+      "label": "IEntity",
+      "degree": 3
+    },
+    {
+      "id": "baseentity_baseentity",
+      "label": "BaseEntity",
+      "degree": 2
+    },
+    {
+      "id": "domainevent_domainevent",
+      "label": "DomainEvent",
+      "degree": 2
+    },
+    {
+      "id": "audittrail_audittrail",
+      "label": "AuditTrail",
+      "degree": 2
+    },
+    {
+      "id": "loguseractivity_loguseractivity",
+      "label": "LogUserActivity",
+      "degree": 2
+    },
+    {
+      "id": "outboxmessage_outboxmessage",
+      "label": "OutboxMessage",
+      "degree": 2
+    },
+    {
+      "id": "baseentity_ums_domain_common",
+      "label": "UMS.Domain.Common",
+      "degree": 1
+    },
+    {
+      "id": "domainevent_ums_domain_common",
+      "label": "UMS.Domain.Common",
+      "degree": 1
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Category",
+      "target": "BaseEntity",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 0 \u2192 community 1"
+    },
+    {
+      "source": "IFullEntity",
+      "target": "IDataConcurrency",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 1 \u2192 community 2"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `Category` connect `Category / IDataConcurrency` to `AuditTrail / BaseEntity`?",
+      "why": "High betweenness centrality (0.098) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `IFullEntity` connect `IAuditable / IFullEntity` to `Category / IDataConcurrency`?",
+      "why": "High betweenness centrality (0.059) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `UMS.Domain.Common`, `UMS.Domain.Common`, `UMS.Domain.Entities` to the rest of the system?",
+      "why": "17 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ],
+  "labels": {
+    "0": "AuditTrail / BaseEntity",
+    "1": "Category / IDataConcurrency",
+    "2": "IAuditable / IFullEntity",
+    "3": "BaseEntity / IEntity",
+    "4": "DomainEvent / IDomainEvent",
+    "5": "IAuditable",
+    "6": "IDataConcurrency",
+    "7": "IDomainEvent",
+    "8": "IEntity",
+    "9": "IMustHaveTenant",
+    "10": "ISoftDelete",
+    "11": "Community 11",
+    "12": "Community 12"
+  }
+}
