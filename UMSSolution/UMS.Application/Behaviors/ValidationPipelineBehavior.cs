@@ -5,10 +5,14 @@
         where TRequest : IRequest<TResponse>, IValidateMe
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
+        private readonly IValidationFailureFactory<TResponse> _failureFactory;
 
-        public ValidationPipelineBehavior(IEnumerable<IValidator<TRequest>> validators)
+        public ValidationPipelineBehavior(
+            IEnumerable<IValidator<TRequest>> validators,
+            IValidationFailureFactory<TResponse> failureFactory)
         {
             _validators = validators;
+            _failureFactory = failureFactory;
         }
 
         public async ValueTask<TResponse> Handle(
@@ -29,28 +33,11 @@
                 if (failures.Count > 0)
                 {
                     var errorMessages = failures.Select(f => f.ErrorMessage).ToList();
-                    return CreateValidationFailureResponse(errorMessages);
+                    return _failureFactory.CreateFailure(errorMessages, 400);
                 }
             }
 
             return await next(request, cancellationToken);
-        }
-
-        private static TResponse CreateValidationFailureResponse(IReadOnlyList<string> errorMessages)
-        {
-            if (typeof(TResponse).IsGenericType &&
-                typeof(TResponse).GetGenericTypeDefinition() == typeof(IResponseWrapper<>))
-            {
-                var dataType = typeof(TResponse).GetGenericArguments()[0];
-                var wrapperType = typeof(ResponseWrapper<>).MakeGenericType(dataType);
-                var failMethod = wrapperType.GetMethod(
-                    nameof(ResponseWrapper<object>.Fail),
-                    [typeof(IReadOnlyList<string>), typeof(int)]);
-
-                return (TResponse)failMethod!.Invoke(null, [errorMessages, 400])!;
-            }
-
-            return (TResponse)ResponseWrapper.Fail(errorMessages, 400);
         }
     }
 }

@@ -7,7 +7,6 @@ using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands;
 using UMS.Application.Interfaces.Common;
-using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Identity.Models;
 using UMS.Infrastructure.Identity.Services;
 using UMS.Infrastructure.Tests.Support;
@@ -33,11 +32,6 @@ public class UserServiceTests
 
         _dateTimeService.Setup(d => d.NowUtc).Returns(FixedNow);
 
-        var seedConfig = Options.Create(new SeedUsersConfiguration
-        {
-            Admin = new SeedUserConfiguration { Email = "admin@seed.com" }
-        });
-
         var mockRequest = new Mock<HttpRequest>();
         mockRequest.Setup(r => r.Scheme).Returns("https");
         mockRequest.Setup(r => r.Host).Returns(new HostString("example.com"));
@@ -53,7 +47,6 @@ public class UserServiceTests
             _roleManager.Object,
             _emailService.Object,
             _httpContextAccessor.Object,
-            seedConfig,
             _dateTimeService.Object,
             _currentUserService.Object,
             twoFactorOptions,
@@ -201,33 +194,6 @@ public class UserServiceTests
         result.Data.Should().NotBeNull();
         result.Data!.Id.Should().Be(3);
         result.Data.Email.Should().Be("bob@test.com");
-    }
-
-    // ── GetAllUsersAsync ───────────────────────────────────────────────────
-
-    [Fact]
-    public async Task GetAllUsersAsync_WhenNoUsers_ReturnsFail()
-    {
-        var empty = new TestAsyncEnumerable<ApplicationUser>(Enumerable.Empty<ApplicationUser>());
-        _userManager.Setup(m => m.Users).Returns(empty);
-
-        var result = await _sut.GetAllUsersAsync();
-
-        result.IsSuccessful.Should().BeFalse();
-        result.Messages.Should().ContainSingle().Which.Should().Be("No Users were found.");
-    }
-
-    [Fact]
-    public async Task GetAllUsersAsync_WhenUsersExist_ReturnsMappedList()
-    {
-        var users = new List<ApplicationUser> { MakeUser(1, "a@t.com"), MakeUser(2, "b@t.com") };
-        _userManager.Setup(m => m.Users).Returns(new TestAsyncEnumerable<ApplicationUser>(users));
-
-        var result = await _sut.GetAllUsersAsync();
-
-        result.IsSuccessful.Should().BeTrue();
-        result.Data.Should().HaveCount(2);
-        result.Data.Select(u => u.Email).Should().BeEquivalentTo("a@t.com", "b@t.com");
     }
 
     // ── GetUsersPagedQueryAsync ────────────────────────────────────────────
@@ -430,6 +396,7 @@ public class UserServiceTests
         var req = new UpdateUserRolesRequest { UserId = 1, Roles = ["Basic"] };
         _userManager.Setup(m => m.Users)
                     .Returns(new TestAsyncEnumerable<ApplicationUser>([adminUser]));
+        _userManager.Setup(m => m.IsInRoleAsync(adminUser, "Admin")).ReturnsAsync(true);
 
         var result = await _sut.UpdateUserRolesAsync(req, CancellationToken.None);
 
@@ -909,6 +876,7 @@ public class UserServiceTests
     {
         var admin = MakeUser(1, "admin@seed.com");
         _userManager.Setup(m => m.FindByIdAsync("1")).ReturnsAsync(admin);
+        _userManager.Setup(m => m.IsInRoleAsync(admin, "Admin")).ReturnsAsync(true);
 
         var result = await _sut.LockUserAsync(1);
 

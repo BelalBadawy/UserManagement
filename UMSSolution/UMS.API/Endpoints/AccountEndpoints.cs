@@ -25,8 +25,10 @@ public static class AccountEndpoints
             var response = await sender.Send(new GetTokenQuery { TokenRequest = tokenRequest }, ct);
             return response.ToApiResult();
         })
+        .RequireRateLimiting("auth")
         .Produces<IResponseWrapper<TokenResponse>>(StatusCodes.Status200OK)
-        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status429TooManyRequests);
 
         group.MapPost("refresh-token", async (RefreshTokenRequest refreshTokenRequest, ISender sender, CancellationToken ct) =>
         {
@@ -41,8 +43,10 @@ public static class AccountEndpoints
             var response = await sender.Send(new ForgotPasswordCommand { Email = request.Email }, ct);
             return response.ToApiResult();
         })
+        .RequireRateLimiting("auth")
         .Produces<IResponseWrapper>(StatusCodes.Status200OK)
-        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status429TooManyRequests);
 
         group.MapPost("reset-password", async (ResetPasswordRequest request, ISender sender, CancellationToken ct) =>
         {
@@ -83,9 +87,11 @@ public static class AccountEndpoints
                     new LoginWith2FAQuery { Request = request }, ct);
                 return response.ToApiResult();
             })
+        .RequireRateLimiting("auth")
         .Produces<IResponseWrapper<TokenResponse>>(StatusCodes.Status200OK)
         .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
-        .Produces<IResponseWrapper>(StatusCodes.Status401Unauthorized);
+        .Produces<IResponseWrapper>(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status429TooManyRequests);
 
         var authGroup = app
             .MapGroup("api/v{version:apiVersion}/account")

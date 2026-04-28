@@ -26,7 +26,6 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IEmailService _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly SeedUsersConfiguration _seedUsersConfiguration;
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly TwoFactorOptions _twoFactorOptions;
@@ -37,7 +36,6 @@ namespace UMS.Infrastructure.Identity.Services
             RoleManager<ApplicationRole> roleManager,
             IEmailService emailService,
             IHttpContextAccessor contextAccessor,
-            IOptions<SeedUsersConfiguration> seedUsersConfiguration,
             IDateTimeService dateTimeService,
             ICurrentUserService currentUserService,
             IOptions<TwoFactorOptions> twoFactorOptions,
@@ -47,7 +45,6 @@ namespace UMS.Infrastructure.Identity.Services
             _roleManager = roleManager;
             _emailService = emailService;
             _httpContextAccessor = contextAccessor;
-            _seedUsersConfiguration = seedUsersConfiguration.Value;
             _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
             _twoFactorOptions = twoFactorOptions.Value;
@@ -161,22 +158,6 @@ namespace UMS.Infrastructure.Identity.Services
             }
 
             return ResponseWrapper<UserResponse>.Fail("User does not exists.");
-        }
-
-        public async Task<IResponseWrapper<List<UserResponse>>> GetAllUsersAsync()
-        {
-            var usersInDb = await _userManager
-                .Users
-                .ToListAsync();
-
-            if (usersInDb.Count > 0)
-            {
-                var mappedUsers = usersInDb.Adapt<List<UserResponse>>();
-
-                return ResponseWrapper<List<UserResponse>>.Success(data: mappedUsers);
-            }
-
-            return ResponseWrapper<List<UserResponse>>.Fail("No Users were found.");
         }
 
         public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
@@ -310,7 +291,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (user is null)
                 return ResponseWrapper.Fail("User does not exist.");
 
-            if (string.Equals(user.Email, _seedUsersConfiguration.Admin.Email, StringComparison.OrdinalIgnoreCase))
+            if (await _userManager.IsInRoleAsync(user, AppRoles.Admin))
                 return ResponseWrapper.Fail("User roles update not permitted.");
 
             var rolesToAssign = request.Roles.ToList();
@@ -505,8 +486,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (user is null)
                 return ResponseWrapper.Fail("User does not exist.");
 
-            if (string.Equals(user.Email, _seedUsersConfiguration.Admin.Email,
-                    StringComparison.OrdinalIgnoreCase))
+            if (await _userManager.IsInRoleAsync(user, AppRoles.Admin))
                 return ResponseWrapper.Fail("Cannot lock the system administrator.");
 
             await _userManager.SetLockoutEnabledAsync(user, true);

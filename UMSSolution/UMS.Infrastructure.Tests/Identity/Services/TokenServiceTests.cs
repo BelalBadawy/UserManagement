@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,7 +19,7 @@ public class TokenServiceTests
     private readonly Mock<UserManager<ApplicationUser>> _userManager;
     private readonly Mock<RoleManager<ApplicationRole>> _roleManager;
     private readonly Mock<IDateTimeService> _dateTimeService = new();
-    private readonly Mock<IMemoryCache> _cache = new();
+    private readonly Mock<IDistributedCache> _cache = new();
     private readonly JwtConfiguration _jwtConfig;
     private readonly TokenService _sut;
 

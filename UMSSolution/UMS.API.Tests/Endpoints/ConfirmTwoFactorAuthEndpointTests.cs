@@ -29,7 +29,7 @@ public class ConfirmTwoFactorAuthEndpointTests : ApiTestBase
 
         var response = await Client.PostAsJsonAsync("/api/v1/users/confirm-2fa", new { Code = "abcdef" });
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
         payload.Should().NotBeNull();
         payload!.IsSuccessful.Should().BeFalse();

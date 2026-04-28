@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,7 +20,7 @@ public class TokenService2FATests
     private readonly Mock<UserManager<ApplicationUser>> _userManager;
     private readonly Mock<RoleManager<ApplicationRole>> _roleManager;
     private readonly Mock<IDateTimeService> _dateTimeService = new();
-    private readonly Mock<IMemoryCache> _cache = new();
+    private readonly Mock<IDistributedCache> _cache = new();
     private readonly JwtConfiguration _jwtConfig;
     private readonly TokenService _sut;
 
@@ -90,21 +90,24 @@ public class TokenService2FATests
 
     private void SetupCacheNotFound()
     {
-        object? dummy = null;
-        _cache.Setup(c => c.TryGetValue(It.IsAny<object>(), out dummy)).Returns(false);
+        _cache.Setup(c => c.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+              .ReturnsAsync((byte[]?)null);
     }
 
     private void SetupCacheFound(string key)
     {
-        object? dummy = (object)true;
-        _cache.Setup(c => c.TryGetValue(key, out dummy)).Returns(true);
+        _cache.Setup(c => c.GetAsync(key, It.IsAny<CancellationToken>()))
+              .ReturnsAsync(new byte[] { 1 });
     }
 
     private void SetupCacheSet()
     {
-        var mockEntry = new Mock<ICacheEntry>();
-        mockEntry.SetupAllProperties();
-        _cache.Setup(c => c.CreateEntry(It.IsAny<object>())).Returns(mockEntry.Object);
+        _cache.Setup(c => c.SetAsync(
+                It.IsAny<string>(),
+                It.IsAny<byte[]>(),
+                It.IsAny<DistributedCacheEntryOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
     }
 
     // ── GetTokenAsync 2FA branch ──────────────────────────────────────────────
@@ -389,9 +392,15 @@ public class TokenService2FATests
         var user = MakeUser(twoFactorEnabled: true);
         var token = BuildChallengeToken(user.Id, jti);
         SetupCacheNotFound();
-        var mockEntry = new Mock<ICacheEntry>();
-        mockEntry.SetupAllProperties();
-        _cache.Setup(c => c.CreateEntry($"2fa_jti:{jti}")).Returns(mockEntry.Object);
+        DistributedCacheEntryOptions? capturedOptions = null;
+        _cache.Setup(c => c.SetAsync(
+                $"2fa_jti:{jti}",
+                It.IsAny<byte[]>(),
+                It.IsAny<DistributedCacheEntryOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<string, byte[], DistributedCacheEntryOptions, CancellationToken>(
+                (_, _, opts, _) => capturedOptions = opts)
+            .Returns(Task.CompletedTask);
         _userManager.Setup(m => m.FindByIdAsync(user.Id.ToString())).ReturnsAsync(user);
         _userManager.Setup(m => m.IsLockedOutAsync(user)).ReturnsAsync(false);
         _userManager.Setup(m => m.VerifyTwoFactorTokenAsync(user, It.IsAny<string>(), "123456"))
@@ -407,8 +416,12 @@ public class TokenService2FATests
             Code = "123456"
         });
 
-        _cache.Verify(c => c.CreateEntry($"2fa_jti:{jti}"), Times.Once);
-        mockEntry.VerifySet(e => e.AbsoluteExpirationRelativeToNow =
+        _cache.Verify(c => c.SetAsync(
+            $"2fa_jti:{jti}",
+            It.IsAny<byte[]>(),
+            It.IsAny<DistributedCacheEntryOptions>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+        capturedOptions!.AbsoluteExpirationRelativeToNow.Should().Be(
             TimeSpan.FromMinutes(_jwtConfig.TwoFactorChallengeTokenExpiryInMinutes));
     }
 

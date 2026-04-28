@@ -29,7 +29,7 @@ public class EnableTwoFactorAuthEndpointTests : ApiTestBase
 
         var response = await Client.PutAsJsonAsync("/api/v1/users/enable-2fa", new { Code = "abc" });
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
         payload.Should().NotBeNull();
         payload!.IsSuccessful.Should().BeFalse();

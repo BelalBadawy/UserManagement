@@ -9,7 +9,6 @@ using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
 using UMS.Application.Features.Users.Commands.Logout;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Interfaces.Common;
-using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Identity.Models;
 using UMS.Infrastructure.Identity.Services;
 using UMS.Infrastructure.Tests.Support;
@@ -36,11 +35,6 @@ public class UserServiceAuthTests
         _dateTimeService.Setup(d => d.NowUtc).Returns(FixedNow);
         _currentUserService.Setup(s => s.GetUserId()).Returns(TestUserId);
 
-        var seedConfig = Options.Create(new SeedUsersConfiguration
-        {
-            Admin = new SeedUserConfiguration { Email = "admin@seed.com" }
-        });
-
         var mockRequest = new Mock<HttpRequest>();
         mockRequest.Setup(r => r.Scheme).Returns("https");
         mockRequest.Setup(r => r.Host).Returns(new HostString("example.com"));
@@ -56,7 +50,6 @@ public class UserServiceAuthTests
             _roleManager.Object,
             _emailService.Object,
             _httpContextAccessor.Object,
-            seedConfig,
             _dateTimeService.Object,
             _currentUserService.Object,
             twoFactorOptions,
