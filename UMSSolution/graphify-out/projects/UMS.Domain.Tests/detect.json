@@ -1,0 +1,20 @@
+{
+  "files": {
+    "code": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\GlobalUsings.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Builders\\CategoryBuilder.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Entities\\CategoryTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain.Tests\\Support\\EntityTestExtensions.cs"
+    ],
+    "document": [],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 4,
+  "total_words": 246,
+  "needs_graph": false,
+  "warning": "Corpus is ~246 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 2
+}

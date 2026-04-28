@@ -1,0 +1,144 @@
+{
+  "communities": {
+    "0": [
+      "categoryendpoints_categoryendpoints",
+      "categoryendpoints_categoryendpoints_mapcategoryendpoints",
+      "categoryendpoints_ums_api_endpoints",
+      "responseresultextensions_responseresultextensions",
+      "responseresultextensions_responseresultextensions_toapiresult",
+      "roleendpoints_roleendpoints",
+      "roleendpoints_roleendpoints_maproleendpoints",
+      "ums_api_endpoints_categoryendpoints_cs",
+      "ums_api_endpoints_roleendpoints_cs",
+      "ums_api_extensions_responseresultextensions_cs"
+    ],
+    "1": [
+      "servicecollectionextensions_servicecollectionextensions",
+      "servicecollectionextensions_servicecollectionextensions_addapiversioningconfig",
+      "servicecollectionextensions_servicecollectionextensions_addcorsconfig",
+      "servicecollectionextensions_ums_api",
+      "ums_api_servicecollectionextensions_cs"
+    ],
+    "2": [
+      "bearerschemetransformer_bearerschemetransformer",
+      "bearerschemetransformer_bearerschemetransformer_transformasync",
+      "bearerschemetransformer_ums_api_helpers",
+      "iopenapidocumenttransformer",
+      "ums_api_helpers_bearerschemetransformer_cs"
+    ],
+    "3": [
+      "errorhandlingmiddleware_errorhandlingmiddleware",
+      "errorhandlingmiddleware_errorhandlingmiddleware_handleexceptionasync",
+      "errorhandlingmiddleware_errorhandlingmiddleware_invokeasync",
+      "errorhandlingmiddleware_ums_api",
+      "ums_api_middlewares_errorhandlingmiddleware_cs"
+    ],
+    "4": [
+      "1_jpg",
+      "folded_clothes_stack",
+      "minimalist_aesthetic",
+      "wardrobe_or_lifestyle_promotion",
+      "white_chair"
+    ],
+    "5": [
+      "accountendpoints_accountendpoints",
+      "accountendpoints_accountendpoints_mapaccountendpoints",
+      "ums_api_endpoints_accountendpoints_cs"
+    ],
+    "6": [
+      "ums_api_endpoints_userendpoints_cs",
+      "userendpoints_userendpoints",
+      "userendpoints_userendpoints_mapuserendpoints"
+    ],
+    "7": [
+      "sd_sd",
+      "sd_ums_api_helpers",
+      "ums_api_helpers_sd_cs"
+    ],
+    "8": [
+      "program_program",
+      "ums_api_program_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.2,
+    "1": 0.4,
+    "2": 0.4,
+    "3": 0.5,
+    "4": 0.7,
+    "5": 0.67,
+    "6": 0.67,
+    "7": 0.67,
+    "8": 1.0
+  },
+  "gods": [
+    {
+      "id": "1_jpg",
+      "label": "Banner Image 1",
+      "degree": 4
+    },
+    {
+      "id": "servicecollectionextensions_servicecollectionextensions",
+      "label": "ServiceCollectionExtensions",
+      "degree": 3
+    },
+    {
+      "id": "bearerschemetransformer_bearerschemetransformer",
+      "label": "BearerSchemeTransformer",
+      "degree": 3
+    },
+    {
+      "id": "errorhandlingmiddleware_errorhandlingmiddleware",
+      "label": "ErrorHandlingMiddleware",
+      "degree": 3
+    },
+    {
+      "id": "minimalist_aesthetic",
+      "label": "Minimalist Aesthetic",
+      "degree": 3
+    },
+    {
+      "id": "wardrobe_or_lifestyle_promotion",
+      "label": "Wardrobe or Lifestyle Promotion",
+      "degree": 3
+    },
+    {
+      "id": "accountendpoints_accountendpoints",
+      "label": "AccountEndpoints",
+      "degree": 2
+    },
+    {
+      "id": "categoryendpoints_categoryendpoints",
+      "label": "CategoryEndpoints",
+      "degree": 2
+    },
+    {
+      "id": "roleendpoints_roleendpoints",
+      "label": "RoleEndpoints",
+      "degree": 2
+    },
+    {
+      "id": "userendpoints_userendpoints",
+      "label": "UserEndpoints",
+      "degree": 2
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "ambiguous_edge",
+      "question": "What is the exact relationship between `Banner Image 1` and `Wardrobe or Lifestyle Promotion`?",
+      "why": "Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `Minimalist Aesthetic` (e.g. with `Banner Image 1` and `White Chair`) actually correct?",
+      "why": "`Minimalist Aesthetic` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Program`, `UMS.API`, `UMS.API.Endpoints` to the rest of the system?",
+      "why": "7 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

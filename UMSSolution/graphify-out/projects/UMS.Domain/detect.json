@@ -1,0 +1,31 @@
+{
+  "files": {
+    "code": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\GlobalUsings.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\BaseEntity.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Common\\DomainEvent.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\AuditTrail.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\Category.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\LogUserActivity.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Entities\\OutboxMessage.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Enums\\DomainEnums.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IAuditable.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDataConcurrency.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IDomainEvent.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IEntity.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IFullEntity.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\IMustHaveTenant.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Domain\\Interfaces\\ISoftDelete.cs"
+    ],
+    "document": [],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 15,
+  "total_words": 1131,
+  "needs_graph": false,
+  "warning": "Corpus is ~1,131 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 2
+}

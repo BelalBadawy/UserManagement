@@ -1,0 +1,40 @@
+{
+  "files": {
+    "code": [
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\GlobalUsings.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Contracts\\ResponseContract.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\AccountEndpointsTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\CategoryEndpointsTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\ConfirmTwoFactorAuthEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\DisableTwoFactorAuthEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\EnableTwoFactorAuthEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\LoginWith2FAEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\LogoutEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\ProfileEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\RoleEndpointsTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\SetupTwoFactorAuthEndpointTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\UserEndpointsTests.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Fixtures\\ApiTestBase.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Fixtures\\CustomWebApplicationFactory.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiPermissionHelper.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiStateVerifier.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestAuthenticationHandler.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestAuthenticationHeaderHelper.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestDatabaseInitializer.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestDataSeeder.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestEmailService.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\ApiTestEmailSink.cs",
+      "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Support\\TestCollectionDefinitions.cs"
+    ],
+    "document": [],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 24,
+  "total_words": 5515,
+  "needs_graph": false,
+  "warning": "Corpus is ~5,515 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 2
+}

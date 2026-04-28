@@ -1,0 +1,70 @@
+{
+  "communities": {
+    "0": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_builders_categorybuilder_cs",
+      "categorybuilder_categorybuilder",
+      "categorybuilder_categorybuilder_deleted",
+      "categorybuilder_categorybuilder_withconcurrencytoken",
+      "categorybuilder_categorybuilder_withid",
+      "categorytests_categorytests_category_should_preserve_soft_delete_and_concurrency_metadata"
+    ],
+    "1": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_entities_categorytests_cs",
+      "categorybuilder_categorybuilder_build",
+      "categorybuilder_categorybuilder_withparent",
+      "categorytests_categorytests",
+      "categorytests_categorytests_category_should_support_parent_child_relationships",
+      "categorytests_categorytests_new_category_should_start_with_expected_defaults"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_support_entitytestextensions_cs",
+      "entitytestextensions_entitytestextensions",
+      "entitytestextensions_entitytestextensions_withid"
+    ],
+    "3": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_domain_tests_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.4,
+    "1": 0.4,
+    "2": 0.67,
+    "3": 1.0
+  },
+  "gods": [
+    {
+      "id": "categorybuilder_categorybuilder",
+      "label": "CategoryBuilder",
+      "degree": 6
+    },
+    {
+      "id": "categorytests_categorytests",
+      "label": "CategoryTests",
+      "degree": 4
+    },
+    {
+      "id": "entitytestextensions_entitytestextensions",
+      "label": "EntityTestExtensions",
+      "degree": 2
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `CategoryBuilder` connect `CategoryBuilder / Deleted` to `Build / WithParent`?",
+      "why": "High betweenness centrality (0.330) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `CategoryTests` connect `Build / WithParent` to `CategoryBuilder / Deleted`?",
+      "why": "High betweenness centrality (0.197) - this node is a cross-community bridge."
+    }
+  ],
+  "labels": {
+    "0": "CategoryBuilder / Deleted",
+    "1": "Build / WithParent",
+    "2": "EntityTestExtensions / WithId",
+    "3": "Community 3"
+  }
+}

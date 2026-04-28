@@ -1,0 +1,344 @@
+{
+  "communities": {
+    "0": [
+      "apitestbase",
+      "apitestbase_apitestbase_useselfserviceclient",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_confirmtwofactorauthendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_disabletwofactorauthendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_enabletwofactorauthendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_loginwith2faendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_logoutendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_profileendpointtests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_setuptwofactorauthendpointtests_cs",
+      "confirmtwofactorauthendpointtests_confirmtwofactorauthendpointtests",
+      "confirmtwofactorauthendpointtests_confirmtwofactorauthendpointtests_confirmtwofactorauth_nonnumericcode_returnsvalidationerror",
+      "confirmtwofactorauthendpointtests_confirmtwofactorauthendpointtests_confirmtwofactorauth_unauthenticated_returns401",
+      "confirmtwofactorauthendpointtests_confirmtwofactorauthendpointtests_confirmtwofactorauth_wrongcode_whennotsetup_returnsfailure",
+      "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests",
+      "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests_disabletwofactorauth_correctpassword_twofactornotenabled_returnsfailure",
+      "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests_disabletwofactorauth_emptypassword_returnsvalidationerror",
+      "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests_disabletwofactorauth_unauthenticated_returns401",
+      "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests_disabletwofactorauth_wrongpassword_returnsfailure",
+      "enabletwofactorauthendpointtests_enabletwofactorauthendpointtests",
+      "enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_invalidcodeformat_returnsvalidationerror",
+      "enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_unauthenticated_returns401",
+      "enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_wrongcode_returnsfailure",
+      "loginwith2faendpointtests_loginwith2faendpointtests",
+      "loginwith2faendpointtests_loginwith2faendpointtests_loginwith2fa_emptyfields_returnsfailure",
+      "loginwith2faendpointtests_loginwith2faendpointtests_loginwith2fa_invalidchallengetoken_returnsfailure",
+      "logoutendpointtests_logoutendpointtests",
+      "logoutendpointtests_logoutendpointtests_logout_authenticated_invalidrefreshtoken_returnsfailure",
+      "logoutendpointtests_logoutendpointtests_logout_authenticated_validrefreshtoken_returnssuccess",
+      "logoutendpointtests_logoutendpointtests_logout_unauthenticated_returns401",
+      "profileendpointtests_profileendpointtests",
+      "profileendpointtests_profileendpointtests_profile_authenticated_returnsprofiledata",
+      "profileendpointtests_profileendpointtests_profile_unauthenticated_returns401",
+      "setuptwofactorauthendpointtests_setuptwofactorauthendpointtests",
+      "setuptwofactorauthendpointtests_setuptwofactorauthendpointtests_setuptwofactorauth_authenticated_returnssetupdata",
+      "setuptwofactorauthendpointtests_setuptwofactorauthendpointtests_setuptwofactorauth_unauthenticated_returns401",
+      "userendpointstests_userendpointstests_change_password_succeeds_when_user_changes_own_password"
+    ],
+    "1": [
+      "apistateverifier_apistateverifier",
+      "apistateverifier_apistateverifier_getcategorybyidasync",
+      "apistateverifier_apistateverifier_getcategorybyidincludingsoftdeletedasync",
+      "apistateverifier_apistateverifier_getrolebyidasync",
+      "apistateverifier_apistateverifier_getroleclaimsasync",
+      "apistateverifier_apistateverifier_getuserrolenamesasync",
+      "apitestbase_apitestbase",
+      "apitestbase_apitestbase_getrequiredservice",
+      "apitestbase_apitestbase_useanonymousclient",
+      "apitestbase_apitestbase_uselowprivilegeclient",
+      "apitestbase_apitestbase_useprivilegedclient",
+      "apitestdataseeder_apitestdataseeder_seedroleasync",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_roleendpointstests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_fixtures_apitestbase_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apistateverifier_cs",
+      "categoryendpointstests_categoryendpointstests_create_category_should_follow_authorization_matrix",
+      "categoryendpointstests_categoryendpointstests_delete_category_should_follow_authorization_matrix",
+      "categoryendpointstests_categoryendpointstests_update_category_should_follow_authorization_matrix",
+      "iclassfixture",
+      "roleendpointstests_roleendpointstests",
+      "roleendpointstests_roleendpointstests_create_role_should_return_successful_response_when_valid",
+      "roleendpointstests_roleendpointstests_delete_role_should_follow_authorization_matrix",
+      "roleendpointstests_roleendpointstests_get_all_roles_should_return_successful_response_when_authorized",
+      "roleendpointstests_roleendpointstests_get_role_by_id_should_return_not_found_when_id_is_invalid",
+      "roleendpointstests_roleendpointstests_get_role_permissions_should_follow_authorization_matrix",
+      "roleendpointstests_roleendpointstests_update_role_permissions_should_follow_authorization_matrix",
+      "roleendpointstests_roleendpointstests_update_role_should_follow_authorization_matrix"
+    ],
+    "2": [
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper",
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper_clear",
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper_configureanonymousclient",
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper_configurelowprivilegeclient",
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper_configureprivilegedclient",
+      "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper_configureselfserviceclient",
+      "apitestdatabaseinitializer_apitestdatabaseinitializer",
+      "apitestdatabaseinitializer_apitestdatabaseinitializer_ensureroleasync",
+      "apitestdatabaseinitializer_apitestdatabaseinitializer_initializeasync",
+      "apitestdatabaseinitializer_apitestdatabaseinitializer_seedbaselineasync",
+      "apitestemailsink_apitestemailsink_add",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_fixtures_customwebapplicationfactory_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestauthenticationheaderhelper_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestdatabaseinitializer_cs",
+      "customwebapplicationfactory_customwebapplicationfactory",
+      "customwebapplicationfactory_customwebapplicationfactory_configurewebhost",
+      "customwebapplicationfactory_customwebapplicationfactory_createanonymousclient",
+      "customwebapplicationfactory_customwebapplicationfactory_createlowprivilegeclient",
+      "customwebapplicationfactory_customwebapplicationfactory_createprivilegedclient",
+      "customwebapplicationfactory_customwebapplicationfactory_createselfserviceclient",
+      "customwebapplicationfactory_customwebapplicationfactory_disposeasync",
+      "customwebapplicationfactory_customwebapplicationfactory_ensuredatabaseinitializedasync",
+      "customwebapplicationfactory_customwebapplicationfactory_initializeasync",
+      "iasynclifetime",
+      "webapplicationfactory"
+    ],
+    "3": [
+      "accountendpointstests_accountendpointstests",
+      "accountendpointstests_accountendpointstests_confirmemail_unknownuser_returnsunsuccessfulpayload",
+      "accountendpointstests_accountendpointstests_confirmemail_validtoken_confirmsemailsuccessfully",
+      "accountendpointstests_accountendpointstests_confirmemailchange_invalidtoken_returnsunsuccessfulpayload",
+      "accountendpointstests_accountendpointstests_confirmemailchange_unknownuser_returnsunsuccessfulpayload",
+      "accountendpointstests_accountendpointstests_forgot_password_should_return_successful_response_and_capture_reset_email",
+      "accountendpointstests_accountendpointstests_login_should_return_token_for_seeded_user",
+      "accountendpointstests_accountendpointstests_login_should_return_unsuccessful_payload_when_credentials_are_invalid",
+      "accountendpointstests_accountendpointstests_refreshtoken_invalidpayload_returnsunsuccessfulpayload",
+      "accountendpointstests_accountendpointstests_refreshtoken_validrefreshtoken_returnsnewtoken",
+      "accountendpointstests_accountendpointstests_resendconfirmationemail_alreadyconfirmedemail_returnssafesuccessresponse",
+      "accountendpointstests_accountendpointstests_resendconfirmationemail_unconfirmedemail_sendsemailandreturnssuccess",
+      "accountendpointstests_accountendpointstests_resendconfirmationemail_unknownemail_returnssafesuccessresponse",
+      "accountendpointstests_accountendpointstests_resetpassword_unknownemail_returnsunsuccessfulpayload",
+      "accountendpointstests_accountendpointstests_resetpassword_validtoken_resetspasswordandallowslogin",
+      "apitestdataseeder_apitestdataseeder_seedunconfirmeduserasync",
+      "apitestdataseeder_apitestdataseeder_seeduserasync",
+      "apitestemailsink_apitestemailsink",
+      "apitestemailsink_apitestemailsink_clear",
+      "apitestemailsink_apitestemailsink_findlatestfor",
+      "apitestemailsink_apitestemailsink_getlatestresettoken",
+      "apitestemailsink_apitestemailsink_getqueryparam",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_accountendpointstests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestemailsink_cs",
+      "userendpointstests_userendpointstests_get_user_by_id_should_return_successful_response_when_user_exists"
+    ],
+    "4": [
+      "apistateverifier_apistateverifier_getuserbyidasync",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_userendpointstests_cs",
+      "userendpointstests_userendpointstests",
+      "userendpointstests_userendpointstests_change_password_returns_unauthorized_when_not_authenticated",
+      "userendpointstests_userendpointstests_change_user_status_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_generate_2fa_recovery_codes_returns_error_when_authenticated_user_not_in_db",
+      "userendpointstests_userendpointstests_generate_2fa_recovery_codes_returns_unauthorized_when_anonymous",
+      "userendpointstests_userendpointstests_generate_change_email_token_returns_error_when_authenticated_user_not_in_db",
+      "userendpointstests_userendpointstests_generate_change_email_token_returns_unauthorized_when_anonymous",
+      "userendpointstests_userendpointstests_get_user_by_id_should_return_not_found_when_user_does_not_exist",
+      "userendpointstests_userendpointstests_get_user_roles_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_get_users_paged_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_lock_user_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_register_user_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_unlock_user_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_update_user_roles_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_update_user_should_follow_authorization_matrix",
+      "userendpointstests_userendpointstests_useuserclient"
+    ],
+    "5": [
+      "apitestdataseeder_apitestdataseeder",
+      "apitestdataseeder_apitestdataseeder_clearcategorycaches",
+      "apitestdataseeder_apitestdataseeder_seedcategoryasync",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_endpoints_categoryendpointstests_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestdataseeder_cs",
+      "categoryendpointstests_categoryendpointstests",
+      "categoryendpointstests_categoryendpointstests_get_all_categories_should_return_seeded_categories_for_requested_state",
+      "categoryendpointstests_categoryendpointstests_get_category_by_id_should_return_seeded_category",
+      "categoryendpointstests_categoryendpointstests_get_category_by_id_should_return_unsuccessful_payload_when_id_is_invalid",
+      "categoryendpointstests_categoryendpointstests_getcategoriesforlist_authorizedrequest_returnslookupitems",
+      "categoryendpointstests_categoryendpointstests_getcategoriespaged_defaultrequest_returnssuccessfulpayload"
+    ],
+    "6": [
+      "apipermissionhelper_apipermissionhelper",
+      "apipermissionhelper_apipermissionhelper_getrequiredpermission",
+      "apipermissionhelper_apipermissionhelper_getwrongpermission",
+      "apitestauthenticationhandler_apitestauthenticationhandler",
+      "apitestauthenticationhandler_apitestauthenticationhandler_handleauthenticateasync",
+      "authenticationhandler",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apipermissionhelper_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestauthenticationhandler_cs"
+    ],
+    "7": [
+      "apitestemailservice_apitestemailservice",
+      "apitestemailservice_apitestemailservice_sendasync",
+      "apitestemailservice_apitestemailservice_tryextractreseturl",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_apitestemailservice_cs",
+      "iemailservice"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_contracts_responsecontract_cs",
+      "responsecontract_pagedresultcontract",
+      "responsecontract_responsecontract",
+      "responsecontract_roleclaimresponsecontract"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_support_testcollectiondefinitions_cs",
+      "testcollectiondefinitions_apicollectiondefinition"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_api_tests_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07,
+    "1": 0.16,
+    "2": 0.12,
+    "3": 0.13,
+    "4": 0.17,
+    "5": 0.29,
+    "6": 0.25,
+    "7": 0.5,
+    "8": 0.5,
+    "9": 1.0,
+    "10": 1.0
+  },
+  "gods": [
+    {
+      "id": "userendpointstests_userendpointstests",
+      "label": "UserEndpointsTests",
+      "degree": 19
+    },
+    {
+      "id": "accountendpointstests_accountendpointstests",
+      "label": "AccountEndpointsTests",
+      "degree": 16
+    },
+    {
+      "id": "customwebapplicationfactory_customwebapplicationfactory",
+      "label": "CustomWebApplicationFactory",
+      "degree": 11
+    },
+    {
+      "id": "categoryendpointstests_categoryendpointstests",
+      "label": "CategoryEndpointsTests",
+      "degree": 10
+    },
+    {
+      "id": "roleendpointstests_roleendpointstests",
+      "label": "RoleEndpointsTests",
+      "degree": 9
+    },
+    {
+      "id": "apitestbase_apitestbase",
+      "label": "ApiTestBase",
+      "degree": 7
+    },
+    {
+      "id": "apistateverifier_apistateverifier",
+      "label": "ApiStateVerifier",
+      "degree": 7
+    },
+    {
+      "id": "disabletwofactorauthendpointtests_disabletwofactorauthendpointtests",
+      "label": "DisableTwoFactorAuthEndpointTests",
+      "degree": 6
+    },
+    {
+      "id": "apitestauthenticationheaderhelper_apitestauthenticationheaderhelper",
+      "label": "ApiTestAuthenticationHeaderHelper",
+      "degree": 6
+    },
+    {
+      "id": "apitestdataseeder_apitestdataseeder",
+      "label": "ApiTestDataSeeder",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "AccountEndpointsTests",
+      "target": "ApiTestBase",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\AccountEndpointsTests.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 3 \u2192 community 0"
+    },
+    {
+      "source": "CategoryEndpointsTests",
+      "target": "ApiTestBase",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\CategoryEndpointsTests.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 0 \u2192 community 5"
+    },
+    {
+      "source": "RoleEndpointsTests",
+      "target": "ApiTestBase",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\RoleEndpointsTests.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 0 \u2192 community 1"
+    },
+    {
+      "source": "UserEndpointsTests",
+      "target": "ApiTestBase",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\UserEndpointsTests.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 0 \u2192 community 4"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `AccountEndpointsTests` connect `AccountEndpointsTests / ConfirmEmail_UnknownUser_ReturnsUnsuccessfulPayload` to `ApiTestBase / UseSelfServiceClient`?",
+      "why": "High betweenness centrality (0.125) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `UserEndpointsTests` connect `GetUserByIdAsync / UserEndpointsTests` to `ApiTestBase / UseSelfServiceClient`, `AccountEndpointsTests / ConfirmEmail_UnknownUser_ReturnsUnsuccessfulPayload`?",
+      "why": "High betweenness centrality (0.087) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `ResponseContract`, `PagedResultContract`, `RoleClaimResponseContract` to the rest of the system?",
+      "why": "4 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `ApiTestBase / UseSelfServiceClient` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `ApiTestAuthenticationHeaderHelper / Clear` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `AccountEndpointsTests / ConfirmEmail_UnknownUser_ReturnsUnsuccessfulPayload` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "labels": {
+    "0": "ApiTestBase / UseSelfServiceClient",
+    "1": "ApiStateVerifier / GetCategoryByIdAsync",
+    "2": "ApiTestAuthenticationHeaderHelper / Clear",
+    "3": "AccountEndpointsTests / ConfirmEmail_UnknownUser_ReturnsUnsuccessfulPayload",
+    "4": "GetUserByIdAsync / UserEndpointsTests",
+    "5": "ApiTestDataSeeder / ClearCategoryCaches",
+    "6": "ApiPermissionHelper / GetRequiredPermission",
+    "7": "ApiTestEmailService / SendAsync",
+    "8": "PagedResultContract / ResponseContract",
+    "9": "ApiCollectionDefinition",
+    "10": "Community 10"
+  }
+}

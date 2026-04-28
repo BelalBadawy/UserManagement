@@ -1,0 +1,446 @@
+{
+  "communities": {
+    "0": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_services_userservice_cs",
+      "currentuserservice_currentuserservice_getuserid",
+      "iuserservice",
+      "mailsenderservice_mailsenderservice_sendasync",
+      "roleservice_roleservice_getrolesasync",
+      "userservice_ums_infrastructure_identity_services",
+      "userservice_userservice",
+      "userservice_userservice_changeuserpasswordasync",
+      "userservice_userservice_changeuserstatusasync",
+      "userservice_userservice_confirmemailasync",
+      "userservice_userservice_confirmemailchangeasync",
+      "userservice_userservice_confirmtwofactorauthasync",
+      "userservice_userservice_disabletwofactorauthasync",
+      "userservice_userservice_enabletwofactorauthasync",
+      "userservice_userservice_forgotpasswordasync",
+      "userservice_userservice_generatechangeemailtokenasync",
+      "userservice_userservice_generatenew2farecoverycodesasync",
+      "userservice_userservice_generatesecuretoken",
+      "userservice_userservice_getidentityresulterrordescriptions",
+      "userservice_userservice_getmyprofileasync",
+      "userservice_userservice_getuserbyidasync",
+      "userservice_userservice_getuserrolesasync",
+      "userservice_userservice_getuserspagedqueryasync",
+      "userservice_userservice_lockuserasync",
+      "userservice_userservice_logoutasync",
+      "userservice_userservice_registeruserasync",
+      "userservice_userservice_resendconfirmationemailasync",
+      "userservice_userservice_resetpasswordasync",
+      "userservice_userservice_setuptwofactorauthasync",
+      "userservice_userservice_unlockuserasync",
+      "userservice_userservice_updateuserasync",
+      "userservice_userservice_updateuserrolesasync"
+    ],
+    "1": [
+      "applicationdbcontext_applicationdbcontext",
+      "applicationdbcontext_applicationdbcontext_addoutboxmessage",
+      "applicationdbcontext_applicationdbcontext_committransaction",
+      "applicationdbcontext_applicationdbcontext_dispose",
+      "applicationdbcontext_applicationdbcontext_onaftersavechanges",
+      "applicationdbcontext_applicationdbcontext_onbeforesavechanges",
+      "applicationdbcontext_applicationdbcontext_onconfiguring",
+      "applicationdbcontext_applicationdbcontext_onmodelcreating",
+      "applicationdbcontext_applicationdbcontext_rollbacktransaction",
+      "applicationdbcontext_applicationdbcontext_savechangesasync",
+      "applicationdbcontext_applicationdbcontext_setoriginalrowversion",
+      "applicationdbcontext_applicationdbcontext_starttransaction",
+      "applicationdbcontext_ums_infrastructure_persistence_contexts",
+      "auditentry_auditentry",
+      "auditentry_auditentry_toaudit",
+      "auditentry_ums_infrastructure_persistence_audit",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_extensions_queryextensions_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_audit_auditentry_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_contexts_applicationdbcontext_cs",
+      "iapplicationdbcontext",
+      "identitydbcontext",
+      "queryextensions_queryextensions",
+      "queryextensions_queryextensions_addsoftdeletequeryfilter",
+      "queryextensions_ums_infrastructure_extensions",
+      "roleservice_roleservice_updaterolepermissionsasync"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_currentusermiddleware_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_common_currentuserservice_cs",
+      "currentusermiddleware_currentusermiddleware",
+      "currentusermiddleware_currentusermiddleware_invokeasync",
+      "currentusermiddleware_ums_infrastructure_identity",
+      "currentuserservice_currentuserservice",
+      "currentuserservice_currentuserservice_getclaims",
+      "currentuserservice_currentuserservice_getroles",
+      "currentuserservice_currentuserservice_getuseremail",
+      "currentuserservice_currentuserservice_hasclaim",
+      "currentuserservice_currentuserservice_hasrole",
+      "currentuserservice_currentuserservice_isauthenticated",
+      "currentuserservice_currentuserservice_setcurrentuser",
+      "icurrentuserservice",
+      "imiddleware"
+    ],
+    "3": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_identityserviceextensions_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_servicecollectionextensions_cs",
+      "identityserviceextensions_identityserviceextensions",
+      "identityserviceextensions_identityserviceextensions_addidentityservices",
+      "identityserviceextensions_identityserviceextensions_addjwtauthentication",
+      "identityserviceextensions_identityserviceextensions_addpermissions",
+      "identityserviceextensions_identityserviceextensions_gettokensettings",
+      "identityserviceextensions_identityserviceextensions_usecurrentuser",
+      "identityserviceextensions_ums_infrastructure_identity",
+      "servicecollectionextensions_servicecollectionextensions",
+      "servicecollectionextensions_servicecollectionextensions_adddatabase",
+      "servicecollectionextensions_servicecollectionextensions_addfeatures",
+      "servicecollectionextensions_servicecollectionextensions_addinfrastructureservices",
+      "servicecollectionextensions_servicecollectionextensions_useinfrastructureasync",
+      "servicecollectionextensions_ums_infrastructure"
+    ],
+    "4": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_common_distributedcacheservice_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_common_inmemorysessionwrapper_cs",
+      "distributedcacheservice_distributedcacheservice",
+      "distributedcacheservice_distributedcacheservice_remove",
+      "distributedcacheservice_distributedcacheservice_set",
+      "distributedcacheservice_distributedcacheservice_tryget",
+      "distributedcacheservice_ums_infrastructure_services_common",
+      "icacheservice",
+      "inmemorysessionwrapper_inmemorysessionwrapper",
+      "inmemorysessionwrapper_inmemorysessionwrapper_getfromsession",
+      "inmemorysessionwrapper_inmemorysessionwrapper_removefromsession",
+      "inmemorysessionwrapper_inmemorysessionwrapper_setinsession",
+      "inmemorysessionwrapper_ums_infrastructure_common",
+      "isessionwrapper"
+    ],
+    "5": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_services_roleservice_cs",
+      "iroleservice",
+      "roleservice_roleservice",
+      "roleservice_roleservice_createroleasync",
+      "roleservice_roleservice_deleteroleasync",
+      "roleservice_roleservice_getallclaimsforroleasync",
+      "roleservice_roleservice_getidentityresulterrordescriptions",
+      "roleservice_roleservice_getpermissionsasync",
+      "roleservice_roleservice_getrolebyidasync",
+      "roleservice_roleservice_updateroleasync",
+      "roleservice_ums_infrastructure_identity_services"
+    ],
+    "6": [
+      "20260418130054_initiaildb_initiaildb",
+      "20260418130054_initiaildb_initiaildb_down",
+      "20260418130054_initiaildb_initiaildb_up",
+      "20260418130054_initiaildb_ums_infrastructure_migrations",
+      "20260424070230_addcategorynormalizationandconcurrency_addcategorynormalizationandconcurrency",
+      "20260424070230_addcategorynormalizationandconcurrency_addcategorynormalizationandconcurrency_down",
+      "20260424070230_addcategorynormalizationandconcurrency_addcategorynormalizationandconcurrency_up",
+      "20260424070230_addcategorynormalizationandconcurrency_ums_infrastructure_migrations",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_migrations_20260418130054_initiaildb_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_migrations_20260424070230_addcategorynormalizationandconcurrency_cs",
+      "migration"
+    ],
+    "7": [
+      "applicationdbseeder_applicationdbseeder",
+      "applicationdbseeder_applicationdbseeder_checkandapplypendingmigrationasync",
+      "applicationdbseeder_applicationdbseeder_seedapplicationdatabaseasync",
+      "applicationdbseeder_ums_infrastructure_persistence_dbinitializers",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_seeds_featuresdbseeder_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_seeds_applicationdbseeder_cs",
+      "featuresdbseeder_featuresdbseeder",
+      "featuresdbseeder_featuresdbseeder_seedfeaturesdatabaseasync",
+      "featuresdbseeder_ums_infrastructure_persistence_dbinitializers"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_seeds_identitydbseeder_cs",
+      "identitydbseeder_identitydbseeder",
+      "identitydbseeder_identitydbseeder_assignpermissionstoroleasync",
+      "identitydbseeder_identitydbseeder_checkandapplypendingmigrationasync",
+      "identitydbseeder_identitydbseeder_seedadminuserasync",
+      "identitydbseeder_identitydbseeder_seedbasicuserasync",
+      "identitydbseeder_identitydbseeder_seedidentitydatabaseasync",
+      "identitydbseeder_identitydbseeder_seedrolesasync",
+      "identitydbseeder_ums_infrastructure_persistence_dbinitializers"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_permissions_permissionpolicyprovider_cs",
+      "iauthorizationpolicyprovider",
+      "permissionpolicyprovider_permissionpolicyprovider",
+      "permissionpolicyprovider_permissionpolicyprovider_getdefaultpolicyasync",
+      "permissionpolicyprovider_permissionpolicyprovider_getfallbackpolicyasync",
+      "permissionpolicyprovider_permissionpolicyprovider_getpolicyasync",
+      "permissionpolicyprovider_ums_infrastructure_identity_permissions"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_interceptors_trimstringinterceptor_cs",
+      "savechangesinterceptor",
+      "trimstringinterceptor_trimstringinterceptor",
+      "trimstringinterceptor_trimstringinterceptor_savingchanges",
+      "trimstringinterceptor_trimstringinterceptor_savingchangesasync",
+      "trimstringinterceptor_trimstringinterceptor_trimstrings",
+      "trimstringinterceptor_ums_infrastructure_persistence_interceptors"
+    ],
+    "11": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_localfilestorageservice_cs",
+      "ifilestorageservice",
+      "localfilestorageservice_localfilestorageservice",
+      "localfilestorageservice_localfilestorageservice_deletefile",
+      "localfilestorageservice_localfilestorageservice_savefileasync",
+      "localfilestorageservice_ums_infrastructure_services"
+    ],
+    "12": [
+      "authorizationhandler",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_permissions_permissionauthorizationhandler_cs",
+      "permissionauthorizationhandler_permissionauthorizationhandler",
+      "permissionauthorizationhandler_permissionauthorizationhandler_handlerequirementasync",
+      "permissionauthorizationhandler_ums_infrastructure_identity_permissions"
+    ],
+    "13": [
+      "applicationdbcontextmodelsnapshot_applicationdbcontextmodelsnapshot",
+      "applicationdbcontextmodelsnapshot_applicationdbcontextmodelsnapshot_buildmodel",
+      "applicationdbcontextmodelsnapshot_ums_infrastructure_migrations",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_migrations_applicationdbcontextmodelsnapshot_cs",
+      "modelsnapshot"
+    ],
+    "14": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_dbconfigurations_categoryconfiguration_cs",
+      "categoryconfiguration_categoryconfiguration",
+      "categoryconfiguration_categoryconfiguration_configure",
+      "categoryconfiguration_ums_infrastructure_persistence_dbconfigurations",
+      "ientitytypeconfiguration"
+    ],
+    "15": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_configurations_seedusersconfiguration_cs",
+      "seedusersconfiguration_seeduserconfiguration",
+      "seedusersconfiguration_seedusersconfiguration",
+      "seedusersconfiguration_ums_infrastructure_identity_configurations"
+    ],
+    "16": [
+      "applicationrole_applicationrole",
+      "applicationrole_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationrole_cs",
+      "identityrole"
+    ],
+    "17": [
+      "applicationroleclaim_applicationroleclaim",
+      "applicationroleclaim_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationroleclaim_cs",
+      "identityroleclaim"
+    ],
+    "18": [
+      "applicationuser_applicationuser",
+      "applicationuser_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationuser_cs",
+      "identityuser"
+    ],
+    "19": [
+      "applicationuserclaim_applicationuserclaim",
+      "applicationuserclaim_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationuserclaim_cs",
+      "identityuserclaim"
+    ],
+    "20": [
+      "applicationuserlogin_applicationuserlogin",
+      "applicationuserlogin_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationuserlogin_cs",
+      "identityuserlogin"
+    ],
+    "21": [
+      "applicationuserrole_applicationuserrole",
+      "applicationuserrole_ums_infrastructure_identity_models",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_models_applicationuserrole_cs",
+      "identityuserrole"
+    ],
+    "22": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_permissions_permissionrequirement_cs",
+      "iauthorizationrequirement",
+      "permissionrequirement_permissionrequirement",
+      "permissionrequirement_ums_infrastructure_identity_permissions"
+    ],
+    "23": [
+      "20260418130054_initiaildb_designer_initiaildb",
+      "20260418130054_initiaildb_designer_initiaildb_buildtargetmodel",
+      "20260418130054_initiaildb_designer_ums_infrastructure_migrations",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_migrations_20260418130054_initiaildb_designer_cs"
+    ],
+    "24": [
+      "20260424070230_addcategorynormalizationandconcurrency_designer_addcategorynormalizationandconcurrency",
+      "20260424070230_addcategorynormalizationandconcurrency_designer_addcategorynormalizationandconcurrency_buildtargetmodel",
+      "20260424070230_addcategorynormalizationandconcurrency_designer_ums_infrastructure_migrations",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_migrations_20260424070230_addcategorynormalizationandconcurrency_designer_cs"
+    ],
+    "25": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_common_datetimeservice_cs",
+      "datetimeservice_datetimeservice",
+      "datetimeservice_ums_infrastructure_services_common",
+      "idatetimeservice"
+    ],
+    "26": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_services_common_mailsenderservice_cs",
+      "iemailservice",
+      "mailsenderservice_mailsenderservice",
+      "mailsenderservice_ums_infrastructure_services_common"
+    ],
+    "27": [
+      "appclaim_appclaim",
+      "appclaim_ums_infrastructure_identity_constants",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_constants_appclaim_cs"
+    ],
+    "28": [
+      "approles_approles",
+      "approles_ums_infrastructure_identity_constants",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_identity_constants_approles_cs"
+    ],
+    "29": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_persistence_constants_schemanames_cs",
+      "schemanames_schemanames",
+      "schemanames_ums_infrastructure_persistence_constants"
+    ],
+    "30": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_infrastructure_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.1,
+    "1": 0.1,
+    "2": 0.13,
+    "3": 0.18,
+    "4": 0.14,
+    "5": 0.25,
+    "6": 0.18,
+    "7": 0.25,
+    "8": 0.36,
+    "9": 0.29,
+    "10": 0.38,
+    "11": 0.33,
+    "12": 0.4,
+    "13": 0.4,
+    "14": 0.4,
+    "15": 0.5,
+    "16": 0.5,
+    "17": 0.5,
+    "18": 0.5,
+    "19": 0.5,
+    "20": 0.5,
+    "21": 0.5,
+    "22": 0.5,
+    "23": 0.5,
+    "24": 0.5,
+    "25": 0.5,
+    "26": 0.5,
+    "27": 0.67,
+    "28": 0.67,
+    "29": 0.67,
+    "30": 1.0
+  },
+  "gods": [
+    {
+      "id": "userservice_userservice",
+      "label": "UserService",
+      "degree": 27
+    },
+    {
+      "id": "applicationdbcontext_applicationdbcontext",
+      "label": "ApplicationDbContext",
+      "degree": 14
+    },
+    {
+      "id": "roleservice_roleservice",
+      "label": "RoleService",
+      "degree": 11
+    },
+    {
+      "id": "currentuserservice_currentuserservice",
+      "label": "CurrentUserService",
+      "degree": 10
+    },
+    {
+      "id": "identitydbseeder_identitydbseeder",
+      "label": "IdentityDbSeeder",
+      "degree": 7
+    },
+    {
+      "id": "identityserviceextensions_identityserviceextensions",
+      "label": "IdentityServiceExtensions",
+      "degree": 6
+    },
+    {
+      "id": "servicecollectionextensions_servicecollectionextensions",
+      "label": "ServiceCollectionExtensions",
+      "degree": 5
+    },
+    {
+      "id": "permissionpolicyprovider_permissionpolicyprovider",
+      "label": "PermissionPolicyProvider",
+      "degree": 5
+    },
+    {
+      "id": "trimstringinterceptor_trimstringinterceptor",
+      "label": "TrimStringInterceptor",
+      "degree": 5
+    },
+    {
+      "id": "distributedcacheservice_distributedcacheservice",
+      "label": "DistributedCacheService",
+      "degree": 5
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `UMS.Infrastructure`, `UMS.Infrastructure.Extensions`, `UMS.Infrastructure.Identity` to the rest of the system?",
+      "why": "41 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `GetUserId / IUserService` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `ApplicationDbContext / AddOutboxMessage` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `CurrentUserMiddleware / InvokeAsync` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `DistributedCacheService / Remove` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.14 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "labels": {
+    "0": "GetUserId / IUserService",
+    "1": "ApplicationDbContext / AddOutboxMessage",
+    "2": "CurrentUserMiddleware / InvokeAsync",
+    "3": "IdentityServiceExtensions / AddIdentityServices",
+    "4": "DistributedCacheService / Remove",
+    "5": "IRoleService / RoleService",
+    "6": "InitiailDb / Down",
+    "7": "ApplicationDbSeeder / CheckAndApplyPendingMigrationAsync",
+    "8": "IdentityDbSeeder / AssignPermissionsToRoleAsync",
+    "9": "IAuthorizationPolicyProvider / PermissionPolicyProvider",
+    "10": "SaveChangesInterceptor / TrimStringInterceptor",
+    "11": "IFileStorageService / LocalFileStorageService",
+    "12": "AuthorizationHandler / PermissionAuthorizationHandler",
+    "13": "ApplicationDbContextModelSnapshot / BuildModel",
+    "14": "CategoryConfiguration / Configure",
+    "15": "SeedUserConfiguration / SeedUsersConfiguration",
+    "16": "ApplicationRole / IdentityRole",
+    "17": "ApplicationRoleClaim / IdentityRoleClaim",
+    "18": "ApplicationUser / IdentityUser",
+    "19": "ApplicationUserClaim / IdentityUserClaim",
+    "20": "ApplicationUserLogin / IdentityUserLogin",
+    "21": "ApplicationUserRole / IdentityUserRole",
+    "22": "IAuthorizationRequirement / PermissionRequirement",
+    "23": "InitiailDb / BuildTargetModel",
+    "24": "AddCategoryNormalizationAndConcurrency / BuildTargetModel",
+    "25": "DateTimeService / IDateTimeService",
+    "26": "IEmailService / MailSenderService",
+    "27": "AppClaim",
+    "28": "AppRoles",
+    "29": "SchemaNames",
+    "30": "Community 30"
+  }
+}

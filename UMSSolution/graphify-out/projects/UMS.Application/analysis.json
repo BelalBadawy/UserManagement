@@ -1,0 +1,906 @@
+{
+  "communities": {
+    "0": [
+      "abstractvalidator",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_pagination_pagedfiltervalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_create_createcategorycommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_delete_deletecategorycommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_update_updatecategorycommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategoriespaged_getcategoriespagedqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategoriespagedadmin_getcategoriespagedadminqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategorybyid_getcategorybyidqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategorybyidadmin_getcategorybyidadminqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_createrole_createrolecommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_deleterole_deleterolecommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_updaterole_updaterolecommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_updaterolepermissions_updaterolepermissionscommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_queries_getpermissions_getpermissionsqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_queries_getrolebyid_getrolebyidqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_changeuserstatus_changeuserstatusvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemail_confirmemailvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemailchange_confirmemailchangevalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmtwofactorauth_confirmtwofactorauthvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_disabletwofactorauth_disabletwofactorauthvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_enabletwofactorauth_enabletwofactorauthvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_lockuser_lockuservalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_logout_logoutcommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_resendconfirmationemail_resendconfirmationemailvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_unlockuser_unlockuservalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuser_updateusercommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuserroles_updateuserrolescommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_userregistration_userregistrationcommandvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserbyid_getuserbyidqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserrolesqueryvalidator_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserspaged_getuserspagedqueryvalidator_cs",
+      "changeuserstatusvalidator_changeuserstatusvalidator",
+      "changeuserstatusvalidator_ums_application_features_users_commands",
+      "confirmemailchangevalidator_confirmemailchangevalidator",
+      "confirmemailchangevalidator_ums_application_features_users_commands",
+      "confirmemailvalidator_confirmemailvalidator",
+      "confirmemailvalidator_ums_application_features_users_commands",
+      "confirmtwofactorauthvalidator_confirmtwofactorauthvalidator",
+      "confirmtwofactorauthvalidator_ums_application_features_users_commands_confirmtwofactorauth",
+      "createcategorycommandvalidator_createcategorycommandvalidator",
+      "createcategorycommandvalidator_ums_application_features_categories_commands_create",
+      "createrolecommandvalidator_createrolecommandvalidator",
+      "createrolecommandvalidator_ums_application_features_roles_commands",
+      "deletecategorycommandvalidator_deletecategorycommandvalidator",
+      "deletecategorycommandvalidator_ums_application_features_categories_commands_delete",
+      "deleterolecommandvalidator_deleterolecommandvalidator",
+      "deleterolecommandvalidator_ums_application_features_roles_commands",
+      "disabletwofactorauthvalidator_disabletwofactorauthvalidator",
+      "disabletwofactorauthvalidator_ums_application_features_users_commands_disabletwofactorauth",
+      "enabletwofactorauthvalidator_enabletwofactorauthvalidator",
+      "enabletwofactorauthvalidator_ums_application_features_users_commands_enabletwofactorauth",
+      "getcategoriespagedadminqueryvalidator_getcategoriespagedadminqueryvalidator",
+      "getcategoriespagedadminqueryvalidator_ums_application_features_categories_queries_getcategoriespagedadmin",
+      "getcategoriespagedqueryvalidator_getcategoriespagedqueryvalidator",
+      "getcategoriespagedqueryvalidator_ums_application_features_categories_queries_getcategoriespaged",
+      "getcategorybyidadminqueryvalidator_getcategorybyidadminqueryvalidator",
+      "getcategorybyidadminqueryvalidator_ums_application_features_categories_queries_getcategorybyidadmin",
+      "getcategorybyidqueryvalidator_getcategorybyidqueryvalidator",
+      "getcategorybyidqueryvalidator_ums_application_features_categories_queries_getcategorybyid",
+      "getpermissionsqueryvalidator_getpermissionsqueryvalidator",
+      "getpermissionsqueryvalidator_ums_application_features_roles_queries",
+      "getrolebyidqueryvalidator_getrolebyidqueryvalidator",
+      "getrolebyidqueryvalidator_ums_application_features_roles_queries",
+      "getuserbyidqueryvalidator_getuserbyidqueryvalidator",
+      "getuserbyidqueryvalidator_ums_application_features_users_queries",
+      "getuserrolesqueryvalidator_getuserrolesqueryvalidator",
+      "getuserrolesqueryvalidator_ums_application_features_users_queries",
+      "getuserspagedqueryvalidator_getuserspagedqueryvalidator",
+      "getuserspagedqueryvalidator_ums_application_features_users_queries",
+      "lockuservalidator_lockuservalidator",
+      "lockuservalidator_ums_application_features_users_commands",
+      "logoutcommandvalidator_logoutcommandvalidator",
+      "logoutcommandvalidator_ums_application_features_users_commands_logout",
+      "pagedfiltervalidator_pagedfiltervalidator",
+      "pagedfiltervalidator_ums_application_dtos_pagination",
+      "resendconfirmationemailvalidator_resendconfirmationemailvalidator",
+      "resendconfirmationemailvalidator_ums_application_features_users_commands",
+      "unlockuservalidator_ums_application_features_users_commands",
+      "unlockuservalidator_unlockuservalidator",
+      "updatecategorycommandvalidator_ums_application_features_categories_commands_update",
+      "updatecategorycommandvalidator_updatecategorycommandvalidator",
+      "updaterolecommandvalidator_ums_application_features_roles_commands",
+      "updaterolecommandvalidator_updaterolecommandvalidator",
+      "updaterolepermissionscommandvalidator_ums_application_features_roles_commands",
+      "updaterolepermissionscommandvalidator_updaterolepermissionscommandvalidator",
+      "updateusercommandvalidator_ums_application_features_users_commands",
+      "updateusercommandvalidator_updateusercommandvalidator",
+      "updateuserrolescommandvalidator_ums_application_features_users_commands",
+      "updateuserrolescommandvalidator_updateuserrolescommandvalidator",
+      "userregistrationcommandvalidator_ums_application_features_users_commands",
+      "userregistrationcommandvalidator_userregistrationcommandvalidator"
+    ],
+    "1": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_pagination_pagedresult_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategoriespaged_getcategoriespagedquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategoriespagedadmin_getcategoriespagedadminquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_queries_getall_getrolesquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemail_confirmemailcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_disabletwofactorauth_disabletwofactorauthcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_enabletwofactorauth_enabletwofactorauthcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_generatenew2farecoverycodes_generatenew2farecoverycodescommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_lockuser_lockusercommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_resendconfirmationemail_resendconfirmationemailcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuserroles_updateuserrolescommand_cs",
+      "confirmemailcommand_confirmemailcommand",
+      "confirmemailcommand_confirmemailcommandhandler",
+      "confirmemailcommand_confirmemailcommandhandler_handle",
+      "confirmemailcommand_ums_application_features_users_commands",
+      "disabletwofactorauthcommand_disabletwofactorauthcommand",
+      "disabletwofactorauthcommand_disabletwofactorauthcommandhandler",
+      "disabletwofactorauthcommand_disabletwofactorauthcommandhandler_handle",
+      "disabletwofactorauthcommand_ums_application_features_users_commands_disabletwofactorauth",
+      "enabletwofactorauthcommand_enabletwofactorauthcommand",
+      "enabletwofactorauthcommand_enabletwofactorauthcommandhandler",
+      "enabletwofactorauthcommand_enabletwofactorauthcommandhandler_handle",
+      "enabletwofactorauthcommand_ums_application_features_users_commands_enabletwofactorauth",
+      "generatenew2farecoverycodescommand_generatenew2farecoverycodescommand",
+      "generatenew2farecoverycodescommand_ums_application_features_users_commands",
+      "getcategoriespagedadminquery_getcategoriespagedadminquery",
+      "getcategoriespagedadminquery_getcategoriespagedadminqueryhandler",
+      "getcategoriespagedadminquery_getcategoriespagedadminqueryhandler_handle",
+      "getcategoriespagedadminquery_ums_application_features_categories_queries_getcategoriespagedadmin",
+      "getcategoriespagedquery_getcategoriespagedquery",
+      "getcategoriespagedquery_getcategoriespagedqueryhandler",
+      "getcategoriespagedquery_getcategoriespagedqueryhandler_handle",
+      "getcategoriespagedquery_ums_application_features_categories_queries_getcategoriespaged",
+      "getrolesquery_getrolesquery",
+      "getrolesquery_ums_application_features_roles_queries",
+      "irequest",
+      "iuserservice_iuserservice_confirmemailasync",
+      "iuserservice_iuserservice_disabletwofactorauthasync",
+      "iuserservice_iuserservice_enabletwofactorauthasync",
+      "iuserservice_iuserservice_lockuserasync",
+      "iuserservice_iuserservice_resendconfirmationemailasync",
+      "iuserservice_iuserservice_updateuserrolesasync",
+      "ivalidateme",
+      "lockusercommand_lockusercommand",
+      "lockusercommand_lockusercommandhandler",
+      "lockusercommand_lockusercommandhandler_handle",
+      "lockusercommand_ums_application_features_users_commands",
+      "pagedresult_pagedresult",
+      "pagedresult_pagedresult_create",
+      "pagedresult_ums_application_dtos_pagination",
+      "resendconfirmationemailcommand_resendconfirmationemailcommand",
+      "resendconfirmationemailcommand_resendconfirmationemailcommandhandler",
+      "resendconfirmationemailcommand_resendconfirmationemailcommandhandler_handle",
+      "resendconfirmationemailcommand_ums_application_features_users_commands",
+      "updateuserrolescommand_ums_application_features_users_commands",
+      "updateuserrolescommand_updateuserrolescommand",
+      "updateuserrolescommand_updateuserrolescommandhandler",
+      "updateuserrolescommand_updateuserrolescommandhandler_handle"
+    ],
+    "2": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_wrappers_responsewrapper_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_wrappers_responsewrapperextension_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_categorywriteguards_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_iapplicationdbcontext_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_icacheservice_cs",
+      "categorywriteguards_categorywriteguards",
+      "categorywriteguards_categorywriteguards_getuniqueconstraintmessage",
+      "categorywriteguards_categorywriteguards_isuniqueconstraintviolation",
+      "categorywriteguards_categorywriteguards_normalizekey",
+      "categorywriteguards_categorywriteguards_validateparentassignmentasync",
+      "createcategorycommand_createcategorycommandhandler_handle",
+      "deletecategorycommand_deletecategorycommandhandler_handle",
+      "getcategorybyidadmin_getcategorybyidadminqueryhandler_handle",
+      "getcategorybyidquery_getcategorybyidqueryhandler_handle",
+      "iapplicationdbcontext_iapplicationdbcontext",
+      "iapplicationdbcontext_iapplicationdbcontext_addoutboxmessage",
+      "iapplicationdbcontext_iapplicationdbcontext_committransaction",
+      "iapplicationdbcontext_iapplicationdbcontext_rollbacktransaction",
+      "iapplicationdbcontext_iapplicationdbcontext_savechangesasync",
+      "iapplicationdbcontext_iapplicationdbcontext_setoriginalrowversion",
+      "iapplicationdbcontext_iapplicationdbcontext_starttransaction",
+      "iapplicationdbcontext_ums_application_interfaces_common",
+      "icacheservice_icacheservice",
+      "icacheservice_icacheservice_remove",
+      "icacheservice_icacheservice_set",
+      "icacheservice_icacheservice_tryget",
+      "icacheservice_ums_application_interfaces_common",
+      "iresponsewrapper",
+      "responsewrapper_responsewrapper",
+      "responsewrapper_responsewrapper_fail",
+      "responsewrapper_responsewrapper_failasync",
+      "responsewrapper_responsewrapper_success",
+      "responsewrapper_responsewrapper_successasync",
+      "responsewrapper_ums_application_dtos_wrappers",
+      "responsewrapperextension_responsewrapperextension",
+      "responsewrapperextension_responsewrapperextension_toresponse",
+      "responsewrapperextension_ums_application_dtos_wrappers",
+      "updatecategorycommand_updatecategorycommandhandler_handle"
+    ],
+    "3": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_deleterole_deleterolecommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_updaterole_updaterolecommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_updaterolepermissions_updaterolepermissionscommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_iroleservice_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_queries_getpermissions_getpermissionsquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_queries_getrolebyid_getrolebyidquery_cs",
+      "deleterolecommand_deleterolecommand",
+      "deleterolecommand_deleterolecommandhandler",
+      "deleterolecommand_deleterolecommandhandler_handle",
+      "deleterolecommand_ums_application_features_roles_commands",
+      "getpermissionsquery_getpermissionsquery",
+      "getpermissionsquery_getpermissionsqueryhandler",
+      "getpermissionsquery_getpermissionsqueryhandler_handle",
+      "getpermissionsquery_ums_application_features_roles_queries",
+      "getrolebyidquery_getrolebyidquery",
+      "getrolebyidquery_getrolebyidqueryhandler",
+      "getrolebyidquery_getrolebyidqueryhandler_handle",
+      "getrolebyidquery_ums_application_features_roles_queries",
+      "getrolesquery_getrolesqueryhandler",
+      "getrolesquery_getrolesqueryhandler_handle",
+      "iroleservice_iroleservice",
+      "iroleservice_iroleservice_deleteroleasync",
+      "iroleservice_iroleservice_getpermissionsasync",
+      "iroleservice_iroleservice_getrolebyidasync",
+      "iroleservice_iroleservice_getrolesasync",
+      "iroleservice_iroleservice_updateroleasync",
+      "iroleservice_iroleservice_updaterolepermissionsasync",
+      "iroleservice_ums_application_features_roles",
+      "updaterolecommand_ums_application_features_roles_commands",
+      "updaterolecommand_updaterolecommand",
+      "updaterolecommand_updaterolecommandhandler",
+      "updaterolecommand_updaterolecommandhandler_handle",
+      "updaterolecommand_updaterolerequest",
+      "updaterolepermissionscommand_ums_application_features_roles_commands",
+      "updaterolepermissionscommand_updateroleclaimsrequest",
+      "updaterolepermissionscommand_updaterolepermissionscommand",
+      "updaterolepermissionscommand_updaterolepermissionscommandhandler",
+      "updaterolepermissionscommand_updaterolepermissionscommandhandler_handle"
+    ],
+    "4": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_changeuserstatus_changeuserstatuscommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmtwofactorauth_confirmtwofactorauthcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_setuptwofactorauth_setuptwofactorauthcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_userregistration_userregistrationcommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_iuserservice_cs",
+      "changeuserstatuscommand_changeuserstatuscommand",
+      "changeuserstatuscommand_changeuserstatuscommandhandler",
+      "changeuserstatuscommand_changeuserstatuscommandhandler_handle",
+      "changeuserstatuscommand_ums_application_features_users_commands",
+      "confirmtwofactorauthcommand_confirmtwofactorauthcommand",
+      "confirmtwofactorauthcommand_confirmtwofactorauthcommandhandler",
+      "confirmtwofactorauthcommand_confirmtwofactorauthcommandhandler_handle",
+      "confirmtwofactorauthcommand_ums_application_features_users_commands_confirmtwofactorauth",
+      "generatenew2farecoverycodescommand_generatenew2farecoverycodescommandhandler",
+      "generatenew2farecoverycodescommand_generatenew2farecoverycodescommandhandler_handle",
+      "iuserservice_iuserservice",
+      "iuserservice_iuserservice_changeuserpasswordasync",
+      "iuserservice_iuserservice_changeuserstatusasync",
+      "iuserservice_iuserservice_confirmtwofactorauthasync",
+      "iuserservice_iuserservice_forgotpasswordasync",
+      "iuserservice_iuserservice_generatechangeemailtokenasync",
+      "iuserservice_iuserservice_generatenew2farecoverycodesasync",
+      "iuserservice_iuserservice_registeruserasync",
+      "iuserservice_iuserservice_resetpasswordasync",
+      "iuserservice_iuserservice_setuptwofactorauthasync",
+      "iuserservice_ums_application_features_users",
+      "setuptwofactorauthcommand_setuptwofactorauthcommand",
+      "setuptwofactorauthcommand_setuptwofactorauthcommandhandler",
+      "setuptwofactorauthcommand_setuptwofactorauthcommandhandler_handle",
+      "setuptwofactorauthcommand_ums_application_features_users_commands_setuptwofactorauth",
+      "userregistrationcommand_ums_application_features_users_commands",
+      "userregistrationcommand_userregistrationcommand",
+      "userregistrationcommand_userregistrationcommandhandler",
+      "userregistrationcommand_userregistrationcommandhandler_handle"
+    ],
+    "5": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_create_createcategorycommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_delete_deletecategorycommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_commands_update_updatecategorycommand_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getallcategoriesforlist_getallcategoriesforlistquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategoriesadmin_getallcategoriesadminquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategorybyid_getcategorybyidquery_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getcategorybyidadmin_getcategorybyidadmin_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getmyprofile_getmyprofilequery_cs",
+      "createcategorycommand_createcategorycommandhandler",
+      "createcategorycommand_createcategoryrequest",
+      "createcategorycommand_ums_application_features_categories_commands_create",
+      "deletecategorycommand_deletecategorycommandhandler",
+      "deletecategorycommand_ums_application_features_categories_commands_delete",
+      "getallcategoriesadminquery_getallcategoriesadminqueryhandler",
+      "getallcategoriesadminquery_getallcategoriesadminqueryhandler_handle",
+      "getallcategoriesadminquery_ums_application_features_categories_queries_getcategoriesadmin",
+      "getallcategoriesforlistquery_getallcategoriesforlistqueryhandler",
+      "getallcategoriesforlistquery_getallcategoriesforlistqueryhandler_handle",
+      "getallcategoriesforlistquery_ums_application_features_categories_queries_getallcategoriesforlist",
+      "getcategorybyidadmin_getcategorybyidadminqueryhandler",
+      "getcategorybyidadmin_ums_application_features_categories_queries_getcategorybyidadmin",
+      "getcategorybyidquery_getcategorybyidqueryhandler",
+      "getcategorybyidquery_ums_application_features_categories_queries_getcategorybyid",
+      "getmyprofilequery_getmyprofilequery",
+      "getmyprofilequery_getmyprofilequeryhandler",
+      "getmyprofilequery_getmyprofilequeryhandler_handle",
+      "getmyprofilequery_ums_application_features_users_queries_getmyprofile",
+      "irequesthandler",
+      "iuserservice_iuserservice_getmyprofileasync",
+      "updatecategorycommand_ums_application_features_categories_commands_update",
+      "updatecategorycommand_updatecategorycommandhandler"
+    ],
+    "6": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_events_categorycreatedevent_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_events_categorydeletedevent_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_events_categoryupdatedevent_cs",
+      "categorycreatedevent_categorycreatedevent",
+      "categorycreatedevent_categorycreatedeventhandler",
+      "categorycreatedevent_categorycreatedeventhandler_handle",
+      "categorycreatedevent_ums_application_features_categories_events",
+      "categorydeletedevent_categorydeletedevent",
+      "categorydeletedevent_categorydeletedeventhandler",
+      "categorydeletedevent_categorydeletedeventhandler_handle",
+      "categorydeletedevent_ums_application_features_categories_events",
+      "categoryupdatedevent_categoryupdatedevent",
+      "categoryupdatedevent_categoryupdatedeventhandler",
+      "categoryupdatedevent_categoryupdatedeventhandler_handle",
+      "categoryupdatedevent_ums_application_features_categories_events",
+      "inotification",
+      "inotificationhandler"
+    ],
+    "7": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_behaviors_validationfailurefactory_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_behaviors_validationpipelinebehavior_cs",
+      "ipipelinebehavior",
+      "ivalidationfailurefactory",
+      "validationfailurefactory_ums_application_behaviors",
+      "validationfailurefactory_validationfailurefactory",
+      "validationfailurefactory_validationfailurefactory_buildfactory",
+      "validationfailurefactory_validationfailurefactory_createfailure",
+      "validationpipelinebehavior_ums_application_behaviors",
+      "validationpipelinebehavior_validationpipelinebehavior",
+      "validationpipelinebehavior_validationpipelinebehavior_handle"
+    ],
+    "8": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_icurrentuserservice_cs",
+      "icurrentuserservice_icurrentuserservice",
+      "icurrentuserservice_icurrentuserservice_getclaims",
+      "icurrentuserservice_icurrentuserservice_getroles",
+      "icurrentuserservice_icurrentuserservice_getuseremail",
+      "icurrentuserservice_icurrentuserservice_getuserid",
+      "icurrentuserservice_icurrentuserservice_hasclaim",
+      "icurrentuserservice_icurrentuserservice_hasrole",
+      "icurrentuserservice_icurrentuserservice_isauthenticated",
+      "icurrentuserservice_icurrentuserservice_setcurrentuser",
+      "icurrentuserservice_ums_application_interfaces_common"
+    ],
+    "9": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_categorycachekeys_cs",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getallcategories_getallcategoriesquery_cs",
+      "categorycachekeys_categorycachekeys",
+      "categorycachekeys_categorycachekeys_getall",
+      "categorycachekeys_ums_application_features_categories",
+      "getallcategoriesquery_getallcategoriesqueryhandler",
+      "getallcategoriesquery_getallcategoriesqueryhandler_handle",
+      "getallcategoriesquery_ums_application_features_categories_queries_getallcategories"
+    ],
+    "10": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_iapirequest_cs",
+      "iapirequest_iapirequest",
+      "iapirequest_iapirequest_deleteasync",
+      "iapirequest_iapirequest_getallasync",
+      "iapirequest_iapirequest_getasync",
+      "iapirequest_iapirequest_postasync",
+      "iapirequest_iapirequest_updateasync",
+      "iapirequest_ums_application_interfaces_common"
+    ],
+    "11": [
+      "apppermissions_appaction",
+      "apppermissions_appfeature",
+      "apppermissions_apppermissions",
+      "apppermissions_appservice",
+      "apppermissions_namefor",
+      "apppermissions_ums_application_authorization",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_authorization_apppermissions_cs"
+    ],
+    "12": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_commands_createrole_createrolecommand_cs",
+      "createrolecommand_createrolecommand",
+      "createrolecommand_createrolecommandhandler",
+      "createrolecommand_createrolecommandhandler_handle",
+      "createrolecommand_createrolerequest",
+      "createrolecommand_ums_application_features_roles_commands",
+      "iroleservice_iroleservice_createroleasync"
+    ],
+    "13": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_unlockuser_unlockusercommand_cs",
+      "iuserservice_iuserservice_unlockuserasync",
+      "unlockusercommand_ums_application_features_users_commands",
+      "unlockusercommand_unlockusercommand",
+      "unlockusercommand_unlockusercommandhandler",
+      "unlockusercommand_unlockusercommandhandler_handle"
+    ],
+    "14": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuser_updateusercommand_cs",
+      "iuserservice_iuserservice_updateuserasync",
+      "updateusercommand_ums_application_features_users_commands",
+      "updateusercommand_updateusercommand",
+      "updateusercommand_updateusercommandhandler",
+      "updateusercommand_updateusercommandhandler_handle"
+    ],
+    "15": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserspaged_getuserspagedquery_cs",
+      "getuserspagedquery_getuserspagedquery",
+      "getuserspagedquery_getuserspagedqueryhandler",
+      "getuserspagedquery_getuserspagedqueryhandler_handle",
+      "getuserspagedquery_ums_application_features_users_queries",
+      "iuserservice_iuserservice_getuserspagedqueryasync"
+    ],
+    "16": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemailchange_confirmemailchangecommand_cs",
+      "confirmemailchangecommand_confirmemailchangecommand",
+      "confirmemailchangecommand_confirmemailchangecommandhandler",
+      "confirmemailchangecommand_confirmemailchangecommandhandler_handle",
+      "confirmemailchangecommand_ums_application_features_users_commands",
+      "iuserservice_iuserservice_confirmemailchangeasync"
+    ],
+    "17": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_logout_logoutcommand_cs",
+      "iuserservice_iuserservice_logoutasync",
+      "logoutcommand_logoutcommand",
+      "logoutcommand_logoutcommandhandler",
+      "logoutcommand_logoutcommandhandler_handle",
+      "logoutcommand_ums_application_features_users_commands_logout"
+    ],
+    "18": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserrolesquery_cs",
+      "getuserrolesquery_getuserrolesquery",
+      "getuserrolesquery_getuserrolesqueryhandler",
+      "getuserrolesquery_getuserrolesqueryhandler_handle",
+      "getuserrolesquery_ums_application_features_users_queries",
+      "iuserservice_iuserservice_getuserrolesasync"
+    ],
+    "19": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_queries_getuserbyid_getuserbyidquery_cs",
+      "getuserbyidquery_getuserbyidquery",
+      "getuserbyidquery_getuserbyidqueryhandler",
+      "getuserbyidquery_getuserbyidqueryhandler_handle",
+      "getuserbyidquery_ums_application_features_users_queries",
+      "iuserservice_iuserservice_getuserbyidasync"
+    ],
+    "20": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_isessionwrapper_cs",
+      "isessionwrapper_isessionwrapper",
+      "isessionwrapper_isessionwrapper_getfromsession",
+      "isessionwrapper_isessionwrapper_removefromsession",
+      "isessionwrapper_isessionwrapper_setinsession",
+      "isessionwrapper_ums_application_interfaces_common"
+    ],
+    "21": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_ifilestorageservice_cs",
+      "ifilestorageservice_ifilestorageservice",
+      "ifilestorageservice_ifilestorageservice_deletefile",
+      "ifilestorageservice_ifilestorageservice_savefileasync",
+      "ifilestorageservice_ums_application_interfaces_common"
+    ],
+    "22": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_servicecollectionextensions_cs",
+      "servicecollectionextensions_servicecollectionextensions",
+      "servicecollectionextensions_servicecollectionextensions_addapplicationservices",
+      "servicecollectionextensions_ums_application"
+    ],
+    "23": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_behaviors_ivalidationfailurefactory_cs",
+      "ivalidationfailurefactory_ivalidationfailurefactory",
+      "ivalidationfailurefactory_ivalidationfailurefactory_createfailure",
+      "ivalidationfailurefactory_ums_application_behaviors"
+    ],
+    "24": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_iemailservice_cs",
+      "iemailservice_iemailservice",
+      "iemailservice_iemailservice_sendasync",
+      "iemailservice_ums_application_interfaces_common"
+    ],
+    "25": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_cache_cacheconfiguration_cs",
+      "cacheconfiguration_cacheconfiguration",
+      "cacheconfiguration_ums_application_dtos_cache"
+    ],
+    "26": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_common_filedata_cs",
+      "filedata_filedata",
+      "filedata_ums_application_dtos_common"
+    ],
+    "27": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_common_sd_cs",
+      "sd_sd",
+      "sd_ums_application_dtos_common"
+    ],
+    "28": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_email_emailconfiguration_cs",
+      "emailconfiguration_emailconfiguration",
+      "emailconfiguration_ums_application_dtos_email"
+    ],
+    "29": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_email_sendemaildto_cs",
+      "sendemaildto_sendemaildto",
+      "sendemaildto_ums_application_dtos_email"
+    ],
+    "30": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_jwt_jwtconfiguration_cs",
+      "jwtconfiguration_jwtconfiguration",
+      "jwtconfiguration_ums_application_dtos_jwt"
+    ],
+    "31": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_pagination_pagedfilterrequest_cs",
+      "pagedfilterrequest_pagedfilterrequest",
+      "pagedfilterrequest_ums_application_dtos_pagination"
+    ],
+    "32": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_wrappers_iresponsewrapper_cs",
+      "iresponsewrapper_iresponsewrapper",
+      "iresponsewrapper_ums_application_dtos_wrappers"
+    ],
+    "33": [
+      "appenums_appenums",
+      "appenums_ums_application_enums",
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_enums_appenums_cs"
+    ],
+    "34": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_roleclaimresponse_cs",
+      "roleclaimresponse_roleclaimresponse",
+      "roleclaimresponse_ums_application_features_roles"
+    ],
+    "35": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_roleclaimviewmodel_cs",
+      "roleclaimviewmodel_roleclaimviewmodel",
+      "roleclaimviewmodel_ums_application_features_roles"
+    ],
+    "36": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_roles_roleresponse_cs",
+      "roleresponse_roleresponse",
+      "roleresponse_ums_application_features_roles"
+    ],
+    "37": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_changeuserstatus_changeuserstatusrequest_cs",
+      "changeuserstatusrequest_changeuserstatusrequest",
+      "changeuserstatusrequest_ums_application_features_users_commands"
+    ],
+    "38": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemail_confirmemailrequest_cs",
+      "confirmemailrequest_confirmemailrequest",
+      "confirmemailrequest_ums_application_features_users_commands"
+    ],
+    "39": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_confirmemailchange_confirmemailchangerequest_cs",
+      "confirmemailchangerequest_confirmemailchangerequest",
+      "confirmemailchangerequest_ums_application_features_users_commands"
+    ],
+    "40": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_lockuser_lockuserrequest_cs",
+      "lockuserrequest_lockuserrequest",
+      "lockuserrequest_ums_application_features_users_commands"
+    ],
+    "41": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_resendconfirmationemail_resendconfirmationemailrequest_cs",
+      "resendconfirmationemailrequest_resendconfirmationemailrequest",
+      "resendconfirmationemailrequest_ums_application_features_users_commands"
+    ],
+    "42": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_unlockuser_unlockuserrequest_cs",
+      "unlockuserrequest_ums_application_features_users_commands",
+      "unlockuserrequest_unlockuserrequest"
+    ],
+    "43": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuser_updateuserrequest_cs",
+      "updateuserrequest_ums_application_features_users_commands",
+      "updateuserrequest_updateuserrequest"
+    ],
+    "44": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_updateuserroles_updateuserrolesrequest_cs",
+      "updateuserrolesrequest_ums_application_features_users_commands",
+      "updateuserrolesrequest_updateuserrolesrequest"
+    ],
+    "45": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_userregistration_userregistrationrequest_cs",
+      "userregistrationrequest_ums_application_features_users_commands",
+      "userregistrationrequest_userregistrationrequest"
+    ],
+    "46": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_models_requests_userroleviewmodel_cs",
+      "userroleviewmodel_ums_application_features_users_models_requests",
+      "userroleviewmodel_userroleviewmodel"
+    ],
+    "47": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_models_responses_userresponse_cs",
+      "userresponse_ums_application_features_users_models_responses",
+      "userresponse_userresponse"
+    ],
+    "48": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_icacheablemediatorquery_cs",
+      "icacheablemediatorquery_icacheablemediatorquery",
+      "icacheablemediatorquery_ums_application_interfaces_common"
+    ],
+    "49": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_idatetimeservice_cs",
+      "idatetimeservice_idatetimeservice",
+      "idatetimeservice_ums_application_interfaces_common"
+    ],
+    "50": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_dtos_twofactor_twofactoroptions_cs",
+      "twofactoroptions_twofactoroptions"
+    ],
+    "51": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_categories_queries_getallcategoriesforlist_categorylookupdto_cs",
+      "categorylookupdto_ums_application_features_categories_queries_getallcategoriesforlist"
+    ],
+    "52": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_disabletwofactorauth_disabletwofactorauthrequest_cs",
+      "disabletwofactorauthrequest_disabletwofactorauthrequest"
+    ],
+    "53": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_commands_logout_logoutrequest_cs",
+      "logoutrequest_logoutrequest"
+    ],
+    "54": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_models_requests_twofactorcoderequest_cs",
+      "twofactorcoderequest_twofactorcoderequest"
+    ],
+    "55": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_models_responses_profileresponse_cs",
+      "profileresponse_profileresponse"
+    ],
+    "56": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_features_users_models_responses_twofactorauthviewmodel_cs",
+      "twofactorauthviewmodel_twofactorauthviewmodel"
+    ],
+    "57": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_interfaces_common_ivalidateme_cs",
+      "ivalidateme_ivalidateme"
+    ],
+    "58": [
+      "c_myfolder_myapps_usermanagement_umssolution_ums_application_globalusings_cs"
+    ]
+  },
+  "cohesion": {
+    "0": 0.02,
+    "1": 0.04,
+    "2": 0.08,
+    "3": 0.05,
+    "4": 0.06,
+    "5": 0.06,
+    "6": 0.13,
+    "7": 0.18,
+    "8": 0.18,
+    "9": 0.25,
+    "10": 0.25,
+    "11": 0.29,
+    "12": 0.29,
+    "13": 0.33,
+    "14": 0.33,
+    "15": 0.33,
+    "16": 0.33,
+    "17": 0.33,
+    "18": 0.33,
+    "19": 0.33,
+    "20": 0.33,
+    "21": 0.4,
+    "22": 0.5,
+    "23": 0.5,
+    "24": 0.5,
+    "25": 0.67,
+    "26": 0.67,
+    "27": 0.67,
+    "28": 0.67,
+    "29": 0.67,
+    "30": 0.67,
+    "31": 0.67,
+    "32": 1.0,
+    "33": 0.67,
+    "34": 0.67,
+    "35": 0.67,
+    "36": 0.67,
+    "37": 0.67,
+    "38": 0.67,
+    "39": 0.67,
+    "40": 0.67,
+    "41": 0.67,
+    "42": 0.67,
+    "43": 0.67,
+    "44": 0.67,
+    "45": 0.67,
+    "46": 0.67,
+    "47": 0.67,
+    "48": 0.67,
+    "49": 0.67,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0
+  },
+  "gods": [
+    {
+      "id": "iuserservice_iuserservice",
+      "label": "IUserService",
+      "degree": 24
+    },
+    {
+      "id": "icurrentuserservice_icurrentuserservice",
+      "label": "ICurrentUserService",
+      "degree": 9
+    },
+    {
+      "id": "iroleservice_iroleservice",
+      "label": "IRoleService",
+      "degree": 8
+    },
+    {
+      "id": "iapplicationdbcontext_iapplicationdbcontext",
+      "label": "IApplicationDbContext",
+      "degree": 7
+    },
+    {
+      "id": "responsewrapper_responsewrapper",
+      "label": "ResponseWrapper",
+      "degree": 6
+    },
+    {
+      "id": "iapirequest_iapirequest",
+      "label": "IApiRequest",
+      "degree": 6
+    },
+    {
+      "id": "categorywriteguards_categorywriteguards",
+      "label": "CategoryWriteGuards",
+      "degree": 5
+    },
+    {
+      "id": "validationfailurefactory_validationfailurefactory",
+      "label": "ValidationFailureFactory",
+      "degree": 4
+    },
+    {
+      "id": "icacheservice_icacheservice",
+      "label": "ICacheService",
+      "degree": 4
+    },
+    {
+      "id": "isessionwrapper_isessionwrapper",
+      "label": "ISessionWrapper",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "GetAllCategoriesQueryHandler",
+      "target": "IRequestHandler",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Categories\\Queries\\GetAllCategories\\GetAllCategoriesQuery.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 5 \u2192 community 9"
+    },
+    {
+      "source": "GetCategoriesPagedQueryHandler",
+      "target": "IRequestHandler",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Categories\\Queries\\GetCategoriesPaged\\GetCategoriesPagedQuery.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 5 \u2192 community 1"
+    },
+    {
+      "source": "CreateRoleCommandHandler",
+      "target": "IRequestHandler",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Roles\\Commands\\CreateRole\\CreateRoleCommand.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 5 \u2192 community 12"
+    },
+    {
+      "source": "DeleteRoleCommandHandler",
+      "target": "IRequestHandler",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Roles\\Commands\\DeleteRole\\DeleteRoleCommand.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 5 \u2192 community 3"
+    },
+    {
+      "source": "ChangeUserStatusCommandHandler",
+      "target": "IRequestHandler",
+      "source_files": [
+        "C:\\_MyFolder\\MyApps\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Users\\Commands\\ChangeUserStatus\\ChangeUserStatusCommand.cs",
+        ""
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "inherits",
+      "note": "Bridges community 5 \u2192 community 4"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `UpdateCategoryCommandHandler` connect `CreateCategoryCommandHandler / CreateCategoryRequest` to `CategoryWriteGuards / GetUniqueConstraintMessage`?",
+      "why": "High betweenness centrality (0.024) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `CreateCategoryCommandHandler` connect `CreateCategoryCommandHandler / CreateCategoryRequest` to `CategoryWriteGuards / GetUniqueConstraintMessage`?",
+      "why": "High betweenness centrality (0.023) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `IUserService` connect `ChangeUserStatusCommand / ChangeUserStatusCommandHandler` to `ConfirmEmailCommand / ConfirmEmailCommandHandler`, `CreateCategoryCommandHandler / CreateCategoryRequest`, `UnlockUserAsync / UnlockUserCommand`, `UpdateUserAsync / UpdateUserCommand`, `GetUsersPagedQuery / GetUsersPagedQueryHandler`, `ConfirmEmailChangeCommand / ConfirmEmailChangeCommandHandler`, `LogoutAsync / LogoutCommand`, `GetUserRolesQuery / GetUserRolesQueryHandler`, `GetUserByIdQuery / GetUserByIdQueryHandler`?",
+      "why": "High betweenness centrality (0.021) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `UMS.Application`, `UMS.Application.Authorization`, `AppAction` to the rest of the system?",
+      "why": "152 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `AbstractValidator / ChangeUserStatusValidator` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.02 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `ConfirmEmailCommand / ConfirmEmailCommandHandler` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.04 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `CategoryWriteGuards / GetUniqueConstraintMessage` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "labels": {
+    "0": "AbstractValidator / ChangeUserStatusValidator",
+    "1": "ConfirmEmailCommand / ConfirmEmailCommandHandler",
+    "2": "CategoryWriteGuards / GetUniqueConstraintMessage",
+    "3": "DeleteRoleCommand / DeleteRoleCommandHandler",
+    "4": "ChangeUserStatusCommand / ChangeUserStatusCommandHandler",
+    "5": "CreateCategoryCommandHandler / CreateCategoryRequest",
+    "6": "CategoryCreatedEvent / CategoryCreatedEventHandler",
+    "7": "IPipelineBehavior / IValidationFailureFactory",
+    "8": "ICurrentUserService / GetClaims",
+    "9": "CategoryCacheKeys / GetAll",
+    "10": "IApiRequest / DeleteAsync",
+    "11": "AppAction / AppFeature",
+    "12": "CreateRoleCommand / CreateRoleCommandHandler",
+    "13": "UnlockUserAsync / UnlockUserCommand",
+    "14": "UpdateUserAsync / UpdateUserCommand",
+    "15": "GetUsersPagedQuery / GetUsersPagedQueryHandler",
+    "16": "ConfirmEmailChangeCommand / ConfirmEmailChangeCommandHandler",
+    "17": "LogoutAsync / LogoutCommand",
+    "18": "GetUserRolesQuery / GetUserRolesQueryHandler",
+    "19": "GetUserByIdQuery / GetUserByIdQueryHandler",
+    "20": "ISessionWrapper / GetFromSession",
+    "21": "IFileStorageService / DeleteFile",
+    "22": "ServiceCollectionExtensions / AddApplicationServices",
+    "23": "IValidationFailureFactory / CreateFailure",
+    "24": "IEmailService / SendAsync",
+    "25": "CacheConfiguration",
+    "26": "FileData",
+    "27": "SD",
+    "28": "EmailConfiguration",
+    "29": "SendEmailDto",
+    "30": "JwtConfiguration",
+    "31": "PagedFilterRequest",
+    "32": "IResponseWrapper",
+    "33": "AppEnums",
+    "34": "RoleClaimResponse",
+    "35": "RoleClaimViewModel",
+    "36": "RoleResponse",
+    "37": "ChangeUserStatusRequest",
+    "38": "ConfirmEmailRequest",
+    "39": "ConfirmEmailChangeRequest",
+    "40": "LockUserRequest",
+    "41": "ResendConfirmationEmailRequest",
+    "42": "UnlockUserRequest",
+    "43": "UpdateUserRequest",
+    "44": "UpdateUserRolesRequest",
+    "45": "UserRegistrationRequest",
+    "46": "UserRoleViewModel",
+    "47": "UserResponse",
+    "48": "ICacheAbleMediatorQuery",
+    "49": "IDateTimeService",
+    "50": "TwoFactorOptions",
+    "51": "Community 51",
+    "52": "DisableTwoFactorAuthRequest",
+    "53": "LogoutRequest",
+    "54": "TwoFactorCodeRequest",
+    "55": "ProfileResponse",
+    "56": "TwoFactorAuthViewModel",
+    "57": "IValidateMe",
+    "58": "Community 58"
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "nodes": [
+    {
+      "id": "1_jpg",
+      "label": "Banner Image 1",
+      "file_type": "image",
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "white_chair",
+      "label": "White Chair",
+      "file_type": "image",
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "folded_clothes_stack",
+      "label": "Folded Clothes Stack",
+      "file_type": "image",
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "minimalist_aesthetic",
+      "label": "Minimalist Aesthetic",
+      "file_type": "image",
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "wardrobe_or_lifestyle_promotion",
+      "label": "Wardrobe or Lifestyle Promotion",
+      "file_type": "image",
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "1_jpg",
+      "target": "white_chair",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "1_jpg",
+      "target": "folded_clothes_stack",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "1_jpg",
+      "target": "minimalist_aesthetic",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "1_jpg",
+      "target": "wardrobe_or_lifestyle_promotion",
+      "relation": "conceptually_related_to",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.25,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "folded_clothes_stack",
+      "target": "wardrobe_or_lifestyle_promotion",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "white_chair",
+      "target": "minimalist_aesthetic",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "minimalist_aesthetic",
+      "target": "wardrobe_or_lifestyle_promotion",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "UMS.API/wwwroot/images/banners/1.jpg",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
