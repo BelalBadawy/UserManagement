@@ -122,42 +122,8 @@ namespace UMS.Infrastructure.Identity
                       },
                       OnAuthenticationFailed = context =>
                       {
-                          if (context.Exception is SecurityTokenExpiredException)
-                          {
-                              context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                              context.Response.ContentType = "application/json";
-                              var result = JsonSerializer.Serialize(
-                                  ResponseWrapper.Fail("The token has expired. Please log in again.")
-                              );
-                              return context.Response.WriteAsync(result);
-                          }
-                          else if (context.Exception is ArgumentException && context.Exception.Message.Contains("IDX14100"))
-                          {
-                              context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                              context.Response.ContentType = "application/json";
-                              var result = JsonSerializer.Serialize(
-                                  ResponseWrapper.Fail("The provided token format is invalid.")
-                              );
-                              return context.Response.WriteAsync(result);
-                          }
-                          else if (context.Exception is SecurityTokenInvalidSignatureException)
-                          {
-                              context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                              context.Response.ContentType = "application/json";
-                              var result = JsonSerializer.Serialize(
-                                  ResponseWrapper.Fail("The token signature is invalid.")
-                              );
-                              return context.Response.WriteAsync(result);
-                          }
-                          else
-                          {
-                              context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                              context.Response.ContentType = "application/json";
-                              var result = JsonSerializer.Serialize(
-                                  ResponseWrapper.Fail("You are not authorized to access this resource.")
-                              );
-                              return context.Response.WriteAsync(result);
-                          }
+                          context.HttpContext.Items["AuthError"] = context.Exception;
+                          return Task.CompletedTask;
                       },
                       OnChallenge = context =>
                       {
@@ -166,7 +132,21 @@ namespace UMS.Infrastructure.Identity
                           {
                               context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                               context.Response.ContentType = "application/json";
-                              var result = JsonSerializer.Serialize(ResponseWrapper.Fail("You are not Authorized."));
+
+                              string errorMessage = "You are not Authorized.";
+                              if (context.HttpContext.Items.TryGetValue("AuthError", out var errorObj) && errorObj is Exception ex)
+                              {
+                                  if (ex is SecurityTokenExpiredException)
+                                      errorMessage = "The token has expired. Please log in again.";
+                                  else if (ex is ArgumentException && ex.Message.Contains("IDX14100"))
+                                      errorMessage = "The provided token format is invalid.";
+                                  else if (ex is SecurityTokenInvalidSignatureException)
+                                      errorMessage = "The token signature is invalid.";
+                                  else
+                                      errorMessage = "You are not authorized to access this resource.";
+                              }
+
+                              var result = JsonSerializer.Serialize(ResponseWrapper.Fail(errorMessage, (int)HttpStatusCode.Unauthorized));
                               return context.Response.WriteAsync(result);
                           }
 
@@ -177,7 +157,7 @@ namespace UMS.Infrastructure.Identity
                           context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                           context.Response.ContentType = "application/json";
                           var result = JsonSerializer.Serialize(
-                              ResponseWrapper.Fail("You are not authorized to access this resource."));
+                              ResponseWrapper.Fail("You are not authorized to access this resource.", (int)HttpStatusCode.Forbidden));
                           return context.Response.WriteAsync(result);
                       }
                   };

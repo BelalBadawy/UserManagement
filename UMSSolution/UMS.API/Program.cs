@@ -50,7 +50,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options.AddPreferredSecuritySchemes("Bearer");
-    }).RequireAuthorization();
+    });
+        //.RequireAuthorization();
 }
 else
 {
@@ -75,4 +76,3 @@ app.MapRoleEndpoints();
 app.MapUserEndpoints();
 app.Run();
 
-public partial class Program { }

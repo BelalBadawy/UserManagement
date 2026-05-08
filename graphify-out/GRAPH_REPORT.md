@@ -1,7 +1,7 @@
 # Graph Report - C:\_MyFolder\MyApps\UserManagement  (2026-05-01)
 
 ## Corpus Check
-- 304 files · ~278,046 words
+- 304 files · ~278,045 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -818,7 +818,7 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ValidationPipelineBehaviorTests` connect `Community 3` to `Community 0`?**
-  _High betweenness centrality (0.077) - this node is a cross-community bridge._
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
 - **What connects `Program`, `UMS.API`, `UMS.API.Endpoints` to the rest of the system?**
   _220 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
