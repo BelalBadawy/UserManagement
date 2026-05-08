@@ -1,0 +1,1 @@
+.\generated\ums-boilerplate-agent-skill\Scaffold.ps1 -ProjectName MyNewApp
