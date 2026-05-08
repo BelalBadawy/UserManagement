@@ -1,0 +1,1540 @@
+# UMS Boilerplate Solution Scaffolder Agent Skill
+
+Use this skill when the user wants to create a new .NET 10 Clean Architecture solution that exactly replicates the UMS boilerplate with a different root namespace.
+
+## Input Parameter Handling
+
+Ask the user for `ProjectName` if it was not provided. Treat `ProjectName` as the new root namespace and project prefix. Accept only a C#-safe root namespace matching `^[A-Za-z_][A-Za-z0-9_]*$` unless the user intentionally updates the scripts to support dotted namespace roots.
+
+## Fast Execution Path
+
+Run one of the bundled self-contained scripts from this skill folder:
+
+PowerShell:
+
+``powershell
+./Scaffold.ps1 -ProjectName MyProduct
+``
+
+Bash:
+
+``bash
+./Scaffold.sh --ProjectName MyProduct
+``
+
+The scripts are intentionally self-contained: they embed every scaffolded `.cs`, `.csproj`, JSON/config, HTTP, and binary asset payload directly. Do not look for external templates.
+
+## Manual Execution Rules
+
+If script execution is not possible, reproduce the same workflow manually:
+
+1. Ask for `ProjectName`.
+2. Run `dotnet new sln -n {ProjectName}` from the target directory. With .NET 10 this creates `{ProjectName}.slnx`.
+3. Create these projects with `net10.0`:
+   - `{ProjectName}.Domain` via `dotnet new classlib`
+   - `{ProjectName}.Application` via `dotnet new classlib`
+   - `{ProjectName}.Infrastructure` via `dotnet new classlib`
+   - `{ProjectName}.API` via `dotnet new webapi`
+   - `{ProjectName}.Domain.Tests` via `dotnet new xunit`
+   - `{ProjectName}.Application.Tests` via `dotnet new xunit`
+   - `{ProjectName}.Infrastructure.Tests` via `dotnet new xunit`
+   - `{ProjectName}.API.Tests` via `dotnet new xunit`
+4. Add all 8 projects to the `.slnx` with `dotnet sln add`.
+5. Add package references exactly as mapped below.
+6. Add project references exactly as mapped below.
+7. Replace all generated files with the embedded boilerplate contents, changing path prefix `UMS` to `{ProjectName}` and replacing the root namespace token `UMS` in file contents with `{ProjectName}`.
+8. Run `dotnet restore` and preferably `dotnet build`.
+
+## Templating Rules
+
+- Replace root namespace token `UMS` with `{ProjectName}` in `.cs`, `.csproj`, `.json`, `.http`, and launch/config files.
+- Rename project folders and project files from `UMS.*` to `{ProjectName}.*`.
+- Preserve the internal folder tree and file names below each project.
+- Preserve package versions, `PrivateAssets`, `IncludeAssets`, content metadata, and project references.
+- Do not scaffold graphify caches, `bin`, or `obj` folders.
+
+## Folder Tree
+
+- UMS.Domain
+  - .Tests\Builders\CategoryBuilder.cs
+  - .Tests\Entities\CategoryTests.cs
+  - .Tests\GlobalUsings.cs
+  - .Tests\Support\EntityTestExtensions.cs
+  - .Tests\UMS.Domain.Tests.csproj
+  - Common\BaseEntity.cs
+  - Common\DomainEvent.cs
+  - Entities\AuditTrail.cs
+  - Entities\Category.cs
+  - Entities\LogUserActivity.cs
+  - Entities\OutboxMessage.cs
+  - Enums\DomainEnums.cs
+  - GlobalUsings.cs
+  - Interfaces\IAuditable.cs
+  - Interfaces\IDataConcurrency.cs
+  - Interfaces\IDomainEvent.cs
+  - Interfaces\IEntity.cs
+  - Interfaces\IFullEntity.cs
+  - Interfaces\IMustHaveTenant.cs
+  - Interfaces\ISoftDelete.cs
+  - UMS.Domain.csproj
+- UMS.Domain.Tests
+  - Builders\CategoryBuilder.cs
+  - Entities\CategoryTests.cs
+  - GlobalUsings.cs
+  - Support\EntityTestExtensions.cs
+  - UMS.Domain.Tests.csproj
+- UMS.Application
+  - .Tests\Behaviors\ValidationPipelineBehaviorTests.cs
+  - .Tests\Fixtures\TestData.cs
+  - .Tests\GlobalUsings.cs
+  - .Tests\Handlers\Categories\CategoryCommandHandlerTests.cs
+  - .Tests\Handlers\Categories\CategoryQueryHandlerTests.cs
+  - .Tests\Handlers\Roles\RoleHandlerTests.cs
+  - .Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs
+  - .Tests\Handlers\Token\GetTokenQueryHandlerTests.cs
+  - .Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs
+  - .Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ConfirmEmailCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs
+  - .Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs
+  - .Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs
+  - .Tests\Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs
+  - .Tests\Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs
+  - .Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs
+  - .Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs
+  - .Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs
+  - .Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs
+  - .Tests\Handlers\Users\LockUserCommandHandlerTests.cs
+  - .Tests\Handlers\Users\LogoutCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs
+  - .Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs
+  - .Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs
+  - .Tests\Handlers\Users\UnlockUserCommandHandlerTests.cs
+  - .Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs
+  - .Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs
+  - .Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs
+  - .Tests\Support\Categories\CategoryHandlerTestSupport.cs
+  - .Tests\UMS.Application.Tests.csproj
+  - .Tests\Validation\Categories\CreateCategoryCommandValidatorTests.cs
+  - .Tests\Validation\Categories\DeleteCategoryCommandValidatorTests.cs
+  - .Tests\Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs
+  - .Tests\Validation\Categories\GetCategoriesPagedQueryValidatorTests.cs
+  - .Tests\Validation\Categories\GetCategoryByIdAdminQueryValidatorTests.cs
+  - .Tests\Validation\Categories\GetCategoryByIdQueryValidatorTests.cs
+  - .Tests\Validation\Categories\UpdateCategoryCommandValidatorTests.cs
+  - .Tests\Validation\Roles\CreateRoleCommandValidatorTests.cs
+  - .Tests\Validation\Roles\DeleteRoleCommandValidatorTests.cs
+  - .Tests\Validation\Roles\GetPermissionsQueryValidatorTests.cs
+  - .Tests\Validation\Roles\GetRoleByIdQueryValidatorTests.cs
+  - .Tests\Validation\Roles\UpdateRoleCommandValidatorTests.cs
+  - .Tests\Validation\Roles\UpdateRolePermissionsCommandValidatorTests.cs
+  - .Tests\Validation\Shared\PagedFilterValidatorTests.cs
+  - .Tests\Validation\Token\GetRefreshTokenQueryPipelineTests.cs
+  - .Tests\Validation\Token\GetRefreshTokenQueryValidatorTests.cs
+  - .Tests\Validation\Token\GetTokenQueryValidatorTests.cs
+  - .Tests\Validation\Token\LoginWith2FAQueryValidatorTests.cs
+  - .Tests\Validation\Users\ChangeUserPasswordValidatorTests.cs
+  - .Tests\Validation\Users\ChangeUserStatusValidatorTests.cs
+  - .Tests\Validation\Users\ConfirmEmailChangeValidatorTests.cs
+  - .Tests\Validation\Users\ConfirmEmailValidatorTests.cs
+  - .Tests\Validation\Users\ConfirmTwoFactorAuthValidatorTests.cs
+  - .Tests\Validation\Users\DisableTwoFactorAuthValidatorTests.cs
+  - .Tests\Validation\Users\EnableTwoFactorAuthValidatorTests.cs
+  - .Tests\Validation\Users\ForgotPasswordCommandValidatorTests.cs
+  - .Tests\Validation\Users\GenerateChangeEmailTokenValidatorTests.cs
+  - .Tests\Validation\Users\GetUserByIdQueryValidatorTests.cs
+  - .Tests\Validation\Users\GetUserRolesQueryValidatorTests.cs
+  - .Tests\Validation\Users\GetUsersPagedQueryValidatorTests.cs
+  - .Tests\Validation\Users\LockUserValidatorTests.cs
+  - .Tests\Validation\Users\LogoutCommandValidatorTests.cs
+  - .Tests\Validation\Users\ResendConfirmationEmailValidatorTests.cs
+  - .Tests\Validation\Users\ResetPasswordCommandValidatorTests.cs
+  - .Tests\Validation\Users\UnlockUserValidatorTests.cs
+  - .Tests\Validation\Users\UpdateUserCommandValidatorTests.cs
+  - .Tests\Validation\Users\UpdateUserRolesCommandPipelineTests.cs
+  - .Tests\Validation\Users\UpdateUserRolesCommandValidatorTests.cs
+  - .Tests\Validation\Users\UserRegistrationCommandValidatorTests.cs
+  - Authorization\AppPermissions.cs
+  - Behaviors\IValidationFailureFactory.cs
+  - Behaviors\ValidationFailureFactory.cs
+  - Behaviors\ValidationPipelineBehavior.cs
+  - Dtos\Cache\CacheConfiguration.cs
+  - Dtos\Common\FileData.cs
+  - Dtos\Common\SD.cs
+  - Dtos\Email\EmailConfiguration.cs
+  - Dtos\Email\SendEmailDto.cs
+  - Dtos\JWT\JwtConfiguration.cs
+  - Dtos\Pagination\PagedFilterRequest.cs
+  - Dtos\Pagination\PagedFilterValidator.cs
+  - Dtos\Pagination\PagedResult.cs
+  - Dtos\TwoFactor\TwoFactorOptions.cs
+  - Dtos\Wrappers\IResponseWrapper.cs
+  - Dtos\Wrappers\ResponseWrapper.cs
+  - Dtos\Wrappers\ResponseWrapperExtension.cs
+  - Enums\AppEnums.cs
+  - Features\Categories\CategoryCacheKeys.cs
+  - Features\Categories\Commands\CategoryWriteGuards.cs
+  - Features\Categories\Commands\Create\CreateCategoryCommand.cs
+  - Features\Categories\Commands\Create\CreateCategoryCommandValidator.cs
+  - Features\Categories\Commands\Delete\DeleteCategoryCommand.cs
+  - Features\Categories\Commands\Delete\DeleteCategoryCommandValidator.cs
+  - Features\Categories\Commands\Update\UpdateCategoryCommand.cs
+  - Features\Categories\Commands\Update\UpdateCategoryCommandValidator.cs
+  - Features\Categories\Events\CategoryCreatedEvent.cs
+  - Features\Categories\Events\CategoryDeletedEvent.cs
+  - Features\Categories\Events\CategoryUpdatedEvent.cs
+  - Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs
+  - Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs
+  - Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs
+  - Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs
+  - Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs
+  - Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs
+  - Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQuery.cs
+  - Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQueryValidator.cs
+  - Features\Categories\Queries\GetCategoryById\GetCategoryByIdQuery.cs
+  - Features\Categories\Queries\GetCategoryById\GetCategoryByIdQueryValidator.cs
+  - Features\Categories\Queries\GetCategoryByIdAdmin\GetCategoryByIdAdmin.cs
+  - Features\Categories\Queries\GetCategoryByIdAdmin\GetCategoryByIdAdminQueryValidator.cs
+  - Features\Roles\Commands\CreateRole\CreateRoleCommand.cs
+  - Features\Roles\Commands\CreateRole\CreateRoleCommandValidator.cs
+  - Features\Roles\Commands\DeleteRole\DeleteRoleCommand.cs
+  - Features\Roles\Commands\DeleteRole\DeleteRoleCommandValidator.cs
+  - Features\Roles\Commands\UpdateRole\UpdateRoleCommand.cs
+  - Features\Roles\Commands\UpdateRole\UpdateRoleCommandValidator.cs
+  - Features\Roles\Commands\UpdateRolePermissions\UpdateRolePermissionsCommand.cs
+  - Features\Roles\Commands\UpdateRolePermissions\UpdateRolePermissionsCommandValidator.cs
+  - Features\Roles\IRoleService.cs
+  - Features\Roles\Queries\GetAll\GetRolesQuery.cs
+  - Features\Roles\Queries\GetPermissions\GetPermissionsQuery.cs
+  - Features\Roles\Queries\GetPermissions\GetPermissionsQueryValidator.cs
+  - Features\Roles\Queries\GetRoleById\GetRoleByIdQuery.cs
+  - Features\Roles\Queries\GetRoleById\GetRoleByIdQueryValidator.cs
+  - Features\Roles\RoleClaimResponse.cs
+  - Features\Roles\RoleClaimViewModel.cs
+  - Features\Roles\RoleResponse.cs
+  - Features\Token\ITokenService.cs
+  - Features\Token\Queries\GetRefreshToken\GetRefreshTokenQuery.cs
+  - Features\Token\Queries\GetRefreshToken\GetRefreshTokenQueryValidator.cs
+  - Features\Token\Queries\GetRefreshToken\RefreshTokenRequest.cs
+  - Features\Token\Queries\GetToken\GetTokenQuery.cs
+  - Features\Token\Queries\GetToken\GetTokenQueryValidator.cs
+  - Features\Token\Queries\GetToken\TokenRequest.cs
+  - Features\Token\Queries\GetToken\TokenResponse.cs
+  - Features\Token\Queries\LoginWith2FA\LoginWith2FAQuery.cs
+  - Features\Token\Queries\LoginWith2FA\LoginWith2FAQueryValidator.cs
+  - Features\Token\Queries\LoginWith2FA\TwoFactorLoginRequest.cs
+  - Features\Users\Commands\ChangeUserPassword\ChangePasswordRequest.cs
+  - Features\Users\Commands\ChangeUserPassword\ChangeUserPasswordCommand.cs
+  - Features\Users\Commands\ChangeUserPassword\ChangeUserPasswordValidator.cs
+  - Features\Users\Commands\ChangeUserStatus\ChangeUserStatusCommand.cs
+  - Features\Users\Commands\ChangeUserStatus\ChangeUserStatusRequest.cs
+  - Features\Users\Commands\ChangeUserStatus\ChangeUserStatusValidator.cs
+  - Features\Users\Commands\ConfirmEmail\ConfirmEmailCommand.cs
+  - Features\Users\Commands\ConfirmEmail\ConfirmEmailRequest.cs
+  - Features\Users\Commands\ConfirmEmail\ConfirmEmailValidator.cs
+  - Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeCommand.cs
+  - Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeRequest.cs
+  - Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeValidator.cs
+  - Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs
+  - Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthValidator.cs
+  - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthCommand.cs
+  - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthRequest.cs
+  - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthValidator.cs
+  - Features\Users\Commands\EnableTwoFactorAuth\EnableTwoFactorAuthCommand.cs
+  - Features\Users\Commands\EnableTwoFactorAuth\EnableTwoFactorAuthValidator.cs
+  - Features\Users\Commands\ForgotPassword\ForgotPasswordCommand.cs
+  - Features\Users\Commands\ForgotPassword\ForgotPasswordCommandValidator.cs
+  - Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenCommand.cs
+  - Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenRequest.cs
+  - Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenValidator.cs
+  - Features\Users\Commands\GenerateNew2FARecoveryCodes\GenerateNew2FARecoveryCodesCommand.cs
+  - Features\Users\Commands\LockUser\LockUserCommand.cs
+  - Features\Users\Commands\LockUser\LockUserRequest.cs
+  - Features\Users\Commands\LockUser\LockUserValidator.cs
+  - Features\Users\Commands\Logout\LogoutCommand.cs
+  - Features\Users\Commands\Logout\LogoutCommandValidator.cs
+  - Features\Users\Commands\Logout\LogoutRequest.cs
+  - Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailCommand.cs
+  - Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailRequest.cs
+  - Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailValidator.cs
+  - Features\Users\Commands\ResetPassword\ResetPasswordCommand.cs
+  - Features\Users\Commands\ResetPassword\ResetPasswordCommandValidator.cs
+  - Features\Users\Commands\ResetPassword\ResetPasswordRequest.cs
+  - Features\Users\Commands\SetupTwoFactorAuth\SetupTwoFactorAuthCommand.cs
+  - Features\Users\Commands\UnlockUser\UnlockUserCommand.cs
+  - Features\Users\Commands\UnlockUser\UnlockUserRequest.cs
+  - Features\Users\Commands\UnlockUser\UnlockUserValidator.cs
+  - Features\Users\Commands\UpdateUser\UpdateUserCommand.cs
+  - Features\Users\Commands\UpdateUser\UpdateUserCommandValidator.cs
+  - Features\Users\Commands\UpdateUser\UpdateUserRequest.cs
+  - Features\Users\Commands\UpdateUserRoles\UpdateUserRolesCommand.cs
+  - Features\Users\Commands\UpdateUserRoles\UpdateUserRolesCommandValidator.cs
+  - Features\Users\Commands\UpdateUserRoles\UpdateUserRolesRequest.cs
+  - Features\Users\Commands\UserRegistration\UserRegistrationCommand.cs
+  - Features\Users\Commands\UserRegistration\UserRegistrationCommandValidator.cs
+  - Features\Users\Commands\UserRegistration\UserRegistrationRequest.cs
+  - Features\Users\IUserService.cs
+  - Features\Users\Models\Requests\TwoFactorCodeRequest.cs
+  - Features\Users\Models\Requests\UserRoleViewModel.cs
+  - Features\Users\Models\Responses\ProfileResponse.cs
+  - Features\Users\Models\Responses\TwoFactorAuthViewModel.cs
+  - Features\Users\Models\Responses\UserResponse.cs
+  - Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs
+  - Features\Users\Queries\GetUserById\GetUserByIdQuery.cs
+  - Features\Users\Queries\GetUserById\GetUserByIdQueryValidator.cs
+  - Features\Users\Queries\GetUserRolesQuery.cs
+  - Features\Users\Queries\GetUserRolesQueryValidator.cs
+  - Features\Users\Queries\GetUsersPaged\GetUsersPagedQuery.cs
+  - Features\Users\Queries\GetUsersPaged\GetUsersPagedQueryValidator.cs
+  - GlobalUsings.cs
+  - Interfaces\Common\IApiRequest.cs
+  - Interfaces\Common\IApplicationDbContext.cs
+  - Interfaces\Common\ICacheAbleMediatorQuery.cs
+  - Interfaces\Common\ICacheService.cs
+  - Interfaces\Common\ICurrentUserService.cs
+  - Interfaces\Common\IDateTimeService.cs
+  - Interfaces\Common\IEmailService.cs
+  - Interfaces\Common\IFileStorageService.cs
+  - Interfaces\Common\ISessionWrapper.cs
+  - Interfaces\Common\IValidateMe.cs
+  - ServiceCollectionExtensions.cs
+  - UMS.Application.csproj
+- UMS.Application.Tests
+  - Behaviors\ValidationPipelineBehaviorTests.cs
+  - Fixtures\TestData.cs
+  - GlobalUsings.cs
+  - Handlers\Categories\CategoryCommandHandlerTests.cs
+  - Handlers\Categories\CategoryQueryHandlerTests.cs
+  - Handlers\Roles\RoleHandlerTests.cs
+  - Handlers\Token\GetRefreshTokenQueryHandlerTests.cs
+  - Handlers\Token\GetTokenQueryHandlerTests.cs
+  - Handlers\Token\LoginWith2FAQueryHandlerTests.cs
+  - Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs
+  - Handlers\Users\ChangeUserStatusCommandHandlerTests.cs
+  - Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs
+  - Handlers\Users\ConfirmEmailCommandHandlerTests.cs
+  - Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\ForgotPasswordCommandHandlerTests.cs
+  - Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs
+  - Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs
+  - Handlers\Users\GetMyProfileQueryHandlerTests.cs
+  - Handlers\Users\GetUserByIdQueryHandlerTests.cs
+  - Handlers\Users\GetUserRolesQueryHandlerTests.cs
+  - Handlers\Users\GetUsersPagedQueryHandlerTests.cs
+  - Handlers\Users\LockUserCommandHandlerTests.cs
+  - Handlers\Users\LogoutCommandHandlerTests.cs
+  - Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs
+  - Handlers\Users\ResetPasswordCommandHandlerTests.cs
+  - Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\UnlockUserCommandHandlerTests.cs
+  - Handlers\Users\UpdateUserCommandHandlerTests.cs
+  - Handlers\Users\UpdateUserRolesCommandHandlerTests.cs
+  - Handlers\Users\UserRegistrationCommandHandlerTests.cs
+  - Support\Categories\CategoryHandlerTestSupport.cs
+  - UMS.Application.Tests.csproj
+  - Validation\Categories\CreateCategoryCommandValidatorTests.cs
+  - Validation\Categories\DeleteCategoryCommandValidatorTests.cs
+  - Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs
+  - Validation\Categories\GetCategoriesPagedQueryValidatorTests.cs
+  - Validation\Categories\GetCategoryByIdAdminQueryValidatorTests.cs
+  - Validation\Categories\GetCategoryByIdQueryValidatorTests.cs
+  - Validation\Categories\UpdateCategoryCommandValidatorTests.cs
+  - Validation\Roles\CreateRoleCommandValidatorTests.cs
+  - Validation\Roles\DeleteRoleCommandValidatorTests.cs
+  - Validation\Roles\GetPermissionsQueryValidatorTests.cs
+  - Validation\Roles\GetRoleByIdQueryValidatorTests.cs
+  - Validation\Roles\UpdateRoleCommandValidatorTests.cs
+  - Validation\Roles\UpdateRolePermissionsCommandValidatorTests.cs
+  - Validation\Shared\PagedFilterValidatorTests.cs
+  - Validation\Token\GetRefreshTokenQueryPipelineTests.cs
+  - Validation\Token\GetRefreshTokenQueryValidatorTests.cs
+  - Validation\Token\GetTokenQueryValidatorTests.cs
+  - Validation\Token\LoginWith2FAQueryValidatorTests.cs
+  - Validation\Users\ChangeUserPasswordValidatorTests.cs
+  - Validation\Users\ChangeUserStatusValidatorTests.cs
+  - Validation\Users\ConfirmEmailChangeValidatorTests.cs
+  - Validation\Users\ConfirmEmailValidatorTests.cs
+  - Validation\Users\ConfirmTwoFactorAuthValidatorTests.cs
+  - Validation\Users\DisableTwoFactorAuthValidatorTests.cs
+  - Validation\Users\EnableTwoFactorAuthValidatorTests.cs
+  - Validation\Users\ForgotPasswordCommandValidatorTests.cs
+  - Validation\Users\GenerateChangeEmailTokenValidatorTests.cs
+  - Validation\Users\GetUserByIdQueryValidatorTests.cs
+  - Validation\Users\GetUserRolesQueryValidatorTests.cs
+  - Validation\Users\GetUsersPagedQueryValidatorTests.cs
+  - Validation\Users\LockUserValidatorTests.cs
+  - Validation\Users\LogoutCommandValidatorTests.cs
+  - Validation\Users\ResendConfirmationEmailValidatorTests.cs
+  - Validation\Users\ResetPasswordCommandValidatorTests.cs
+  - Validation\Users\UnlockUserValidatorTests.cs
+  - Validation\Users\UpdateUserCommandValidatorTests.cs
+  - Validation\Users\UpdateUserRolesCommandPipelineTests.cs
+  - Validation\Users\UpdateUserRolesCommandValidatorTests.cs
+  - Validation\Users\UserRegistrationCommandValidatorTests.cs
+- UMS.Infrastructure
+  - .Tests\appsettings.Testing.json
+  - .Tests\Fixtures\TempDirectoryFixture.cs
+  - .Tests\GlobalUsings.cs
+  - .Tests\Identity\Services\RoleServiceTests.cs
+  - .Tests\Identity\Services\TokenService2FATests.cs
+  - .Tests\Identity\Services\TokenServiceTests.cs
+  - .Tests\Identity\Services\UserServiceAuthTests.cs
+  - .Tests\Identity\Services\UserServiceTests.cs
+  - .Tests\Services\Common\CurrentUserServiceTests.cs
+  - .Tests\Services\Common\DateTimeServiceTests.cs
+  - .Tests\Services\Common\DistributedCacheServiceTests.cs
+  - .Tests\Services\Common\InMemorySessionWrapperTests.cs
+  - .Tests\Services\LocalFileStorageServiceTests.cs
+  - .Tests\Services\MailSenderServiceTests.cs
+  - .Tests\Support\IdentityMockFactory.cs
+  - .Tests\Support\TestAsyncQueryProvider.cs
+  - .Tests\UMS.Infrastructure.Tests.csproj
+  - Extensions\QueryExtensions.cs
+  - GlobalUsings.cs
+  - Identity\Configurations\SeedUsersConfiguration.cs
+  - Identity\Constants\AppClaim.cs
+  - Identity\Constants\AppRoles.cs
+  - Identity\CurrentUserMiddleware.cs
+  - Identity\IdentityServiceExtensions.cs
+  - Identity\Models\ApplicationRole.cs
+  - Identity\Models\ApplicationRoleClaim.cs
+  - Identity\Models\ApplicationUser.cs
+  - Identity\Models\ApplicationUserClaim.cs
+  - Identity\Models\ApplicationUserLogin.cs
+  - Identity\Models\ApplicationUserRole.cs
+  - Identity\Models\ApplicationUserToken.cs
+  - Identity\Permissions\PermissionAuthorizationHandler.cs
+  - Identity\Permissions\PermissionPolicyProvider.cs
+  - Identity\Permissions\PermissionRequirement.cs
+  - Identity\Seeds\FeaturesDbSeeder.cs
+  - Identity\Seeds\IdentityDbSeeder.cs
+  - Identity\Services\RoleService.cs
+  - Identity\Services\TokenService.cs
+  - Identity\Services\UserService.cs
+  - Migrations\20260418130054_InitiailDb.cs
+  - Migrations\20260418130054_InitiailDb.Designer.cs
+  - Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.cs
+  - Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs
+  - Migrations\20260425071933_RemoveRefreshTokenTable.cs
+  - Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs
+  - Migrations\ApplicationDbContextModelSnapshot.cs
+  - Persistence\Audit\AuditEntry.cs
+  - Persistence\Constants\SchemaNames.cs
+  - Persistence\Contexts\ApplicationDbContext.cs
+  - Persistence\DbConfigurations\CategoryConfiguration.cs
+  - Persistence\Interceptors\TrimStringInterceptor.cs
+  - Persistence\Seeds\ApplicationDbSeeder.cs
+  - ServiceCollectionExtensions.cs
+  - Services\Common\CurrentUserService.cs
+  - Services\Common\DateTimeService.cs
+  - Services\Common\DistributedCacheService.cs
+  - Services\Common\InMemorySessionWrapper.cs
+  - Services\Common\MailSenderService.cs
+  - Services\LocalFileStorageService.cs
+  - UMS.Infrastructure.csproj
+- UMS.Infrastructure.Tests
+  - appsettings.Testing.json
+  - Fixtures\TempDirectoryFixture.cs
+  - GlobalUsings.cs
+  - Identity\Services\RoleServiceTests.cs
+  - Identity\Services\TokenService2FATests.cs
+  - Identity\Services\TokenServiceTests.cs
+  - Identity\Services\UserServiceAuthTests.cs
+  - Identity\Services\UserServiceTests.cs
+  - Services\Common\CurrentUserServiceTests.cs
+  - Services\Common\DateTimeServiceTests.cs
+  - Services\Common\DistributedCacheServiceTests.cs
+  - Services\Common\InMemorySessionWrapperTests.cs
+  - Services\LocalFileStorageServiceTests.cs
+  - Services\MailSenderServiceTests.cs
+  - Support\IdentityMockFactory.cs
+  - Support\TestAsyncQueryProvider.cs
+  - UMS.Infrastructure.Tests.csproj
+- UMS.API
+  - .Tests\Contracts\ResponseContract.cs
+  - .Tests\Endpoints\AccountEndpointsTests.cs
+  - .Tests\Endpoints\CategoryEndpointsTests.cs
+  - .Tests\Endpoints\ConfirmTwoFactorAuthEndpointTests.cs
+  - .Tests\Endpoints\DisableTwoFactorAuthEndpointTests.cs
+  - .Tests\Endpoints\EnableTwoFactorAuthEndpointTests.cs
+  - .Tests\Endpoints\LoginWith2FAEndpointTests.cs
+  - .Tests\Endpoints\LogoutEndpointTests.cs
+  - .Tests\Endpoints\ProfileEndpointTests.cs
+  - .Tests\Endpoints\RoleEndpointsTests.cs
+  - .Tests\Endpoints\SetupTwoFactorAuthEndpointTests.cs
+  - .Tests\Endpoints\UserEndpointsTests.cs
+  - .Tests\Fixtures\ApiTestBase.cs
+  - .Tests\Fixtures\CustomWebApplicationFactory.cs
+  - .Tests\GlobalUsings.cs
+  - .Tests\Support\ApiPermissionHelper.cs
+  - .Tests\Support\ApiStateVerifier.cs
+  - .Tests\Support\ApiTestAuthenticationHandler.cs
+  - .Tests\Support\ApiTestAuthenticationHeaderHelper.cs
+  - .Tests\Support\ApiTestDatabaseInitializer.cs
+  - .Tests\Support\ApiTestDataSeeder.cs
+  - .Tests\Support\ApiTestEmailService.cs
+  - .Tests\Support\ApiTestEmailSink.cs
+  - .Tests\Support\TestCollectionDefinitions.cs
+  - .Tests\UMS.API.Tests.csproj
+  - appsettings.Development.json
+  - appsettings.json
+  - appsettings.Testing.json
+  - Endpoints\AccountEndpoints.cs
+  - Endpoints\CategoryEndpoints.cs
+  - Endpoints\RoleEndpoints.cs
+  - Endpoints\UserEndpoints.cs
+  - Extensions\ResponseResultExtensions.cs
+  - Helpers\BearerSchemeTransformer.cs
+  - Helpers\SD.cs
+  - Middlewares\ErrorHandlingMiddleware.cs
+  - Program.cs
+  - Properties\launchSettings.json
+  - ServiceCollectionExtensions.cs
+  - UMS.API.csproj
+  - UMS.API.http
+  - wwwroot\images\banners\1.jpg
+- UMS.API.Tests
+  - Contracts\ResponseContract.cs
+  - Endpoints\AccountEndpointsTests.cs
+  - Endpoints\CategoryEndpointsTests.cs
+  - Endpoints\ConfirmTwoFactorAuthEndpointTests.cs
+  - Endpoints\DisableTwoFactorAuthEndpointTests.cs
+  - Endpoints\EnableTwoFactorAuthEndpointTests.cs
+  - Endpoints\LoginWith2FAEndpointTests.cs
+  - Endpoints\LogoutEndpointTests.cs
+  - Endpoints\ProfileEndpointTests.cs
+  - Endpoints\RoleEndpointsTests.cs
+  - Endpoints\SetupTwoFactorAuthEndpointTests.cs
+  - Endpoints\UserEndpointsTests.cs
+  - Fixtures\ApiTestBase.cs
+  - Fixtures\CustomWebApplicationFactory.cs
+  - GlobalUsings.cs
+  - Support\ApiPermissionHelper.cs
+  - Support\ApiStateVerifier.cs
+  - Support\ApiTestAuthenticationHandler.cs
+  - Support\ApiTestAuthenticationHeaderHelper.cs
+  - Support\ApiTestDatabaseInitializer.cs
+  - Support\ApiTestDataSeeder.cs
+  - Support\ApiTestEmailService.cs
+  - Support\ApiTestEmailSink.cs
+  - Support\TestCollectionDefinitions.cs
+  - UMS.API.Tests.csproj
+
+## NuGet Packages
+
+- UMS.Domain
+  - none
+- UMS.Domain.Tests
+  - coverlet.collector 6.0.4
+  - FluentAssertions 8.9.0
+  - Microsoft.NET.Test.Sdk 17.14.1
+  - xunit 2.9.3
+  - xunit.runner.visualstudio 3.1.4
+- UMS.Application
+  - FluentValidation 12.1.1
+  - FluentValidation.DependencyInjectionExtensions 12.1.1
+  - Mapster 10.0.7
+  - Mapster.DependencyInjection 10.0.7
+  - Mediator.Abstractions 3.0.2
+  - Mediator.SourceGenerator 3.0.2
+  - Microsoft.EntityFrameworkCore 10.0.6
+- UMS.Application.Tests
+  - AutoFixture 4.18.1
+  - Bogus 35.6.1
+  - coverlet.collector 6.0.4
+  - FluentAssertions 8.9.0
+  - Microsoft.EntityFrameworkCore.Sqlite 10.0.6
+  - Microsoft.NET.Test.Sdk 17.14.1
+  - Moq 4.20.72
+  - xunit 2.9.3
+  - xunit.runner.visualstudio 3.1.4
+- UMS.Infrastructure
+  - FluentEmail.Core 3.0.2
+  - FluentEmail.Smtp 3.0.2
+  - Microsoft.AspNetCore.Authentication.JwtBearer 10.0.6
+  - Microsoft.AspNetCore.Components.Authorization 10.0.6
+  - Microsoft.AspNetCore.Identity.EntityFrameworkCore 10.0.6
+  - Microsoft.EntityFrameworkCore.Sqlite 10.0.6
+  - Microsoft.EntityFrameworkCore.SqlServer 10.0.6
+  - Microsoft.EntityFrameworkCore.Tools 10.0.6
+  - Microsoft.EntityFrameworkCore.InMemory 10.0.6
+- UMS.Infrastructure.Tests
+  - Bogus 35.6.1
+  - coverlet.collector 6.0.4
+  - FluentAssertions 8.9.0
+  - Microsoft.NET.Test.Sdk 17.14.1
+  - Moq 4.20.72
+  - xunit 2.9.3
+  - xunit.runner.visualstudio 3.1.4
+- UMS.API
+  - Asp.Versioning.Mvc.ApiExplorer 8.1.1
+  - Microsoft.AspNetCore.OpenApi 10.0.6
+  - Microsoft.EntityFrameworkCore.SqlServer 10.0.6
+  - Microsoft.EntityFrameworkCore.Tools 10.0.6
+  - Microsoft.EntityFrameworkCore.Design 10.0.6
+  - Scalar.AspNetCore 2.14.1
+- UMS.API.Tests
+  - Bogus 35.6.1
+  - coverlet.collector 6.0.4
+  - FluentAssertions 8.9.0
+  - Microsoft.AspNetCore.Mvc.Testing 10.0.6
+  - Microsoft.EntityFrameworkCore.InMemory 10.0.6
+  - Microsoft.NET.Test.Sdk 17.14.1
+  - xunit 2.9.3
+  - xunit.runner.visualstudio 3.1.4
+
+## Project References
+
+- UMS.Domain
+  - none
+- UMS.Domain.Tests
+  - ..\UMS.Domain\UMS.Domain.csproj
+- UMS.Application
+  - ..\UMS.Domain\UMS.Domain.csproj
+- UMS.Application.Tests
+  - ..\UMS.Application\UMS.Application.csproj
+  - ..\UMS.Domain\UMS.Domain.csproj
+- UMS.Infrastructure
+  - ..\UMS.Application\UMS.Application.csproj
+  - ..\UMS.Domain\UMS.Domain.csproj
+- UMS.Infrastructure.Tests
+  - ..\UMS.Infrastructure\UMS.Infrastructure.csproj
+  - ..\UMS.Application\UMS.Application.csproj
+- UMS.API
+  - ..\UMS.Application\UMS.Application.csproj
+  - ..\UMS.Domain\UMS.Domain.csproj
+  - ..\UMS.Infrastructure\UMS.Infrastructure.csproj
+- UMS.API.Tests
+  - ..\UMS.API\UMS.API.csproj
+  - ..\UMS.Infrastructure\UMS.Infrastructure.csproj
+
+## Root Namespace Occurrences To Replace
+
+- UMS.Domain.Tests\UMS.Domain.Tests.csproj:35:    <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.API.Tests\UMS.API.Tests.csproj:34:    <ProjectReference Include="..\UMS.API\UMS.API.csproj" />
+- UMS.API.Tests\UMS.API.Tests.csproj:35:    <ProjectReference Include="..\UMS.Infrastructure\UMS.Infrastructure.csproj" />
+- UMS.Infrastructure.Tests\UMS.Infrastructure.Tests.csproj:43:    <ProjectReference Include="..\UMS.Infrastructure\UMS.Infrastructure.csproj" />
+- UMS.Infrastructure.Tests\UMS.Infrastructure.Tests.csproj:44:    <ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+- UMS.Infrastructure\UMS.Infrastructure.csproj:25:    <ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+- UMS.Infrastructure\UMS.Infrastructure.csproj:26:    <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.Domain.Tests\Support\EntityTestExtensions.cs:3:namespace UMS.Domain.Tests.Support;
+- UMS.Infrastructure.Tests\Support\TestAsyncQueryProvider.cs:4:namespace UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure\Services\LocalFileStorageService.cs:2:using UMS.Application.Dtos.Common;
+- UMS.Infrastructure\Services\LocalFileStorageService.cs:3:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\LocalFileStorageService.cs:5:namespace UMS.Infrastructure.Services
+- UMS.Infrastructure.Tests\Support\IdentityMockFactory.cs:4:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Support\IdentityMockFactory.cs:6:namespace UMS.Infrastructure.Tests.Support;
+- UMS.API.Tests\Contracts\ResponseContract.cs:1:namespace UMS.API.Tests.Contracts;
+- UMS.Domain.Tests\GlobalUsings.cs:2:global using UMS.Domain.Entities;
+- UMS.API.Tests\Support\TestCollectionDefinitions.cs:1:namespace UMS.API.Tests.Support;
+- UMS.API.Tests\Support\ApiTestEmailSink.cs:4:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure.Tests\Services\MailSenderServiceTests.cs:5:using UMS.Application.Dtos.Email;
+- UMS.Infrastructure.Tests\Services\MailSenderServiceTests.cs:6:using UMS.Infrastructure.Services.Common;
+- UMS.Infrastructure.Tests\Services\MailSenderServiceTests.cs:8:namespace UMS.Infrastructure.Tests.Services;
+- UMS.API.Tests\Support\ApiTestEmailService.cs:2:using UMS.Application.Dtos.Email;
+- UMS.API.Tests\Support\ApiTestEmailService.cs:3:using UMS.Application.Interfaces.Common;
+- UMS.API.Tests\Support\ApiTestEmailService.cs:5:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs:2:using UMS.Application.Dtos.Common;
+- UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs:3:using UMS.Infrastructure.Services;
+- UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs:4:using UMS.Infrastructure.Tests.Fixtures;
+- UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs:6:namespace UMS.Infrastructure.Tests.Services;
+- UMS.Infrastructure\Services\Common\MailSenderService.cs:6:using UMS.Application.Dtos.Common;
+- UMS.Infrastructure\Services\Common\MailSenderService.cs:7:using UMS.Application.Dtos.Email;
+- UMS.Infrastructure\Services\Common\MailSenderService.cs:8:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\Common\MailSenderService.cs:10:namespace UMS.Infrastructure.Services.Common
+- UMS.API\UMS.API.http:1:@UMS.API_HostAddress = http://localhost:5037
+- UMS.API\UMS.API.http:3:GET {{UMS.API_HostAddress}}/weatherforecast/
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:5:using UMS.Application.Features.Categories;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:6:using UMS.Application.Features.Categories.Commands.Create;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:7:using UMS.Application.Interfaces.Common;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:8:using UMS.Domain.Entities;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:9:using UMS.Infrastructure.Identity.Models;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:10:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:11:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Support\ApiTestDataSeeder.cs:13:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure.Tests\Fixtures\TempDirectoryFixture.cs:1:namespace UMS.Infrastructure.Tests.Fixtures;
+- UMS.API\UMS.API.csproj:30:	  <ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+- UMS.API\UMS.API.csproj:31:	  <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.API\UMS.API.csproj:32:	  <ProjectReference Include="..\UMS.Infrastructure\UMS.Infrastructure.csproj" />
+- UMS.Domain.Tests\Entities\CategoryTests.cs:1:using UMS.Domain.Tests.Builders;
+- UMS.Domain.Tests\Entities\CategoryTests.cs:3:namespace UMS.Domain.Tests.Entities;
+- UMS.Infrastructure\Services\Common\InMemorySessionWrapper.cs:5:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\Common\InMemorySessionWrapper.cs:7:namespace UMS.Infrastructure.Common
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:4:using UMS.Application.Authorization;
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:5:using UMS.Infrastructure.Identity.Constants;
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:6:using UMS.Infrastructure.Identity.Models;
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:7:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:9:namespace UMS.API.Tests.Support;
+- UMS.API.Tests\Support\ApiTestDatabaseInitializer.cs:28:                "API test database setup failed. Ensure SQL Server is available for ConnectionStrings:TestConnection in UMS.API/appsettings.Testing.json.",
+- UMS.API\ServiceCollectionExtensions.cs:3:namespace UMS.API
+- UMS.API.Tests\Fixtures\CustomWebApplicationFactory.cs:7:using UMS.Application.Interfaces.Common;
+- UMS.API.Tests\Fixtures\CustomWebApplicationFactory.cs:8:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.API.Tests\Fixtures\CustomWebApplicationFactory.cs:9:using UMS.API.Tests.Support;
+- UMS.API.Tests\Fixtures\CustomWebApplicationFactory.cs:11:namespace UMS.API.Tests.Fixtures;
+- UMS.Application\UMS.Application.csproj:23:	  <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.Infrastructure\Services\Common\DistributedCacheService.cs:1:using UMS.Application.Dtos.Cache;
+- UMS.Infrastructure\Services\Common\DistributedCacheService.cs:7:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\Common\DistributedCacheService.cs:9:namespace UMS.Infrastructure.Services.Common
+- UMS.API.Tests\Support\ApiTestAuthenticationHeaderHelper.cs:3:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure\Services\Common\DateTimeService.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\Common\DateTimeService.cs:3:namespace UMS.Infrastructure.Services.Common
+- UMS.Application\ServiceCollectionExtensions.cs:2:using UMS.Application.Behaviors;
+- UMS.Application\ServiceCollectionExtensions.cs:6:namespace UMS.Application
+- UMS.Application\ServiceCollectionExtensions.cs:27:                options.Namespace = "UMS.Application";
+- UMS.API.Tests\Fixtures\ApiTestBase.cs:2:using UMS.API.Tests.Support;
+- UMS.API.Tests\Fixtures\ApiTestBase.cs:4:namespace UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Support\ApiTestAuthenticationHandler.cs:8:using UMS.Infrastructure.Identity.Constants;
+- UMS.API.Tests\Support\ApiTestAuthenticationHandler.cs:10:namespace UMS.API.Tests.Support;
+- UMS.Domain.Tests\Builders\CategoryBuilder.cs:1:using UMS.Domain.Tests.Support;
+- UMS.Domain.Tests\Builders\CategoryBuilder.cs:3:namespace UMS.Domain.Tests.Builders;
+- UMS.Infrastructure\Services\Common\CurrentUserService.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\Common\CurrentUserService.cs:5:namespace UMS.Infrastructure.Services.Common;
+- UMS.API\Program.cs:4:using UMS.API;
+- UMS.API\Program.cs:5:using UMS.API.Endpoints;
+- UMS.API\Program.cs:6:using UMS.API.Helpers;
+- UMS.API\Program.cs:7:using UMS.Application;
+- UMS.API\Program.cs:8:using UMS.Application.Dtos.TwoFactor;
+- UMS.API\Program.cs:9:using UMS.Infrastructure;
+- UMS.Infrastructure.Tests\Services\Common\InMemorySessionWrapperTests.cs:4:using UMS.Infrastructure.Common;
+- UMS.Infrastructure.Tests\Services\Common\InMemorySessionWrapperTests.cs:6:namespace UMS.Infrastructure.Tests.Services.Common;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:4:using UMS.Application.Dtos.Cache;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:5:using UMS.Application.Dtos.Email;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:6:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:7:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:8:using UMS.Infrastructure.Common;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:9:using UMS.Infrastructure.Identity;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:10:using UMS.Infrastructure.Identity.Configurations;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:11:using UMS.Infrastructure.Persistence.DbInitializers;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:12:using UMS.Infrastructure.Persistence.Interceptors;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:13:using UMS.Infrastructure.Services;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:14:using UMS.Infrastructure.Services.Common;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:16:namespace UMS.Infrastructure
+- UMS.Infrastructure.Tests\Services\Common\DistributedCacheServiceTests.cs:5:using UMS.Application.Dtos.Cache;
+- UMS.Infrastructure.Tests\Services\Common\DistributedCacheServiceTests.cs:6:using UMS.Infrastructure.Services.Common;
+- UMS.Infrastructure.Tests\Services\Common\DistributedCacheServiceTests.cs:8:namespace UMS.Infrastructure.Tests.Services.Common;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:3:using UMS.Domain.Entities;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:4:using UMS.Infrastructure.Identity.Models;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:5:using UMS.Infrastructure.Identity.Constants;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:6:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:7:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Support\ApiStateVerifier.cs:9:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure.Tests\Services\Common\DateTimeServiceTests.cs:1:using UMS.Infrastructure.Services.Common;
+- UMS.Infrastructure.Tests\Services\Common\DateTimeServiceTests.cs:3:namespace UMS.Infrastructure.Tests.Services.Common;
+- UMS.Domain\GlobalUsings.cs:5:global using UMS.Domain.Common;
+- UMS.Domain\GlobalUsings.cs:6:global using UMS.Domain.Interfaces;
+- UMS.Domain\GlobalUsings.cs:7:global using UMS.Domain.Enums;
+- UMS.API.Tests\Support\ApiPermissionHelper.cs:1:using UMS.Application.Authorization;
+- UMS.API.Tests\Support\ApiPermissionHelper.cs:3:namespace UMS.API.Tests.Support;
+- UMS.Infrastructure.Tests\Services\Common\CurrentUserServiceTests.cs:3:using UMS.Infrastructure.Services.Common;
+- UMS.Infrastructure.Tests\Services\Common\CurrentUserServiceTests.cs:5:namespace UMS.Infrastructure.Tests.Services.Common;
+- UMS.API\Middlewares\ErrorHandlingMiddleware.cs:4:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Middlewares\ErrorHandlingMiddleware.cs:6:namespace UMS.API
+- UMS.Infrastructure\GlobalUsings.cs:1:global using UMS.Domain.Entities;
+- UMS.Infrastructure\GlobalUsings.cs:2:global using UMS.Domain.Interfaces;
+- UMS.Infrastructure\GlobalUsings.cs:7:global using UMS.Infrastructure.Identity.Constants;
+- UMS.Infrastructure\GlobalUsings.cs:10:global using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\GlobalUsings.cs:11:global using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure\GlobalUsings.cs:12:global using UMS.Application.Interfaces;
+- UMS.API.Tests\Endpoints\UserEndpointsTests.cs:3:using UMS.Application.Authorization;
+- UMS.API.Tests\Endpoints\UserEndpointsTests.cs:4:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\UserEndpointsTests.cs:5:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\UserEndpointsTests.cs:6:using UMS.API.Tests.Support;
+- UMS.API.Tests\Endpoints\UserEndpointsTests.cs:8:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\SetupTwoFactorAuthEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\SetupTwoFactorAuthEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\SetupTwoFactorAuthEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.Domain\Enums\DomainEnums.cs:1:namespace UMS.Domain.Enums;
+- UMS.API\Helpers\SD.cs:1:namespace UMS.API.Helpers
+- UMS.API.Tests\Endpoints\RoleEndpointsTests.cs:3:using UMS.Application.Authorization;
+- UMS.API.Tests\Endpoints\RoleEndpointsTests.cs:4:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\RoleEndpointsTests.cs:5:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\RoleEndpointsTests.cs:6:using UMS.API.Tests.Support;
+- UMS.API.Tests\Endpoints\RoleEndpointsTests.cs:8:namespace UMS.API.Tests.Endpoints;
+- UMS.Domain\Interfaces\ISoftDelete.cs:1:namespace UMS.Domain.Interfaces
+- UMS.API\Helpers\BearerSchemeTransformer.cs:4:namespace UMS.API.Helpers
+- UMS.API.Tests\Endpoints\ProfileEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\ProfileEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\ProfileEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\LogoutEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\LogoutEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\LogoutEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.Domain\Interfaces\IMustHaveTenant.cs:1:namespace UMS.Domain.Interfaces
+- UMS.API.Tests\Endpoints\ConfirmTwoFactorAuthEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\ConfirmTwoFactorAuthEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\ConfirmTwoFactorAuthEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\LoginWith2FAEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\LoginWith2FAEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\LoginWith2FAEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.Domain\Interfaces\IFullEntity.cs:1:namespace UMS.Domain.Interfaces
+- UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:3:using UMS.Application.Authorization;
+- UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:4:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:5:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:6:using UMS.API.Tests.Support;
+- UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:8:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\EnableTwoFactorAuthEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\EnableTwoFactorAuthEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\EnableTwoFactorAuthEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:5:using UMS.API.Tests.Support;
+- UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:7:namespace UMS.API.Tests.Endpoints;
+- UMS.Domain\Interfaces\IEntity.cs:1:namespace UMS.Domain.Interfaces
+- UMS.Infrastructure\Persistence\Seeds\ApplicationDbSeeder.cs:1:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Persistence\Seeds\ApplicationDbSeeder.cs:3:namespace UMS.Infrastructure.Persistence.DbInitializers
+- UMS.API.Tests\Endpoints\DisableTwoFactorAuthEndpointTests.cs:3:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\DisableTwoFactorAuthEndpointTests.cs:4:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\DisableTwoFactorAuthEndpointTests.cs:6:namespace UMS.API.Tests.Endpoints;
+- UMS.API\Extensions\ResponseResultExtensions.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Extensions\ResponseResultExtensions.cs:5:namespace UMS.API.Extensions;
+- UMS.Infrastructure\Extensions\QueryExtensions.cs:4:namespace UMS.Infrastructure.Extensions
+- UMS.Infrastructure\Identity\Constants\AppClaim.cs:1:namespace UMS.Infrastructure.Identity.Constants
+- UMS.Infrastructure\Identity\Constants\AppRoles.cs:3:namespace UMS.Infrastructure.Identity.Constants
+- UMS.Domain\Interfaces\IDomainEvent.cs:1:namespace UMS.Domain.Interfaces
+- UMS.Domain\Entities\OutboxMessage.cs:1:namespace UMS.Domain.Entities
+- UMS.Infrastructure\Identity\Configurations\SeedUsersConfiguration.cs:1:namespace UMS.Infrastructure.Identity.Configurations
+- UMS.Application\Interfaces\Common\IValidateMe.cs:1:namespace UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:8:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:9:using UMS.Application.Features.Token.Queries;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:10:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:11:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:12:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:13:using UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure.Tests\Identity\Services\TokenServiceTests.cs:15:namespace UMS.Infrastructure.Tests.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:8:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:9:using UMS.Application.Features.Token.Queries;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:10:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:11:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:12:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:13:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:14:using UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure.Tests\Identity\Services\TokenService2FATests.cs:16:namespace UMS.Infrastructure.Tests.Identity.Services;
+- UMS.Infrastructure\Persistence\Interceptors\TrimStringInterceptor.cs:4:namespace UMS.Infrastructure.Persistence.Interceptors
+- UMS.Infrastructure\Identity\Services\UserService.cs:7:using UMS.Application.Dtos.Common;
+- UMS.Infrastructure\Identity\Services\UserService.cs:8:using UMS.Application.Dtos.Email;
+- UMS.Infrastructure\Identity\Services\UserService.cs:9:using UMS.Application.Dtos.Pagination;
+- UMS.Infrastructure\Identity\Services\UserService.cs:10:using UMS.Application.Dtos.TwoFactor;
+- UMS.Infrastructure\Identity\Services\UserService.cs:11:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Identity\Services\UserService.cs:12:using UMS.Application.Features.Users;
+- UMS.Infrastructure\Identity\Services\UserService.cs:13:using UMS.Application.Features.Users.Commands;
+- UMS.Infrastructure\Identity\Services\UserService.cs:14:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Infrastructure\Identity\Services\UserService.cs:15:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Infrastructure\Identity\Services\UserService.cs:16:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Infrastructure\Identity\Services\UserService.cs:17:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Infrastructure\Identity\Services\UserService.cs:18:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Identity\Services\UserService.cs:19:using UMS.Infrastructure.Identity.Configurations;
+- UMS.Infrastructure\Identity\Services\UserService.cs:21:namespace UMS.Infrastructure.Identity.Services
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:6:using UMS.Application.Dtos.TwoFactor;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:8:using UMS.Application.Features.Users.Commands;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:10:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:11:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:12:using UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:14:namespace UMS.Infrastructure.Tests.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:209:        var request = new UMS.Application.Dtos.Pagination.PagedFilterRequest
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:231:        var request = new UMS.Application.Dtos.Pagination.PagedFilterRequest
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:491:        _emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:506:        _emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:514:            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:593:        _emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:600:            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto =>
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:623:        _emailService.Verify(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()), Times.Never);
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:755:        _emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:763:            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:801:        _emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:809:            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto =>
+- UMS.API\Endpoints\UserEndpoints.cs:2:using UMS.API.Extensions;
+- UMS.API\Endpoints\UserEndpoints.cs:3:using UMS.Application.Authorization;
+- UMS.API\Endpoints\UserEndpoints.cs:4:using UMS.Application.Dtos.Pagination;
+- UMS.API\Endpoints\UserEndpoints.cs:5:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Endpoints\UserEndpoints.cs:6:using UMS.Application.Features.Users.Commands;
+- UMS.API\Endpoints\UserEndpoints.cs:7:using UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth;
+- UMS.API\Endpoints\UserEndpoints.cs:8:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.API\Endpoints\UserEndpoints.cs:9:using UMS.Application.Features.Users.Commands.EnableTwoFactorAuth;
+- UMS.API\Endpoints\UserEndpoints.cs:10:using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
+- UMS.API\Endpoints\UserEndpoints.cs:11:using UMS.Application.Features.Users.Models.Requests;
+- UMS.API\Endpoints\UserEndpoints.cs:12:using UMS.Application.Features.Users.Models.Responses;
+- UMS.API\Endpoints\UserEndpoints.cs:13:using UMS.Application.Features.Users.Queries;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:3:using UMS.Application.Features.Roles;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:4:using UMS.Application.Features.Roles.Commands;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:5:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:6:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:7:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:8:using UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure.Tests\Identity\Services\RoleServiceTests.cs:10:namespace UMS.Infrastructure.Tests.Identity.Services;
+- UMS.Domain\Interfaces\IDataConcurrency.cs:1:namespace UMS.Domain.Interfaces
+- UMS.Application\Interfaces\Common\ISessionWrapper.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Domain\Entities\LogUserActivity.cs:1:namespace UMS.Domain.Entities;
+- UMS.Domain\Interfaces\IAuditable.cs:1:namespace UMS.Domain.Interfaces
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:6:using UMS.Application.Dtos.TwoFactor;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:8:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:9:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:10:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:11:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:12:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:13:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:14:using UMS.Infrastructure.Tests.Support;
+- UMS.Infrastructure.Tests\Identity\Services\UserServiceAuthTests.cs:16:namespace UMS.Infrastructure.Tests.Identity.Services;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:8:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:9:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:10:using UMS.Application.Features.Token;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:11:using UMS.Application.Features.Token.Queries;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:12:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:13:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:14:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Identity\Services\TokenService.cs:16:namespace UMS.Infrastructure.Identity.Services
+- UMS.Application\Interfaces\Common\IFileStorageService.cs:1:using UMS.Application.Dtos.Common;
+- UMS.Application\Interfaces\Common\IFileStorageService.cs:3:namespace UMS.Application.Interfaces.Common
+- UMS.Domain\Entities\Category.cs:1:namespace UMS.Domain.Entities
+- UMS.Infrastructure\Identity\CurrentUserMiddleware.cs:2:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Identity\CurrentUserMiddleware.cs:4:namespace UMS.Infrastructure.Identity
+- UMS.Application.Tests\Validation\Users\UserRegistrationCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\UserRegistrationCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\UserRegistrationCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Identity\Permissions\PermissionRequirement.cs:1:namespace UMS.Infrastructure.Identity.Permissions
+- UMS.Infrastructure\Persistence\DbConfigurations\CategoryConfiguration.cs:3:using UMS.Domain.Entities;
+- UMS.Infrastructure\Persistence\DbConfigurations\CategoryConfiguration.cs:5:namespace UMS.Infrastructure.Persistence.DbConfigurations
+- UMS.API\Endpoints\AccountEndpoints.cs:2:using UMS.API.Extensions;
+- UMS.API\Endpoints\AccountEndpoints.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Endpoints\AccountEndpoints.cs:4:using UMS.Application.Features.Token.Queries;
+- UMS.API\Endpoints\AccountEndpoints.cs:5:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.API\Endpoints\AccountEndpoints.cs:6:using UMS.Application.Features.Users.Commands;
+- UMS.API\Endpoints\AccountEndpoints.cs:7:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.API\Endpoints\AccountEndpoints.cs:8:using UMS.Application.Features.Users.Models.Responses;
+- UMS.API\Endpoints\AccountEndpoints.cs:9:using UMS.Application.Features.Users.Queries.GetMyProfile;
+- UMS.API\Endpoints\AccountEndpoints.cs:11:namespace UMS.API.Endpoints;
+- UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:3:using UMS.Domain.Enums;
+- UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:4:using static UMS.Application.Enums.AppEnums;
+- UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:6:namespace UMS.Infrastructure.Persistence.Audit
+- UMS.Infrastructure\Identity\Services\RoleService.cs:2:using UMS.Application.Authorization;
+- UMS.Infrastructure\Identity\Services\RoleService.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Identity\Services\RoleService.cs:4:using UMS.Application.Features.Roles;
+- UMS.Infrastructure\Identity\Services\RoleService.cs:5:using UMS.Application.Features.Roles.Commands;
+- UMS.Infrastructure\Identity\Services\RoleService.cs:6:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Identity\Services\RoleService.cs:8:namespace UMS.Infrastructure.Identity.Services
+- UMS.API\Endpoints\RoleEndpoints.cs:2:using UMS.API.Extensions;
+- UMS.API\Endpoints\RoleEndpoints.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Endpoints\RoleEndpoints.cs:4:using UMS.Application.Features.Roles;
+- UMS.API\Endpoints\RoleEndpoints.cs:5:using UMS.Application.Features.Roles.Commands;
+- UMS.API\Endpoints\RoleEndpoints.cs:6:using UMS.Application.Features.Roles.Queries;
+- UMS.API\Endpoints\RoleEndpoints.cs:7:using UMS.Application.Authorization;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.API\Endpoints\CategoryEndpoints.cs:3:using UMS.API.Extensions;
+- UMS.API\Endpoints\CategoryEndpoints.cs:4:using UMS.Application.Dtos.Pagination;
+- UMS.API\Endpoints\CategoryEndpoints.cs:5:using UMS.Application.Dtos.Wrappers;
+- UMS.API\Endpoints\CategoryEndpoints.cs:6:using UMS.Application.Features.Categories.Commands.Create;
+- UMS.API\Endpoints\CategoryEndpoints.cs:7:using UMS.Application.Features.Categories.Commands.Delete;
+- UMS.API\Endpoints\CategoryEndpoints.cs:8:using UMS.Application.Features.Categories.Commands.Update;
+- UMS.API\Endpoints\CategoryEndpoints.cs:9:using UMS.Application.Features.Categories.Queries.GetAllCategories;
+- UMS.API\Endpoints\CategoryEndpoints.cs:10:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
+- UMS.API\Endpoints\CategoryEndpoints.cs:11:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.API\Endpoints\CategoryEndpoints.cs:12:using UMS.Application.Features.Categories.Queries.GetCategoryById;
+- UMS.API\Endpoints\CategoryEndpoints.cs:13:using UMS.Application.Authorization;
+- UMS.API\Endpoints\CategoryEndpoints.cs:15:namespace UMS.API.Endpoints
+- UMS.Infrastructure\Persistence\Constants\SchemaNames.cs:1:namespace UMS.Infrastructure.Persistence.Constants
+- UMS.Infrastructure\Identity\Models\ApplicationRole.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Application\Interfaces\Common\IEmailService.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Domain\Entities\AuditTrail.cs:1:namespace UMS.Domain.Entities
+- UMS.Infrastructure\Identity\Permissions\PermissionPolicyProvider.cs:3:namespace UMS.Infrastructure.Identity.Permissions
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:9:using UMS.Application.Authorization;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:10:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:11:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:12:using UMS.Application.Features.Roles;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:13:using UMS.Application.Features.Token;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:14:using UMS.Application.Features.Users;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:15:using UMS.Infrastructure.Identity.Permissions;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:16:using UMS.Infrastructure.Identity.Services;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:17:using UMS.Infrastructure.Persistence.DbInitializers;
+- UMS.Infrastructure\Identity\IdentityServiceExtensions.cs:19:namespace UMS.Infrastructure.Identity
+- UMS.Infrastructure\Identity\Models\ApplicationUserClaim.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Infrastructure\Identity\Models\ApplicationUserRole.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Application.Tests\Validation\Users\ConfirmEmailChangeValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ConfirmEmailChangeValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ConfirmEmailChangeValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Identity\Models\ApplicationUserToken.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandPipelineTests.cs:2:using UMS.Application.Behaviors;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandPipelineTests.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandPipelineTests.cs:4:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\UpdateUserRolesCommandPipelineTests.cs:6:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Identity\Models\ApplicationUserLogin.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:6:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:7:using UMS.Domain.Enums;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:8:using UMS.Domain.Interfaces;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:9:using UMS.Infrastructure.Extensions;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:10:using UMS.Infrastructure.Persistence.Audit;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:11:using static UMS.Application.Enums.AppEnums;
+- UMS.Infrastructure\Persistence\Contexts\ApplicationDbContext.cs:13:namespace UMS.Infrastructure.Persistence.Contexts
+- UMS.Application.Tests\Validation\Users\ChangeUserStatusValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ChangeUserStatusValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ChangeUserStatusValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\UpdateUserCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\UpdateUserCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\UpdateUserCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.cs:6:namespace UMS.Infrastructure.Migrations
+- UMS.Application.Tests\Validation\Users\ChangeUserPasswordValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ChangeUserPasswordValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ChangeUserPasswordValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\UnlockUserValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\UnlockUserValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\UnlockUserValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Identity\Permissions\PermissionAuthorizationHandler.cs:1:using UMS.Application.Dtos.JWT;
+- UMS.Infrastructure\Identity\Permissions\PermissionAuthorizationHandler.cs:3:namespace UMS.Infrastructure.Identity.Permissions
+- UMS.Application.Tests\Validation\Users\ResetPasswordCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ResetPasswordCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ResetPasswordCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.cs:6:namespace UMS.Infrastructure.Migrations
+- UMS.Application.Tests\Validation\Users\ResendConfirmationEmailValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ResendConfirmationEmailValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ResendConfirmationEmailValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Domain\Common\DomainEvent.cs:1:namespace UMS.Domain.Common
+- UMS.Infrastructure\Identity\Seeds\IdentityDbSeeder.cs:2:using UMS.Application.Authorization;
+- UMS.Infrastructure\Identity\Seeds\IdentityDbSeeder.cs:3:using UMS.Infrastructure.Identity.Configurations;
+- UMS.Infrastructure\Identity\Seeds\IdentityDbSeeder.cs:5:namespace UMS.Infrastructure.Persistence.DbInitializers
+- UMS.Application.Tests\Validation\Users\LogoutCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Application.Tests\Validation\Users\LogoutCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:7:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:11:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:25:            modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:62:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:146:            modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:188:            modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:224:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:259:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:288:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:375:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:399:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:420:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:435:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:454:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:456:                    b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:464:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:466:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:473:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:475:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:482:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:484:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:491:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:493:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:499:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:506:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:508:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:515:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Identity\Seeds\FeaturesDbSeeder.cs:2:namespace UMS.Infrastructure.Persistence.DbInitializers
+- UMS.Infrastructure\Identity\Models\ApplicationUser.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.cs:5:namespace UMS.Infrastructure.Migrations
+- UMS.Application\Interfaces\Common\IDateTimeService.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:8:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:12:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:28:            modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:65:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:130:            modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:172:            modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:208:            modelBuilder.Entity("UMS.Domain.Entities.RefreshToken", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:255:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:290:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:319:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:406:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:430:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:451:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:466:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:485:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:487:                    b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:495:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:497:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:504:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:506:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:513:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:515:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:522:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:524:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:530:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:537:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:539:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:546:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Application.Tests\Validation\Users\GetUserByIdQueryValidatorTests.cs:1:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Validation\Users\GetUserByIdQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Token\LoginWith2FAQueryValidatorTests.cs:1:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Application.Tests\Validation\Token\LoginWith2FAQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Token;
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:8:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:12:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:28:            modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:65:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:150:            modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:192:            modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:228:            modelBuilder.Entity("UMS.Domain.Entities.RefreshToken", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:275:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:310:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:339:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:426:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:450:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:471:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:486:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:505:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:507:                    b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:515:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:517:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:524:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:526:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:533:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:535:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:542:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:544:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:550:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:557:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:559:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs:566:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Application.Tests\Validation\Users\LockUserValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\LockUserValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\LockUserValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:8:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:12:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:28:            modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:65:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:149:            modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:191:            modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:227:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:262:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:291:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:378:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:402:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:423:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:438:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:457:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:459:                    b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:467:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:469:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:476:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:478:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:485:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:487:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:494:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:496:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:502:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:509:            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:511:                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs:518:            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Domain\Common\BaseEntity.cs:1:namespace UMS.Domain.Common
+- UMS.Infrastructure\Identity\Models\ApplicationRoleClaim.cs:1:namespace UMS.Infrastructure.Identity.Models
+- UMS.Application\Interfaces\Common\ICurrentUserService.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryValidatorTests.cs:1:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Token;
+- UMS.Application.Tests\Fixtures\TestData.cs:3:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Fixtures\TestData.cs:4:using UMS.Application.Features.Roles;
+- UMS.Application.Tests\Fixtures\TestData.cs:5:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Fixtures\TestData.cs:6:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Fixtures\TestData.cs:7:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Fixtures\TestData.cs:8:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Fixtures\TestData.cs:9:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Fixtures\TestData.cs:11:namespace UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\DisableTwoFactorAuthValidatorTests.cs:1:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Application.Tests\Validation\Users\DisableTwoFactorAuthValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs:4:using UMS.Application.Interfaces.Common;
+- UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs:5:using UMS.Domain.Entities;
+- UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs:6:using UMS.Domain.Interfaces;
+- UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs:8:namespace UMS.Application.Tests.Support.Categories;
+- UMS.Application\Interfaces\Common\ICacheService.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Application.Tests\Validation\Token\GetTokenQueryValidatorTests.cs:1:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Validation\Token\GetTokenQueryValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Token\GetTokenQueryValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Token;
+- UMS.Application.Tests\Validation\Users\GenerateChangeEmailTokenValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\GenerateChangeEmailTokenValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\GenerateChangeEmailTokenValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryPipelineTests.cs:2:using UMS.Application.Behaviors;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryPipelineTests.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryPipelineTests.cs:4:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Validation\Token\GetRefreshTokenQueryPipelineTests.cs:6:namespace UMS.Application.Tests.Validation.Token;
+- UMS.Application.Tests\Validation\Users\GetUsersPagedQueryValidatorTests.cs:1:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Validation\Users\GetUsersPagedQueryValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\GetUsersPagedQueryValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\ConfirmTwoFactorAuthValidatorTests.cs:1:using UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth;
+- UMS.Application.Tests\Validation\Users\ConfirmTwoFactorAuthValidatorTests.cs:2:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Validation\Users\ConfirmTwoFactorAuthValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\EnableTwoFactorAuthValidatorTests.cs:1:using UMS.Application.Features.Users.Commands.EnableTwoFactorAuth;
+- UMS.Application.Tests\Validation\Users\EnableTwoFactorAuthValidatorTests.cs:2:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Validation\Users\EnableTwoFactorAuthValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\GetUserRolesQueryValidatorTests.cs:1:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Validation\Users\GetUserRolesQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Roles\DeleteRoleCommandValidatorTests.cs:1:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Validation\Roles\DeleteRoleCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application.Tests\Validation\Roles\UpdateRolePermissionsCommandValidatorTests.cs:1:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Validation\Roles\UpdateRolePermissionsCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Roles\UpdateRolePermissionsCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application\Interfaces\Common\ICacheAbleMediatorQuery.cs:2:namespace UMS.Application.Interfaces.Common
+- UMS.Application.Tests\Validation\Users\ForgotPasswordCommandValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ForgotPasswordCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Users\ConfirmEmailValidatorTests.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Validation\Users\ConfirmEmailValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Users\ConfirmEmailValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Users;
+- UMS.Application.Tests\Validation\Roles\CreateRoleCommandValidatorTests.cs:1:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Validation\Roles\CreateRoleCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Roles\CreateRoleCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application.Tests\Validation\Roles\UpdateRoleCommandValidatorTests.cs:1:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Validation\Roles\UpdateRoleCommandValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Roles\UpdateRoleCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application\Interfaces\Common\IApplicationDbContext.cs:2:using UMS.Domain.Entities;
+- UMS.Application\Interfaces\Common\IApplicationDbContext.cs:3:using UMS.Domain.Interfaces;
+- UMS.Application\Interfaces\Common\IApplicationDbContext.cs:5:namespace UMS.Application.Interfaces.Common
+- UMS.Application.Tests\Validation\Roles\GetRoleByIdQueryValidatorTests.cs:1:using UMS.Application.Features.Roles.Queries;
+- UMS.Application.Tests\Validation\Roles\GetRoleByIdQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application\Enums\AppEnums.cs:1:namespace UMS.Application.Enums
+- UMS.Application\GlobalUsings.cs:3:global using UMS.Application.Interfaces.Common;
+- UMS.Application\GlobalUsings.cs:5:global using UMS.Application.Dtos.Wrappers;
+- UMS.Application\GlobalUsings.cs:6:global using UMS.Application.Dtos.Email;
+- UMS.Application\GlobalUsings.cs:7:global using UMS.Domain.Entities;
+- UMS.Application\GlobalUsings.cs:12:[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UMS.Application.Tests")]
+- UMS.Application.Tests\Behaviors\ValidationPipelineBehaviorTests.cs:4:using UMS.Application.Behaviors;
+- UMS.Application.Tests\Behaviors\ValidationPipelineBehaviorTests.cs:5:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Behaviors\ValidationPipelineBehaviorTests.cs:6:using UMS.Application.Interfaces.Common;
+- UMS.Application.Tests\Behaviors\ValidationPipelineBehaviorTests.cs:8:namespace UMS.Application.Tests.Behaviors;
+- UMS.Application.Tests\Validation\Roles\GetPermissionsQueryValidatorTests.cs:1:using UMS.Application.Features.Roles.Queries;
+- UMS.Application.Tests\Validation\Roles\GetPermissionsQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Roles;
+- UMS.Application.Tests\Validation\Shared\PagedFilterValidatorTests.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Validation\Shared\PagedFilterValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Shared\PagedFilterValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Shared;
+- UMS.Application.Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\UserRegistrationCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Behaviors\ValidationPipelineBehavior.cs:1:namespace UMS.Application.Behaviors
+- UMS.Application\Authorization\AppPermissions.cs:3:namespace UMS.Application.Authorization
+- UMS.Application.Tests\Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Interfaces\Common\IApiRequest.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Behaviors\IValidationFailureFactory.cs:1:namespace UMS.Application.Behaviors
+- UMS.Application.Tests\Validation\Categories\CreateCategoryCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.Create;
+- UMS.Application.Tests\Validation\Categories\CreateCategoryCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application.Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\UpdateUserRolesCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth;
+- UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\ChangeUserStatusCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs:1:using UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application\Dtos\Common\SD.cs:1:namespace UMS.Application.Dtos.Common
+- UMS.Application\Behaviors\ValidationFailureFactory.cs:2:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Behaviors\ValidationFailureFactory.cs:4:namespace UMS.Application.Behaviors
+- UMS.Application.Tests\Validation\Categories\UpdateCategoryCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.Update;
+- UMS.Application.Tests\Validation\Categories\UpdateCategoryCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application.Tests\UMS.Application.Tests.csproj:39:    <ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+- UMS.Application.Tests\UMS.Application.Tests.csproj:40:    <ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Validation\Categories\DeleteCategoryCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.Delete;
+- UMS.Application.Tests\Validation\Categories\DeleteCategoryCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ConfirmEmailCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Common\FileData.cs:1:namespace UMS.Application.Dtos.Common
+- UMS.Application\Dtos\Cache\CacheConfiguration.cs:1:namespace UMS.Application.Dtos.Cache
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:4:using UMS.Application.Interfaces.Common;
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:5:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\ChangeUserPasswordCommandHandlerTests.cs:7:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\UpdateUserCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Validation\Categories\GetCategoryByIdQueryValidatorTests.cs:1:using UMS.Application.Features.Categories.Queries.GetCategoryById;
+- UMS.Application.Tests\Validation\Categories\GetCategoryByIdQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedQueryValidatorTests.cs:1:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedQueryValidatorTests.cs:2:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\Categories\GetCategoriesPagedQueryValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application\Dtos\JWT\JwtConfiguration.cs:1:namespace UMS.Application.Dtos.JWT
+- UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.EnableTwoFactorAuth;
+- UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Validation\Categories\GetCategoryByIdAdminQueryValidatorTests.cs:1:using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
+- UMS.Application.Tests\Validation\Categories\GetCategoryByIdAdminQueryValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
+- UMS.Application.Tests\Handlers\Users\LockUserCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\LockUserCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\LockUserCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\LockUserCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Wrappers\IResponseWrapper.cs:1:namespace UMS.Application.Dtos.Wrappers
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:2:using UMS.Application.Features.Roles;
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:3:using UMS.Application.Features.Roles.Commands;
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:4:using UMS.Application.Features.Roles.Queries;
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:5:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:7:namespace UMS.Application.Tests.Handlers.Roles;
+- UMS.Application.Tests\Handlers\Users\UnlockUserCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\UnlockUserCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\UnlockUserCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\UnlockUserCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs:2:using UMS.Application.Features.Token;
+- UMS.Application.Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs:3:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Token\GetRefreshTokenQueryHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Token;
+- UMS.Application\Dtos\Wrappers\ResponseWrapperExtension.cs:3:namespace UMS.Application.Dtos.Wrappers
+- UMS.Application\Dtos\TwoFactor\TwoFactorOptions.cs:1:namespace UMS.Application.Dtos.TwoFactor;
+- UMS.Application.Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs:2:using UMS.Application.Features.Token;
+- UMS.Application.Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs:3:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs:4:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Application.Tests\Handlers\Token\LoginWith2FAQueryHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Token;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:2:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:3:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:5:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:6:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\GetUsersPagedQueryHandlerTests.cs:8:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Token\GetTokenQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Token\GetTokenQueryHandlerTests.cs:2:using UMS.Application.Features.Token;
+- UMS.Application.Tests\Handlers\Token\GetTokenQueryHandlerTests.cs:3:using UMS.Application.Features.Token.Queries;
+- UMS.Application.Tests\Handlers\Token\GetTokenQueryHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Token\GetTokenQueryHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Token;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:3:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:4:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:5:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\GetUserByIdQueryHandlerTests.cs:7:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:2:using UMS.Application.Features.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:3:using UMS.Application.Features.Categories.Queries.GetAllCategories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:4:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:5:using UMS.Application.Features.Categories.Queries.GetCategoriesAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:6:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:7:using UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:8:using UMS.Application.Features.Categories.Queries.GetCategoryById;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:9:using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:10:using UMS.Application.Tests.Support.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:12:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application\Dtos\Email\SendEmailDto.cs:1:using UMS.Application.Dtos.Common;
+- UMS.Application\Dtos\Email\SendEmailDto.cs:3:namespace UMS.Application.Dtos.Email
+- UMS.Application.Tests\Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ResendConfirmationEmailCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:3:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:4:using UMS.Application.Features.Users.Queries;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:5:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\GetUserRolesQueryHandlerTests.cs:7:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Wrappers\ResponseWrapper.cs:1:namespace UMS.Application.Dtos.Wrappers
+- UMS.Application.Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
+- UMS.Application.Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Handlers\Users\SetupTwoFactorAuthCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Pagination\PagedFilterRequest.cs:1:namespace UMS.Application.Dtos.Pagination
+- UMS.Application\Features\Token\Queries\LoginWith2FA\TwoFactorLoginRequest.cs:1:namespace UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Application.Tests\Handlers\Users\LogoutCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\LogoutCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\LogoutCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Application.Tests\Handlers\Users\LogoutCommandHandlerTests.cs:5:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs:3:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs:4:using UMS.Application.Features.Users.Queries.GetMyProfile;
+- UMS.Application.Tests\Handlers\Users\GetMyProfileQueryHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Email\EmailConfiguration.cs:1:namespace UMS.Application.Dtos.Email
+- UMS.Application\Features\Token\Queries\LoginWith2FA\LoginWith2FAQueryValidator.cs:1:namespace UMS.Application.Features.Token.Queries.LoginWith2FA
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:2:using UMS.Application.Features.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:3:using UMS.Application.Features.Categories.Commands.Create;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:4:using UMS.Application.Features.Categories.Commands.Delete;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:5:using UMS.Application.Features.Categories.Commands.Update;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:6:using UMS.Application.Features.Categories.Events;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:7:using UMS.Application.Tests.Support.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:9:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application.Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs:4:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Handlers\Users\ResetPasswordCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application\Dtos\Pagination\PagedFilterValidator.cs:1:namespace UMS.Application.Dtos.Pagination
+- UMS.Application\Dtos\Pagination\PagedResult.cs:1:namespace UMS.Application.Dtos.Pagination
+- UMS.Application\Features\Token\ITokenService.cs:1:using UMS.Application.Features.Token.Queries;
+- UMS.Application\Features\Token\ITokenService.cs:2:using UMS.Application.Features.Token.Queries.LoginWith2FA;
+- UMS.Application\Features\Token\ITokenService.cs:4:namespace UMS.Application.Features.Token
+- UMS.Application\Features\Token\Queries\LoginWith2FA\LoginWith2FAQuery.cs:1:namespace UMS.Application.Features.Token.Queries.LoginWith2FA
+- UMS.Application\Features\Users\IUserService.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Users\IUserService.cs:2:using UMS.Application.Features.Users.Commands;
+- UMS.Application\Features\Users\IUserService.cs:3:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Application\Features\Users\IUserService.cs:4:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Application\Features\Users\IUserService.cs:5:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application\Features\Users\IUserService.cs:6:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\IUserService.cs:8:namespace UMS.Application.Features.Users
+- UMS.Application\Features\Users\Queries\GetUserRolesQuery.cs:1:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application\Features\Users\Queries\GetUserRolesQuery.cs:3:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs:1:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs:3:namespace UMS.Application.Features.Users.Queries.GetMyProfile
+- UMS.Application\Features\Users\Queries\GetUsersPaged\GetUsersPagedQuery.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Users\Queries\GetUsersPaged\GetUsersPagedQuery.cs:2:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Queries\GetUsersPaged\GetUsersPagedQuery.cs:4:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Users\Queries\GetUsersPaged\GetUsersPagedQueryValidator.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Users\Queries\GetUsersPaged\GetUsersPagedQueryValidator.cs:3:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Token\Queries\GetToken\TokenResponse.cs:3:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Users\Queries\GetUserRolesQueryValidator.cs:1:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Categories\CategoryCacheKeys.cs:1:namespace UMS.Application.Features.Categories
+- UMS.Application\Features\Token\Queries\GetRefreshToken\GetRefreshTokenQuery.cs:1:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Token\Queries\GetToken\GetTokenQueryValidator.cs:1:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Token\Queries\GetToken\TokenRequest.cs:1:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Token\Queries\GetRefreshToken\GetRefreshTokenQueryValidator.cs:1:using UMS.Application.Features.Token.Queries;
+- UMS.Application\Features\Token\Queries\GetRefreshToken\GetRefreshTokenQueryValidator.cs:3:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Token\Queries\GetToken\GetTokenQuery.cs:1:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Token\Queries\GetRefreshToken\RefreshTokenRequest.cs:1:namespace UMS.Application.Features.Token.Queries
+- UMS.Application\Features\Roles\RoleClaimResponse.cs:2:namespace UMS.Application.Features.Roles
+- UMS.Application\Features\Roles\IRoleService.cs:1:using UMS.Application.Features.Roles.Commands;
+- UMS.Application\Features\Roles\IRoleService.cs:3:namespace UMS.Application.Features.Roles
+- UMS.Application\Features\Users\Queries\GetUserById\GetUserByIdQueryValidator.cs:1:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Roles\RoleClaimViewModel.cs:1:namespace UMS.Application.Features.Roles
+- UMS.Application\Features\Users\Queries\GetUserById\GetUserByIdQuery.cs:1:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Queries\GetUserById\GetUserByIdQuery.cs:3:namespace UMS.Application.Features.Users.Queries
+- UMS.Application\Features\Roles\RoleResponse.cs:1:namespace UMS.Application.Features.Roles
+- UMS.Application\Features\Users\Models\Requests\TwoFactorCodeRequest.cs:1:namespace UMS.Application.Features.Users.Models.Requests;
+- UMS.Application\Features\Users\Models\Requests\UserRoleViewModel.cs:1:namespace UMS.Application.Features.Users.Models.Requests
+- UMS.Application\Features\Users\Models\Responses\UserResponse.cs:1:namespace UMS.Application.Features.Users.Models.Responses
+- UMS.Application\Features\Categories\Commands\CategoryWriteGuards.cs:1:namespace UMS.Application.Features.Categories.Commands;
+- UMS.Application\Features\Users\Models\Responses\TwoFactorAuthViewModel.cs:3:namespace UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Models\Responses\ProfileResponse.cs:1:namespace UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommandValidator.cs:2:namespace UMS.Application.Features.Categories.Commands.Update
+- UMS.Application\Features\Roles\Commands\UpdateRolePermissions\UpdateRolePermissionsCommandValidator.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:1:using UMS.Application.Features.Categories.Commands;
+- UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:2:using UMS.Application.Features.Categories.Events;
+- UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:3:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:5:namespace UMS.Application.Features.Categories.Commands.Update
+- UMS.Application\Features\Roles\Commands\UpdateRolePermissions\UpdateRolePermissionsCommand.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommandValidator.cs:2:namespace UMS.Application.Features.Categories.Commands.Create
+- UMS.Application\Features\Categories\Events\CategoryUpdatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
+- UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:1:using UMS.Application.Features.Categories.Commands;
+- UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:2:using UMS.Application.Features.Categories.Events;
+- UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:3:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:5:namespace UMS.Application.Features.Categories.Commands.Create
+- UMS.Application\Features\Roles\Commands\DeleteRole\DeleteRoleCommandValidator.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Categories\Events\CategoryDeletedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
+- UMS.Application\Features\Categories\Events\CategoryCreatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
+- UMS.Application\Features\Roles\Commands\CreateRole\CreateRoleCommandValidator.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Roles\Commands\DeleteRole\DeleteRoleCommand.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Roles\Commands\CreateRole\CreateRoleCommand.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs:1:using UMS.Application.Features.Categories.Events;
+- UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs:2:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs:4:namespace UMS.Application.Features.Categories.Commands.Delete
+- UMS.Application\Features\Roles\Queries\GetAll\GetRolesQuery.cs:1:namespace UMS.Application.Features.Roles.Queries
+- UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetAllCategories
+- UMS.Application\Features\Roles\Queries\GetPermissions\GetPermissionsQuery.cs:1:namespace UMS.Application.Features.Roles.Queries
+- UMS.Application\Features\Roles\Commands\UpdateRole\UpdateRoleCommand.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommandValidator.cs:3:namespace UMS.Application.Features.Categories.Commands.Delete
+- UMS.Application\Features\Roles\Commands\UpdateRole\UpdateRoleCommandValidator.cs:1:namespace UMS.Application.Features.Roles.Commands
+- UMS.Application\Features\Roles\Queries\GetPermissions\GetPermissionsQueryValidator.cs:1:namespace UMS.Application.Features.Roles.Queries
+- UMS.Application\Features\Roles\Queries\GetRoleById\GetRoleByIdQuery.cs:1:namespace UMS.Application.Features.Roles.Queries
+- UMS.Application\Features\Roles\Queries\GetRoleById\GetRoleByIdQueryValidator.cs:1:namespace UMS.Application.Features.Roles.Queries
+- UMS.Application\Features\Users\Commands\EnableTwoFactorAuth\EnableTwoFactorAuthValidator.cs:1:namespace UMS.Application.Features.Users.Commands.EnableTwoFactorAuth
+- UMS.Application\Features\Users\Commands\EnableTwoFactorAuth\EnableTwoFactorAuthCommand.cs:1:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application\Features\Users\Commands\EnableTwoFactorAuth\EnableTwoFactorAuthCommand.cs:3:namespace UMS.Application.Features.Users.Commands.EnableTwoFactorAuth
+- UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
+- UMS.Application\Features\Users\Commands\UnlockUser\UnlockUserValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs:1:namespace UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
+- UMS.Application\Features\Categories\Queries\GetCategoryById\GetCategoryByIdQueryValidator.cs:1:namespace UMS.Application.Features.Categories.Queries.GetCategoryById
+- UMS.Application\Features\Users\Commands\UnlockUser\UnlockUserRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetCategoriesAdmin
+- UMS.Application\Features\Users\Commands\UnlockUser\UnlockUserCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoryById\GetCategoryByIdQuery.cs:1:namespace UMS.Application.Features.Categories.Queries.GetCategoryById
+- UMS.Application\Features\Users\Commands\ChangeUserStatus\ChangeUserStatusValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:2:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:4:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
+- UMS.Application\Features\Categories\Queries\GetCategoryByIdAdmin\GetCategoryByIdAdminQueryValidator.cs:1:namespace UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin
+- UMS.Application\Features\Users\Commands\UserRegistration\UserRegistrationRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResendConfirmationEmail\ResendConfirmationEmailCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ChangeUserStatus\ChangeUserStatusRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQueryValidator.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQueryValidator.cs:3:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:2:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:4:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
+- UMS.Application\Features\Users\Commands\ChangeUserStatus\ChangeUserStatusCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\SetupTwoFactorAuth\SetupTwoFactorAuthCommand.cs:1:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Commands\SetupTwoFactorAuth\SetupTwoFactorAuthCommand.cs:3:namespace UMS.Application.Features.Users.Commands.SetupTwoFactorAuth
+- UMS.Application\Features\Users\Commands\UserRegistration\UserRegistrationCommandValidator.cs:2:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQuery.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQuery.cs:2:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQuery.cs:4:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin
+- UMS.Application\Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Categories\Queries\GetCategoryByIdAdmin\GetCategoryByIdAdmin.cs:1:namespace UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin
+- UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthValidator.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth
+- UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthCommand.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth
+- UMS.Application\Features\Users\Commands\ConfirmEmail\ConfirmEmailValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UserRegistration\UserRegistrationCommand.cs:2:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthValidator.cs:1:namespace UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth
+- UMS.Application\Features\Users\Commands\Logout\LogoutCommand.cs:1:namespace UMS.Application.Features.Users.Commands.Logout
+- UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthRequest.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Application\Features\Users\Commands\ConfirmEmail\ConfirmEmailRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\Logout\LogoutRequest.cs:1:namespace UMS.Application.Features.Users.Commands.Logout;
+- UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs:1:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs:3:namespace UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth
+- UMS.Application\Features\Users\Commands\Logout\LogoutCommandValidator.cs:1:namespace UMS.Application.Features.Users.Commands.Logout
+- UMS.Application\Features\Users\Commands\ConfirmEmail\ConfirmEmailCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResetPassword\ResetPasswordCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResetPassword\ResetPasswordCommandValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ResetPassword\ResetPasswordRequest.cs:3:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ChangeUserPassword\ChangeUserPasswordCommand.cs:1:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Users\Commands\ChangeUserPassword\ChangeUserPasswordCommand.cs:3:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ChangeUserPassword\ChangePasswordRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ChangeUserPassword\ChangeUserPasswordValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ForgotPassword\ForgotPasswordCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\ForgotPassword\ForgotPasswordCommandValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUser\UpdateUserCommand.cs:2:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUser\UpdateUserCommandValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUser\UpdateUserRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\GenerateNew2FARecoveryCodes\GenerateNew2FARecoveryCodesCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUserRoles\UpdateUserRolesCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\LockUser\LockUserCommand.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUserRoles\UpdateUserRolesCommandValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\LockUser\LockUserRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\LockUser\LockUserValidator.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\UpdateUserRoles\UpdateUserRolesRequest.cs:1:namespace UMS.Application.Features.Users.Commands
+- UMS.Application\Features\Users\Commands\GenerateChangeEmailToken\GenerateChangeEmailTokenValidator.cs:1:namespace UMS.Application.Features.Users.Commands

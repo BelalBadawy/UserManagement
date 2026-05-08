@@ -20,18 +20,9 @@ public static class ResponseResultExtensions
                 : failureCode ?? StatusCodes.Status400BadRequest;
         }
 
-        if (response.IsSuccessful)
-        {
-            return Results.Ok((object)response);
-        }
-        else
-        {
-            return Results.BadRequest((object)response);
-        }
-
-        //return Results.Json(
-        //    response,
-        //   // statusCode: statusCode,
-        //    contentType: "application/json"); // Explicit content type
+        return Results.Json(
+            response,
+            statusCode: statusCode,
+            contentType: "application/json");
     }
 }

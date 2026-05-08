@@ -1,11 +1,11 @@
-# Graph Report - D:\_MyApps\UserManagement\UMSSolution  (2026-04-29)
+# Graph Report - C:\_MyFolder\MyApps\UserManagement\UMSSolution  (2026-05-08)
 
 ## Corpus Check
-- 283 files · ~66,511 words
+- 285 files · ~121,457 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1523 nodes · 2375 edges · 121 communities detected
+- 1536 nodes · 2393 edges · 117 communities detected
 - Extraction: 65% EXTRACTED · 35% INFERRED · 0% AMBIGUOUS · INFERRED: 828 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -127,10 +127,6 @@
 - [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 116|Community 116]]
-- [[_COMMUNITY_Community 117|Community 117]]
-- [[_COMMUNITY_Community 118|Community 118]]
-- [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 120|Community 120]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `UserServiceTests` - 58 edges
@@ -145,470 +141,468 @@
 10. `AccountEndpointsTests` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AccountEndpointsTests` --inherits--> `ApiTestBase`  [EXTRACTED]
-  UMS.API.Tests\Endpoints\AccountEndpointsTests.cs →   _Bridges community 11 → community 2_
 - `LocalFileStorageServiceTests` --inherits--> `IClassFixture`  [EXTRACTED]
-  UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs →   _Bridges community 2 → community 19_
-- `CreateCategoryCommandHandler` --inherits--> `IRequestHandler`  [EXTRACTED]
-  UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs →   _Bridges community 4 → community 1_
-- `GetUserByIdQueryHandler` --inherits--> `IRequestHandler`  [EXTRACTED]
-  UMS.Application\Features\Users\Queries\GetUserById\GetUserByIdQuery.cs →   _Bridges community 1 → community 0_
+  UMS.Infrastructure.Tests\Services\LocalFileStorageServiceTests.cs →   _Bridges community 2 → community 16_
+- `DeleteCategoryCommandHandler` --inherits--> `IRequestHandler`  [EXTRACTED]
+  UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs →   _Bridges community 1 → community 3_
+- `GetAllCategoriesQueryHandler` --inherits--> `IRequestHandler`  [EXTRACTED]
+  UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs →   _Bridges community 1 → community 0_
 - `RecordingCacheService` --inherits--> `ICacheService`  [EXTRACTED]
-  UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs →   _Bridges community 4 → community 7_
+  UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs →   _Bridges community 3 → community 8_
 
 ## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (24): ConfirmEmailChangeCommandHandlerTests, ConfirmTwoFactorAuthCommandHandlerTests, DisableTwoFactorAuthCommandHandlerTests, EnableTwoFactorAuthCommandHandlerTests, GenerateNew2FARecoveryCodesCommandHandlerTests, GetMyProfileQueryHandlerTests, GetUserByIdQueryHandler, GetUserByIdQueryHandlerTests (+16 more)
+Nodes (31): CategoryCacheKeys, UMS.Application.Features.Categories, CreateCategoryCommandHandlerTests, DeleteCategoryCommandHandlerTests, UpdateCategoryCommandHandlerTests, GetAllCategoriesAdminQueryHandlerTests, GetAllCategoriesForListQueryHandlerTests, GetAllCategoriesQueryHandlerTests (+23 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.02
-Nodes (103): ChangeUserStatusCommand, ChangeUserStatusCommandHandler, UMS.Application.Features.Users.Commands, ConfirmEmailChangeCommand, ConfirmEmailChangeCommandHandler, UMS.Application.Features.Users.Commands, ConfirmEmailCommand, ConfirmEmailCommandHandler (+95 more)
+Cohesion: 0.01
+Nodes (107): ChangeUserStatusCommand, ChangeUserStatusCommandHandler, UMS.Application.Features.Users.Commands, ConfirmEmailChangeCommand, ConfirmEmailChangeCommandHandler, UMS.Application.Features.Users.Commands, ConfirmEmailCommand, ConfirmEmailCommandHandler (+99 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.04
-Nodes (18): ApiStateVerifier, ApiTestBase, ApiTestBase, ApiTestDataSeeder, NameFor(), CategoryEndpointsTests, ConfirmTwoFactorAuthEndpointTests, DisableTwoFactorAuthEndpointTests (+10 more)
+Cohesion: 0.03
+Nodes (25): AccountEndpointsTests, ApiStateVerifier, ApiTestBase, ApiTestBase, ApiTestDataSeeder, ApiTestEmailSink, AppAction, AppFeature (+17 more)
 
 ### Community 3 - "Community 3"
+Cohesion: 0.03
+Nodes (31): ApiPermissionHelper, ApiTestAuthenticationHandler, ApiTestAuthenticationHeaderHelper, ApiTestDatabaseInitializer, ApiTestEmailService, ApplicationDbContext, UMS.Infrastructure.Persistence.Contexts, AuditEntry (+23 more)
+
+### Community 4 - "Community 4"
 Cohesion: 0.02
 Nodes (63): AbstractValidator, ChangeUserStatusValidator, UMS.Application.Features.Users.Commands, ConfirmEmailChangeValidator, UMS.Application.Features.Users.Commands, ConfirmEmailValidator, UMS.Application.Features.Users.Commands, ConfirmTwoFactorAuthValidator (+55 more)
 
-### Community 4 - "Community 4"
-Cohesion: 0.03
-Nodes (29): ApiTestAuthenticationHeaderHelper, ApiTestDatabaseInitializer, ApplicationDbContext, UMS.Infrastructure.Persistence.Contexts, AuditEntry, UMS.Infrastructure.Persistence.Audit, BearerSchemeTransformer, UMS.API.Helpers (+21 more)
-
 ### Community 5 - "Community 5"
-Cohesion: 0.05
-Nodes (19): CategoryCacheKeys, UMS.Application.Features.Categories, CreateCategoryCommandHandlerTests, DeleteCategoryCommandHandlerTests, UpdateCategoryCommandHandlerTests, GetAllCategoriesAdminQueryHandlerTests, GetAllCategoriesForListQueryHandlerTests, GetAllCategoriesQueryHandlerTests (+11 more)
+Cohesion: 0.03
+Nodes (16): ChangeUserStatusCommandHandlerTests, ChangeUserStatusValidatorTests, ConfirmEmailChangeValidatorTests, ConfirmEmailValidatorTests, GetCategoriesPagedAdminQueryValidatorTests, GetCategoriesPagedQueryValidatorTests, GetUsersPagedQueryHandlerTests, GetUsersPagedQueryValidatorTests (+8 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.04
-Nodes (15): ConfirmEmailChangeValidatorTests, ConfirmEmailValidatorTests, CreateRoleCommandValidatorTests, LockUserValidatorTests, ResendConfirmationEmailValidatorTests, CreateRoleCommandHandlerTests, DeleteRoleCommandHandlerTests, GetPermissionsQueryHandlerTests (+7 more)
+Cohesion: 0.05
+Nodes (17): ErrorHandlingMiddleware, UMS.API, GenerateNew2FARecoveryCodesCommandHandlerTests, IPipelineBehavior, IResponseWrapper, IValidationFailureFactory, ResponseWrapper, UMS.Application.Dtos.Wrappers (+9 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.05
-Nodes (15): CategoryBuilder, CategoryTests, DistributedCacheService, UMS.Infrastructure.Services.Common, DistributedCacheServiceTests, EntityTestExtensions, IAuthorizationPolicyProvider, ICacheService (+7 more)
+Nodes (15): CreateRoleCommandValidatorTests, IDisposable, IRoleService, CreateRoleCommandHandlerTests, DeleteRoleCommandHandlerTests, GetPermissionsQueryHandlerTests, GetRoleByIdQueryHandlerTests, GetRolesQueryHandlerTests (+7 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.09
-Nodes (7): IDisposable, IRoleService, GetRoleByIdQueryHandlerTests, RoleService, UMS.Infrastructure.Identity.Services, RoleServiceTests, TempDirectoryFixture
+Cohesion: 0.05
+Nodes (15): CategoryBuilder, CategoryTests, DistributedCacheService, UMS.Infrastructure.Services.Common, DistributedCacheServiceTests, EntityTestExtensions, IAuthorizationPolicyProvider, ICacheService (+7 more)
 
 ### Community 9 - "Community 9"
+Cohesion: 0.06
+Nodes (12): ApplicationDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, FeaturesDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, IdentityDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, IdentityServiceExtensions, UMS.Infrastructure.Identity (+4 more)
+
+### Community 10 - "Community 10"
 Cohesion: 0.12
 Nodes (6): CurrentUserMiddleware, UMS.Infrastructure.Identity, CurrentUserService, CurrentUserServiceTests, ICurrentUserService, IMiddleware
 
-### Community 10 - "Community 10"
-Cohesion: 0.08
-Nodes (10): ApplicationDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, FeaturesDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, IdentityServiceExtensions, UMS.Infrastructure.Identity, ServiceCollectionExtensions, UMS.API (+2 more)
-
 ### Community 11 - "Community 11"
-Cohesion: 0.1
-Nodes (4): AccountEndpointsTests, ApiTestEmailSink, ErrorHandlingMiddleware, UMS.API
-
-### Community 12 - "Community 12"
-Cohesion: 0.1
-Nodes (5): GetCategoriesPagedAdminQueryValidatorTests, GetCategoriesPagedQueryValidatorTests, GetUsersPagedQueryHandlerTests, GetUsersPagedQueryValidatorTests, PagedFilterValidatorTests
-
-### Community 13 - "Community 13"
 Cohesion: 0.08
 Nodes (2): IUserService, UMS.Application.Features.Users
 
-### Community 14 - "Community 14"
+### Community 12 - "Community 12"
 Cohesion: 0.11
 Nodes (14): AuditTrail, UMS.Domain.Entities, BaseEntity, Category, UMS.Domain.Entities, IAuditable, IDataConcurrency, IFullEntity (+6 more)
 
-### Community 15 - "Community 15"
+### Community 13 - "Community 13"
 Cohesion: 0.13
 Nodes (11): CategoryCreatedEvent, CategoryCreatedEventHandler, UMS.Application.Features.Categories.Events, CategoryDeletedEvent, CategoryDeletedEventHandler, UMS.Application.Features.Categories.Events, CategoryUpdatedEvent, CategoryUpdatedEventHandler (+3 more)
 
-### Community 16 - "Community 16"
+### Community 14 - "Community 14"
 Cohesion: 0.12
 Nodes (6): AccountEndpoints, CategoryEndpoints, UMS.API.Endpoints, ResponseResultExtensions, RoleEndpoints, UserEndpoints
 
-### Community 17 - "Community 17"
-Cohesion: 0.12
-Nodes (8): IPipelineBehavior, IValidationFailureFactory, UpdateUserRolesCommandPipelineTests, UMS.Application.Behaviors, ValidationFailureFactory, UMS.Application.Behaviors, ValidationPipelineBehavior, ValidationPipelineBehaviorTests
-
-### Community 18 - "Community 18"
+### Community 15 - "Community 15"
 Cohesion: 0.14
 Nodes (8): EnumerableQuery, IAsyncEnumerable, IAsyncEnumerator, IAsyncQueryProvider, IQueryable, TestAsyncEnumerable, TestAsyncEnumerator, TestAsyncQueryProvider
 
-### Community 19 - "Community 19"
+### Community 16 - "Community 16"
 Cohesion: 0.21
 Nodes (4): IFileStorageService, LocalFileStorageService, UMS.Infrastructure.Services, LocalFileStorageServiceTests
 
-### Community 20 - "Community 20"
+### Community 17 - "Community 17"
 Cohesion: 0.18
 Nodes (2): ICurrentUserService, UMS.Application.Interfaces.Common
 
-### Community 21 - "Community 21"
+### Community 18 - "Community 18"
 Cohesion: 0.18
 Nodes (5): InitiailDb, UMS.Infrastructure.Migrations, AddCategoryNormalizationAndConcurrency, UMS.Infrastructure.Migrations, Migration
 
-### Community 22 - "Community 22"
+### Community 19 - "Community 19"
 Cohesion: 0.2
 Nodes (2): IRoleService, UMS.Application.Features.Roles
 
-### Community 23 - "Community 23"
-Cohesion: 0.27
-Nodes (2): UpdateUserRolesCommandHandlerTests, UpdateUserRolesCommandValidatorTests
-
-### Community 24 - "Community 24"
+### Community 20 - "Community 20"
 Cohesion: 0.27
 Nodes (2): UpdateUserCommandHandlerTests, UpdateUserCommandValidatorTests
 
-### Community 25 - "Community 25"
+### Community 21 - "Community 21"
+Cohesion: 0.27
+Nodes (2): UserRegistrationCommandHandlerTests, UserRegistrationCommandValidatorTests
+
+### Community 22 - "Community 22"
+Cohesion: 0.42
+Nodes (8): Add-Package(), Add-ProjectReference(), Convert-TemplatePath(), Get-ProjectDir(), Get-ProjectPath(), Invoke-Step(), Write-BinaryFile(), Write-TemplateFile()
+
+### Community 23 - "Community 23"
 Cohesion: 0.22
 Nodes (2): IApplicationDbContext, UMS.Application.Interfaces.Common
 
-### Community 26 - "Community 26"
-Cohesion: 0.25
-Nodes (3): ApiPermissionHelper, ApiTestAuthenticationHandler, AuthenticationHandler
-
-### Community 27 - "Community 27"
-Cohesion: 0.29
-Nodes (4): ApiTestEmailService, IEmailService, MailSenderService, UMS.Infrastructure.Services.Common
-
-### Community 28 - "Community 28"
+### Community 24 - "Community 24"
 Cohesion: 0.38
 Nodes (3): SaveChangesInterceptor, TrimStringInterceptor, UMS.Infrastructure.Persistence.Interceptors
 
-### Community 29 - "Community 29"
-Cohesion: 0.33
-Nodes (5): AppAction, AppFeature, AppPermissions, AppService, UMS.Application.Authorization
-
-### Community 30 - "Community 30"
+### Community 25 - "Community 25"
 Cohesion: 0.33
 Nodes (2): ICacheService, UMS.Application.Interfaces.Common
 
-### Community 31 - "Community 31"
+### Community 26 - "Community 26"
 Cohesion: 0.33
 Nodes (2): ISessionWrapper, UMS.Application.Interfaces.Common
 
-### Community 32 - "Community 32"
+### Community 27 - "Community 27"
 Cohesion: 0.33
 Nodes (1): ConfirmTwoFactorAuthValidatorTests
 
-### Community 33 - "Community 33"
+### Community 28 - "Community 28"
 Cohesion: 0.33
 Nodes (1): DisableTwoFactorAuthValidatorTests
 
-### Community 34 - "Community 34"
+### Community 29 - "Community 29"
 Cohesion: 0.33
 Nodes (1): EnableTwoFactorAuthValidatorTests
 
-### Community 35 - "Community 35"
+### Community 30 - "Community 30"
+Cohesion: 0.4
+Nodes (0): 
+
+### Community 31 - "Community 31"
 Cohesion: 0.4
 Nodes (3): SD, UMS.API.Helpers, UMS.Application.Dtos.Common
 
-### Community 36 - "Community 36"
+### Community 32 - "Community 32"
 Cohesion: 0.4
 Nodes (2): IFileStorageService, UMS.Application.Interfaces.Common
 
-### Community 37 - "Community 37"
+### Community 33 - "Community 33"
 Cohesion: 0.4
 Nodes (1): CreateCategoryCommandValidatorTests
 
-### Community 38 - "Community 38"
+### Community 34 - "Community 34"
 Cohesion: 0.4
 Nodes (1): UpdateCategoryCommandValidatorTests
 
-### Community 39 - "Community 39"
+### Community 35 - "Community 35"
 Cohesion: 0.4
 Nodes (3): AuthorizationHandler, PermissionAuthorizationHandler, UMS.Infrastructure.Identity.Permissions
 
-### Community 40 - "Community 40"
+### Community 36 - "Community 36"
 Cohesion: 0.4
 Nodes (3): ApplicationDbContextModelSnapshot, UMS.Infrastructure.Migrations, ModelSnapshot
 
-### Community 41 - "Community 41"
+### Community 37 - "Community 37"
 Cohesion: 0.4
 Nodes (3): CategoryConfiguration, UMS.Infrastructure.Persistence.DbConfigurations, IEntityTypeConfiguration
 
-### Community 42 - "Community 42"
+### Community 38 - "Community 38"
 Cohesion: 0.7
 Nodes (5): Banner Image 1, Folded Clothes Stack, Minimalist Aesthetic, Wardrobe or Lifestyle Promotion, White Chair
 
-### Community 43 - "Community 43"
+### Community 39 - "Community 39"
 Cohesion: 0.5
 Nodes (3): PagedResultContract, ResponseContract, RoleClaimResponseContract
 
-### Community 44 - "Community 44"
+### Community 40 - "Community 40"
 Cohesion: 0.5
 Nodes (2): IValidationFailureFactory, UMS.Application.Behaviors
 
-### Community 45 - "Community 45"
+### Community 41 - "Community 41"
 Cohesion: 0.5
 Nodes (2): IEmailService, UMS.Application.Interfaces.Common
 
-### Community 46 - "Community 46"
+### Community 42 - "Community 42"
 Cohesion: 0.5
 Nodes (1): DeleteCategoryCommandValidatorTests
 
-### Community 47 - "Community 47"
+### Community 43 - "Community 43"
 Cohesion: 0.5
 Nodes (1): GetCategoryByIdAdminQueryValidatorTests
 
-### Community 48 - "Community 48"
+### Community 44 - "Community 44"
 Cohesion: 0.5
 Nodes (1): GetCategoryByIdQueryValidatorTests
 
-### Community 49 - "Community 49"
+### Community 45 - "Community 45"
 Cohesion: 0.5
 Nodes (1): DeleteRoleCommandValidatorTests
 
-### Community 50 - "Community 50"
+### Community 46 - "Community 46"
 Cohesion: 0.5
 Nodes (1): GetPermissionsQueryValidatorTests
 
-### Community 51 - "Community 51"
+### Community 47 - "Community 47"
 Cohesion: 0.5
 Nodes (1): GetRoleByIdQueryValidatorTests
 
-### Community 52 - "Community 52"
+### Community 48 - "Community 48"
 Cohesion: 0.5
 Nodes (1): GetUserByIdQueryValidatorTests
 
-### Community 53 - "Community 53"
+### Community 49 - "Community 49"
 Cohesion: 0.5
 Nodes (1): GetUserRolesQueryValidatorTests
 
-### Community 54 - "Community 54"
+### Community 50 - "Community 50"
 Cohesion: 0.5
 Nodes (1): LogoutCommandValidatorTests
 
-### Community 55 - "Community 55"
+### Community 51 - "Community 51"
 Cohesion: 0.5
 Nodes (3): BaseEntity, UMS.Domain.Common, IEntity
 
-### Community 56 - "Community 56"
+### Community 52 - "Community 52"
 Cohesion: 0.5
 Nodes (3): DomainEvent, UMS.Domain.Common, IDomainEvent
 
-### Community 57 - "Community 57"
+### Community 53 - "Community 53"
 Cohesion: 0.5
 Nodes (3): SeedUserConfiguration, SeedUsersConfiguration, UMS.Infrastructure.Identity.Configurations
 
-### Community 58 - "Community 58"
+### Community 54 - "Community 54"
 Cohesion: 0.5
 Nodes (3): ApplicationRole, UMS.Infrastructure.Identity.Models, IdentityRole
 
-### Community 59 - "Community 59"
+### Community 55 - "Community 55"
 Cohesion: 0.5
 Nodes (3): ApplicationRoleClaim, UMS.Infrastructure.Identity.Models, IdentityRoleClaim
 
-### Community 60 - "Community 60"
+### Community 56 - "Community 56"
 Cohesion: 0.5
 Nodes (3): ApplicationUser, UMS.Infrastructure.Identity.Models, IdentityUser
 
-### Community 61 - "Community 61"
+### Community 57 - "Community 57"
 Cohesion: 0.5
 Nodes (3): ApplicationUserClaim, UMS.Infrastructure.Identity.Models, IdentityUserClaim
 
-### Community 62 - "Community 62"
+### Community 58 - "Community 58"
 Cohesion: 0.5
 Nodes (3): ApplicationUserLogin, UMS.Infrastructure.Identity.Models, IdentityUserLogin
 
-### Community 63 - "Community 63"
+### Community 59 - "Community 59"
 Cohesion: 0.5
 Nodes (3): ApplicationUserRole, UMS.Infrastructure.Identity.Models, IdentityUserRole
 
-### Community 64 - "Community 64"
+### Community 60 - "Community 60"
 Cohesion: 0.5
 Nodes (3): IAuthorizationRequirement, PermissionRequirement, UMS.Infrastructure.Identity.Permissions
 
-### Community 65 - "Community 65"
+### Community 61 - "Community 61"
 Cohesion: 0.5
 Nodes (2): InitiailDb, UMS.Infrastructure.Migrations
 
-### Community 66 - "Community 66"
+### Community 62 - "Community 62"
 Cohesion: 0.5
 Nodes (2): AddCategoryNormalizationAndConcurrency, UMS.Infrastructure.Migrations
 
-### Community 67 - "Community 67"
+### Community 63 - "Community 63"
 Cohesion: 0.5
 Nodes (3): DateTimeService, UMS.Infrastructure.Services.Common, IDateTimeService
 
-### Community 68 - "Community 68"
+### Community 64 - "Community 64"
 Cohesion: 0.5
 Nodes (1): DateTimeServiceTests
 
-### Community 69 - "Community 69"
+### Community 65 - "Community 65"
 Cohesion: 0.5
 Nodes (1): IdentityMockFactory
 
-### Community 70 - "Community 70"
+### Community 66 - "Community 66"
 Cohesion: 0.67
 Nodes (2): CacheConfiguration, UMS.Application.Dtos.Cache
 
-### Community 71 - "Community 71"
+### Community 67 - "Community 67"
 Cohesion: 0.67
 Nodes (2): FileData, UMS.Application.Dtos.Common
 
-### Community 72 - "Community 72"
+### Community 68 - "Community 68"
 Cohesion: 0.67
 Nodes (2): EmailConfiguration, UMS.Application.Dtos.Email
 
-### Community 73 - "Community 73"
+### Community 69 - "Community 69"
 Cohesion: 0.67
 Nodes (2): SendEmailDto, UMS.Application.Dtos.Email
 
-### Community 74 - "Community 74"
+### Community 70 - "Community 70"
 Cohesion: 0.67
 Nodes (2): JwtConfiguration, UMS.Application.Dtos.JWT
 
-### Community 75 - "Community 75"
+### Community 71 - "Community 71"
 Cohesion: 0.67
 Nodes (2): PagedFilterRequest, UMS.Application.Dtos.Pagination
 
-### Community 76 - "Community 76"
+### Community 72 - "Community 72"
 Cohesion: 1.0
 Nodes (2): IResponseWrapper, UMS.Application.Dtos.Wrappers
 
-### Community 77 - "Community 77"
+### Community 73 - "Community 73"
 Cohesion: 0.67
 Nodes (2): AppEnums, UMS.Application.Enums
 
-### Community 78 - "Community 78"
+### Community 74 - "Community 74"
 Cohesion: 0.67
 Nodes (2): RoleClaimResponse, UMS.Application.Features.Roles
 
-### Community 79 - "Community 79"
+### Community 75 - "Community 75"
 Cohesion: 0.67
 Nodes (2): RoleClaimViewModel, UMS.Application.Features.Roles
 
-### Community 80 - "Community 80"
+### Community 76 - "Community 76"
 Cohesion: 0.67
 Nodes (2): RoleResponse, UMS.Application.Features.Roles
 
-### Community 81 - "Community 81"
+### Community 77 - "Community 77"
 Cohesion: 0.67
 Nodes (2): ChangeUserStatusRequest, UMS.Application.Features.Users.Commands
 
-### Community 82 - "Community 82"
+### Community 78 - "Community 78"
 Cohesion: 0.67
 Nodes (2): ConfirmEmailRequest, UMS.Application.Features.Users.Commands
 
-### Community 83 - "Community 83"
+### Community 79 - "Community 79"
 Cohesion: 0.67
 Nodes (2): ConfirmEmailChangeRequest, UMS.Application.Features.Users.Commands
 
-### Community 84 - "Community 84"
+### Community 80 - "Community 80"
 Cohesion: 0.67
 Nodes (2): LockUserRequest, UMS.Application.Features.Users.Commands
 
-### Community 85 - "Community 85"
+### Community 81 - "Community 81"
 Cohesion: 0.67
 Nodes (2): ResendConfirmationEmailRequest, UMS.Application.Features.Users.Commands
 
-### Community 86 - "Community 86"
+### Community 82 - "Community 82"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Commands, UnlockUserRequest
 
-### Community 87 - "Community 87"
+### Community 83 - "Community 83"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Commands, UpdateUserRequest
 
-### Community 88 - "Community 88"
+### Community 84 - "Community 84"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Commands, UpdateUserRolesRequest
 
-### Community 89 - "Community 89"
+### Community 85 - "Community 85"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Commands, UserRegistrationRequest
 
-### Community 90 - "Community 90"
+### Community 86 - "Community 86"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Models.Requests, UserRoleViewModel
 
-### Community 91 - "Community 91"
+### Community 87 - "Community 87"
 Cohesion: 0.67
 Nodes (2): UMS.Application.Features.Users.Models.Responses, UserResponse
 
-### Community 92 - "Community 92"
+### Community 88 - "Community 88"
 Cohesion: 0.67
 Nodes (2): ICacheAbleMediatorQuery, UMS.Application.Interfaces.Common
 
-### Community 93 - "Community 93"
+### Community 89 - "Community 89"
 Cohesion: 0.67
 Nodes (2): IDateTimeService, UMS.Application.Interfaces.Common
 
-### Community 94 - "Community 94"
+### Community 90 - "Community 90"
 Cohesion: 0.67
 Nodes (2): IAuditable, UMS.Domain.Interfaces
 
-### Community 95 - "Community 95"
+### Community 91 - "Community 91"
 Cohesion: 0.67
 Nodes (2): IDataConcurrency, UMS.Domain.Interfaces
 
-### Community 96 - "Community 96"
+### Community 92 - "Community 92"
 Cohesion: 0.67
 Nodes (2): IDomainEvent, UMS.Domain.Interfaces
 
-### Community 97 - "Community 97"
+### Community 93 - "Community 93"
 Cohesion: 1.0
 Nodes (2): IEntity, UMS.Domain.Interfaces
 
-### Community 98 - "Community 98"
+### Community 94 - "Community 94"
 Cohesion: 0.67
 Nodes (2): IMustHaveTenant, UMS.Domain.Interfaces
 
-### Community 99 - "Community 99"
+### Community 95 - "Community 95"
 Cohesion: 0.67
 Nodes (2): ISoftDelete, UMS.Domain.Interfaces
 
-### Community 100 - "Community 100"
+### Community 96 - "Community 96"
 Cohesion: 0.67
 Nodes (2): AppClaim, UMS.Infrastructure.Identity.Constants
 
-### Community 101 - "Community 101"
+### Community 97 - "Community 97"
 Cohesion: 0.67
 Nodes (2): AppRoles, UMS.Infrastructure.Identity.Constants
 
-### Community 102 - "Community 102"
+### Community 98 - "Community 98"
 Cohesion: 0.67
 Nodes (2): SchemaNames, UMS.Infrastructure.Persistence.Constants
 
-### Community 103 - "Community 103"
-Cohesion: 1.0
-Nodes (1): Program
-
-### Community 104 - "Community 104"
+### Community 99 - "Community 99"
 Cohesion: 1.0
 Nodes (1): ApiCollectionDefinition
 
-### Community 105 - "Community 105"
+### Community 100 - "Community 100"
 Cohesion: 1.0
 Nodes (1): TwoFactorOptions
 
-### Community 106 - "Community 106"
+### Community 101 - "Community 101"
 Cohesion: 1.0
 Nodes (1): UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
 
-### Community 107 - "Community 107"
+### Community 102 - "Community 102"
 Cohesion: 1.0
 Nodes (1): DisableTwoFactorAuthRequest
 
-### Community 108 - "Community 108"
+### Community 103 - "Community 103"
 Cohesion: 1.0
 Nodes (1): LogoutRequest
 
-### Community 109 - "Community 109"
+### Community 104 - "Community 104"
 Cohesion: 1.0
 Nodes (1): TwoFactorCodeRequest
 
-### Community 110 - "Community 110"
+### Community 105 - "Community 105"
 Cohesion: 1.0
 Nodes (1): ProfileResponse
 
-### Community 111 - "Community 111"
+### Community 106 - "Community 106"
 Cohesion: 1.0
 Nodes (1): TwoFactorAuthViewModel
 
-### Community 112 - "Community 112"
+### Community 107 - "Community 107"
 Cohesion: 1.0
 Nodes (1): IValidateMe
+
+### Community 108 - "Community 108"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 109 - "Community 109"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 110 - "Community 110"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 111 - "Community 111"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 112 - "Community 112"
+Cohesion: 1.0
+Nodes (0): 
 
 ### Community 113 - "Community 113"
 Cohesion: 1.0
@@ -626,50 +620,42 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 117 - "Community 117"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 118 - "Community 118"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 119 - "Community 119"
-Cohesion: 1.0
-Nodes (0): 
-
-### Community 120 - "Community 120"
-Cohesion: 1.0
-Nodes (0): 
-
 ## Ambiguous Edges - Review These
 - `Banner Image 1` → `Wardrobe or Lifestyle Promotion`  [AMBIGUOUS]
   UMS.API/wwwroot/images/banners/1.jpg · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **220 isolated node(s):** `Program`, `UMS.API`, `UMS.API.Endpoints`, `UMS.API.Helpers`, `UMS.API.Helpers` (+215 more)
+- **219 isolated node(s):** `UMS.API`, `UMS.API.Endpoints`, `UMS.API.Helpers`, `UMS.API.Helpers`, `UMS.API` (+214 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 103`** (2 nodes): `Program`, `Program.cs`
+- **Thin community `Community 99`** (2 nodes): `ApiCollectionDefinition`, `TestCollectionDefinitions.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 104`** (2 nodes): `TestCollectionDefinitions.cs`, `ApiCollectionDefinition`
+- **Thin community `Community 100`** (2 nodes): `TwoFactorOptions`, `TwoFactorOptions.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 105`** (2 nodes): `TwoFactorOptions`, `TwoFactorOptions.cs`
+- **Thin community `Community 101`** (2 nodes): `UMS.Application.Features.Categories.Queries.GetAllCategoriesForList`, `CategoryLookupDto.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 106`** (2 nodes): `UMS.Application.Features.Categories.Queries.GetAllCategoriesForList`, `CategoryLookupDto.cs`
+- **Thin community `Community 102`** (2 nodes): `DisableTwoFactorAuthRequest`, `DisableTwoFactorAuthRequest.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 107`** (2 nodes): `DisableTwoFactorAuthRequest`, `DisableTwoFactorAuthRequest.cs`
+- **Thin community `Community 103`** (2 nodes): `LogoutRequest`, `LogoutRequest.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 108`** (2 nodes): `LogoutRequest`, `LogoutRequest.cs`
+- **Thin community `Community 104`** (2 nodes): `TwoFactorCodeRequest`, `TwoFactorCodeRequest.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 109`** (2 nodes): `TwoFactorCodeRequest`, `TwoFactorCodeRequest.cs`
+- **Thin community `Community 105`** (2 nodes): `ProfileResponse`, `ProfileResponse.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 110`** (2 nodes): `ProfileResponse`, `ProfileResponse.cs`
+- **Thin community `Community 106`** (2 nodes): `TwoFactorAuthViewModel`, `TwoFactorAuthViewModel.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 111`** (2 nodes): `TwoFactorAuthViewModel`, `TwoFactorAuthViewModel.cs`
+- **Thin community `Community 107`** (2 nodes): `IValidateMe`, `IValidateMe.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 112`** (2 nodes): `IValidateMe`, `IValidateMe.cs`
+- **Thin community `Community 108`** (1 nodes): `Program.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 113`** (1 nodes): `GlobalUsings.cs`
+- **Thin community `Community 109`** (1 nodes): `GlobalUsings.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 110`** (1 nodes): `GlobalUsings.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 111`** (1 nodes): `GlobalUsings.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 112`** (1 nodes): `GlobalUsings.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 113`** (1 nodes): `DomainEnums.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 114`** (1 nodes): `GlobalUsings.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -677,29 +663,21 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 116`** (1 nodes): `GlobalUsings.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 117`** (1 nodes): `DomainEnums.cs`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 118`** (1 nodes): `GlobalUsings.cs`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 119`** (1 nodes): `GlobalUsings.cs`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 120`** (1 nodes): `GlobalUsings.cs`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Banner Image 1` and `Wardrobe or Lifestyle Promotion`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `ValidationPipelineBehaviorTests` connect `Community 17` to `Community 3`?**
-  _High betweenness centrality (0.095) - this node is a cross-community bridge._
-- **What connects `Program`, `UMS.API`, `UMS.API.Endpoints` to the rest of the system?**
-  _220 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `ValidationPipelineBehaviorTests` connect `Community 6` to `Community 4`?**
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **What connects `UMS.API`, `UMS.API.Endpoints`, `UMS.API.Helpers` to the rest of the system?**
+  _219 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.03 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.02 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.01 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.02 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03 - nodes in this community are weakly interconnected._
