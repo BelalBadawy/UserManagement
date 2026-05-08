@@ -1,7 +1,7 @@
 # Graph Report - C:\_MyFolder\MyApps\UserManagement\UMSSolution  (2026-05-08)
 
 ## Corpus Check
-- 285 files · ~121,457 words
+- 285 files · ~121,167 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -670,7 +670,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `Banner Image 1` and `Wardrobe or Lifestyle Promotion`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `ValidationPipelineBehaviorTests` connect `Community 6` to `Community 4`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
 - **What connects `UMS.API`, `UMS.API.Endpoints`, `UMS.API.Helpers` to the rest of the system?**
   _219 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**

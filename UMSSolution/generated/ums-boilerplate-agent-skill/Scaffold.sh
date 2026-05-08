@@ -3353,19 +3353,10 @@ public static class ResponseResultExtensions
                 : failureCode ?? StatusCodes.Status400BadRequest;
         }
 
-        if (response.IsSuccessful)
-        {
-            return Results.Ok((object)response);
-        }
-        else
-        {
-            return Results.BadRequest((object)response);
-        }
-
-        //return Results.Json(
-        //    response,
-        //   // statusCode: statusCode,
-        //    contentType: "application/json"); // Explicit content type
+        return Results.Json(
+            response,
+            statusCode: statusCode,
+            contentType: "application/json");
     }
 }
 __UMS_FILE_32__
@@ -17050,8 +17041,7 @@ namespace UMS.Infrastructure.Identity.Services
 
             try
             {
-                var decodedToken = HttpUtility.UrlDecode(request.Token);
-                var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.Password);
+                var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
 
                 if (result.Succeeded)
                 {
@@ -17076,9 +17066,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (user.EmailConfirmed)
                 return ResponseWrapper.Success("Email is already confirmed.");
             
-            var decodedToken = HttpUtility.UrlDecode(token);
-
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
                 return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
 

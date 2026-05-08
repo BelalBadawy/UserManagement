@@ -61,7 +61,9 @@ foreach ($p in $projectNames) {
 
 $treeLines = foreach ($p in $projectNames) {
     "- $p"
-    $projectFiles = $allFiles | Where-Object { $_ -like "$p*" }
+    $projectFiles = $allFiles | Where-Object {
+        $_ -eq $p -or $_.StartsWith("$p\") -or $_.StartsWith("$p/")
+    }
     foreach ($f in $projectFiles) { "  - " + ($f.Substring($p.Length).TrimStart('\', '/')) }
 }
 
