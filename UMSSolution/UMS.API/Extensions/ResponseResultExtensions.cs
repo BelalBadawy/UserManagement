@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using UMS.Application.Dtos.Wrappers;
 
 namespace UMS.API.Extensions;
@@ -18,9 +20,18 @@ public static class ResponseResultExtensions
                 : failureCode ?? StatusCodes.Status400BadRequest;
         }
 
-        return Results.Json(
-            response,
-            statusCode: statusCode,
-            contentType: "application/json"); // Explicit content type
+        if (response.IsSuccessful)
+        {
+            return Results.Ok((object)response);
+        }
+        else
+        {
+            return Results.BadRequest((object)response);
+        }
+
+        //return Results.Json(
+        //    response,
+        //   // statusCode: statusCode,
+        //    contentType: "application/json"); // Explicit content type
     }
 }

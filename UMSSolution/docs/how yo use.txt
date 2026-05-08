@@ -1,0 +1,17 @@
+OpenSpec 
+
+For full command details and options, see Commands.
+
+Command	Purpose	When to Use
+/opsx:propose	Create change + planning artifacts	Fast default path (core profile)
+/opsx:explore	Think through ideas	Unclear requirements, investigation
+/opsx:new	Start a change scaffold	Expanded mode, explicit artifact control
+/opsx:continue	Create next artifact	Expanded mode, step-by-step artifact creation
+/opsx:ff	Create all planning artifacts	Expanded mode, clear scope
+/opsx:apply	Implement tasks	Ready to write code
+/opsx:verify	Validate implementation	Expanded mode, before archiving
+/opsx:sync	Merge delta specs	Expanded mode, optional
+/opsx:archive	Complete the change	All work finished
+/opsx:bulk-archive	Archive multiple changes	Expanded mode, parallel work
+
+###################################################################################

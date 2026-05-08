@@ -1,0 +1,1603 @@
+{
+	"info": {
+		"_postman_id": "ums-api-v1-collection",
+		"name": "UMS.API | v1",
+		"description": "Postman collection for UMS.API v1 - User Management System. Import this file into Postman to test all endpoints.\n\n**Variables:**\n- `base_url`: The API base URL (default: https://localhost:7122)\n- `version`: API version (default: 1)\n- `token`: JWT token (set after login)\n- `refresh_token`: Refresh token (set after login)\n\n**Usage:**\n1. Run the **Login** request first to populate `token` and `refresh_token`.\n2. All authenticated requests will automatically use the Bearer token.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Account",
+			"description": "Account management endpoints: login, token refresh, password reset, email confirmation, 2FA login, logout, and profile.",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"P@ssw0rd!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"login"
+							]
+						},
+						"description": "Authenticate a user and receive a JWT token + refresh token. On success, the response includes `token`, `refreshToken`, and `refreshTokenExpiryTime`. If 2FA is enabled, `requiresTwoFactor` will be `true` with a `twoFactorChallengeToken`."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.isSuccessful && res.data) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('refresh_token', res.data.refreshToken);",
+									"    pm.collectionVariables.set('two_factor_challenge_token', res.data.twoFactorChallengeToken || '');",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{token}}\",\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"refresh-token"
+							]
+						},
+						"description": "Refresh an expired JWT token using a valid refresh token."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.isSuccessful && res.data) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('refresh_token', res.data.refreshToken);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/forgot-password?Email=user@example.com",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"forgot-password"
+							],
+							"query": [
+								{
+									"key": "Email",
+									"value": "user@example.com",
+									"description": "The email address of the account to reset password for (required)"
+								}
+							]
+						},
+						"description": "Request a password reset email. Sends a reset token to the user's email address."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"email\": \"user@example.com\",\n  \"password\": \"NewP@ssw0rd!\",\n  \"confirmPassword\": \"NewP@ssw0rd!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"reset-password"
+							]
+						},
+						"description": "Reset a user's password using the token received via email from the forgot-password endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1,\n  \"token\": \"email-confirmation-token\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/confirm-email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"confirm-email"
+							]
+						},
+						"description": "Confirm a user's email address using the token sent during registration."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Email Change",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1,\n  \"newEmail\": \"newemail@example.com\",\n  \"token\": \"email-change-token\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/confirm-email-change",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"confirm-email-change"
+							]
+						},
+						"description": "Confirm an email address change using the token generated by the generate-change-email-token endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Confirmation Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/resend-confirmation-email",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"resend-confirmation-email"
+							]
+						},
+						"description": "Resend the email confirmation message to the specified email address."
+					},
+					"response": []
+				},
+				{
+					"name": "Login 2FA",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"twoFactorChallengeToken\": \"{{two_factor_challenge_token}}\",\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/login-2fa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"login-2fa"
+							]
+						},
+						"description": "Complete two-factor authentication login using the challenge token from the initial login response and the 2FA code from the authenticator app."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.isSuccessful && res.data) {",
+									"    pm.collectionVariables.set('token', res.data.token);",
+									"    pm.collectionVariables.set('refresh_token', res.data.refreshToken);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"logout"
+							]
+						},
+						"description": "Logout the current user by invalidating the refresh token."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/account/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"account",
+								"profile"
+							]
+						},
+						"description": "Get the authenticated user's profile information including roles and permissions."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"description": "Category CRUD endpoints: list all, paged list, lookup list, get by ID, create, update, and delete.",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories?isActive=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filter by active status (optional)"
+								}
+							]
+						},
+						"description": "Get all categories. Optionally filter by active status."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Categories Paged",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories/paged?PageNumber=1&PageSize=10&SearchTerm=&SortBy=name&SortDirection=asc&IsActive=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories",
+								"paged"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1",
+									"description": "Page number (required)"
+								},
+								{
+									"key": "PageSize",
+									"value": "10",
+									"description": "Page size (required)"
+								},
+								{
+									"key": "SearchTerm",
+									"value": "",
+									"description": "Search term (optional)"
+								},
+								{
+									"key": "SortBy",
+									"value": "name",
+									"description": "Sort field (optional)"
+								},
+								{
+									"key": "SortDirection",
+									"value": "asc",
+									"description": "Sort direction: asc or desc (optional)"
+								},
+								{
+									"key": "IsActive",
+									"value": "true",
+									"description": "Filter by active status (optional)"
+								}
+							]
+						},
+						"description": "Get a paged list of categories with filtering, sorting, and search support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Categories For List (Lookup)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories/for-list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories",
+								"for-list"
+							]
+						},
+						"description": "Get a lightweight list of categories for dropdown/lookup purposes. Returns id and name only."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories",
+								"{{category_id}}"
+							]
+						},
+						"description": "Get a single category by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Category\",\n  \"slug\": \"new-category\",\n  \"parentId\": null,\n  \"isActive\": true,\n  \"sortOrder\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories"
+							]
+						},
+						"description": "Create a new category."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 1,\n  \"name\": \"Updated Category\",\n  \"slug\": \"updated-category\",\n  \"parentId\": null,\n  \"isActive\": true,\n  \"sortOrder\": 1,\n  \"rowVersion\": \"AAAAAAAAB+c=\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories"
+							]
+						},
+						"description": "Update an existing category. Requires `rowVersion` for concurrency control."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/categories/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"categories",
+								"{{category_id}}"
+							]
+						},
+						"description": "Delete a category by its ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"description": "Role management endpoints: create, update, delete roles, get all roles, get role by ID, get role permissions, and update role permissions.",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles/all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles",
+								"all"
+							]
+						},
+						"description": "Get all roles."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Role By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles/{{role_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles",
+								"{{role_id}}"
+							]
+						},
+						"description": "Get a single role by its ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Role Permissions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles/permissions/{{role_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles",
+								"permissions",
+								"{{role_id}}"
+							]
+						},
+						"description": "Get all permission claims for a specific role."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"NewRole\",\n  \"description\": \"Description of the new role\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles"
+							]
+						},
+						"description": "Create a new role."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleId\": 1,\n  \"name\": \"UpdatedRole\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles"
+							]
+						},
+						"description": "Update an existing role's name and description."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role Permissions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roleId\": 1,\n  \"roleClaims\": [\n    {\n      \"claimType\": \"Permission\",\n      \"claimValue\": \"Users.Create\",\n      \"description\": \"Create users\"\n    },\n    {\n      \"claimType\": \"Permission\",\n      \"claimValue\": \"Users.View\",\n      \"description\": \"View users\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles/update-permissions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles",
+								"update-permissions"
+							]
+						},
+						"description": "Update the permission claims assigned to a role."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/roles/{{role_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"roles",
+								"{{role_id}}"
+							]
+						},
+						"description": "Delete a role by its ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"description": "User management endpoints: register, get, update, change password, change status, manage roles, 2FA setup, lock/unlock, and email change.",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"P@ssw0rd!\",\n  \"confirmPassword\": \"P@ssw0rd!\",\n  \"phoneNumber\": \"+1234567890\",\n  \"autoConfirmEmail\": true,\n  \"activateUser\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"register"
+							]
+						},
+						"description": "Register a new user. Set `autoConfirmEmail` to true to skip email confirmation, and `activateUser` to true to activate the user immediately."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Get a single user by their ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users Paged List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/paged-list?PageNumber=1&PageSize=10&SearchTerm=&SortBy=fullName&SortDirection=asc&IsActive=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"paged-list"
+							],
+							"query": [
+								{
+									"key": "PageNumber",
+									"value": "1",
+									"description": "Page number (required)"
+								},
+								{
+									"key": "PageSize",
+									"value": "10",
+									"description": "Page size (required)"
+								},
+								{
+									"key": "SearchTerm",
+									"value": "",
+									"description": "Search term (optional)"
+								},
+								{
+									"key": "SortBy",
+									"value": "fullName",
+									"description": "Sort field (optional)"
+								},
+								{
+									"key": "SortDirection",
+									"value": "asc",
+									"description": "Sort direction: asc or desc (optional)"
+								},
+								{
+									"key": "IsActive",
+									"value": "true",
+									"description": "Filter by active status (optional)"
+								}
+							]
+						},
+						"description": "Get a paged list of users with filtering, sorting, and search support."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1,\n  \"fullName\": \"John Doe Updated\",\n  \"phoneNumber\": \"+1987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/update",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"update"
+							]
+						},
+						"description": "Update a user's full name and phone number."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"OldP@ssw0rd!\",\n  \"newPassword\": \"NewP@ssw0rd!\",\n  \"confirmedNewPassword\": \"NewP@ssw0rd!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"change-password"
+							]
+						},
+						"description": "Change the authenticated user's password."
+					},
+					"response": []
+				},
+				{
+					"name": "Change User Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1,\n  \"activateOrDeactivate\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/change-status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"change-status"
+							]
+						},
+						"description": "Activate or deactivate a user. Set `activateOrDeactivate` to `true` to activate, `false` to deactivate."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1,\n  \"roles\": [\n    \"Admin\",\n    \"User\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/user-roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"user-roles"
+							]
+						},
+						"description": "Update the roles assigned to a user. Provide the list of role names to assign."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/roles/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"roles",
+								"{{user_id}}"
+							]
+						},
+						"description": "Get all roles assigned to a specific user."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Change Email Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newEmail\": \"newemail@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/generate-change-email-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"generate-change-email-token"
+							]
+						},
+						"description": "Generate a token for changing the authenticated user's email address. The token is sent to the new email."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate 2FA Recovery Codes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/generate-2fa-recovery-codes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"generate-2fa-recovery-codes"
+							]
+						},
+						"description": "Generate new two-factor authentication recovery codes for the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Lock User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/lock-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"lock-user"
+							]
+						},
+						"description": "Lock a user account, preventing them from logging in."
+					},
+					"response": []
+				},
+				{
+					"name": "Unlock User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/unlock-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"unlock-user"
+							]
+						},
+						"description": "Unlock a previously locked user account."
+					},
+					"response": []
+				},
+				{
+					"name": "Setup 2FA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/setup-2fa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"setup-2fa"
+							]
+						},
+						"description": "Initialize two-factor authentication setup. Returns the QR code URL and secret key for the authenticator app."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm 2FA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/confirm-2fa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"confirm-2fa"
+							]
+						},
+						"description": "Confirm the two-factor authentication setup by providing the verification code from the authenticator app."
+					},
+					"response": []
+				},
+				{
+					"name": "Enable 2FA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/enable-2fa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"enable-2fa"
+							]
+						},
+						"description": "Enable two-factor authentication for the authenticated user. Returns recovery codes on success."
+					},
+					"response": []
+				},
+				{
+					"name": "Disable 2FA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"P@ssw0rd!\",\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v{{version}}/users/disable-2fa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v{{version}}",
+								"users",
+								"disable-2fa"
+							]
+						},
+						"description": "Disable two-factor authentication for the authenticated user. Requires the current password and a 2FA code."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:7122",
+			"type": "string"
+		},
+		{
+			"key": "version",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "two_factor_challenge_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "role_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

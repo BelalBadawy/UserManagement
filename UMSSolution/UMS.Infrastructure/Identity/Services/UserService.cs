@@ -363,7 +363,8 @@ namespace UMS.Infrastructure.Identity.Services
 
             try
             {
-                var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
+                var decodedToken = HttpUtility.UrlDecode(request.Token);
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.Password);
 
                 if (result.Succeeded)
                 {
@@ -387,8 +388,10 @@ namespace UMS.Infrastructure.Identity.Services
 
             if (user.EmailConfirmed)
                 return ResponseWrapper.Success("Email is already confirmed.");
+            
+            var decodedToken = HttpUtility.UrlDecode(token);
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             if (!result.Succeeded)
                 return ResponseWrapper.Fail(GetIdentityResultErrorDescriptions(result));
 

@@ -32,7 +32,7 @@ namespace UMS.API
                 {
                     _logger.LogWarning(
                         "The response has already started, the error handling middleware will not modify the response.");
-                    throw;
+                    return;
                 }
 
                 await HandleExceptionAsync(context, ex, _env.IsDevelopment());
