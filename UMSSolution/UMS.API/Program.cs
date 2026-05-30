@@ -5,6 +5,7 @@ using UMS.API;
 using UMS.API.Endpoints;
 using UMS.API.Helpers;
 using UMS.Application;
+using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.TwoFactor;
 using UMS.Infrastructure;
 using WebApi.Endpoints;
@@ -38,6 +39,7 @@ builder.Services.AddApiVersioningConfig();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 builder.Services.Configure<TwoFactorOptions>(builder.Configuration.GetSection("TwoFactor"));
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("ClientSettings"));
 
 
 var app = builder.Build();

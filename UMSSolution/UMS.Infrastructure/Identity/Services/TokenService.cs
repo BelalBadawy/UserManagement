@@ -60,7 +60,7 @@ namespace UMS.Infrastructure.Identity.Services
             // Check email if email confirmed
             if (!userInDb.EmailConfirmed)
             {
-                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
+                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.", statusCode: 403);
             }
             // Check if locked out before verifying password so the right message is shown
             if (await _userManager.IsLockedOutAsync(userInDb))
@@ -156,7 +156,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (user is null || !user.IsActive)
                 return ResponseWrapper<TokenResponse>.Fail("Invalid credentials.");
             if (!user.EmailConfirmed)
-                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.");
+                return ResponseWrapper<TokenResponse>.Fail("Email not confirmed.", statusCode: 403);
             if (await _userManager.IsLockedOutAsync(user))
                 return ResponseWrapper<TokenResponse>.Fail("Account is locked. Please try again later.");
             if (!user.TwoFactorEnabled)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
@@ -44,6 +45,7 @@ public class UserServiceAuthTests
         _httpContextAccessor.Setup(a => a.HttpContext).Returns(mockHttpContext.Object);
 
         var twoFactorOptions = Options.Create(new TwoFactorOptions { Issuer = "TestApp" });
+        var clientSettings = Options.Create(new ClientSettings { BaseUrl = "http://client.example.com" });
 
         _sut = new UserService(
             _userManager.Object,
@@ -53,6 +55,7 @@ public class UserServiceAuthTests
             _dateTimeService.Object,
             _currentUserService.Object,
             twoFactorOptions,
+            clientSettings,
             new Mock<ILogger<UserService>>().Object);
     }
 

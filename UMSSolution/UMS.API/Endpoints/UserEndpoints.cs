@@ -26,7 +26,9 @@ public static class UserEndpoints
         {
             var response = await sender.Send(new UserRegistrationCommand { UserRegistration = userRegistration }, ct);
             return response.ToApiResult();
-        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Create))
+        })
+        .AllowAnonymous()
+        // .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Create))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 

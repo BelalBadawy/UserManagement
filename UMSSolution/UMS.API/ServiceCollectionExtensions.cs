@@ -45,7 +45,7 @@ namespace UMS.API
                     {
                         // Fallback for local development when no origins are configured
                         policy
-                            .WithOrigins("https://localhost:7122", "http://localhost:7122")
+                            .WithOrigins("https://localhost:7122", "http://localhost:7122", "http://localhost:5173")
                             .AllowAnyMethod()
                             .AllowAnyHeader();
                     }
