@@ -29,6 +29,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly IDateTimeService _dateTimeService;
         private readonly ICurrentUserService _currentUserService;
         private readonly TwoFactorOptions _twoFactorOptions;
+        private readonly ClientSettings _clientSettings;
         private readonly ILogger<UserService> _logger;
 
         public UserService(
@@ -39,6 +40,7 @@ namespace UMS.Infrastructure.Identity.Services
             IDateTimeService dateTimeService,
             ICurrentUserService currentUserService,
             IOptions<TwoFactorOptions> twoFactorOptions,
+            IOptions<ClientSettings> clientSettings,
             ILogger<UserService> logger)
         {
             _userManager = userManager;
@@ -48,6 +50,7 @@ namespace UMS.Infrastructure.Identity.Services
             _dateTimeService = dateTimeService;
             _currentUserService = currentUserService;
             _twoFactorOptions = twoFactorOptions.Value;
+            _clientSettings = clientSettings.Value;
             _logger = logger;
         }
 
@@ -86,10 +89,9 @@ namespace UMS.Infrastructure.Identity.Services
                 {
                     if (!userRegistration.AutoConfirmEmail)
                     {
-                        var httpRequest = _httpContextAccessor.HttpContext?.Request;
-                        var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+                        var clientBaseUrl = _clientSettings.BaseUrl;
                         var emailToken  = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-                        var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+                        var callbackUrl = $"{clientBaseUrl.TrimEnd('/')}/confirm-email" +
                                           $"?userId={newUser.Id}" +
                                           $"&token={HttpUtility.UrlEncode(emailToken)}";
 
@@ -417,10 +419,9 @@ namespace UMS.Infrastructure.Identity.Services
             if (user is null || user.EmailConfirmed)
                 return ResponseWrapper.Success(safeMessage);
 
-            var httpRequest = _httpContextAccessor.HttpContext?.Request;
-            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var clientBaseUrl = _clientSettings.BaseUrl;
             var token       = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = $"{baseUrl}/Account/ConfirmEmail" +
+            var callbackUrl = $"{clientBaseUrl.TrimEnd('/')}/confirm-email" +
                               $"?userId={user.Id}" +
                               $"&token={HttpUtility.UrlEncode(token)}";
 
@@ -446,10 +447,9 @@ namespace UMS.Infrastructure.Identity.Services
             if (string.Equals(user.Email, newEmail, StringComparison.OrdinalIgnoreCase))
                 return ResponseWrapper.Fail("New email must be different from your current email.");
 
-            var httpRequest = _httpContextAccessor.HttpContext?.Request;
-            var baseUrl     = $"{httpRequest?.Scheme}://{httpRequest?.Host}{httpRequest?.PathBase}";
+            var clientBaseUrl = _clientSettings.BaseUrl;
             var token       = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
-            var callbackUrl = $"{baseUrl}/Account/ConfirmEmailChange" +
+            var callbackUrl = $"{clientBaseUrl.TrimEnd('/')}/confirm-email-change" +
                               $"?userId={user.Id}" +
                               $"&newEmail={HttpUtility.UrlEncode(newEmail)}" +
                               $"&token={HttpUtility.UrlEncode(token)}";

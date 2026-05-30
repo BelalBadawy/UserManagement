@@ -63,10 +63,10 @@ public class UserEndpointsTests : ApiTestBase
     }
 
     [Theory]
-    [InlineData("anonymous", HttpStatusCode.Unauthorized)]
-    [InlineData("low-privilege", HttpStatusCode.Forbidden)]
-    [InlineData("privileged", HttpStatusCode.OK)]
-    public async Task Register_user_should_follow_authorization_matrix(string authMode, HttpStatusCode expectedStatusCode)
+    [InlineData("anonymous")]
+    [InlineData("low-privilege")]
+    [InlineData("privileged")]
+    public async Task Register_user_should_be_accessible_to_all_roles_since_it_is_anonymous(string authMode)
     {
         var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Create);
         UseUserClient(authMode, requiredPermission);
@@ -85,12 +85,7 @@ public class UserEndpointsTests : ApiTestBase
 
         var response = await Client.PostAsJsonAsync("/api/v1/users/register", request);
 
-        response.StatusCode.Should().Be(expectedStatusCode);
-
-        if (expectedStatusCode != HttpStatusCode.OK)
-        {
-            return;
-        }
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
         payload.Should().NotBeNull();

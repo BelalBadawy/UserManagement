@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using UMS.Application.Dtos.Common;
+using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.TwoFactor;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users.Commands;
@@ -41,6 +43,7 @@ public class UserServiceTests
         _httpContextAccessor.Setup(a => a.HttpContext).Returns(mockHttpContext.Object);
 
         var twoFactorOptions = Options.Create(new TwoFactorOptions { Issuer = "TestApp" });
+        var clientSettings = Options.Create(new ClientSettings { BaseUrl = "http://client.example.com" });
 
         _sut = new UserService(
             _userManager.Object,
@@ -50,6 +53,7 @@ public class UserServiceTests
             _dateTimeService.Object,
             _currentUserService.Object,
             twoFactorOptions,
+            clientSettings,
             new Mock<ILogger<UserService>>().Object);
     }
 
@@ -926,5 +930,89 @@ public class UserServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Messages.Should().ContainSingle().Which.Should().Be("User unlocked successfully.");
         _userManager.Verify(m => m.ResetAccessFailedCountAsync(user), Times.Once);
+    }
+
+    // ── Email Confirmation Links ───────────────────────────────────────────
+
+    [Fact]
+    public async Task RegisterUserAsync_WhenAutoConfirmEmailFalse_SendsConfirmationEmailWithClientUrl()
+    {
+        // Arrange
+        var req = new UserRegistrationRequest 
+        { 
+            Email = "new@test.com", 
+            Password = "Pass@1", 
+            FullName = "Alice", 
+            AutoConfirmEmail = false, 
+            ActivateUser = true 
+        };
+        _userManager.Setup(m => m.FindByEmailAsync(req.Email)).ReturnsAsync((ApplicationUser?)null);
+        _userManager.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), req.Password)).ReturnsAsync(IdentityResult.Success);
+        _userManager.Setup(m => m.AddToRoleAsync(It.IsAny<ApplicationUser>(), "Basic")).ReturnsAsync(IdentityResult.Success);
+        _userManager.Setup(m => m.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>())).ReturnsAsync("verification-token");
+        
+        SendEmailDto? sentEmailDto = null;
+        _emailService.Setup(m => m.SendAsync(It.IsAny<SendEmailDto>(), It.IsAny<CancellationToken>()))
+                     .Callback<SendEmailDto, CancellationToken>((dto, ct) => sentEmailDto = dto)
+                     .ReturnsAsync(string.Empty);
+
+        // Act
+        var result = await _sut.RegisterUserAsync(req);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        sentEmailDto.Should().NotBeNull();
+        sentEmailDto!.MailTo.Should().Be(req.Email);
+        sentEmailDto.MessageBody.Should().Contain("http://client.example.com/confirm-email");
+        sentEmailDto.MessageBody.Should().Contain("token=verification-token");
+    }
+
+    [Fact]
+    public async Task ResendConfirmationEmailAsync_SendsConfirmationEmailWithClientUrl()
+    {
+        // Arrange
+        var user = MakeUser(1, "u@t.com", confirmed: false);
+        _userManager.Setup(m => m.FindByEmailAsync(user.Email!)).ReturnsAsync(user);
+        _userManager.Setup(m => m.GenerateEmailConfirmationTokenAsync(user)).ReturnsAsync("resend-token");
+
+        SendEmailDto? sentEmailDto = null;
+        _emailService.Setup(m => m.SendAsync(It.IsAny<SendEmailDto>(), It.IsAny<CancellationToken>()))
+                     .Callback<SendEmailDto, CancellationToken>((dto, ct) => sentEmailDto = dto)
+                     .ReturnsAsync(string.Empty);
+
+        // Act
+        var result = await _sut.ResendConfirmationEmailAsync(user.Email!);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        sentEmailDto.Should().NotBeNull();
+        sentEmailDto!.MailTo.Should().Be(user.Email);
+        sentEmailDto.MessageBody.Should().Contain("http://client.example.com/confirm-email");
+        sentEmailDto.MessageBody.Should().Contain("token=resend-token");
+    }
+
+    [Fact]
+    public async Task GenerateChangeEmailTokenAsync_SendsConfirmationEmailWithClientUrl()
+    {
+        // Arrange
+        var user = MakeUser(1, "old@test.com");
+        _currentUserService.Setup(s => s.GetUserId()).Returns(1);
+        _userManager.Setup(m => m.FindByIdAsync("1")).ReturnsAsync(user);
+        _userManager.Setup(m => m.GenerateChangeEmailTokenAsync(user, "new@test.com")).ReturnsAsync("change-token");
+
+        SendEmailDto? sentEmailDto = null;
+        _emailService.Setup(m => m.SendAsync(It.IsAny<SendEmailDto>(), It.IsAny<CancellationToken>()))
+                     .Callback<SendEmailDto, CancellationToken>((dto, ct) => sentEmailDto = dto)
+                     .ReturnsAsync(string.Empty);
+
+        // Act
+        var result = await _sut.GenerateChangeEmailTokenAsync("new@test.com");
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        sentEmailDto.Should().NotBeNull();
+        sentEmailDto!.MailTo.Should().Be(user.Email);
+        sentEmailDto.MessageBody.Should().Contain("http://client.example.com/confirm-email-change");
+        sentEmailDto.MessageBody.Should().Contain("token=change-token");
     }
 }
