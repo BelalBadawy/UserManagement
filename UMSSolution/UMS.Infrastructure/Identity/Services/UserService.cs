@@ -325,11 +325,11 @@ namespace UMS.Infrastructure.Identity.Services
             if (user is null || !user.EmailConfirmed)
                 return ResponseWrapper.Success(safeMessage);
 
-            var request = _httpContextAccessor.HttpContext?.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
+            var clientBaseUrl = _clientSettings.BaseUrl;
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callbackUrl =
-                $"{baseUrl}/Account/ResetPassword?email={HttpUtility.UrlEncode(user.Email)}&code={HttpUtility.UrlEncode(code)}";
+            var callbackUrl = $"{clientBaseUrl.TrimEnd('/')}/reset-password" +
+                              $"?email={HttpUtility.UrlEncode(user.Email)}" +
+                              $"&token={HttpUtility.UrlEncode(code)}";
 
             var emailModel = new SendEmailDto
             {
@@ -338,7 +338,9 @@ namespace UMS.Infrastructure.Identity.Services
                 MessageBody = $"<p>Hello: {user.FullName}</p>" +
                 $"<p>Username: {user.UserName}.</p>" +
                 "<p>In order to reset your password, please click on the following link.</p>" +
-                $"<p><a href=\"{callbackUrl}\">Click here</a></p>" +
+                $"<p><a href=\"{callbackUrl}\">Click here to Reset Password</a></p>" +
+                "<p>If the link above does not work, copy and paste the following URL into your browser:</p>" +
+                $"<p>{callbackUrl}</p>" +
                 "<p>Thank you,</p>"
             };
 

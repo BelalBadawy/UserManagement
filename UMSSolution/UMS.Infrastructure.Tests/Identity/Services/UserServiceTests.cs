@@ -515,7 +515,10 @@ public class UserServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Messages.Should().ContainSingle().Which.Should().Be("If the email is registered, you will receive an email shortly.");
         _emailService.Verify(e => e.SendAsync(
-            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
+            It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => 
+                dto.MailTo == "u@t.com" &&
+                dto.MessageBody.Contains("http://client.example.com/reset-password?email=u%40t.com&token=reset-token") &&
+                dto.MessageBody.Contains("If the link above does not work, copy and paste the following URL into your browser:")),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

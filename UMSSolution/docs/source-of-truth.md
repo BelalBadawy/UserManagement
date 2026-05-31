@@ -50,6 +50,26 @@ Governs secure email updates for existing users.
   3. Clicking the link directs the user to the client-side `/confirm-email-change` landing page, which auto-submits the parameters to the backend.
   4. Upon validation, the user's email and username are updated, and they are redirected to the login page after 3 seconds.
 
+### 3.4 Forgot Password & Password Reset
+Governs self-service password recovery for users who have forgotten their credentials.
+
+* **Happy Path (Forgot Password Request)**:
+  1. The user navigates to the login page and clicks the "Forgot Password?" link, which routes them to `/forgot-password` on the client.
+  2. The user inputs their registered email address and clicks "Send Reset Link".
+  3. The React client validates that the email address is structured correctly and sends a `POST` request to `/api/v1/account/forgot-password?email=...`.
+  4. To prevent user enumeration, the backend always responds with a success message: `"If the email is registered, you will receive an email shortly."`
+  5. The client intercepts the success response and replaces the email form in-place with a clean success screen displaying the exact success message returned from the API ("If the email is registered, you will receive an email shortly.").
+  6. The backend dispatches a secure password reset token link targeting the React client's `/reset-password` path (e.g. `{clientBaseUrl}/reset-password?email={email}&token={token}`) and includes a plain-text fallback URL block in the email message body.
+
+* **Happy Path (Password Reset)**:
+  1. The user clicks the link in their email inbox, directing them to `/reset-password` on the client.
+  2. The React client checks the query string parameters. If `email` or `token` is missing, it renders an "Invalid Link" error screen.
+  3. If both parameters are present, the client displays a form showing their email address (disabled field) and inputs for New Password and Confirm Password.
+  4. The client calculates password strength in real-time. If the strength is evaluated as "Weak" (less than 8 characters or failing complexity tests), or if the confirmation password does not match, the submit button remains disabled.
+  5. Once a strong matching password is typed, the user submits the form. The client issues a `POST` request to `/api/v1/account/reset-password` with the email, token, new password, and confirmation password.
+  6. The backend validates the parameters and token, resets the password, updates the user's security stamp, and returns a success response wrapper.
+  7. The client displays a success screen, triggers a success toast, and starts a 3-second countdown timer that automatically redirects the user to the `/login` route.
+
 ---
 
 ## 4. API Contracts & Integrations
@@ -101,6 +121,23 @@ Governs secure email updates for existing users.
 - **Purpose**: Dispatches a new email verification token.
 - **Request Payload**:
   - `email` (string): Registered email address.
+- **Response Wrapper**: Returns standard success/fail wrapper.
+
+#### `POST /api/v1/account/forgot-password`
+- **Access**: Anonymous (`AllowAnonymous`)
+- **Purpose**: Generates a password reset token and sends a reset link to the user's email.
+- **Request Parameters**:
+  - `email` (string, query parameter): User's registered email address.
+- **Response Wrapper**: Always returns a standard successful `ResponseWrapper` (to prevent user enumeration).
+
+#### `POST /api/v1/account/reset-password`
+- **Access**: Anonymous
+- **Purpose**: Resets the password using the token received in the email.
+- **Request Payload**:
+  - `email` (string): User's email address.
+  - `token` (string): The reset token.
+  - `password` (string): The new password.
+  - `confirmPassword` (string): Confirmation matching the new password.
 - **Response Wrapper**: Returns standard success/fail wrapper.
 
 ---
@@ -170,3 +207,30 @@ A custom, lightweight, glassmorphic toast notification component and context pro
   - **Backend**: Bound `ClientSettings` configs, set `StatusCode = 403` on unconfirmed email validation checks, and updated `UserService` to build links resolving to client-side paths.
   - **Frontend**: Established centralized API client, updated registration form, created `/confirm-email`, `/resend-confirmation`, and `/confirm-email-change` landing pages, and intercepted unconfirmed email errors (`403`) to prompt resending links.
   - **Form Validation, Password Strength & Toastr**: Installed client-side validations to block invalid form submissions, integrated a real-time password strength meter rejecting weak passwords, and built a custom, glassmorphic toast notification system (`useToast`) across all account/verification pages.
+- **2026-05-30**: Implemented Forgot Password and Password Reset (4k Password) flow.
+  - **Backend**: Modified `UserService.ForgotPasswordAsync` to generate reset links resolving to client-side routes using `_clientSettings.BaseUrl` and added a plain-text fallback URL block in the email message body. Updated `UserServiceTests` to verify client URL redirection format.
+  - **Frontend**: Registered `/forgot-password` and `/reset-password` routes in `App.tsx`.
+  - **Forgot Password Page**: Implemented a glassmorphic form for forgot password requests, displaying an in-place success view upon successful submission to prevent enumeration.
+  - **Reset Password Page**: Implemented a form to parse query string parameters, validate password strength in real-time, block weak passwords, submit the reset token, and trigger an auto-redirect countdown to the login screen on success.
+
+---
+
+## 9. Client-Side Session & Route Protection
+
+### 9.1 JWT Claim Decoding & Normalization
+To prevent dependencies on external token libraries, the client uses a native decoding mechanism (`src/lib/jwt.ts`) that splits the token parts, decodes the Base64URL payload via `window.atob`, and maps .NET claim formats to clean TypeScript fields:
+- **Roles Normalization**: Looks up `"http://schemas.microsoft.com/ws/2008/06/identity/claims/role"`. If the user has a single role, it parses as a string; if multiple, it parses as an array. The utility normalizes both cases by wrapping single strings into a string array.
+- **Permissions Normalization**: Similar normalization logic is applied to the `"permission"` claim key to return arrays consistently.
+- **Expiration Check**: Validates token expiration (`exp` claim) locally against the current system time using a 30-second clock skew buffer.
+
+### 9.2 Auth Context & Token Refresh
+The React application's session state is managed via `<AuthProvider>` and the `useAuth` custom hook:
+- **Initial Load**: On mount, the provider checks the active token. If expired, it attempts a silent refresh request to `POST /api/v1/account/refresh-token` with the stored access token and refresh token. If the refresh request fails or tokens are missing/invalid, the session is cleared.
+- **Token Refresh**: Provides automatic check/refresh logic triggered on page loads and transitions, preventing session dropouts.
+- **Login/Logout**: Updates both context states and `localStorage` keys immediately.
+
+### 9.3 Protected vs Public-Only Routes
+- **Protected Routes (`ProtectedRoute`)**: Restricts access to authenticated users. Supports optional role verification (e.g., `/admin` requires the "Admin" role). Unauthenticated users are redirected to `/login`, and authenticated users without required roles are redirected back to the public homepage `/`.
+- **Public-Only Routes (`PublicOnlyRoute`)**: Restricts access to guests. If an authenticated user attempts to visit auth pages like `/login`, `/register`, or verification routes, they are automatically intercepted and routed to their respective homepage (Admin to `/admin`, others to `/`).
+- **Public Home (`/`)**: Open anonymously. Displays generic greeting for guests, or username/logout button if authenticated.
+
