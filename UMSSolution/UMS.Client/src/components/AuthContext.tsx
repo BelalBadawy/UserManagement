@@ -11,6 +11,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   refreshAccessToken: () => Promise<boolean>;
+  hasPermission: (permissionName: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,6 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const hasPermission = (permissionName: string): boolean => {
+    if (!user || !user.permissions) return false;
+    return user.permissions.includes(permissionName);
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       const storedToken = localStorage.getItem('token');
@@ -94,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     isAuthenticated: !!user,
     refreshAccessToken,
+    hasPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

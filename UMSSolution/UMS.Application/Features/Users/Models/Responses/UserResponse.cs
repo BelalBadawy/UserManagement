@@ -1,4 +1,4 @@
-﻿namespace UMS.Application.Features.Users.Models.Responses
+namespace UMS.Application.Features.Users.Models.Responses
 {
     public class UserResponse
     {
@@ -9,5 +9,6 @@
         public bool IsActive { get; set; }
         public bool EmailConfirmed { get; set; }
         public string PhoneNumber { get; set; }
+        public bool IsLocked { get; set; }
     }
 }

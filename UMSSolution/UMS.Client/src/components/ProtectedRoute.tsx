@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { useToast } from './ui/toast';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
+  allowedPermissions?: string[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, allowedPermissions }) => {
   const { user, isAuthenticated, loading, refreshAccessToken } = useAuth();
+  const toast = useToast();
   const [checkingToken, setCheckingToken] = useState(true);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -28,6 +32,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
     }
   }, [loading, refreshAccessToken]);
 
+  useEffect(() => {
+    if (!loading && !checkingToken && isAuthenticated && user) {
+      // Check permissions if specified
+      if (allowedPermissions) {
+        const hasPerm = allowedPermissions.some((perm) => user.permissions.includes(perm));
+        if (!hasPerm) {
+          toast.error("Access Denied: You do not have permission to access this resource.");
+          setPermissionDenied(true);
+        }
+      }
+      
+      // Check roles if specified
+      if (allowedRoles) {
+        const hasRole = user.roles.some((role) => allowedRoles.includes(role));
+        if (!hasRole) {
+          toast.error("Access Denied: You do not have the required role to access this resource.");
+          setPermissionDenied(true);
+        }
+      }
+    }
+  }, [loading, checkingToken, isAuthenticated, user, allowedPermissions, allowedRoles, toast]);
+
   if (loading || checkingToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
@@ -43,11 +69,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && user) {
-    const hasRole = user.roles.some((role) => allowedRoles.includes(role));
-    if (!hasRole) {
-      return <Navigate to="/" replace />;
-    }
+  if (permissionDenied) {
+    // If Admin, redirect to admin home, else basic home
+    const isAdmin = user?.roles.includes('Admin');
+    return <Navigate to={isAdmin ? '/admin' : '/'} replace />;
   }
 
   return <Outlet />;

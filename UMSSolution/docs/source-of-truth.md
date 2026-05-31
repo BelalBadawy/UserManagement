@@ -70,6 +70,76 @@ Governs self-service password recovery for users who have forgotten their creden
   6. The backend validates the parameters and token, resets the password, updates the user's security stamp, and returns a success response wrapper.
   7. The client displays a success screen, triggers a success toast, and starts a 3-second countdown timer that automatically redirects the user to the `/login` route.
 
+### 3.5 Admin User Management (Phase 1)
+Governs identity search, list traversal, status locks, details updates, and initial registration privileges.
+
+* **List & Traversal Flow**:
+  1. The Admin navigates to `/admin/users`. The route is guarded at the routing tier to only allow users possessing `Permission.Identity.Users.Read`.
+  2. On load, the page parses URL query parameters (`page`, `search`, `active`, `locked`, `role`) to initialize search and filtering states reactively.
+  3. The page presents an advanced filter bar including:
+     - **Status Filter**: Options for *All*, *Active*, and *Inactive*, mapping to server-side `IsActive` filtering.
+     - **Lockout Filter**: Options for *All*, *Locked*, and *Unlocked*, mapping to server-side `IsLocked` filtering.
+     - **Assigned Role Filter**: A dropdown dynamically populated by fetching roles from `GET api/v1/roles/all`, filtering users by role ID.
+  4. The page dispatches a paginated request `GET /api/v1/users/paged-list` with `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `isActive`, `isLocked`, and `roleId`. Changing any filter or search term automatically resets pagination back to Page 1.
+  5. The footer renders a full numbered pagination structure using official Shadcn Pagination components (`PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationEllipsis`) presenting the first page, last page, current page, one page on either side of the current page, and ellipses for gaps, with Previous/Next buttons disabled appropriately at boundaries.
+  6. Parallel roles queries (`GET /api/v1/users/roles/{userId}`) are fired to fetch role mappings for rendering under the "Assigned Roles" column.
+  7. Column headers are interactive; clicking them switches sorting keys or directions dynamically, triggering a page refresh from the API.
+
+* **Guarded Action Operations**:
+  1. **Lock/Unlock (Lockout)**: Governs security lockouts. Checked by `Permission.Identity.Users.Lock` / `Permission.Identity.Users.Unlock` claims. Action buttons show/hide based on the backend-tracked `IsLocked` (or `LockoutEnd`) status. Locking a user sets their lockout expiry date to `DateTimeOffset.MaxValue` and invalidates active refresh tokens. Unlocking resets the lockout date. Toggling triggers a confirmation modal and dispatches `PUT /api/v1/users/lock-user` or `PUT /api/v1/users/unlock-user`.
+  2. **Activate/Deactivate (Activation)**: Governs account status. Checked by `Permission.Identity.Users.Update`. Action buttons show/hide based on the `IsActive` flag. Deactivating a user flags the account as inactive in the database, preventing generic session logins. Toggling triggers a confirmation modal and dispatches `PUT /api/v1/users/change-status`.
+  3. **Create User**: Checked by `Permission.Identity.Users.Create`. Opens a side-panel `Sheet` allowing form entry. Evaluates password strength in real-time, blocking submission of weak passwords. Auto-assigns roles. Dispatches to `POST /api/v1/users/register`.
+  4. **Edit Details & Roles**: Checked by `Permission.Identity.Users.Update`. Loads existing credentials into `Sheet`. Admin edits Name, Phone Number, and toggles Assigned Roles. Clicking save dispatches a profile update `PUT /api/v1/users/update` followed by role assignment changes `PUT /api/v1/users/user-roles`.
+  5. **Delete User**: Checked by `Permission.Identity.Users.Delete`. Deletion logic is verified and simulated client-side.
+
+### 3.6 Admin Role Management (Phase 2)
+Governs custom role classifications configuration, security level naming, descriptions, and dynamic authorization checks.
+
+* **List & Traversal Flow**:
+  1. The Admin navigates to `/admin/roles`. The route is guarded at the routing tier to only allow users possessing `Permission.Identity.Roles.Read`.
+  2. On load, the page dispatches a request `GET /api/v1/roles/all` to fetch the complete list of system roles.
+  3. The page displays roles (ID, Role Name, Description) in a clean tabular view. Users can filter roles locally via an interactive search bar.
+
+* **Guarded Action Operations**:
+  1. **Create Role**: Checked by `Permission.Identity.Roles.Create`. Activates a side-panel `Sheet` containing Name and Description inputs. Submitting dispatches `POST /api/v1/roles`.
+  2. **Edit Role**: Checked by `Permission.Identity.Roles.Update`. Opens the `Sheet` populated with the role data. Submitting dispatches `PUT /api/v1/roles` (basic details updates).
+  3. **Delete Role**: Checked by `Permission.Identity.Roles.Delete`. Displays a confirmation modal `Dialog`. On confirmation, dispatches `DELETE /api/v1/roles/{roleId}` to wipe out the role.
+
+### 3.7 Claims & Permissions Management (Phase 3)
+Governs assigning granular access permission claims (such as `Permission.Identity.Users.Read`) to security roles.
+
+* **Permissions Matrix Load & Render Flow**:
+  1. Integrated inside the `RoleFormSheet` container.
+  2. On sheet activation:
+     - In **Create Mode**: Calls `GET /api/v1/roles/permissions/{firstRoleId}` (representing any valid system role) to dynamically load the system permissions metadata schema. All checkboxes default to unchecked (`selected: false`).
+     - In **Edit Mode**: Calls `GET /api/v1/roles/permissions/{roleId}`. The backend returns all system permissions with their active state checked (`selected: true`) or unchecked.
+  3. The client parses permission claim names (e.g. `Permission.Identity.Users.Read`) into `AppService` ("Identity"), `AppFeature` ("Users"), and `AppAction` ("Read").
+  4. Renders categories dynamically grouped by Service and Feature inside interactive expandable Accordion sections.
+
+* **Bulk Toggle & Matrix Controls**:
+  1. **Global Toggle**: A "Select All" master checkbox at the top to select or deselect all system permissions with one click. Supports indeterminate check states.
+  2. **Category Toggle**: Individual category headers have checkboxes to toggle all child actions (e.g. check all *Identity -> Users* permissions at once).
+  3. **Individual Toggle**: Each permission item displays its read label and action name with a toggle checkbox.
+
+* **Save & Update Flow**:
+  1. When clicking "Save Role & Permissions", the client saves core metadata, then updates permissions.
+  2. The client filters active checked claims and posts the array to `PUT /api/v1/roles/update-permissions` containing the `RoleId` and `RoleClaims` list.
+  3. The backend calculates additions/removals within a SQL transaction, ensuring atomic updates.
+
+### 3.8 Product Categories Management
+Governs the catalog organization, hierarchy, sorting, and active status configurations of product categories.
+
+* **List & Traversal Flow**:
+  1. The Admin navigates to `/admin/categories`. The route is guarded at the routing tier to only allow users possessing `Permission.Product.Categories.Read`.
+  2. On load, the page dispatches a paginated request `GET /api/v1/categories/paged-list` with `pageNumber`, `pageSize`, `sortBy`, `sortOrder`, `searchQuery`, and `isActive` (if filtering).
+  3. The page displays categories (ID, Name, Slug, Sort Order, Status) in a Tanstack Table with full pagination support.
+  4. Header columns are interactive; clicking them triggers sorting dynamically. A search input debounces and filters by name or slug. A status dropdown filters by Active, Inactive, or All.
+
+* **Guarded Action Operations**:
+  1. **Create Category**: Checked by `Permission.Product.Categories.Create`. Activates a side-panel `Sheet` containing Name, Slug (auto-generated from Name but editable), Parent Category (dynamically fetched dropdown of parent categories), Sort Order, and IsActive toggle. Submitting dispatches `POST /api/v1/categories`.
+  2. **Edit Category**: Checked by `Permission.Product.Categories.Update`. Opens the `Sheet` populated with the category's current data. Submitting dispatches `PUT /api/v1/categories` along with the `rowVersion` for concurrency control.
+  3. **Delete Category**: Checked by `Permission.Product.Categories.Delete`. Displays a confirmation modal `Dialog`. On confirmation, dispatches `DELETE /api/v1/categories/{id}`.
+
 ---
 
 ## 4. API Contracts & Integrations
@@ -139,6 +209,54 @@ Governs self-service password recovery for users who have forgotten their creden
   - `password` (string): The new password.
   - `confirmPassword` (string): Confirmation matching the new password.
 - **Response Wrapper**: Returns standard success/fail wrapper.
+
+### 4.2 Product Categories Endpoints
+
+#### `GET /api/v1/categories/paged-list`
+- **Access**: Authenticated, requires `Permission.Product.Categories.Read`
+- **Purpose**: Retrieves a paged list of product categories based on search query, sorting, and status filters.
+- **Request Parameters**:
+  - `pageNumber` (integer, query parameter): Page index.
+  - `pageSize` (integer, query parameter): Page capacity.
+  - `sortBy` (string, query parameter): Field name to sort by (e.g. `name`, `slug`, `sortOrder`).
+  - `sortOrder` (string, query parameter): Sorting direction (`asc` or `desc`).
+  - `searchQuery` (string, query parameter): Search query to filter categories by name or slug.
+  - `isActive` (boolean, optional query parameter): Filter categories by status.
+- **Response Wrapper**: Returns a standard `ResponseWrapper` containing the paginated data list.
+
+#### `GET /api/v1/categories/{id}`
+- **Access**: Authenticated, requires `Permission.Product.Categories.Read`
+- **Purpose**: Retrieves category details by ID.
+- **Response Wrapper**: Returns category entity.
+
+#### `POST /api/v1/categories`
+- **Access**: Authenticated, requires `Permission.Product.Categories.Create`
+- **Purpose**: Creates a new product category.
+- **Request Payload**:
+  - `name` (string): Unique category name.
+  - `slug` (string): Auto-generated or custom editable slug.
+  - `parentId` (integer, optional): Parent category identifier.
+  - `sortOrder` (integer): Sorting sequence rank.
+  - `isActive` (boolean): Active status flag.
+- **Response Wrapper**: Standard `ResponseWrapper`.
+
+#### `PUT /api/v1/categories`
+- **Access**: Authenticated, requires `Permission.Product.Categories.Update`
+- **Purpose**: Modifies an existing category.
+- **Request Payload**:
+  - `id` (integer): Category identifier.
+  - `name` (string): Updated name.
+  - `slug` (string): Updated slug.
+  - `parentId` (integer, optional): Parent category ID.
+  - `sortOrder` (integer): Sorting position.
+  - `isActive` (boolean): Active status flag.
+  - `rowVersion` (string): Optimistic concurrency token check.
+- **Response Wrapper**: Standard `ResponseWrapper`.
+
+#### `DELETE /api/v1/categories/{id}`
+- **Access**: Authenticated, requires `Permission.Product.Categories.Delete`
+- **Purpose**: Deletes category by ID.
+- **Response Wrapper**: Standard `ResponseWrapper`.
 
 ---
 
@@ -287,9 +405,53 @@ When a user with 2FA enabled logs in with valid credentials:
 
 ---
 
-## 11. Changelog Updates
+## 12. Claims-Based Dynamic Navigation & Route Protection
+
+UMS implements a granular claims-based client-side permission mechanism:
+
+### 12.1 Dynamic Layout Navigation Menu
+The `<AdminLayout />` wrapper provides a unified navigation header and footer extracted from the design template:
+- **Desktop Header Menu**: Dynamically evaluates the user's session claims from the token and renders navigation tabs (e.g. *Users Management*, *Roles Management*) only if the user possesses the matching read permission (e.g. `Permission.Identity.Users.Read`).
+- **Responsive Mobile Drawer**: A slide-out panel (simulating Sheet behavior) containing the same dynamic navigation list and logout trigger.
+- **Account Dropdown**: A dropdown menu displaying user session details (email, profile links, logout trigger).
+
+### 12.2 Route-Level claims authorization (`allowedPermissions`)
+The `<ProtectedRoute />` guard was extended to accept an optional `allowedPermissions` array parameter:
+- **Authorization Verification**: Intercepts routing, extracts the user's claims array from the context state, and checks if the user possesses at least one of the required permission strings.
+- **Access Violation Redirect**: If the permission check fails, the guard intercepts execution, prompts a global toast alert warning (*"Access Denied: You do not have permission to access this resource."*), and redirects the user back to the default home screen `/`.
+
+### 12.3 Action-Level authorization (`hasPermission`)
+The `useAuth()` context hook provides a `hasPermission(permissionName: string)` helper:
+- **Button Hiding/Locking**: Elements (such as *Create User*, *Edit*, and *Delete* buttons) check the helper inline and remain hidden or disabled if the user lacks the required permission claim (e.g. `Permission.Identity.Users.Create`).
+
+---
+
+## 13. Changelog Updates
 - **2026-05-31**: Implemented Two-Factor Authentication (2FA) client integration.
   - **Frontend Page**: Created `/profile` page with account details and interactive 2FA setup/disable wizards using Shadcn/ui Dialog and Card styling. Used `qrcode.react` for local browser-side QR rendering.
   - **Login Integration**: Added 2FA code verification panel to `Login.tsx` that intercepts 2FA requirements and completes the auth flow using challenge tokens.
+- **2026-05-31 (Late)**: Implemented Claims-Based Route Protection & Dynamic Admin Layout Menu.
+  - **Admin Layout**: Created `<AdminLayout />` wrapping children in a common header/footer featuring a dynamic header menu, responsive mobile sheet, and profile dropdown menu.
+  - **Route Guard**: Extended `<ProtectedRoute />` to support `allowedPermissions` checks with automated redirect and toast alerts on access violation.
+  - **Action Guard**: Exposed `hasPermission` helper from `useAuth` hook to block unauthorized button clicks and hides/reveals actions dynamically (Create, Edit, Delete).
+  - **Mock Page**: Created `/admin/users` view to test user administration actions and permission checks.
+- **2026-05-31 (Night)**: Implemented Product Categories Management Module.
+  - **Backend**: Updated `GetCategoriesPagedQuery` query model to integrate server-side pagination, sorting, search, and dynamic status filters (`IsActive`).
+  - **Frontend API**: Added centralized `categories-api.ts` file handling CRUD operations, lists, and filtering query mapping.
+  - **UI Views**: Built `/admin/categories` using Tanstack Table with full inline search, sorting, status dropdown, delete warning confirmation dialogs, and a responsive category creation/edit `CategoryFormSheet` featuring automatic slugification.
+  - **Navigation**: Registered claim-guarded routes in `App.tsx` and dynamically included menu option in `AdminLayout.tsx` using permission checks.
+- **2026-05-31 (Late Night)**: Separated User Lockout (Lock/Unlock) and Activation (Activate/Deactivate) flows.
+  - **Backend**: Added `IsLocked` property to `UserResponse` DTO and mapped it using the Identity lockout expiry date check in user query handlers.
+  - **Frontend API**: Updated client-side `UserResponse` model interface to track `isLocked`.
+  - **UI Page**: Updated actions column to present separate lockout (Lock/Unlock) toggles and status (Activate/Deactivate) toggles. Configured custom visual status indicators for Active (default), Inactive (secondary/grey), and Locked (warning/orange) badges. Added activation confirmation dialogs and wired them up.
+  - **Fixes**: Fixed API test email sink to support retrieving tokens mapped as `token` parameter.
+  - **Verification**: Confirmed all 470 unit/integration tests pass, and verified a clean production build compilation.
+- **2026-05-31 (End of Day)**: Enhanced User Management Filtering and Pagination.
+  - **Backend**: Updated `PagedFilterRequest` to include nullable properties `IsLocked` and `RoleId`. Modified `UserService` to inject `IApplicationDbContext`, applying server-side filters for `IsActive`, `IsLocked` (comparing with `UtcNow`), and `RoleId` (joining via `ApplicationUserRole`) inside `GetUsersPagedQueryAsync`.
+  - **Unit Tests**: Updated `UserServiceTests` and `UserServiceAuthTests` to mock and inject `IApplicationDbContext` into `UserService`.
+  - **Frontend UI/UX**: Installed official Shadcn Select and Pagination components. Implemented advanced filter bar containing Status, Lockout, and Assigned Role selectors in `UserManagement.tsx`. Integrated full numbered pagination displaying first/last pages, ellipses, and Previous/Next buttons.
+  - **URL Synchronization**: Configured reactive URL state syncing for filters, search, and page variables with page reset logic on filter updates.
+  - **Verification**: Verified zero errors on client build `npm run build` and all backend test suites.
+
 
 

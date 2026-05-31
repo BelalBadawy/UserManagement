@@ -10,6 +10,10 @@ import ResetPassword from './pages/ResetPassword'
 import AdminHome from './pages/AdminHome'
 import PublicHome from './pages/PublicHome'
 import Profile from './pages/Profile'
+import UserManagement from './pages/UserManagement'
+import RoleManagement from './pages/RoleManagement'
+import CategoriesManagement from './pages/CategoriesManagement'
+import AdminLayout from './layouts/AdminLayout'
 import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -46,14 +50,29 @@ function AppContent() {
         </Route>
       </Route>
 
-      {/* Authenticated Route Group - Protected for all authenticated users */}
+      {/* Authenticated Route Group - Protected for all authenticated users, wrapped in AdminLayout */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/profile" element={<Profile />} />
-      </Route>
+        <Route element={<AdminLayout />}>
+          <Route path="/profile" element={<Profile />} />
+          
+          {/* Admin Role Only Route */}
+          <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+            <Route path="/admin" element={<AdminHome />} />
+          </Route>
 
-      {/* Admin Route Group - Protected & requires Admin role */}
-      <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
-        <Route path="/admin" element={<AdminHome />} />
+          {/* Permission-Guarded Routes */}
+          <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Users.Read']} />}>
+            <Route path="/admin/users" element={<UserManagement />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Roles.Read']} />}>
+            <Route path="/admin/roles" element={<RoleManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedPermissions={['Permission.Product.Categories.Read']} />}>
+            <Route path="/admin/categories" element={<CategoriesManagement />} />
+          </Route>
+        </Route>
       </Route>
 
       {/* Catch-all redirect */}

@@ -7,6 +7,8 @@ using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
 using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
+using Moq;
+using UMS.Application.Interfaces.Common;
 using UMS.Application.Tests.Support.Categories;
 
 namespace UMS.Application.Tests.Handlers.Categories;
@@ -124,7 +126,9 @@ public class GetCategoriesPagedQueryHandlerTests
         await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
         await scope.SeedCategoryAsync("Gamma", "gamma", 1, isActive: true);
         await scope.SeedCategoryAsync("Alpha Hidden", "alpha-hidden", 4, isActive: false);
-        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext);
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(s => s.IsAuthenticated()).Returns(false);
+        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext, mockCurrentUserService.Object);
         var query = new GetCategoriesPagedQuery
         {
             PagedFilterRequest = new()

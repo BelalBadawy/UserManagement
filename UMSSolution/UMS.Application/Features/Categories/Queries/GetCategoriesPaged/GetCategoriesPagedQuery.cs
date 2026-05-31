@@ -8,7 +8,9 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
         string Name,
         string Slug,
         int? ParentId,
-        int SortOrder
+        int SortOrder,
+        bool IsActive,
+        byte[] RowVersion
     );
 
     public class GetCategoriesPagedQuery : IRequest<IResponseWrapper<PagedResult<CategoryResponse>>>, IValidateMe
@@ -16,17 +18,34 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
         public PagedFilterRequest PagedFilterRequest { get; set; } = new();
     }
 
-    public class GetCategoriesPagedQueryHandler(IApplicationDbContext applicationDbContext)
+    public class GetCategoriesPagedQueryHandler(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetCategoriesPagedQuery, IResponseWrapper<PagedResult<CategoryResponse>>>
     {
         private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
 
         public async ValueTask<IResponseWrapper<PagedResult<CategoryResponse>>> Handle(GetCategoriesPagedQuery request, CancellationToken ct)
         {
             var pagedFilter = request.PagedFilterRequest;
             var categoriesQuery = _applicationDbContext.Categories
-                .AsNoTracking()
-                .Where(c => c.IsActive); // Default IsActive = true for frontend
+                .AsNoTracking();
+
+            // 0. Status Filtering
+            if (pagedFilter.IsActive.HasValue)
+            {
+                categoriesQuery = categoriesQuery.Where(c => c.IsActive == pagedFilter.IsActive.Value);
+            }
+            else
+            {
+                // For anonymous or non-privileged requests, show only active categories.
+                // For authenticated admins/managers (who have read permission), show all by default if no filter is set.
+                if (!_currentUserService.IsAuthenticated() || !_currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
+                {
+                    categoriesQuery = categoriesQuery.Where(c => c.IsActive);
+                }
+            }
 
             // 1. Filtering
             if (!string.IsNullOrWhiteSpace(pagedFilter.SearchTerm))
@@ -69,7 +88,9 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
                     c.Name,
                     c.Slug,
                     c.ParentId,
-                    c.SortOrder
+                    c.SortOrder,
+                    c.IsActive,
+                    c.RowVersion
                 ))
                 .ToListAsync(ct);
 

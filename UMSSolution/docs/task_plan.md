@@ -68,4 +68,69 @@ Phase 1: Custom Toast Notification System
 - [x] Verify client builds and runs without compilation errors
 - **Status:** complete
 
+## Claims-Based Authorization & Layout Navigation Flow Phases
 
+### Phase 9: Admin Layout, Dynamic Menu & Claim Route Guard
+- [x] Extend `AuthContext` to expose `hasPermission` check
+- [x] Extend `ProtectedRoute` to support `allowedPermissions` checks with toast redirect
+- [x] Create `AdminLayout` wrapper with dynamic header/footer and mobile sidebar menu
+- [x] Create mock `UserManagement` with claim-guarded buttons
+- [x] Register routes under `AdminLayout` with respective allowed permissions
+- **Status:** complete
+
+## Admin User & Role Management Flow Phases
+
+### Phase 10: Admin User Management (Phase 1)
+- [x] Implement Users API client mappings in `api-client.ts`
+- [x] Implement query searching & dropdown filters
+- [x] Implement pagination & sorting using `@tanstack/react-table`
+- [x] Guard actions (Edit, Delete, Lock/Unlock) using `hasPermission` helper
+- [x] Build Create / Edit `UserFormSheet` side-panel
+- [x] Integrate Password Strength Meter in user creation
+- [x] Build Lock/Unlock and Delete confirmation dialogs
+- [x] Update `docs/source-of-truth.md` and verify clean build
+- **Status:** complete
+
+### Phase 11: Admin Role Management (Phase 2)
+- [x] Implement Role list & CRUD components
+- [x] Build Role Create / Edit `Sheet`
+- [x] Build Role Delete confirmation dialog
+- **Status:** complete
+
+### Phase 12: Claims/Permissions Matrix UI (Phase 3)
+- [x] Build Accordion-grouped permissions matrix under Role Edit flow
+- [x] Implement "Select All / Deselect All" global options
+- [x] Implement category-level toggles and Switches/Checkboxes
+- **Status:** complete
+
+## Product Categories Management Flow Phases
+
+### Phase 13: Product Categories Management
+- [x] Modify `GetCategoriesPagedQuery.cs` to add `IsActive` & `RowVersion` and implement status filtering
+- [x] Implement frontend centralized client helper `categories-api.ts`
+- [x] Build `CategoriesManagement.tsx` component with `@tanstack/react-table`
+- [x] Register `/admin/categories` route in `App.tsx` and menu links in `AdminLayout.tsx`
+- [x] Verify client build and backend tests compile and pass cleanly
+- **Status:** complete
+
+## User Activation & Lockout Toggles Flow Phases
+
+### Phase 14: User Activation & Lockout Toggles
+- [x] Add `IsLocked` property to backend `UserResponse` DTO and project in queries
+- [x] Add `isLocked` property to frontend `UserResponse` model
+- [x] Implement separate toggle controls for Lock/Unlock (lockout) and Activate/Deactivate (status) in the user list UI
+- [x] Configure distinctive Shadcn Badges for Active, Inactive, and Locked states
+- [x] Verify client production build and all test suites pass successfully
+- **Status:** complete
+
+## Enhanced User Management Filtering and Pagination Flow Phases
+
+### Phase 15: Enhanced User Management Filtering and Pagination
+- [x] Add status (`IsActive`), lockout (`IsLocked`), and role ID (`RoleId`) filtering parameters to backend query DTO `PagedFilterRequest`
+- [x] Apply server-side filters dynamically in `UserService.GetUsersPagedQueryAsync`
+- [x] Install official Shadcn `select` and `pagination` components
+- [x] Upgrade frontend paginated list to support Status, Lockout, and Assigned Role filters in `UserManagement.tsx`
+- [x] Replace pagination controls in frontend with official Shadcn Pagination primitives displaying first/last page, ellipses, and prev/next buttons
+- [x] Synchronize search query, current page, and filter selections reactively with URL parameters
+- [x] Verify backend tests and frontend client build compile and pass cleanly
+- **Status:** complete
