@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { api } from '../lib/api-client'
 import { useToast } from '../components/ui/toast'
+import { useAuth } from '../components/AuthContext'
+import { decodeToken } from '../lib/jwt'
 
 export default function Login() {
   const navigate = useNavigate()
   const toast = useToast()
+  const { login } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -49,12 +52,18 @@ export default function Login() {
         toast.success('Login successful!')
         const token = result.data?.token
         const refreshToken = result.data?.refreshToken
-        if (token) localStorage.setItem('token', token)
-        if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+        
+        if (token && refreshToken) {
+          login(token, refreshToken)
+          const decoded = decodeToken(token)
+          const isAdmin = decoded?.roles.includes('Admin')
 
-        setTimeout(() => {
-          navigate('/admin')
-        }, 1500)
+          setTimeout(() => {
+            navigate(isAdmin ? '/admin' : '/')
+          }, 1500)
+        } else {
+          toast.error('Token information was missing in server response.')
+        }
       } else {
         if (result.statusCode === 403) {
           setIsEmailUnconfirmed(true)
