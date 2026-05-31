@@ -55,7 +55,7 @@ namespace UMS.Infrastructure.Identity.Services
 
             if (roleInDb is not null)
             {
-                if (roleInDb.Name != AppRoles.Admin)
+                if (!string.Equals(roleInDb.Name, AppRoles.Admin, StringComparison.OrdinalIgnoreCase))
                 {
                     var usersInRole = await _userManager.GetUsersInRoleAsync(roleInDb.Name);
 
@@ -117,6 +117,7 @@ namespace UMS.Infrastructure.Identity.Services
                         ClaimType = AppClaim.Permission,
                         ClaimValue = permission.Name,
                         Description = permission.Description,
+                        Selected = currentlyAssignedRoleClaimsNames.Contains(permission.Name)
                     });
                 }
 
@@ -160,7 +161,7 @@ namespace UMS.Infrastructure.Identity.Services
 
             if (roleInDb is not null)
             {
-                if (roleInDb.Name != AppRoles.Admin)
+                if (!string.Equals(roleInDb.Name, AppRoles.Admin, StringComparison.OrdinalIgnoreCase))
                 {
                     roleInDb.Name = updateRole.Name;
                     roleInDb.Description = updateRole.Description;
@@ -187,7 +188,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (roleInDb is null)
                 return ResponseWrapper.Fail("Role does not exist.");
 
-            if (roleInDb.Name == AppRoles.Admin)
+            if (string.Equals(roleInDb.Name, AppRoles.Admin, StringComparison.OrdinalIgnoreCase))
                 return ResponseWrapper.Fail("Cannot change permissions for this role.");
 
             var allowedValues = AppPermissions.AllPermissions

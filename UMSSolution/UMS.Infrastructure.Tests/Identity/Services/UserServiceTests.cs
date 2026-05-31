@@ -23,6 +23,7 @@ public class UserServiceTests
     private readonly Mock<IHttpContextAccessor> _httpContextAccessor = new();
     private readonly Mock<IDateTimeService> _dateTimeService = new();
     private readonly Mock<ICurrentUserService> _currentUserService = new();
+    private readonly Mock<IApplicationDbContext> _dbContext = new();
     private readonly UserService _sut;
 
     private static readonly DateTime FixedNow = new(2025, 1, 15, 12, 0, 0, DateTimeKind.Utc);
@@ -54,7 +55,8 @@ public class UserServiceTests
             _currentUserService.Object,
             twoFactorOptions,
             clientSettings,
-            new Mock<ILogger<UserService>>().Object);
+            new Mock<ILogger<UserService>>().Object,
+            _dbContext.Object);
     }
 
     private static ApplicationUser MakeUser(int id = 1, string email = "user@test.com", bool confirmed = true, bool active = true) =>
@@ -344,6 +346,20 @@ public class UserServiceTests
 
         result.IsSuccessful.Should().BeTrue();
         result.Messages.Should().ContainSingle().Which.Should().Be("User de-activated successfully");
+    }
+
+    [Fact]
+    public async Task ChangeUserStatusAsync_WhenDeactivatingAdmin_ReturnsFail()
+    {
+        var user = MakeUser(20);
+        var req = new ChangeUserStatusRequest { UserId = 20, ActivateOrDeactivate = false };
+        _userManager.Setup(m => m.FindByIdAsync("20")).ReturnsAsync(user);
+        _userManager.Setup(m => m.IsInRoleAsync(user, "Admin")).ReturnsAsync(true);
+
+        var result = await _sut.ChangeUserStatusAsync(req);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.Messages.Should().ContainSingle().Which.Should().Be("Cannot de-activate the system administrator.");
     }
 
     // ── GetUserRolesAsync ──────────────────────────────────────────────────

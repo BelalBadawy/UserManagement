@@ -35,5 +35,15 @@ namespace UMS.Application.Dtos.Pagination
         /// Optional filter for active status.
         /// </summary>
         public bool? IsActive { get; set; }
+
+        /// <summary>
+        /// Optional filter for locked status.
+        /// </summary>
+        public bool? IsLocked { get; set; }
+
+        /// <summary>
+        /// Optional filter for role ID.
+        /// </summary>
+        public int? RoleId { get; set; }
     }
 }

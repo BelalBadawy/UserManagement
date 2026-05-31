@@ -38,7 +38,7 @@ public sealed class ApiTestEmailSink
 
         var uri = new Uri(message.ResetUrl);
         var query = HttpUtility.ParseQueryString(uri.Query);
-        var token = query["code"];
+        var token = query["token"] ?? query["code"];
 
         return token
             ?? throw new InvalidOperationException($"No reset token was found in the reset URL for '{email}'.");

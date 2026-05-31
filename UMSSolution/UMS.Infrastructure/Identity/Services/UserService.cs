@@ -17,6 +17,8 @@ using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Identity.Configurations;
+using UMS.Infrastructure.Identity.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -31,6 +33,7 @@ namespace UMS.Infrastructure.Identity.Services
         private readonly TwoFactorOptions _twoFactorOptions;
         private readonly ClientSettings _clientSettings;
         private readonly ILogger<UserService> _logger;
+        private readonly IApplicationDbContext _context;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
@@ -41,7 +44,8 @@ namespace UMS.Infrastructure.Identity.Services
             ICurrentUserService currentUserService,
             IOptions<TwoFactorOptions> twoFactorOptions,
             IOptions<ClientSettings> clientSettings,
-            ILogger<UserService> logger)
+            ILogger<UserService> logger,
+            IApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -52,6 +56,7 @@ namespace UMS.Infrastructure.Identity.Services
             _twoFactorOptions = twoFactorOptions.Value;
             _clientSettings = clientSettings.Value;
             _logger = logger;
+            _context = context;
         }
 
         private static string GenerateSecureToken()
@@ -155,6 +160,7 @@ namespace UMS.Infrastructure.Identity.Services
             if (userInDb is not null)
             {
                 var mappedUser = userInDb.Adapt<UserResponse>();
+                mappedUser.IsLocked = userInDb.LockoutEnd != null && userInDb.LockoutEnd > DateTimeOffset.UtcNow;
 
                 return ResponseWrapper<UserResponse>.Success(data: mappedUser);
             }
@@ -166,7 +172,37 @@ namespace UMS.Infrastructure.Identity.Services
             PagedFilterRequest pagedFilterRequest,
             CancellationToken ct)
         {
-            var usersQuery = _userManager.Users.AsQueryable();
+            var dbContext = _context as DbContext;
+            var usersQuery = dbContext != null 
+                ? dbContext.Set<ApplicationUser>() 
+                : _userManager.Users.AsQueryable();
+
+            if (pagedFilterRequest.IsActive.HasValue)
+            {
+                usersQuery = usersQuery.Where(u => u.IsActive == pagedFilterRequest.IsActive.Value);
+            }
+
+            if (pagedFilterRequest.IsLocked.HasValue)
+            {
+                var utcNow = DateTimeOffset.UtcNow;
+                if (pagedFilterRequest.IsLocked.Value)
+                {
+                    usersQuery = usersQuery.Where(u => u.LockoutEnd != null && u.LockoutEnd > utcNow);
+                }
+                else
+                {
+                    usersQuery = usersQuery.Where(u => u.LockoutEnd == null || u.LockoutEnd <= utcNow);
+                }
+            }
+
+            if (pagedFilterRequest.RoleId.HasValue && dbContext != null)
+            {
+                var userIdsInRole = dbContext.Set<ApplicationUserRole>()
+                    .Where(ur => ur.RoleId == pagedFilterRequest.RoleId.Value)
+                    .Select(ur => ur.UserId);
+
+                usersQuery = usersQuery.Where(u => userIdsInRole.Contains(u.Id));
+            }
 
             if (!string.IsNullOrWhiteSpace(pagedFilterRequest.SearchTerm))
             {
@@ -207,7 +243,8 @@ namespace UMS.Infrastructure.Identity.Services
                     IsActive = o.IsActive,
                     PhoneNumber = o.PhoneNumber,
                     UserName = o.UserName,
-                    EmailConfirmed = o.EmailConfirmed
+                    EmailConfirmed = o.EmailConfirmed,
+                    IsLocked = o.LockoutEnd != null && o.LockoutEnd > DateTimeOffset.UtcNow
                 })
                 .ToListAsync(ct);
 
@@ -248,6 +285,11 @@ namespace UMS.Infrastructure.Identity.Services
             var userInDb = await _userManager.FindByIdAsync(changeUserStatus.UserId.ToString());
             if (userInDb is not null)
             {
+                if (await _userManager.IsInRoleAsync(userInDb, AppRoles.Admin) && !changeUserStatus.ActivateOrDeactivate)
+                {
+                    return ResponseWrapper.Fail("Cannot de-activate the system administrator.");
+                }
+
                 userInDb.IsActive = changeUserStatus.ActivateOrDeactivate;
 
                 var identityResult = await _userManager.UpdateAsync(userInDb);

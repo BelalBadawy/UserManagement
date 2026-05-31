@@ -1,6 +1,6 @@
-import React from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthContext'
-import { LogOut, Shield, Mail, Phone, Lock } from 'lucide-react'
+import { LogOut, Shield, Mail, Phone, Lock, User } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
@@ -72,7 +72,17 @@ export default function AdminHome() {
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-end pt-4">
+        <CardFooter className="flex justify-end gap-3 pt-4">
+          <Button
+            asChild
+            variant="outline"
+            className="flex items-center gap-2 border-neutral-800 text-white bg-neutral-850 hover:bg-neutral-800 transition-all px-5 py-2 h-10"
+          >
+            <Link to="/profile">
+              <User className="w-4 h-4" />
+              My Profile
+            </Link>
+          </Button>
           <Button
             onClick={logout}
             variant="outline"

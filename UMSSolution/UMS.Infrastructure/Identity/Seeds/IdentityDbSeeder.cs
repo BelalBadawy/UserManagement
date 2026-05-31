@@ -126,7 +126,7 @@ namespace UMS.Infrastructure.Persistence.DbInitializers
                 }
                 else if (roleName == AppRoles.Admin)
                 {
-                    await AssignPermissionsToRoleAsync(role, AppPermissions.AdminPermissions);
+                    await AssignPermissionsToRoleAsync(role, AppPermissions.AllPermissions);
                 }
             }
         }

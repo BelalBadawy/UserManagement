@@ -24,6 +24,7 @@ public class UserServiceAuthTests
     private readonly Mock<IHttpContextAccessor> _httpContextAccessor = new();
     private readonly Mock<IDateTimeService> _dateTimeService = new();
     private readonly Mock<ICurrentUserService> _currentUserService = new();
+    private readonly Mock<IApplicationDbContext> _dbContext = new();
     private readonly UserService _sut;
 
     private const int TestUserId = 42;
@@ -56,7 +57,8 @@ public class UserServiceAuthTests
             _currentUserService.Object,
             twoFactorOptions,
             clientSettings,
-            new Mock<ILogger<UserService>>().Object);
+            new Mock<ILogger<UserService>>().Object,
+            _dbContext.Object);
     }
 
     private ApplicationUser MakeUser(bool twoFactorEnabled = false) =>
