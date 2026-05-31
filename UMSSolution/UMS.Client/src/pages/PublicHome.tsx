@@ -1,10 +1,8 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../components/AuthContext'
-import { LogIn, UserPlus, LogOut, ArrowRight, ShieldCheck } from 'lucide-react'
+import { LogIn, UserPlus, LogOut, ArrowRight, ShieldCheck, User } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import { Badge } from '../components/ui/badge'
 
 export default function PublicHome() {
   const { user, isAuthenticated, logout } = useAuth()
@@ -45,6 +43,13 @@ export default function PublicHome() {
                   </Link>
                 </Button>
               )}
+              <Button asChild className="w-full py-6 text-base font-bold bg-[#4285F4] hover:bg-[#3273DC] text-white rounded-xl shadow-lg shadow-blue-500/10">
+                <Link to="/profile" className="flex items-center justify-center gap-2">
+                  <User className="w-5 h-5" />
+                  View Security & Profile Settings
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
               <Button
                 onClick={logout}
                 variant="outline"

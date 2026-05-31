@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import AdminHome from './pages/AdminHome'
 import PublicHome from './pages/PublicHome'
+import Profile from './pages/Profile'
 import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -43,6 +44,11 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
+      </Route>
+
+      {/* Authenticated Route Group - Protected for all authenticated users */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       {/* Admin Route Group - Protected & requires Admin role */}

@@ -1460,8 +1460,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\package.json": {
-    "mtime": 1780060033.595339,
-    "ast_hash": "0ceb7453408b869f4bf1fe2522826dbd",
+    "mtime": 1780220638.8964128,
+    "ast_hash": "5b6397e5aa0a3858f3500361235d8e3f",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\postcss.config.js": {
@@ -1495,8 +1495,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\App.tsx": {
-    "mtime": 1780214669.1563046,
-    "ast_hash": "01cfd8b4e2f08cecf1891cf6fd6adc82",
+    "mtime": 1780220663.986086,
+    "ast_hash": "d48c593e4782f914b3794dd94c717950",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\main.tsx": {
@@ -4285,8 +4285,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\pages\\Login.tsx": {
-    "mtime": 1780214687.8888412,
-    "ast_hash": "3efe94104d73aee4991f98b77a85e76b",
+    "mtime": 1780220700.2383173,
+    "ast_hash": "f125d5a13bfaf0bf3d355278d693afc3",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\pages\\Register.tsx": {
@@ -5555,8 +5555,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\task_plan.md": {
-    "mtime": 1780214817.35868,
-    "ast_hash": "b6d7bf865596ad32015774021c5af10d",
+    "mtime": 1780220742.6225817,
+    "ast_hash": "adff521c8cb8044399047c70e6bc0d5c",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\lib\\api-client.ts": {
@@ -5580,8 +5580,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\source-of-truth.md": {
-    "mtime": 1780214812.991704,
-    "ast_hash": "4789783725cbfad8e843e7c15d92c14a",
+    "mtime": 1780220755.4217622,
+    "ast_hash": "c4d7a8f9a45bc1180275ffae2037111a",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ui\\toast.tsx": {
@@ -5645,8 +5645,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\AuthContext.tsx": {
-    "mtime": 1780214638.142358,
-    "ast_hash": "b34c0a2c1eacc9d56b9b412329daf8d2",
+    "mtime": 1780214992.956643,
+    "ast_hash": "d699081b035ee5605fb53e641fa785e7",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ProtectedRoute.tsx": {
@@ -5660,13 +5660,13 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\pages\\AdminHome.tsx": {
-    "mtime": 1780214803.690611,
-    "ast_hash": "1921e3bad1a00aa5ae8ff51efe41ba55",
+    "mtime": 1780220714.2732937,
+    "ast_hash": "7969265e8e69c05fa09ce7257d18d040",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\pages\\PublicHome.tsx": {
-    "mtime": 1780214808.3440003,
-    "ast_hash": "82bd88847c042627a5107fab9ca1c63f",
+    "mtime": 1780221358.326056,
+    "ast_hash": "94026a9674b9228de267052dcd2e18a5",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ui\\badge.tsx": {
@@ -5677,6 +5677,11 @@
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ui\\card.tsx": {
     "mtime": 1780214793.909989,
     "ast_hash": "0542e4afe2460ca1c0263dd329b800e5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\pages\\Profile.tsx": {
+    "mtime": 1780220727.184149,
+    "ast_hash": "a56df1672a05c0b1df25acb497a241f6",
     "semantic_hash": ""
   }
 }

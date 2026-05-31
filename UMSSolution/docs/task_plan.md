@@ -58,3 +58,14 @@ Phase 1: Custom Toast Notification System
 - [x] Update `docs/source-of-truth.md` and `docs/task_plan.md` documentation
 - **Status:** complete
 
+## Two-Factor Authentication (2FA) Flow Phases
+
+### Phase 8: Two-Factor Authentication (2FA) Setup & Challenge Login
+- [x] Create a dedicated profile page (`Profile.tsx`) containing user details and 2FA settings
+- [x] Integrate local `qrcode.react` package for client-side QR generation
+- [x] Implement the setup wizard modal with Shadcn/ui-styled dialog to step through Setup, Verification, and Recovery codes
+- [x] Integrate 2FA verification panel into `Login.tsx` to challenge users with enabled 2FA
+- [x] Verify client builds and runs without compilation errors
+- **Status:** complete
+
+

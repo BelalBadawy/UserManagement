@@ -234,3 +234,62 @@ The React application's session state is managed via `<AuthProvider>` and the `u
 - **Public-Only Routes (`PublicOnlyRoute`)**: Restricts access to guests. If an authenticated user attempts to visit auth pages like `/login`, `/register`, or verification routes, they are automatically intercepted and routed to their respective homepage (Admin to `/admin`, others to `/`).
 - **Public Home (`/`)**: Open anonymously. Displays generic greeting for guests, or username/logout button if authenticated.
 
+---
+
+## 10. Two-Factor Authentication (2FA)
+
+UMS integrates Time-Based One-Time Password (TOTP) multi-factor authentication. Users can self-manage 2FA from their profile settings, and the system enforces a code challenge on subsequent logins.
+
+### 10.1 User Profile Page & 2FA Management Flow
+Authenticated users can navigate to `/profile` (accessible from both Admin and Public Home pages) to view and manage their account details:
+- **Profile Detail Display**: Renders account statistics, active status, roles, permissions, and phone number.
+- **Enable 2FA Setup Dialog**:
+  1. The user clicks "Setup 2FA". The client calls `POST api/v1/users/setup-2fa` to generate an authenticator key and `CodeQR` otpauth URI.
+  2. The dialog displays a QR code (rendered client-side securely via `qrcode.react`) and the raw secret key.
+  3. The user scans the QR code into their authenticator application and clicks "Next".
+  4. The client prompts the user to enter the temporary 6-digit TOTP code. It posts the code to `PUT api/v1/users/enable-2fa`.
+  5. On verification success, 10 recovery codes are generated and shown. The user must save them before completing setup.
+- **Disable 2FA Dialog**:
+  - To turn off 2FA, the user clicks "Disable 2FA", enters their account password (and optional authenticator code), and submits a request to `PUT api/v1/users/disable-2fa` to remove protection.
+
+### 10.2 2FA Login Challenge Flow
+When a user with 2FA enabled logs in with valid credentials:
+1. The login call to `POST api/v1/account/login` responds successfully indicating `{ requiresTwoFactor: true, twoFactorChallengeToken: "..." }` instead of yielding a session token.
+2. The client intercepts this flag, transitions the login form view to the 2FA Verification panel, and stores the challenge token in state.
+3. The user must input the 6-digit TOTP code from their authenticator app, or a backup 8-character recovery code.
+4. On submission, the client calls `POST api/v1/account/login-2fa` passing the code and challenge token.
+5. If the code verifies, the API returns the final JWT and refresh token, and the client logs the user in.
+
+### 10.3 2FA API Contracts
+
+#### `POST /api/v1/users/setup-2fa`
+- **Access**: Authenticated
+- **Purpose**: Generates key and QR code URI for 2FA.
+- **Response**: `{ keySecret: string, codeQR: string }`
+
+#### `PUT /api/v1/users/enable-2fa`
+- **Access**: Authenticated
+- **Purpose**: Validates code, enables 2FA, and returns 10 backup codes.
+- **Request**: `{ code: string }`
+- **Response**: `string[]` (list of 10 recovery codes)
+
+#### `PUT /api/v1/users/disable-2fa`
+- **Access**: Authenticated
+- **Purpose**: Disables 2FA using account password and optional code.
+- **Request**: `{ password: string, code?: string }`
+- **Response**: Standard `ResponseWrapper`
+
+#### `POST /api/v1/account/login-2fa`
+- **Access**: Anonymous
+- **Purpose**: Completes 2FA login challenge.
+- **Request**: `{ twoFactorChallengeToken: string, code: string }`
+- **Response**: Standard Token Response `{ token: string, refreshToken: string, ... }`
+
+---
+
+## 11. Changelog Updates
+- **2026-05-31**: Implemented Two-Factor Authentication (2FA) client integration.
+  - **Frontend Page**: Created `/profile` page with account details and interactive 2FA setup/disable wizards using Shadcn/ui Dialog and Card styling. Used `qrcode.react` for local browser-side QR rendering.
+  - **Login Integration**: Added 2FA code verification panel to `Login.tsx` that intercepts 2FA requirements and completes the auth flow using challenge tokens.
+
+
