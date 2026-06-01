@@ -22,6 +22,7 @@ namespace UMS.Application.Authorization
         public const string RoleClaims = nameof(RoleClaims);
         public const string Menus = nameof(Menus);
         public const string Categories = nameof(Categories);
+        public const string AuditTrails = nameof(AuditTrails);
     }
 
     public static class AppService
@@ -65,6 +66,7 @@ namespace UMS.Application.Authorization
             new(AppService.Identity, AppFeature.Users, AppAction.Unlock,      "Unlock Users"),
             new(AppService.Identity, AppFeature.Users, AppAction.ChangeEmail, "Change User Email", IsBasic: true),
             new(AppService.Identity, AppFeature.Users, AppAction.Manage2FA,   "Manage User 2FA",   IsBasic: true),
+            new(AppService.Identity, AppFeature.AuditTrails, AppAction.Read,  "Read Audit Trails"),
         ];
 
         public static IReadOnlyList<AppPermission> AllPermissions { get; } =

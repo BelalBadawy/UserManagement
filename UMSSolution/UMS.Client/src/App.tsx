@@ -13,6 +13,7 @@ import Profile from './pages/Profile'
 import UserManagement from './pages/UserManagement'
 import RoleManagement from './pages/RoleManagement'
 import CategoriesManagement from './pages/CategoriesManagement'
+import AuditLogsManagement from './pages/AuditLogsManagement'
 import AdminLayout from './layouts/AdminLayout'
 import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
@@ -71,6 +72,10 @@ function AppContent() {
 
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Product.Categories.Read']} />}>
             <Route path="/admin/categories" element={<CategoriesManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.AuditTrails.Read']} />}>
+            <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
           </Route>
         </Route>
       </Route>

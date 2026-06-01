@@ -12,5 +12,6 @@ namespace UMS.Application.Interfaces.Common
         bool HasRole(string roleName);
         bool HasClaim(string claimType, string value);
         void SetCurrentUser(ClaimsPrincipal principal);
+        string? GetIpAddress();
     }
 }

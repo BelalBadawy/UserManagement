@@ -534,7 +534,8 @@ namespace UMS.Infrastructure.Identity.Services
                 return ResponseWrapper.Fail("Cannot lock the system administrator.");
 
             await _userManager.SetLockoutEnabledAsync(user, true);
-            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(1000));
+            await _userManager.UpdateSecurityStampAsync(user);
 
             user.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(-1);
             await _userManager.UpdateAsync(user);

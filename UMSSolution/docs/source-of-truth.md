@@ -86,7 +86,7 @@ Governs identity search, list traversal, status locks, details updates, and init
   7. Column headers are interactive; clicking them switches sorting keys or directions dynamically, triggering a page refresh from the API.
 
 * **Guarded Action Operations**:
-  1. **Lock/Unlock (Lockout)**: Governs security lockouts. Checked by `Permission.Identity.Users.Lock` / `Permission.Identity.Users.Unlock` claims. Action buttons show/hide based on the backend-tracked `IsLocked` (or `LockoutEnd`) status. Locking a user sets their lockout expiry date to `DateTimeOffset.MaxValue` and invalidates active refresh tokens. Unlocking resets the lockout date. Toggling triggers a confirmation modal and dispatches `PUT /api/v1/users/lock-user` or `PUT /api/v1/users/unlock-user`.
+  1. **Lock/Unlock (Lockout)**: Governs security lockouts. Checked by `Permission.Identity.Users.Lock` / `Permission.Identity.Users.Unlock` claims. Action buttons show/hide based on the backend-tracked `IsLocked` (or `LockoutEnd`) status. Locking a user sets their lockout expiry date to a 1,000-year offset (`DateTimeOffset.UtcNow.AddYears(1000)`) to prevent database type overflows, invalidates active refresh tokens (by setting their expiry to yesterday), and regenerates the user's **Security Stamp** (`UpdateSecurityStampAsync`) to instantly invalidate and reject any currently active access tokens (JWTs) mid-session. Unlocking resets the lockout date and resets the failed access count. Toggling triggers a confirmation modal and dispatches `PUT /api/v1/users/lock-user` or `PUT /api/v1/users/unlock-user`.
   2. **Activate/Deactivate (Activation)**: Governs account status. Checked by `Permission.Identity.Users.Update`. Action buttons show/hide based on the `IsActive` flag. Deactivating a user flags the account as inactive in the database, preventing generic session logins. Toggling triggers a confirmation modal and dispatches `PUT /api/v1/users/change-status`.
   3. **Create User**: Checked by `Permission.Identity.Users.Create`. Opens a side-panel `Sheet` allowing form entry. Evaluates password strength in real-time, blocking submission of weak passwords. Auto-assigns roles. Dispatches to `POST /api/v1/users/register`.
   4. **Edit Details & Roles**: Checked by `Permission.Identity.Users.Update`. Loads existing credentials into `Sheet`. Admin edits Name, Phone Number, and toggles Assigned Roles. Clicking save dispatches a profile update `PUT /api/v1/users/update` followed by role assignment changes `PUT /api/v1/users/user-roles`.
@@ -139,6 +139,20 @@ Governs the catalog organization, hierarchy, sorting, and active status configur
   1. **Create Category**: Checked by `Permission.Product.Categories.Create`. Activates a side-panel `Sheet` containing Name, Slug (auto-generated from Name but editable), Parent Category (dynamically fetched dropdown of parent categories), Sort Order, and IsActive toggle. Submitting dispatches `POST /api/v1/categories`.
   2. **Edit Category**: Checked by `Permission.Product.Categories.Update`. Opens the `Sheet` populated with the category's current data. Submitting dispatches `PUT /api/v1/categories` along with the `rowVersion` for concurrency control.
   3. **Delete Category**: Checked by `Permission.Product.Categories.Delete`. Displays a confirmation modal `Dialog`. On confirmation, dispatches `DELETE /api/v1/categories/{id}`.
+
+### 3.9 Audit Logs Management
+Governs tracking database events, inspecting mutated properties, identifying remote IP addresses, and actors.
+
+* **List & Traversal Flow**:
+  1. The Admin navigates to `/admin/audit-logs`. The route is guarded at the routing tier to only allow users possessing `Permission.Identity.AuditTrails.Read`.
+  2. On load, the page dispatches a paginated request `GET /api/v1/audit-logs` with `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, and `searchTerm`.
+  3. The page displays log events (Log ID, Affected Table, Event Type, Actor Email, IP Address, Timestamp) in a structured table.
+  4. Users can sort by ID, Affected Table, Event Type, or Timestamp, and filter logs dynamically using the real-time search bar.
+  
+* **Guarded Action Operations**:
+  1. **Inspection Sheet**: Clicking "View Details" opens a side-panel `<Sheet>` showing advanced details: affected columns list (as labels), and an interactive `<EntityDiffViewer>` component containing:
+     - **Visual Diff Table**: Performs key-by-key parsing and comparisons of before/after JSON values dynamically, highlighting changed values, added values, and deleted values in clean, high-contrast colorized formatting. It supports inline copy-to-clipboard, property search filtering, and a toggle to only display modified properties.
+     - **Raw JSON View**: Offers side-by-side formatted JSON blocks for developers who need to review or copy the entire raw data structures.
 
 ---
 
@@ -257,6 +271,19 @@ Governs the catalog organization, hierarchy, sorting, and active status configur
 - **Access**: Authenticated, requires `Permission.Product.Categories.Delete`
 - **Purpose**: Deletes category by ID.
 - **Response Wrapper**: Standard `ResponseWrapper`.
+
+### 4.3 Audit Logs Endpoints
+
+#### `GET /api/v1/audit-logs`
+- **Access**: Authenticated, requires `Permission.Identity.AuditTrails.Read`
+- **Purpose**: Retrieves a paged, sorted, and searchable list of audit trails.
+- **Request Parameters**:
+  - `pageNumber` (integer, query parameter): Page index.
+  - `pageSize` (integer, query parameter): Page capacity.
+  - `sortBy` (string, query parameter): Field name to sort by (`tablename`, `type`, `datetime`, `id`).
+  - `sortDirection` (string, query parameter): Sort direction (`asc` or `desc`).
+  - `searchTerm` (string, query parameter): Search query to filter audit logs by table name, IP address, or user email.
+- **Response Wrapper**: Returns a standard `ResponseWrapper` containing the paginated data list of `AuditTrailResponse`.
 
 ---
 
@@ -452,6 +479,23 @@ The `useAuth()` context hook provides a `hasPermission(permissionName: string)` 
   - **Frontend UI/UX**: Installed official Shadcn Select and Pagination components. Implemented advanced filter bar containing Status, Lockout, and Assigned Role selectors in `UserManagement.tsx`. Integrated full numbered pagination displaying first/last pages, ellipses, and Previous/Next buttons.
   - **URL Synchronization**: Configured reactive URL state syncing for filters, search, and page variables with page reset logic on filter updates.
   - **Verification**: Verified zero errors on client build `npm run build` and all backend test suites.
+- **2026-06-01**: Implemented Backend and Frontend Audit Trails.
+  - **Backend**: Added `IpAddress` column to `AuditTrail` domain model, updated `ApplicationDbContext` to capture IP address and ignore changes to `AuditTrail` itself. Enabled auditing globally via config (`"EnableAuditLog": true`).
+  - **API**: Registered the `Read Audit Trails` permission claim. Created `GetAuditTrailsPagedQuery` in Application and `AuditTrailService` in Infrastructure joining the user table to display email. Mapped API endpoint `/api/v1/audit-logs`.
+  - **Frontend**: Created client-side API helper `audit-logs-api.ts`. Integrated "Audit Logs" option in `AdminLayout.tsx` and mapped `/admin/audit-logs` route in `App.tsx` guarded by `Permission.Identity.AuditTrails.Read`. Built the `AuditLogsManagement.tsx` page showcasing paginated logs, search/sort, and a JSON detail diff view panel.
+  - **Verification**: Generated and ran EF migration `AddAuditTrailIpAddress`, ran backend test suites (469 tests passed), and verified a clean frontend compilation (`npm run build`).
+- **2026-06-01 (Late)**: Implemented Visual Entity Comparison Diff for Audit Logs.
+  - **Reusable Component**: Created `<EntityDiffViewer />` in `src/components/EntityDiffViewer.tsx` that dynamically computes modifications (added, deleted, modified, unchanged) from raw JSON values and shows them in an interactive table with copy actions, text search, and toggle filters.
+  - **Page Integration**: Integrated the diff visualizer into `AuditLogsManagement.tsx` details sheet to replace the raw `<pre>` JSON blocks.
+  - **Documentation**: Updated tasks in `docs/task_plan.md` and specs in `docs/source-of-truth.md`.
+- **2026-06-01 (End of Day)**: Enhanced User Lockout Security.
+  - **Security Stamp Invalidation**: Updated `UserService.LockUserAsync` to call `_userManager.UpdateSecurityStampAsync(user)` during lockouts, ensuring any currently active JWT tokens are instantly rejected.
+  - **Safe Date Constraint**: Changed lockout end date to `DateTimeOffset.UtcNow.AddYears(1000)` to bypass SQL Server MaxValue conversion/overflow bugs.
+  - **Testing**: Updated Mock assertions in `UserServiceTests.cs` and verified all backend unit tests pass cleanly.
+  - **Documentation**: Updated `docs/task_plan.md` and `docs/source-of-truth.md` specifications.
+
+
+
 
 
 

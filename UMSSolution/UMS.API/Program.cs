@@ -76,5 +76,6 @@ app.MapAccountEndpoints();
 app.MapCategoryEndpoints();
 app.MapRoleEndpoints();
 app.MapUserEndpoints();
+app.MapAuditTrailEndpoints();
 app.Run();
 

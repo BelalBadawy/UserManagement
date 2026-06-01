@@ -88,20 +88,23 @@ namespace UMS.Infrastructure.Persistence.Contexts
                 return await base.SaveChangesAsync(cancellationToken);
             }
 
-            var auditEntries = OnBeforeSaveChanges(userId);
+            var ipAddress = _currentUserService.GetIpAddress();
+            var auditEntries = OnBeforeSaveChanges(userId, ipAddress);
             var result = await base.SaveChangesAsync(cancellationToken);
             await OnAfterSaveChanges(auditEntries, cancellationToken);
             return result;
         }
 
-        private List<AuditEntry> OnBeforeSaveChanges(int? userId)
+        private List<AuditEntry> OnBeforeSaveChanges(int? userId, string? ipAddress)
         {
             ChangeTracker.DetectChanges();
             var auditEntries = new List<AuditEntry>();
 
             foreach (var entry in ChangeTracker.Entries())
             {
-                if (entry.Entity is AuditTrail
+                if (entry.Entity is AuditTrail 
+                    || entry.Entity.GetType().Name == nameof(AuditTrail) 
+                    || entry.Entity.GetType().BaseType?.Name == nameof(AuditTrail)
                     || entry.State is EntityState.Detached or EntityState.Unchanged)
                 {
                     continue;
@@ -110,7 +113,8 @@ namespace UMS.Infrastructure.Persistence.Contexts
                 var auditEntry = new AuditEntry(entry)
                 {
                     TableName = entry.Entity.GetType().Name,
-                    UserId = userId
+                    UserId = userId,
+                    IpAddress = ipAddress
                 };
                 auditEntries.Add(auditEntry);
 
