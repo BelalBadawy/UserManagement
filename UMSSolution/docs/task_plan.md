@@ -134,3 +134,48 @@ Phase 1: Custom Toast Notification System
 - [x] Synchronize search query, current page, and filter selections reactively with URL parameters
 - [x] Verify backend tests and frontend client build compile and pass cleanly
 - **Status:** complete
+
+## Backend Audit Trails Flow Phases
+
+### Phase 16: Backend Audit Trails
+- [x] Implement `IpAddress` on `AuditTrail` and update DbContext & helper to capture IP address & ignore `AuditTrail` changes to prevent infinite loops
+- [x] Add `"EnableAuditLog": true` in `UMS.API/appsettings.json`
+- [x] Create and run Entity Framework migration `AddAuditTrailIpAddress`
+- [x] Register `AuditTrails` permissions in `AppPermissions.cs`
+- [x] Implement `GetAuditTrailsPagedQuery` in `UMS.Application`
+- [x] Map API endpoint `/api/v1/audit-logs` in `AuditTrailEndpoints` and register in `Program.cs`
+- [x] Verify backend build and run all test suites (469 passed)
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- **Status:** complete
+
+## Audit Logs UI Flow Phases
+
+### Phase 17: Audit Logs UI Management
+- [x] Create client-side helper `audit-logs-api.ts` mapping the paged audit logs endpoint
+- [x] Update `AdminLayout.tsx` to add "Audit Logs" to desktop, mobile navigation, and footer links
+- [x] Build the paginated `AuditLogsManagement.tsx` table with search filter, type badges, pagination, and JSON diff side-panel sheet
+- [x] Register `/admin/audit-logs` route in `App.tsx`
+- [x] Verify clean compilation with frontend production build (`npm run build`)
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- **Status:** complete
+
+## Visual Audit Log Comparison Diff Flow Phases
+
+### Phase 18: Visual Audit Log Comparison Diff
+- [x] Create reusable component `EntityDiffViewer.tsx` inside `UMS.Client/src/components/EntityDiffViewer.tsx` dynamically computing property changes
+- [x] Integrate `EntityDiffViewer` in `AuditLogsManagement.tsx` side sheet details view
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- [x] Verify clean compilation with frontend production build
+- **Status:** complete
+
+## User Lockout Security Enhancements Flow Phases
+
+### Phase 19: User Lockout Security Enhancements
+- [x] Update `UserService.LockUserAsync` to instantly invalidate active access tokens by updating the user's Security Stamp
+- [x] Use a safer 1,000-year lockout date offset (`DateTimeOffset.UtcNow.AddYears(1000)`) to prevent database type overflows
+- [x] Update unit tests in `UserServiceTests.cs` to verify stamp updates and dynamic dates
+- [x] Run backend test suites to verify all tests pass cleanly
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- **Status:** complete
+
+

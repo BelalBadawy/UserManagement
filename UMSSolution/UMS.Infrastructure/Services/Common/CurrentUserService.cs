@@ -40,4 +40,6 @@ public class CurrentUserService : ICurrentUserService
     {
         _explicitUser = principal;
     }
+
+    public string? GetIpAddress() => _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 }

@@ -10,7 +10,8 @@ import {
   LogOut, 
   Users, 
   Lock, 
-  BookOpen
+  BookOpen,
+  FileText
 } from 'lucide-react'
 
 export default function AdminLayout() {
@@ -51,6 +52,12 @@ export default function AdminLayout() {
       path: '/admin/categories',
       permission: 'Permission.Product.Categories.Read',
       icon: <BookOpen className="w-4 h-4 mr-2" />
+    },
+    {
+      label: 'Audit Logs',
+      path: '/admin/audit-logs',
+      permission: 'Permission.Identity.AuditTrails.Read',
+      icon: <FileText className="w-4 h-4 mr-2" />
     },
     {
       label: 'My Profile',
@@ -273,6 +280,9 @@ export default function AdminLayout() {
                 )}
                 {hasPermission('Permission.Product.Categories.Read') && (
                   <li><Link to="/admin/categories" className="hover:text-white transition-colors">Categories Management</Link></li>
+                )}
+                {hasPermission('Permission.Identity.AuditTrails.Read') && (
+                  <li><Link to="/admin/audit-logs" className="hover:text-white transition-colors">Audit Logs</Link></li>
                 )}
               </ul>
             </div>

@@ -14,6 +14,7 @@ namespace UMS.Infrastructure.Persistence.Audit
 
         public EntityEntry Entry { get; }
         public int? UserId { get; set; }
+        public string? IpAddress { get; set; }
         public string? TableName { get; set; }
 
         // ✅ Changed from string? to AuditType
@@ -31,6 +32,7 @@ namespace UMS.Infrastructure.Persistence.Audit
             var audit = new AuditTrail
             {
                 UserId = UserId,
+                IpAddress = IpAddress,
                 Type = Type,
                 TableName = TableName,
                 DateTime = DateTime.UtcNow,

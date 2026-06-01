@@ -3,6 +3,7 @@ namespace UMS.Domain.Entities
     public class AuditTrail : BaseEntity<int>
     {
         public int? UserId { get; set; }
+        public string? IpAddress { get; set; }
         public AuditType Type { get; set; }
         public string? TableName { get; set; }
         public DateTime DateTime { get; set; }
