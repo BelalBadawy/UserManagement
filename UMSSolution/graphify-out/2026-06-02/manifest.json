@@ -35,13 +35,13 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\Scaffold.ps1": {
-    "mtime": 1780421207.567475,
-    "ast_hash": "9ad070e2c6b4b27228b9a5f56d80ded4",
+    "mtime": 1780040893.807186,
+    "ast_hash": "2b63187f0d461d82c9b3695f3439fd0d",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\Scaffold.sh": {
-    "mtime": 1780421207.6706586,
-    "ast_hash": "c305e815c0737f58f8d3ce9c87c01284",
+    "mtime": 1780040893.8091855,
+    "ast_hash": "259a33fce967db9f3e4450d7808f4cfb",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\reference-bootstrap\\assets\\js\\comming-soon.js": {
@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\tools\\generate-scaffold-artifacts.ps1": {
-    "mtime": 1780421196.7373793,
-    "ast_hash": "33298b71c9d557922ee64f26bebb49a5",
+    "mtime": 1780040893.886186,
+    "ast_hash": "f5c16a8fd9caac26d5eff27a17c21a21",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API\\appsettings.Development.json": {
@@ -2725,8 +2725,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\SkillPrompt.md": {
-    "mtime": 1780421207.4799025,
-    "ast_hash": "a0fb40363aee0a14de4d1dcbf61b24d8",
+    "mtime": 1780040893.8091855,
+    "ast_hash": "f6b10f526477e4362aebcd3e80b0a760",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\openspec\\config.yaml": {
@@ -5795,13 +5795,13 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\Scaffold.ps1": {
-    "mtime": 1780421207.5755844,
-    "ast_hash": "9ad070e2c6b4b27228b9a5f56d80ded4",
+    "mtime": 1780419872.372897,
+    "ast_hash": "4dc0838b90dfc5c4d61477fade19fedb",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\Scaffold.sh": {
-    "mtime": 1780421207.6796682,
-    "ast_hash": "c305e815c0737f58f8d3ce9c87c01284",
+    "mtime": 1780419872.3874042,
+    "ast_hash": "375ee977ddcce6676339ade423b1849d",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\implementation_plan.md": {
@@ -5824,9 +5824,14 @@
     "ast_hash": "9e85820150986b905a42478769ba3a23",
     "semantic_hash": ""
   },
-  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\SkillPrompt.md": {
-    "mtime": 1780421207.4799025,
-    "ast_hash": "a0fb40363aee0a14de4d1dcbf61b24d8",
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\scaffold-agent-skill.md": {
+    "mtime": 1780419872.3884056,
+    "ast_hash": "08f1560c8f6ab42e5465ff070a94bf88",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\README.md": {
+    "mtime": 1780419644.7346153,
+    "ast_hash": "0edc35b251a8453bdb6d289d175a8e41",
     "semantic_hash": ""
   }
 }
