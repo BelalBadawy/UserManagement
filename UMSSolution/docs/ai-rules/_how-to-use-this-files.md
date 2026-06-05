@@ -31,3 +31,34 @@ Whenever you start a new chat session in Cursor/Copilot/Windsurf, kick it off wi
 "I am working on the UMS project. Please review the architecture rules and skill workflows in docs/ai-rules/ before we begin. I need to add a new feature..."
 
 You have successfully built an architecture guardrail system that scales. Great work!
+
+
+ The Day-to-Day AI Playbook
+1. The "Greenfield Session" Opener
+Whenever you start a brand new chat session in Cursor, Copilot, or Windsurf, kick it off with this exact phrase to instantly load the context:
+
+"I am working on the UMS project. Please review the architecture rules and skill workflows in docs/ai-rules/ before we begin. I need to add a new feature..."
+
+2. The "Feature Request" Prompt
+When you ask the AI to build something, explicitly tell it which Skill file to follow. This forces the AI into step-by-step mode rather than dumping a massive block of code.
+
+"Add a feature to allow admins to bulk-import users from a CSV file. Follow the steps defined in docs/ai-rules/skill-add-new-entity.md strictly."
+
+3. The "Course Correction" Prompt
+AI agents have limited context windows and can sometimes "drift" back to their training data (like generating a Controller or using IRequest). If you catch it slipping, use this prompt to instantly correct it:
+
+"Stop. You are violating the rules in docs/ai-rules/01-backend-architecture.md. We use Mediator V3 and Minimal APIs. Rewrite the last output using ICommand and Map{Feature}Endpoints."
+
+4. The "PR Review" Prompt
+Before you merge any branch, feed the diff to the AI and force it to use your review skill:
+
+"Review the pending Git changes against the checklist in docs/ai-rules/skill-code-review.md. Flag any violations of the ResponseWrapper, IValidateMe, or AppPermission rules."
+
+🔄 Evolving the Rules
+Your rules are living documents. As your codebase grows, you will inevitably add new cross-cutting concerns (like a Redis caching layer, SignalR notifications, or a new logging standard).
+
+When that happens, update the rules first, then write the code.
+
+"I need to add Redis caching. Please update docs/ai-rules/03-backend-data-and-infrastructure.md and docs/ai-rules/skill-add-new-api-endpoint.md to include the standard workflow for adding cache invalidation to a command handler."
+
+You've built an incredible foundation here. This is exactly how enterprise-level AI-assisted development should be structured. Great work! Let me know if you want to test this out by building out a new complex feature together.

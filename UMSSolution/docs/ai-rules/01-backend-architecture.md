@@ -8,24 +8,32 @@
 
 ## 1. Project Dependency Direction
 
-The solution is divided into four main layers following Clean Architecture principles. Dependencies must strictly flow inward:
+The solution follows Clean Architecture V-Shape dependency flow:
+
 ```
-           +-----------------------------+
-           |           UMS.API           |
-           +--------------+--------------+
-                          |
-                          v
-           +-----------------------------+
-           |       UMS.Application       |
-           +--------------+--------------+
-                          |
-                          v
-  +-----------------------+-----------------------+
-  |                                               |
-  v                                               v
-+-----------------------------+         +-----------------------------+
-|      UMS.Infrastructure     |-------->|          UMS.Domain         |
-+-----------------------------+         +-----------------------------+
++-----------------------------+
+|           UMS.API           |
++--------------+--------------+
+               |
+               v
++-----------------------------+
+|       UMS.Application       |
++--------------+--------------+
+               |
+               v
++-----------------------------+
+|          UMS.Domain         |
++-----------------------------+
+               ^
+               | (implements Domain interfaces)
++-----------------------------+
+|      UMS.Infrastructure     |
++-----------------------------+
+               ^
+               | (registered in API)
++-----------------------------+
+|           UMS.API           |
++-----------------------------+
 ```
 - **UMS.API** references `UMS.Application` and `UMS.Infrastructure`.
 - **UMS.Infrastructure** references `UMS.Application` and `UMS.Domain`.

@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API\\Endpoints\\UserEndpoints.cs": {
-    "mtime": 1780417909.311946,
-    "ast_hash": "1ba0add0bb14773b291f9b24cfc4da8b",
+    "mtime": 1780660951.6528742,
+    "ast_hash": "0775112ba823d346d5e913e85c4c2d6e",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API\\Extensions\\ResponseResultExtensions.cs": {
@@ -300,8 +300,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API.Tests\\Endpoints\\UserEndpointsTests.cs": {
-    "mtime": 1780417909.310022,
-    "ast_hash": "0d45702fcf323fb063a964a2376250a5",
+    "mtime": 1780660991.8898084,
+    "ast_hash": "661956e08134469c0dc20e5e594728e8",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API.Tests\\Fixtures\\ApiTestBase.cs": {
@@ -5922,6 +5922,21 @@
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\generate_NewProject_From_Script\\SkillPrompt.md": {
     "mtime": 1780421207.4799025,
     "ast_hash": "a0fb40363aee0a14de4d1dcbf61b24d8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Users\\Commands\\DeactivateUser\\DeactivateUserCommand.cs": {
+    "mtime": 1780660933.1663005,
+    "ast_hash": "1ab24902f22928d581535fea1f6aaed8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Users\\Commands\\DeactivateUser\\DeactivateUserCommandValidator.cs": {
+    "mtime": 1780660938.6983454,
+    "ast_hash": "ce911a57c14ae69a79a8e7822763d438",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Application.Tests\\Handlers\\Users\\DeactivateUserCommandHandlerTests.cs": {
+    "mtime": 1780660976.1683958,
+    "ast_hash": "e5446e0fca7d3335da8e16b259d4b045",
     "semantic_hash": ""
   }
 }

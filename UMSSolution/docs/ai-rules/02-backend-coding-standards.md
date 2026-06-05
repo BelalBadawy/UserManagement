@@ -59,8 +59,8 @@ The application intercepts validation requests and handles errors prior to handl
 
 ## 4. Mapster Mapping Guidelines
 
-- **Inline Projections:** For database queries, utilize manual LINQ projections `.Select(x => new Dto(...))` to ensure optimal database queries and prevent N+1 issues.
-- **Implicit Mapping:** For simple entity-to-DTO conversions inside handlers, call Mapster's `.Adapt<TDestination>()` extension method.
+- **Query Projections (Reads):** For database queries, ALWAYS use manual LINQ projections `.Select(x => new Dto(...))` to ensure optimal SQL generation and prevent N+1 issues. Do NOT use `.Adapt()` on `IQueryable`.
+- **Command Mappings (Writes):** For mapping incoming requests to Domain entities inside Command handlers, use Mapster's `.Adapt<TDestination>()` method.
 - Handlers must never perform verbose assignments or custom mapping code loops.
 
 ---
