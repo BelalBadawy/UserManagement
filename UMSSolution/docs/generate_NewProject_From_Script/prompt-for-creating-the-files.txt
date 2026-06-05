@@ -1,0 +1,125 @@
+# Implementation Plan: Clean Architecture .NET 10 + React 19 Scaffolder Agent Skill (Revised)
+
+Generate a reusable Agent Skill (AI prompt definition and helper scripts) that automates the scaffolding of a Clean Architecture .NET 10 + React 19 single-page application solution using the current codebase as the boilerplate reference.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Because the complete solution contains ~24,000 lines of code (~1.3MB text), outputting the full scripts in a single LLM response is physically impossible due to token limits. 
+> To guarantee correctness and completeness, we will modify the local script `tools/generate-scaffold-artifacts.ps1` to include `UMS.Client` and run it on your machine, writing the final `Scaffold.ps1` and `Scaffold.sh` files to the `generated/` directory.
+>
+> We will also output all generated files to `docs/template2` as requested:
+> 1. [SkillPrompt.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/SkillPrompt.md)
+> 2. [Scaffold.ps1](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/Scaffold.ps1)
+> 3. [Scaffold.sh](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/Scaffold.sh)
+
+## Architectural Decisions & Gap Closures
+
+### 1. File Content Escaping & Interpolation Strategy
+- **PowerShell (`Scaffold.ps1`)**: All file contents will be written using single-quoted here-strings (`@' ... '@`) to prevent variable and backtick interpolation. The generator script will scan each file's content for the literal sequence `'@` on a line by itself. If found, it will automatically fall back to Base64 encoding for that specific file.
+- **Bash (`Scaffold.sh`)**: All file contents will be written using heredocs with a quoted, unique delimiter per file that contains a hash of the file path (e.g., `cat << 'HEREDOC_[HASH]' > "$filepath"`). This prevents all shell interpolation.
+- **Double-Quoting Restriction**: Neither script will use double-quoted here-strings or unquoted heredoc delimiters, ensuring absolute preservation of string interpolation sequences (`$`) in C# and JavaScript.
+
+### 2. .slnx Handling
+- **No Embedded Solution File**: The `.slnx` solution file will not be stored as a string literal. Instead, the generated scripts will run `dotnet new sln -n $ProjectName` to instantiate it dynamically, followed by running `dotnet sln add` to link all 8 generated `.csproj` projects.
+
+### 3. Client Inclusion & Exclusion Rules
+- **Include**:
+  - `package.json`, `vite.config.ts`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`
+  - Tailwind/PostCSS configs (`tailwind.config.js`, `postcss.config.js`, `index.css` with Tailwind directives)
+  - `index.html`
+  - `components.json` (Shadcn UI config)
+  - Entire `src/` directory (all `.tsx`, `.ts`, and `.css` files)
+  - `public/` directory, **except** heavy image assets.
+- **Exclude**:
+  - `node_modules/`
+  - `dist/` (compiled build outputs)
+  - `package-lock.json`
+  - `public/assets/img/` (heavy graphic design templates)
+
+### 4. Namespace Replacement Boundary Rules
+- Avoid blind `.Replace("UMS", $ProjectName)` substitutions to protect seed data, URLs, email variables, and third-party references containing `UMS`.
+- **PowerShell & Bash Replacement Regexes**:
+  1. `namespace UMS\b` -> `namespace $NewNamespace`
+  2. `using UMS\b` -> `using $NewNamespace`
+  3. `<RootNamespace>UMS\b` -> `<RootNamespace>$NewNamespace`
+  4. `<ProjectReference Include="([^"]*UMS\.[^"]*)"` -> substitute the `UMS.` occurrences in project references within double quotes, preventing greedy matching across other XML attributes.
+  5. Import statements matching `'UMS.Client/...` -> substitute with `'$NewNamespace.Client/...`.
+- **Namespace Replacement Timing Pattern**: Single-quoted here-strings and quoted heredocs prevent interpolation. A two-step pattern will be followed:
+  * **PowerShell (`Scaffold.ps1`)**:
+    1. Read the here-string into a variable (no interpolation occurs).
+    2. Perform regex replacement on the variable: `$content = $content -replace 'using UMS\b', "using $ProjectName"`.
+    3. Write the modified content to the file using `[System.IO.File]::WriteAllText`.
+  * **Bash (`Scaffold.sh`)**:
+    1. Write the heredoc content raw (no interpolation occurs).
+    2. Execute `sed` (or `perl`) to replace namespaces in-place: `sed -i "s/using UMS\b/using $PROJECT_NAME/g" "$filepath"`.
+
+### 5. Package and Reference Strategy
+- **DECISION**: The embedded `.csproj` files written via here-strings contain complete `<PackageReference>` and `<ProjectReference>` elements extracted from the boilerplate. Therefore, the generated `Scaffold.ps1` and `Scaffold.sh` do NOT run `dotnet add package` or `dotnet add reference` commands. Those commands would be redundant since the `.csproj` files already contain the correct dependencies. The scripts only run `dotnet new`, `dotnet sln add`, cleanup, file writes, `npm install`, and verification.
+
+### 6. Auto-Generated File Cleanup
+The output scripts will run a cleanup phase immediately after `dotnet new` and before writing the embedded file contents. This deletes the standard templated outputs:
+- `Class1.cs` from Domain, Application, and Infrastructure projects.
+- `WeatherForecast.cs` and the `Controllers/` directory from the API project.
+- `UnitTest1.cs` from all 4 test projects.
+- `Program.cs` and all `.http` files from the API project.
+
+### 7. Encoding Strategy
+- **UTF-8 without BOM** will be strictly enforced at all stages:
+  - Read files in the generator via: `[System.IO.File]::ReadAllText($path, [System.Text.UTF8Encoding]::new($false))`.
+  - Write files in `Scaffold.ps1` via: `[System.IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))`.
+  - Write files in `Scaffold.sh` via standard `cat << 'DELIM' > "$path"`.
+
+### 8. SkillPrompt.md Definition
+- The Agent Skill Prompt is defined as a fixed static string embedded within `generate-scaffold-artifacts.ps1`. The generator writes this directly to `generated/ums-boilerplate-agent-skill/SkillPrompt.md` without modification.
+
+### 9. Empty Folders Decision
+- Git does not track empty folders, so only tracked/present folder structures will be processed. Any folders that are completely empty in the boilerplate will be skipped by default.
+
+---
+
+## Proposed Changes
+
+### Build Tooling
+
+#### [MODIFY] [generate-scaffold-artifacts.ps1](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/tools/generate-scaffold-artifacts.ps1)
+Reorganize the execution flow inside `generate-scaffold-artifacts.ps1` as follows:
+
+1.  **Initialize**: Define old namespace (`UMS`), target projects (8 .NET + 1 Client), and output directories.
+    - Set the outputs to be written to `generated/ums-boilerplate-agent-skill` and `/docs/template2`.
+2.  **Scan Files**: Enumerate all source code, test files, and client assets matching the inclusion rules.
+3.  **Map Packages & References**: Parse package lists and project references for the 8 `.csproj` files.
+4.  **Write SkillPrompt.md**: Dump the static markdown skill definition.
+5.  **Build Scaffold.ps1**: Generate the PowerShell script with single-quoted here-string content blocks, Base64 fallback checks, cleanup directives, and UTF-8 without BOM writer methods.
+6.  **Build Scaffold.sh**: Generate the Bash script using quoted unique heredocs, regex-based sed/perl replacements, and cleanup commands.
+
+### Generated Scaffolder Outputs
+
+#### [NEW] [SkillPrompt.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/SkillPrompt.md)
+*   Prompt detailing how the AI agent runs the scripts, validates the build, and reports success.
+
+#### [NEW] [Scaffold.ps1](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/Scaffold.ps1)
+*   Self-contained PowerShell script generating the 8 C# projects, 1 React Client, writing files via `[System.IO.File]::WriteAllText` without BOM, and running `npm install`.
+
+#### [NEW] [Scaffold.sh](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/template2/Scaffold.sh)
+*   Self-contained Bash script.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run `generate-scaffold-artifacts.ps1` to verify file generation completes with zero errors.
+- Run the generated `Scaffold.ps1` in a temporary test directory:
+  ```powershell
+  ./Scaffold.ps1 -ProjectName CustomApp -OutputPath ./test-scaffold
+  ```
+- Build the solution: `dotnet build ./test-scaffold/CustomApp`
+- Run test suites: `dotnet test ./test-scaffold/CustomApp`
+- Install and compile client:
+  ```bash
+  cd ./test-scaffold/CustomApp/CustomApp.Client
+  npm install
+  npm run build
+  ```
+- Verify zero syntax compilation errors on the substituted namespace strings.
