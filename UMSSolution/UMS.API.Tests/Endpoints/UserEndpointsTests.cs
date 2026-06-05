@@ -245,6 +245,34 @@ public class UserEndpointsTests : ApiTestBase
     [InlineData("anonymous", HttpStatusCode.Unauthorized)]
     [InlineData("low-privilege", HttpStatusCode.Forbidden)]
     [InlineData("privileged", HttpStatusCode.OK)]
+    public async Task Deactivate_user_should_follow_authorization_matrix(string authMode, HttpStatusCode expectedStatusCode)
+    {
+        var user = await Seeder.SeedUserAsync($"deactivate-{Guid.NewGuid():N}@example.com", "Admin@123", ["Basic"]);
+        var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update);
+        UseUserClient(authMode, requiredPermission);
+
+        var response = await Client.PutAsync($"/api/v1/users/{user.Id}/deactivate", null);
+
+        response.StatusCode.Should().Be(expectedStatusCode);
+
+        if (expectedStatusCode != HttpStatusCode.OK)
+        {
+            return;
+        }
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
+
+        var updatedUser = await Verifier.GetUserByIdAsync(user.Id);
+        updatedUser.Should().NotBeNull();
+        updatedUser!.IsActive.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("anonymous", HttpStatusCode.Unauthorized)]
+    [InlineData("low-privilege", HttpStatusCode.Forbidden)]
+    [InlineData("privileged", HttpStatusCode.OK)]
     public async Task Update_user_roles_should_follow_authorization_matrix(string authMode, HttpStatusCode expectedStatusCode)
     {
         var role = await Seeder.SeedRoleAsync($"UserRole-{Guid.NewGuid():N}", "Assigned role");

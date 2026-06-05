@@ -1,4 +1,4 @@
-﻿using Mediator;
+using Mediator;
 using UMS.API.Extensions;
 using UMS.Application.Authorization;
 using UMS.Application.Dtos.Pagination;
@@ -11,6 +11,7 @@ using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Features.Users.Queries;
+using UMS.Application.Features.Users.Commands.DeactivateUser;
 
 namespace WebApi.Endpoints;
 
@@ -70,6 +71,16 @@ public static class UserEndpoints
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
+
+        group.MapPut("{userId:int}/deactivate", async (int userId, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new DeactivateUserCommand(userId), ct);
+            return response.ToApiResult();
+        })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
+        .WithName("DeactivateUser")
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
         group.MapPut("user-roles", async (UpdateUserRolesRequest updateUserRoles, ISender sender, CancellationToken ct) =>
         {
