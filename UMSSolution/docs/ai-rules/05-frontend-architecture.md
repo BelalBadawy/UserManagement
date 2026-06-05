@@ -74,3 +74,4 @@ To maintain high rendering performance and clean code, state is strictly divided
 - **Tailwind Utility CSS:** All layouts and page styling must utilize Tailwind CSS classes. Inline `style={...}` tags are forbidden.
 - **Radix UI Primitives:** Leverage Radix UI primitives (or shadcn components wrapped around them) for complex interactive elements (such as `Dialog`, `Sheet`, `Toast`, `Select`) to guarantee keyboard navigation and screen-reader accessibility.
 - **Icons:** Use ONLY `lucide-react` icons. Maintain a consistent size (typically `w-4 h-4` or `w-5 h-5`) for UI balance.
+- **Standard Data Grids:** All admin data tables requiring pagination, sorting, and filtering must utilize TanStack React Table and the shared `<DataTablePagination />` component. Do not build custom pagination from scratch or use standard HTML tables for admin lists.

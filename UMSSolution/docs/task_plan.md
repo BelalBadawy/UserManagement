@@ -171,11 +171,39 @@ Phase 1: Custom Toast Notification System
 ## User Lockout Security Enhancements Flow Phases
 
 ### Phase 19: User Lockout Security Enhancements
-- [x] Update `UserService.LockUserAsync` to instantly invalidate active access tokens by updating the user's Security Stamp
+- [x] Update `UserService.LockUserAsync` to invalidate active sessions and refresh tokens immediately by updating the user's Security Stamp (preventing any future token refreshes once active short-lived JWTs expire)
 - [x] Use a safer 1,000-year lockout date offset (`DateTimeOffset.UtcNow.AddYears(1000)`) to prevent database type overflows
 - [x] Update unit tests in `UserServiceTests.cs` to verify stamp updates and dynamic dates
 - [x] Run backend test suites to verify all tests pass cleanly
 - [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
 - **Status:** complete
+
+## Product Categories Management Pagination Upgrade Flow Phases
+
+### Phase 20: Product Categories Pagination Upgrade
+- [x] Install `@tanstack/react-query` and `@tanstack/react-query-devtools` dependencies
+- [x] Initialize `QueryClient` and configure `QueryClientProvider` / Devtools in `App.tsx`
+- [x] Configure Vitest test runner, custom setup file, and test scripts in `package.json`
+- [x] Extract API calls into custom hooks `useCategoryList`, `useCategoryLookups`, `useCreateCategory`, `useUpdateCategory`, and `useDeleteCategory` inside `src/hooks/useCategories.ts`
+- [x] Create reusable `DataTablePagination.tsx` under `src/components/ui/`
+- [x] Refactor `CategoriesManagement.tsx` to use the new hooks, `useReactTable` state binding, and `useSearchParams` URL synchronization
+- [x] Implement RTL component tests in `DataTablePagination.test.tsx` verifying component interactions
+- [x] Verify production compilation (`npm run build`), zero lint warnings (`npm run lint`), and successful test suite run (`npm run test`)
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- **Status:** complete
+
+## User Management Refactoring & Standardization Flow Phases
+
+### Phase 21: User Management Refactoring & Standardization
+- [x] Lock in standard data grids requirement in `docs/ai-rules/05-frontend-architecture.md`
+- [x] Extract users API interactions into custom hooks `useUserList` (with graceful parallel role fetching error recovery), `useAvailableRoles`, `useRegisterUser`, `useUpdateUserAndRoles`, `useLockUser`, `useUnlockUser`, `useChangeUserStatus`, and `useDeleteUser` inside `src/hooks/useUsers.ts`
+- [x] Refactor `UserManagement.tsx` to use the new hooks, `useReactTable` state binding, and `useSearchParams` URL parameter synchronization for sorting and filters
+- [x] Integrate reusable `<DataTablePagination />` component into `UserManagement.tsx`
+- [x] Write Vitest custom hooks tests in `useUsers.test.tsx` using `renderHook` verifying parallel role fetches and failure fallbacks
+- [x] Verify production compilation (`npm run build`), zero lint warnings (`npx eslint`), and successful test suite run (`npm run test`)
+- [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
+- **Status:** complete
+
+
 
 

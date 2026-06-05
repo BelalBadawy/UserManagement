@@ -1,36 +1,59 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { useToast } from '../components/ui/toast';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
-import { categoriesApi } from '../lib/categories-api';
-import type { CategoryResponse, CategoryLookupDto } from '../lib/categories-api';
+import type { CategoryResponse } from '../lib/categories-api';
 import { 
   Plus, Edit2, Trash2, ShieldCheck, AlertTriangle, 
-  Search, RotateCcw, ChevronLeft, ChevronRight, Loader2
+  Search, RotateCcw, Loader2
 } from 'lucide-react';
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+} from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
+import { 
+  useCategoryList, 
+  useCategoryLookups, 
+  useCreateCategory, 
+  useUpdateCategory, 
+  useDeleteCategory 
+} from '../hooks/useCategories';
+import { DataTablePagination } from '../components/ui/DataTablePagination';
+
+const columns: ColumnDef<CategoryResponse>[] = [
+  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'name', header: 'Category Name' },
+  { accessorKey: 'slug', header: 'Slug' },
+  { accessorKey: 'parentId', header: 'Parent Category' },
+  { accessorKey: 'sortOrder', header: 'Sort Order' },
+  { accessorKey: 'isActive', header: 'Status' },
+];
 
 export default function CategoriesManagement() {
   const { hasPermission } = useAuth();
-  const toast = useToast();
 
-  // List States
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [parentLookups, setParentLookups] = useState<CategoryLookupDto[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Query / Filter / Pagination States
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('sortorder');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  // Query parameters from URL
+  const pageNumber = Number(searchParams.get('page') || '1');
+  const pageSize = Number(searchParams.get('size') || '10');
+  const searchTerm = searchParams.get('search') || '';
+  const sortBy = searchParams.get('sortBy') || 'sortorder';
+  const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
+  const statusFilter = (searchParams.get('status') || 'all') as 'all' | 'active' | 'inactive';
+
+  // Search input state (local to prevent queries on keystroke)
+  const [searchInput, setSearchInput] = useState(searchTerm);
+
+  // Synchronize local search input if URL search term changes
+  useEffect(() => {
+    setSearchInput(searchTerm);
+  }, [searchTerm]);
 
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
@@ -44,8 +67,69 @@ export default function CategoriesManagement() {
   const [formParentId, setFormParentId] = useState<number | null>(null);
   const [formSortOrder, setFormSortOrder] = useState<number>(0);
   const [formIsActive, setFormIsActive] = useState(true);
-  const [formSubmitting, setFormSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // API Hooks
+  const isActiveParam = statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : null;
+  const { data: pagedData, isLoading: loading } = useCategoryList({
+    pageNumber,
+    pageSize,
+    searchTerm,
+    sortBy,
+    sortDirection,
+    isActive: isActiveParam,
+  });
+
+  const { data: parentLookups = [] } = useCategoryLookups();
+
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  const categories = pagedData?.data || [];
+  const totalCount = pagedData?.totalCount || 0;
+
+  const formSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // React Table Instance
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: categories,
+    columns,
+    pageCount: Math.ceil(totalCount / pageSize),
+    state: {
+      pagination: {
+        pageIndex: pageNumber - 1,
+        pageSize,
+      },
+      sorting: [{ id: sortBy, desc: sortDirection === 'desc' }],
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' 
+        ? updater({ pageIndex: pageNumber - 1, pageSize }) 
+        : updater;
+      setSearchParams(prev => {
+        prev.set('page', String(next.pageIndex + 1));
+        prev.set('size', String(next.pageSize));
+        return prev;
+      });
+    },
+    onSortingChange: (updater) => {
+      const current = [{ id: sortBy, desc: sortDirection === 'desc' }];
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      if (next && next.length > 0) {
+        setSearchParams(prev => {
+          prev.set('sortBy', next[0].id);
+          prev.set('sortDir', next[0].desc ? 'desc' : 'asc');
+          prev.set('page', '1');
+          return prev;
+        });
+      }
+    },
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   // Helper to dynamically slugify text
   const generateSlug = (val: string) => {
@@ -57,53 +141,6 @@ export default function CategoriesManagement() {
       .replace(/^-+|-+$/g, '');    // trim hyphens
   };
 
-  // Fetch Category lookups for dropdowns
-  const fetchParentLookups = async () => {
-    try {
-      const response = await categoriesApi.getForList();
-      if (response.isSuccessful && response.data) {
-        setParentLookups(response.data);
-      }
-    } catch (err) {
-      console.error('Failed to load parent category lookups', err);
-    }
-  };
-
-  // Fetch categories paged list
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const isActiveParam = 
-        statusFilter === 'active' ? true : 
-        statusFilter === 'inactive' ? false : null;
-
-      const response = await categoriesApi.getPagedList({
-        pageNumber,
-        pageSize,
-        searchTerm,
-        sortBy,
-        sortDirection,
-        isActive: isActiveParam,
-      });
-
-      if (response.isSuccessful && response.data) {
-        setCategories(response.data.data);
-        setTotalCount(response.data.totalCount);
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve categories.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred while loading categories.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [pageNumber, pageSize, searchTerm, sortBy, sortDirection, statusFilter]);
-
   // Handle name input change to auto-suggest slug
   const handleNameChange = (val: string) => {
     setFormName(val);
@@ -114,26 +151,43 @@ export default function CategoriesManagement() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchTerm(searchInput);
-    setPageNumber(1);
+    setSearchParams(prev => {
+      if (searchInput.trim()) {
+        prev.set('search', searchInput.trim());
+      } else {
+        prev.delete('search');
+      }
+      prev.set('page', '1');
+      return prev;
+    });
   };
 
   const handleResetFilters = () => {
     setSearchInput('');
-    setSearchTerm('');
-    setPageNumber(1);
-    setStatusFilter('all');
-    setSortBy('sortorder');
-    setSortDirection('asc');
+    setSearchParams(prev => {
+      prev.delete('search');
+      prev.delete('page');
+      prev.delete('size');
+      prev.delete('status');
+      prev.delete('sortBy');
+      prev.delete('sortDir');
+      return prev;
+    });
   };
 
   const toggleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDirection('asc');
-    }
+    setSearchParams(prev => {
+      const currentSortBy = prev.get('sortBy') || 'sortorder';
+      const currentSortDir = prev.get('sortDir') || 'asc';
+      if (currentSortBy === field) {
+        prev.set('sortDir', currentSortDir === 'asc' ? 'desc' : 'asc');
+      } else {
+        prev.set('sortBy', field);
+        prev.set('sortDir', 'asc');
+      }
+      prev.set('page', '1');
+      return prev;
+    });
   };
 
   // Form Validation
@@ -169,7 +223,6 @@ export default function CategoriesManagement() {
     setFormIsActive(true);
     setErrors({});
     setIsFormSheetOpen(true);
-    fetchParentLookups();
   };
 
   const openEditSheet = (cat: CategoryResponse) => {
@@ -182,56 +235,43 @@ export default function CategoriesManagement() {
     setFormIsActive(cat.isActive);
     setErrors({});
     setIsFormSheetOpen(true);
-    fetchParentLookups();
   };
 
   const handleSubmitCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setFormSubmitting(true);
-    try {
-      if (formMode === 'create') {
-        const response = await categoriesApi.create({
-          name: formName,
-          slug: formSlug,
-          parentId: formParentId,
-          isActive: formIsActive,
-          sortOrder: formSortOrder,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('Category created successfully!');
-          setIsFormSheetOpen(false);
-          fetchCategories();
-        } else {
-          toast.error(response.messages[0] || 'Failed to create category.');
+    if (formMode === 'create') {
+      createMutation.mutate({
+        name: formName,
+        slug: formSlug,
+        parentId: formParentId,
+        isActive: formIsActive,
+        sortOrder: formSortOrder,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
         }
-      } else {
-        if (!targetCategory) return;
-        const response = await categoriesApi.update({
-          id: targetCategory.id,
-          name: formName,
-          slug: formSlug,
-          parentId: formParentId,
-          isActive: formIsActive,
-          sortOrder: formSortOrder,
-          rowVersion: targetCategory.rowVersion,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('Category updated successfully!');
-          setIsFormSheetOpen(false);
-          fetchCategories();
-        } else {
-          toast.error(response.messages[0] || 'Failed to update category.');
+      });
+    } else {
+      if (!targetCategory) return;
+      updateMutation.mutate({
+        id: targetCategory.id,
+        name: formName,
+        slug: formSlug,
+        parentId: formParentId,
+        isActive: formIsActive,
+        sortOrder: formSortOrder,
+        rowVersion: targetCategory.rowVersion,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
         }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during save.');
-    } finally {
-      setFormSubmitting(false);
+      });
     }
   };
 
@@ -242,21 +282,14 @@ export default function CategoriesManagement() {
 
   const executeDeleteCategory = async () => {
     if (!targetCategory) return;
-    try {
-      const response = await categoriesApi.delete(targetCategory.id);
-      if (response.isSuccessful) {
-        toast.success(`Category "${targetCategory.name}" deleted successfully.`);
-        fetchCategories();
-      } else {
-        toast.error(response.messages[0] || 'Failed to delete category.');
+    deleteMutation.mutate(targetCategory.id, {
+      onSuccess: (response) => {
+        if (response.isSuccessful) {
+          setIsDeleteDialogOpen(false);
+          setTargetCategory(null);
+        }
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during deletion.');
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setTargetCategory(null);
-    }
+    });
   };
 
   // Find parent category name from lists
@@ -265,8 +298,6 @@ export default function CategoriesManagement() {
     const lookup = parentLookups.find(p => p.id === parentId);
     return lookup ? lookup.name : `Category #${parentId}`;
   };
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
@@ -309,7 +340,15 @@ export default function CategoriesManagement() {
             <div className="flex gap-2 shrink-0">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) => setSearchParams(prev => {
+                  if (e.target.value === 'all') {
+                    prev.delete('status');
+                  } else {
+                    prev.set('status', e.target.value);
+                  }
+                  prev.set('page', '1');
+                  return prev;
+                })}
                 className="border border-neutral-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 font-medium text-neutral-700"
               >
                 <option value="all">All Statuses</option>
@@ -401,12 +440,12 @@ export default function CategoriesManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge 
-                          variant="outline" 
-                          className={
-                            cat.isActive 
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
-                              : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
-                          }
+                           variant="outline" 
+                           className={
+                             cat.isActive 
+                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
+                               : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
+                           }
                         >
                           {cat.isActive ? 'Active' : 'Inactive'}
                         </Badge>
@@ -450,33 +489,9 @@ export default function CategoriesManagement() {
             </table>
           </div>
 
-          {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
-              <div className="text-xs text-neutral-500">
-                Page {pageNumber} of {totalPages}
-              </div>
-              <div className="flex gap-1.5">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={pageNumber === 1}
-                  onClick={() => setPageNumber(p => Math.max(p - 1, 1))}
-                  className="rounded-lg py-1 px-3 flex items-center gap-1 border-neutral-200"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  Prev
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={pageNumber === totalPages}
-                  onClick={() => setPageNumber(p => Math.min(p + 1, totalPages))}
-                  className="rounded-lg py-1 px-3 flex items-center gap-1 border-neutral-200"
-                >
-                  Next
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Button>
-              </div>
+          {!loading && totalCount > 0 && (
+            <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
+              <DataTablePagination table={table} />
             </div>
           )}
         </CardContent>
@@ -612,9 +627,11 @@ export default function CategoriesManagement() {
             </DialogClose>
             <Button
               type="button"
+              disabled={deleteMutation.isPending}
               onClick={executeDeleteCategory}
               className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl border-transparent"
             >
+              {deleteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-1.5 inline" />}
               Delete Permanently
             </Button>
           </DialogFooter>

@@ -4,47 +4,57 @@ import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { useToast } from '../components/ui/toast';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter';
-import { usersApi } from '../lib/users-api';
-import type { UserResponse, RoleResponse } from '../lib/users-api';
+import type { UserResponse } from '../lib/users-api';
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from '../components/ui/select';
-import {
-  Pagination, PaginationContent, PaginationEllipsis, PaginationItem,
-  PaginationLink, PaginationNext, PaginationPrevious
-} from '../components/ui/pagination';
 import { 
   Plus, Edit2, Trash2, UserCheck, AlertTriangle, 
   Search, RotateCcw, Lock, Unlock, Loader2 
 } from 'lucide-react';
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+} from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
+import {
+  useUserList,
+  useAvailableRoles,
+  useRegisterUser,
+  useUpdateUserAndRoles,
+  useLockUser,
+  useUnlockUser,
+  useChangeUserStatus,
+  useDeleteUser,
+} from '../hooks/useUsers';
+import { DataTablePagination } from '../components/ui/DataTablePagination';
+
+const columns: ColumnDef<UserResponse>[] = [
+  { accessorKey: 'fullName', header: 'User' },
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'roles', header: 'Assigned Roles' },
+  { accessorKey: 'status', header: 'Status' },
+];
 
 export default function UserManagement() {
   const { hasPermission } = useAuth();
-  const toast = useToast();
 
-  // List States
-  const [users, setUsers] = useState<UserResponse[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [availableRoles, setAvailableRoles] = useState<RoleResponse[]>([]);
-
-  // Query / Filter / Pagination States
+  // Query / Filter / Pagination States from URL
   const [searchParams, setSearchParams] = useSearchParams();
 
   const pageNumber = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = parseInt(searchParams.get('size') || '10', 10);
   const searchTerm = searchParams.get('search') || '';
   const activeParam = searchParams.get('active') || 'all';
   const lockedParam = searchParams.get('locked') || 'all';
   const roleParam = searchParams.get('role') || 'all';
+  const sortBy = searchParams.get('sortBy') || 'fullname';
+  const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
 
   const [searchInput, setSearchInput] = useState(searchTerm);
-  const [pageSize] = useState(10);
-  const [sortBy, setSortBy] = useState('fullname');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Sync search input if searchTerm changes (e.g. from reset or back navigation)
   useEffect(() => {
@@ -55,12 +65,12 @@ export default function UserManagement() {
     const nextParams = new URLSearchParams(searchParams);
     
     // Changing filters or searching resets to page 1
-    if (newParams.page === undefined && (newParams.search !== undefined || newParams.active !== undefined || newParams.locked !== undefined || newParams.role !== undefined)) {
+    if (newParams.page === undefined && (newParams.search !== undefined || newParams.active !== undefined || newParams.locked !== undefined || newParams.role !== undefined || newParams.sortBy !== undefined || newParams.sortDir !== undefined)) {
       nextParams.set('page', '1');
     }
 
     Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null || val === 'all' || (key === 'page' && val === '1') || (key === 'search' && val === '')) {
+      if (val === null || val === 'all' || (key === 'page' && val === '1') || (key === 'search' && val === '') || (key === 'sortBy' && val === 'fullname') || (key === 'sortDir' && val === 'asc') || (key === 'size' && val === '10')) {
         nextParams.delete(key);
       } else {
         nextParams.set(key, val);
@@ -86,119 +96,112 @@ export default function UserManagement() {
   const [formActivateUser, setFormActivateUser] = useState(true);
   const [formAutoConfirmEmail, setFormAutoConfirmEmail] = useState(false);
   const [formRoles, setFormRoles] = useState<string[]>([]);
-  const [formSubmitting, setFormSubmitting] = useState(false);
 
   // Validation States
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Map user ID to their roles for visual rendering
-  const [userRolesMap, setUserRolesMap] = useState<Record<number, string[]>>({});
+  // Query & Mutation Hooks
+  const isActiveParam = activeParam === 'active' ? true : activeParam === 'inactive' ? false : null;
+  const isLockedParam = lockedParam === 'locked' ? true : lockedParam === 'unlocked' ? false : null;
+  const roleIdParam = roleParam !== 'all' ? parseInt(roleParam, 10) : null;
 
-  // Load available roles on mount
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await usersApi.getRolesAll();
-        if (response.isSuccessful && response.data) {
-          setAvailableRoles(response.data);
-        }
-      } catch (err) {
-        console.error('Failed to load roles', err);
-      }
-    };
-    fetchRoles();
-  }, []);
+  const { data: pagedData, isLoading: loading } = useUserList({
+    pageNumber,
+    pageSize,
+    searchTerm,
+    sortBy,
+    sortDirection,
+    isActive: isActiveParam,
+    isLocked: isLockedParam,
+    roleId: roleIdParam,
+  });
 
-  // Fetch users paged list
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      let isActive: boolean | null = null;
-      if (activeParam === 'active') isActive = true;
-      if (activeParam === 'inactive') isActive = false;
+  const { data: availableRoles = [] } = useAvailableRoles();
 
-      let isLocked: boolean | null = null;
-      if (lockedParam === 'locked') isLocked = true;
-      if (lockedParam === 'unlocked') isLocked = false;
+  const registerMutation = useRegisterUser();
+  const updateMutation = useUpdateUserAndRoles();
+  const lockMutation = useLockUser();
+  const unlockMutation = useUnlockUser();
+  const changeStatusMutation = useChangeUserStatus();
+  const deleteMutation = useDeleteUser();
 
-      const roleId = roleParam !== 'all' ? parseInt(roleParam, 10) : null;
+  const users = pagedData?.data || [];
+  const totalCount = pagedData?.totalCount || 0;
+  const userRolesMap = pagedData?.rolesMap || {};
 
-      const response = await usersApi.getPagedList({
-        pageNumber,
+  const formSubmitting = registerMutation.isPending || updateMutation.isPending;
+  const confirmPending = 
+    lockMutation.isPending || 
+    unlockMutation.isPending || 
+    changeStatusMutation.isPending || 
+    deleteMutation.isPending;
+
+  // React Table Instance
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: users,
+    columns,
+    pageCount: Math.ceil(totalCount / pageSize),
+    state: {
+      pagination: {
+        pageIndex: pageNumber - 1,
         pageSize,
-        searchTerm,
-        sortBy,
-        sortDirection,
-        isActive,
-        isLocked,
-        roleId,
+      },
+      sorting: [{ id: sortBy, desc: sortDirection === 'desc' }],
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' 
+        ? updater({ pageIndex: pageNumber - 1, pageSize }) 
+        : updater;
+      updateFilters({
+        page: String(next.pageIndex + 1),
+        size: String(next.pageSize),
       });
-
-      if (response.isSuccessful && response.data) {
-        setUsers(response.data.data);
-        setTotalCount(response.data.totalCount);
-
-        // Fetch roles for each user in parallel to render in the table
-        const rolesPromises = response.data.data.map(async (u) => {
-          try {
-            const roleResponse = await usersApi.getUserRoles(u.id);
-            if (roleResponse.isSuccessful && roleResponse.data) {
-              return { userId: u.id, roles: roleResponse.data.map(r => r.roleName) };
-            }
-          } catch (e) {
-            console.error(`Failed to fetch roles for user ${u.id}`, e);
-          }
-          return { userId: u.id, roles: [] };
+    },
+    onSortingChange: (updater) => {
+      const current = [{ id: sortBy, desc: sortDirection === 'desc' }];
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      if (next && next.length > 0) {
+        updateFilters({
+          sortBy: next[0].id,
+          sortDir: next[0].desc ? 'desc' : 'asc',
+          page: '1',
         });
-
-        const results = await Promise.all(rolesPromises);
-        const nextMap: Record<number, string[]> = {};
-        results.forEach(res => {
-          nextMap[res.userId] = res.roles;
-        });
-        setUserRolesMap(nextMap);
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve users.');
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred while loading users.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, [pageNumber, pageSize, searchTerm, activeParam, lockedParam, roleParam, sortBy, sortDirection]);
+    },
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   // Handle Searches
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateFilters({ search: searchInput });
+    updateFilters({ search: searchInput.trim() });
   };
 
   const handleResetFilters = () => {
     setSearchInput('');
     updateFilters({
       page: '1',
+      size: '10',
       search: '',
       active: 'all',
       locked: 'all',
-      role: 'all'
+      role: 'all',
+      sortBy: 'fullname',
+      sortDir: 'asc',
     });
-    setSortBy('fullname');
-    setSortDirection('asc');
   };
 
   // Toggle Sorting
   const toggleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDirection('asc');
-    }
+    const dir = sortBy === field && sortDirection === 'asc' ? 'desc' : 'asc';
+    updateFilters({
+      sortBy: field,
+      sortDir: dir,
+      page: '1',
+    });
   };
 
   // Form Validation
@@ -280,54 +283,36 @@ export default function UserManagement() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setFormSubmitting(true);
-    try {
-      if (formMode === 'create') {
-        const response = await usersApi.register({
-          fullName: formFullName,
-          email: formEmail,
-          password: formPassword,
-          confirmPassword: formConfirmPassword,
-          phoneNumber: formPhoneNumber,
-          activateUser: formActivateUser,
-          autoConfirmEmail: formAutoConfirmEmail,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('User created successfully!');
-          setIsFormSheetOpen(false);
-          fetchUsers();
-        } else {
-          toast.error(response.messages[0] || 'Registration failed.');
-        }
-      } else {
-        // Edit Flow
-        if (!targetUser) return;
-        const profileRes = await usersApi.update({
-          userId: targetUser.id,
-          fullName: formFullName,
-          phoneNumber: formPhoneNumber,
-        });
-
-        if (profileRes.isSuccessful) {
-          // Update assigned roles
-          const rolesRes = await usersApi.updateUserRoles(targetUser.id, formRoles);
-          if (rolesRes.isSuccessful) {
-            toast.success('User details and roles updated successfully!');
+    if (formMode === 'create') {
+      registerMutation.mutate({
+        fullName: formFullName,
+        email: formEmail,
+        password: formPassword,
+        confirmPassword: formConfirmPassword,
+        phoneNumber: formPhoneNumber,
+        activateUser: formActivateUser,
+        autoConfirmEmail: formAutoConfirmEmail,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
             setIsFormSheetOpen(false);
-            fetchUsers();
-          } else {
-            toast.warning('User details updated, but role assignment failed: ' + rolesRes.messages[0]);
           }
-        } else {
-          toast.error(profileRes.messages[0] || 'Failed to update user details.');
         }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during form submission.');
-    } finally {
-      setFormSubmitting(false);
+      });
+    } else {
+      if (!targetUser) return;
+      updateMutation.mutate({
+        userId: targetUser.id,
+        fullName: formFullName,
+        phoneNumber: formPhoneNumber,
+        roles: formRoles,
+      }, {
+        onSuccess: (response) => {
+          if (response.profileRes.isSuccessful && response.rolesRes.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
+        }
+      });
     }
   };
 
@@ -351,54 +336,38 @@ export default function UserManagement() {
   const executeConfirmAction = async () => {
     if (!targetUser || !confirmAction) return;
 
-    try {
-      if (confirmAction === 'lock') {
-        const res = await usersApi.lock(targetUser.id);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" locked successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to lock user.');
+    if (confirmAction === 'lock') {
+      lockMutation.mutate(targetUser.id, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'unlock') {
-        const res = await usersApi.unlock(targetUser.id);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" unlocked successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to unlock user.');
+      });
+    } else if (confirmAction === 'unlock') {
+      unlockMutation.mutate(targetUser.id, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'activate') {
-        const res = await usersApi.changeStatus(targetUser.id, true);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" activated successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to activate user.');
+      });
+    } else if (confirmAction === 'activate') {
+      changeStatusMutation.mutate({ userId: targetUser.id, activate: true }, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'deactivate') {
-        const res = await usersApi.changeStatus(targetUser.id, false);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" deactivated successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to deactivate user.');
+      });
+    } else if (confirmAction === 'deactivate') {
+      changeStatusMutation.mutate({ userId: targetUser.id, activate: false }, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'delete') {
-        // simulated delete operation
-        toast.success(`Delete operation simulated successfully for user "${targetUser.fullName}"! (Verified claim: Permission.Identity.Users.Delete)`);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Operation failed.');
-    } finally {
-      setIsConfirmDialogOpen(false);
-      setConfirmAction(null);
-      setTargetUser(null);
+      });
+    } else if (confirmAction === 'delete') {
+      deleteMutation.mutate(targetUser.fullName, {
+        onSuccess: () => {
+          setIsConfirmDialogOpen(false);
+        }
+      });
     }
   };
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
@@ -704,74 +673,9 @@ export default function UserManagement() {
             </table>
           </div>
 
-          {/* Table Pagination */}
-          {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
-              <div className="text-xs text-neutral-500">
-                Page {pageNumber} of {totalPages}
-              </div>
-              <Pagination className="w-auto mx-0">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pageNumber > 1) updateFilters({ page: String(pageNumber - 1) });
-                      }}
-                      className={pageNumber === 1 ? 'pointer-events-none opacity-50' : ''}
-                    />
-                  </PaginationItem>
-                  
-                  {(() => {
-                    const pages: (number | 'ellipsis')[] = [];
-                    pages.push(1);
-                    if (pageNumber > 3) {
-                      pages.push('ellipsis');
-                    }
-                    for (let i = Math.max(2, pageNumber - 1); i <= Math.min(totalPages - 1, pageNumber + 1); i++) {
-                      if (!pages.includes(i)) {
-                        pages.push(i);
-                      }
-                    }
-                    if (pageNumber < totalPages - 2) {
-                      pages.push('ellipsis');
-                    }
-                    if (totalPages > 1 && !pages.includes(totalPages)) {
-                      pages.push(totalPages);
-                    }
-                    return pages;
-                  })().map((page, idx) => (
-                    <PaginationItem key={idx}>
-                      {page === 'ellipsis' ? (
-                        <PaginationEllipsis />
-                      ) : (
-                        <PaginationLink
-                          href="#"
-                          isActive={page === pageNumber}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            updateFilters({ page: String(page) });
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      )}
-                    </PaginationItem>
-                  ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pageNumber < totalPages) updateFilters({ page: String(pageNumber + 1) });
-                      }}
-                      className={pageNumber === totalPages ? 'pointer-events-none opacity-50' : ''}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+          {!loading && totalCount > 0 && (
+            <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
+              <DataTablePagination table={table} />
             </div>
           )}
         </CardContent>
@@ -964,12 +868,14 @@ export default function UserManagement() {
             <DialogFooter>
               <Button 
                 variant={confirmAction === 'delete' ? 'destructive' : 'default'}
+                disabled={confirmPending}
                 onClick={executeConfirmAction}
                 className="rounded-xl px-5"
               >
+                {confirmPending && <Loader2 className="w-4 h-4 animate-spin mr-1.5 inline" />}
                 Confirm
               </Button>
-              <DialogClose onClick={() => setIsConfirmDialogOpen(false)}>
+              <DialogClose onClick={() => setIsConfirmDialogOpen(false)} className="border-neutral-200 text-neutral-600 hover:bg-neutral-100 font-bold">
                 Cancel
               </DialogClose>
             </DialogFooter>

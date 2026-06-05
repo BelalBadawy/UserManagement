@@ -62,3 +62,5 @@ When that happens, update the rules first, then write the code.
 "I need to add Redis caching. Please update docs/ai-rules/03-backend-data-and-infrastructure.md and docs/ai-rules/skill-add-new-api-endpoint.md to include the standard workflow for adding cache invalidation to a command handler."
 
 You've built an incredible foundation here. This is exactly how enterprise-level AI-assisted development should be structured. Great work! Let me know if you want to test this out by building out a new complex feature together.
+
+ update task_plan.md and docs/source-of-truth.md updated code.

@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import LoginLayout from './layouts/LoginLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -19,6 +21,15 @@ import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import './App.css'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+})
 
 // Helper component to redirect authenticated users away from Auth pages
 function PublicOnlyRoute() {
@@ -88,14 +99,18 @@ function AppContent() {
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   )
 }
 
 export default App
+
