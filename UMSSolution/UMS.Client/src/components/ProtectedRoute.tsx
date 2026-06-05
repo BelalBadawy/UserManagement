@@ -33,7 +33,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, al
   }, [loading, refreshAccessToken]);
 
   useEffect(() => {
-    if (!loading && !checkingToken && isAuthenticated && user) {
+    if (!loading && !checkingToken && isAuthenticated && user && !permissionDenied) {
       // Check permissions if specified
       if (allowedPermissions) {
         const hasPerm = allowedPermissions.some((perm) => user.permissions.includes(perm));
@@ -52,7 +52,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, al
         }
       }
     }
-  }, [loading, checkingToken, isAuthenticated, user, allowedPermissions, allowedRoles, toast]);
+  }, [loading, checkingToken, isAuthenticated, user, allowedPermissions, allowedRoles, toast, permissionDenied]);
 
   if (loading || checkingToken) {
     return (

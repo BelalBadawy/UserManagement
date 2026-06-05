@@ -1,16 +1,16 @@
 # Graph Report - UMSSolution  (2026-06-05)
 
 ## Corpus Check
-- 626 files · ~2,246,794 words
+- 626 files · ~2,247,145 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 10266 nodes · 15732 edges · 1212 communities (706 shown, 506 thin omitted)
+- 10266 nodes · 15732 edges · 1210 communities (702 shown, 508 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 1123 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `effc8237`
+- Built from commit: `4749bfad`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -675,7 +675,6 @@
 - [[_COMMUNITY_Community 696|Community 696]]
 - [[_COMMUNITY_Community 697|Community 697]]
 - [[_COMMUNITY_Community 698|Community 698]]
-- [[_COMMUNITY_Community 699|Community 699]]
 - [[_COMMUNITY_Community 700|Community 700]]
 - [[_COMMUNITY_Community 701|Community 701]]
 - [[_COMMUNITY_Community 702|Community 702]]
@@ -1142,7 +1141,6 @@
 - [[_COMMUNITY_Community 1189|Community 1189]]
 - [[_COMMUNITY_Community 1190|Community 1190]]
 - [[_COMMUNITY_Community 1191|Community 1191]]
-- [[_COMMUNITY_Community 1192|Community 1192]]
 - [[_COMMUNITY_Community 1193|Community 1193]]
 - [[_COMMUNITY_Community 1194|Community 1194]]
 - [[_COMMUNITY_Community 1195|Community 1195]]
@@ -1186,15 +1184,15 @@
 - `PipelineTestRequest` --implements--> `IValidateMe`  [EXTRACTED]
   UMS.Application.Tests/Behaviors/ValidationPipelineBehaviorTests.cs → UMS.Application/Interfaces/Common/IValidateMe.cs
 
-## Communities (1212 total, 506 thin omitted)
+## Communities (1210 total, 508 thin omitted)
 
 ### Community 0 - "Category Role Response Flow"
-Cohesion: 0.06
-Nodes (12): ConfirmEmailChangeCommandHandlerTests, GetUserByIdQueryHandlerTests, GetUserRolesQueryHandlerTests, GetUsersPagedQueryHandlerTests, LockUserCommandHandlerTests, ResponseWrapper, GetRoleByIdQueryHandlerTests, Fact (+4 more)
+Cohesion: 0.04
+Nodes (22): CreateCategoryCommandHandlerTests, UpdateCategoryCommandHandlerTests, ConfirmEmailChangeCommandHandlerTests, ConfirmTwoFactorAuthCommandHandlerTests, DisableTwoFactorAuthCommandHandlerTests, EnableTwoFactorAuthCommandHandlerTests, GenerateNew2FARecoveryCodesCommandHandlerTests, GetMyProfileQueryHandlerTests (+14 more)
 
 ### Community 1 - "API Service Registration"
-Cohesion: 0.06
-Nodes (7): a(), b(), es, Gn(), r(), un, W
+Cohesion: 0.07
+Nodes (6): a(), b(), es, Gn(), r(), W
 
 ### Community 2 - "OpenAPI Bearer Scheme"
 Cohesion: 0.06
@@ -1205,7 +1203,7 @@ Cohesion: 0.06
 Nodes (35): 6.10 Use React DOM Resource Hints, 6.11 Use useTransition Over Manual Loading States, 6.1 Animate SVG Wrapper Instead of SVG Element, 6.2 CSS content-visibility for Long Lists, 6.3 Hoist Static JSX Elements, 6.4 Optimize SVG Precision, 6.5 Prevent Hydration Mismatch Without Flickering, 6.6 Suppress Expected Hydration Mismatches (+27 more)
 
 ### Community 5 - "Account Endpoints"
-Cohesion: 0.15
+Cohesion: 0.16
 Nodes (4): ApiStateVerifier, ApiTestBase, IClassFixture, RoleEndpointsTests
 
 ### Community 6 - "User Endpoints"
@@ -2176,10 +2174,6 @@ Nodes (4): IAuditable, UMS.Domain.Interfaces, IAuditable, UMS.Domain.Interfaces
 Cohesion: 0.33
 Nodes (6): Category, IDataConcurrency, UMS.Domain.Interfaces, IDataConcurrency, UMS.Domain.Interfaces, IFullEntity
 
-### Community 263 - "Community 263"
-Cohesion: 0.05
-Nodes (5): a(), build(), d(), e(), updateProps()
-
 ### Community 264 - "Community 264"
 Cohesion: 0.67
 Nodes (3): IEntity, UMS.Domain.Interfaces, UMS.Domain.Interfaces
@@ -2257,24 +2251,20 @@ Cohesion: 0.17
 Nodes (11): FluentEmail.Core (3.0.2), FluentEmail.Smtp (3.0.2), Microsoft.AspNetCore.Authentication.JwtBearer (10.0.6), Microsoft.AspNetCore.Components.Authorization (10.0.6), Microsoft.AspNetCore.Identity.EntityFrameworkCore (10.0.6), net10.0, Microsoft.EntityFrameworkCore.InMemory (10.0.6), Microsoft.EntityFrameworkCore.Sqlite (10.0.6) (+3 more)
 
 ### Community 333 - "Community 333"
-Cohesion: 0.07
-Nodes (15): CreateCategoryCommandHandlerTests, DeleteCategoryCommandHandlerTests, UpdateCategoryCommandHandlerTests, GetAllCategoriesAdminQueryHandlerTests, GetAllCategoriesForListQueryHandlerTests, GetAllCategoriesQueryHandlerTests, GetCategoriesPagedAdminQueryHandlerTests, GetCategoriesPagedQueryHandlerTests (+7 more)
+Cohesion: 0.06
+Nodes (15): CategoryCacheKeys, UMS.Application.Features.Categories, CategoryCacheKeys, UMS.Application.Features.Categories, DeleteCategoryCommandHandlerTests, GetAllCategoriesAdminQueryHandlerTests, GetAllCategoriesForListQueryHandlerTests, GetAllCategoriesQueryHandlerTests (+7 more)
 
 ### Community 334 - "Community 334"
 Cohesion: 0.20
 Nodes (9): net10.0, Bogus (35.6.1), coverlet.collector (6.0.4), FluentAssertions (8.9.0), Microsoft.NET.Test.Sdk (17.14.1), Moq (4.20.72), xunit (2.9.3), xunit.runner.visualstudio (3.1.4) (+1 more)
 
 ### Community 335 - "Community 335"
-Cohesion: 0.12
-Nodes (4): Ae, be(), ot(), p()
+Cohesion: 0.08
+Nodes (5): Ae, be(), ot(), p(), zt
 
 ### Community 339 - "Community 339"
 Cohesion: 0.13
 Nodes (40): be(), bi(), Ce(), d(), De(), _e(), ei(), Fe() (+32 more)
-
-### Community 340 - "Community 340"
-Cohesion: 0.09
-Nodes (3): j(), N(), tt
 
 ### Community 341 - "Community 341"
 Cohesion: 0.09
@@ -2305,16 +2295,12 @@ Cohesion: 0.13
 Nodes (9): TempDirectoryFixture, IDisposable, RoleService, RoleServiceTests, TempDirectoryFixture, ApplicationRole, Fact, Mock (+1 more)
 
 ### Community 348 - "Community 348"
-Cohesion: 0.07
-Nodes (28): _(), addSlide(), b, ee, getShift(), getSlides(), getThumb(), h() (+20 more)
+Cohesion: 0.05
+Nodes (36): _(), a(), addSlide(), b, build(), cleanup(), ee, getShift() (+28 more)
 
 ### Community 349 - "Community 349"
 Cohesion: 0.09
 Nodes (3): Ln, qt, u()
-
-### Community 350 - "Community 350"
-Cohesion: 0.08
-Nodes (6): ConfirmTwoFactorAuthCommandHandlerTests, DisableTwoFactorAuthCommandHandlerTests, EnableTwoFactorAuthCommandHandlerTests, GetMyProfileQueryHandlerTests, SetupTwoFactorAuthCommandHandlerTests, UserServiceAuthTests
 
 ### Community 351 - "Community 351"
 Cohesion: 0.17
@@ -2342,7 +2328,7 @@ Nodes (25): api, ApiResponse, auditLogsApi, AuditLogsFilterRequest, AuditTrailRe
 
 ### Community 359 - "Community 359"
 Cohesion: 0.11
-Nodes (25): eO(), i(), N(), o(), w(), a(), a(), c() (+17 more)
+Nodes (27): i(), N(), o(), w(), a(), a(), c(), d() (+19 more)
 
 ### Community 360 - "Community 360"
 Cohesion: 0.09
@@ -2353,8 +2339,8 @@ Cohesion: 0.08
 Nodes (18): ApplicationUserClaim, ApplicationUserLogin, ApplicationUserRole, ApplicationUserToken, ApplicationDbContext, UMS.Infrastructure.Persistence.Contexts, DbContextOptionsBuilder, IDbContextTransaction (+10 more)
 
 ### Community 362 - "Community 362"
-Cohesion: 0.07
-Nodes (6): c(), h(), on, ps, q(), vs
+Cohesion: 0.09
+Nodes (3): h(), ps, vs
 
 ### Community 363 - "Community 363"
 Cohesion: 0.11
@@ -2389,7 +2375,7 @@ Cohesion: 0.07
 Nodes (15): AccountEndpoints, AuditTrailEndpoints, UMS.API.Endpoints, CategoryEndpoints, UMS.API.Endpoints, AccountEndpoints, CategoryEndpoints, UMS.API.Endpoints (+7 more)
 
 ### Community 372 - "Community 372"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (4): c(), q(), Qi, v()
 
 ### Community 373 - "Community 373"
@@ -2401,11 +2387,11 @@ Cohesion: 0.16
 Nodes (29): description, get, get, get, get, get, get, get (+21 more)
 
 ### Community 376 - "Community 376"
-Cohesion: 0.13
-Nodes (3): _(), ot, Zi
+Cohesion: 0.07
+Nodes (7): _(), an, c(), on, ot, q(), Zi
 
 ### Community 377 - "Community 377"
-Cohesion: 0.11
+Cohesion: 0.14
 Nodes (3): _(), ot, Zi
 
 ### Community 379 - "Community 379"
@@ -2429,7 +2415,7 @@ Cohesion: 0.11
 Nodes (9): CustomWebApplicationFactory, CustomWebApplicationFactory, IAsyncLifetime, IWebHostBuilder, object, Program, HttpClient, Task (+1 more)
 
 ### Community 384 - "Community 384"
-Cohesion: 0.10
+Cohesion: 0.11
 Nodes (5): ft(), gt(), isDisabled(), mt(), vt()
 
 ### Community 385 - "Community 385"
@@ -2437,11 +2423,11 @@ Cohesion: 0.14
 Nodes (16): IRoleService, RoleService, UMS.Infrastructure.Identity.Services, CreateRoleRequest, IApplicationDbContext, IdentityResult, IResponseWrapper, List (+8 more)
 
 ### Community 386 - "Community 386"
-Cohesion: 0.11
-Nodes (11): b(), de(), emit(), f(), K(), n(), oe(), pe() (+3 more)
+Cohesion: 0.12
+Nodes (9): b(), de(), emit(), n(), oe(), pe(), re, x() (+1 more)
 
 ### Community 387 - "Community 387"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (8): CategoryHandlerTestDbContext, CancellationToken, Category, JsonSerializerOptions, ModelBuilder, Task, TEntity, TNotification
 
 ### Community 388 - "Community 388"
@@ -2474,7 +2460,7 @@ Nodes (9): GetAllCategoriesAdminQueryHandlerTests, GetAllCategoriesForListQueryH
 
 ### Community 395 - "Community 395"
 Cohesion: 0.07
-Nodes (26): ChangeUserStatusCommandHandler, DeleteCategoryCommandHandler, UMS.Application.Features.Categories.Commands.Delete, DeleteCategoryCommandHandler, UMS.Application.Features.Categories.Commands.Delete, GetAuditTrailsPagedQueryHandler, UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged, GetCategoriesPagedQueryHandler (+18 more)
+Nodes (28): ChangeUserStatusCommandHandler, CreateCategoryCommandHandler, CreateCategoryRequest, UMS.Application.Features.Categories.Commands.Create, CreateCategoryCommandHandler, CreateCategoryRequest, UMS.Application.Features.Categories.Commands.Create, DeleteCategoryCommandHandler (+20 more)
 
 ### Community 398 - "Community 398"
 Cohesion: 0.24
@@ -2564,6 +2550,10 @@ Nodes (16): code:csharp (if (!userRegistration.AutoConfirmEmail)), code:csharp (
 Cohesion: 0.33
 Nodes (6): RoleEndpointsTests, Fact, HttpStatusCode, InlineData, Task, Theory
 
+### Community 424 - "Community 424"
+Cohesion: 0.20
+Nodes (10): CancellationToken, IApplicationDbContext, ICacheService, IResponseWrapper, UpdateCategoryCommand, ValueTask, UMS.Application.Features.Categories.Commands.Update, UpdateCategoryCommandHandler (+2 more)
+
 ### Community 425 - "Community 425"
 Cohesion: 0.19
 Nodes (10): IdentityDbSeeder, UMS.Infrastructure.Persistence.DbInitializers, SeedUsersConfiguration, ApplicationDbContext, ApplicationRole, AppPermission, IReadOnlyList, RoleManager (+2 more)
@@ -2597,7 +2587,7 @@ Cohesion: 0.12
 Nodes (16): Phase 4: Testing & Cleanup, Task 4.10: Delete placeholder UnitTest1 file from Infrastructure tests, Task 4.11: Decide and enforce ownership of legacy UMS.Tests project, Task 4.12: Decide and enforce ownership of legacy UMS.IntegrationTests project, Task 4.13: Update testing strategy documentation to match actual test project structure, Task 4.14: Regenerate stale coverage audit documentation, Task 4.15: Run solution test suite after refactoring completion, Task 4.1: Add unit tests for validation pipeline mixed-pass mixed-fail scenario (+8 more)
 
 ### Community 433 - "Community 433"
-Cohesion: 0.25
+Cohesion: 0.23
 Nodes (9): ApiStateVerifier, ApplicationRole, ApplicationRoleClaim, ApplicationUser, CancellationToken, Category, CustomWebApplicationFactory, List (+1 more)
 
 ### Community 434 - "Community 434"
@@ -2636,10 +2626,6 @@ Nodes (14): Approval Checkpoint, Constraints, Current Context, Expected Risks, G
 Cohesion: 0.20
 Nodes (7): AuthorizationPolicy, IAuthorizationPolicyProvider, PermissionPolicyProvider, UMS.Infrastructure.Identity.Permissions, PermissionPolicyProvider, UMS.Infrastructure.Identity.Permissions, Task
 
-### Community 445 - "Community 445"
-Cohesion: 0.16
-Nodes (12): CreateCategoryCommandHandler, CreateCategoryRequest, UMS.Application.Features.Categories.Commands.Create, CreateCategoryCommandHandler, CreateCategoryRequest, UMS.Application.Features.Categories.Commands.Create, CancellationToken, CreateCategoryCommand (+4 more)
-
 ### Community 446 - "Community 446"
 Cohesion: 0.19
 Nodes (11): CreateRoleCommand, CreateRoleCommandHandler, CreateRoleRequest, UMS.Application.Features.Roles.Commands, CreateRoleCommandHandler, CreateRoleRequest, UMS.Application.Features.Roles.Commands, CancellationToken (+3 more)
@@ -2661,8 +2647,8 @@ Cohesion: 0.14
 Nodes (13): Bash Usage, Choose A Project Name, code:powershell (.\docs\template\Scaffold.ps1 -ProjectName MyProduct), code:powershell (.\docs\template\Scaffold.ps1 -ProjectName MyProduct -OutputP), code:bash (./docs/template/Scaffold.sh --ProjectName MyProduct), code:bash (./docs/template/Scaffold.sh --ProjectName MyProduct --Output), code:text (MyProduct/), How To Use This Template (+5 more)
 
 ### Community 451 - "Community 451"
-Cohesion: 0.29
-Nodes (6): DisableTwoFactorAuthEndpointTests, EnableTwoFactorAuthEndpointTests, Fact, Task, Fact, Task
+Cohesion: 0.21
+Nodes (9): DisableTwoFactorAuthEndpointTests, LogoutEndpointTests, ApiTestBase, Fact, Task, Fact, Task, CustomWebApplicationFactory (+1 more)
 
 ### Community 452 - "Community 452"
 Cohesion: 0.21
@@ -2884,10 +2870,6 @@ Nodes (5): IApiRequest, UMS.Application.Interfaces.Common, UMS.Application.Inter
 Cohesion: 0.24
 Nodes (8): Exception, ErrorHandlingMiddleware, UMS.API, HttpContext, ILogger, IWebHostEnvironment, RequestDelegate, Task
 
-### Community 508 - "Community 508"
-Cohesion: 0.08
-Nodes (5): cleanup(), g, X, xt, Z
-
 ### Community 509 - "Community 509"
 Cohesion: 0.33
 Nodes (9): GetAuditTrailsPagedQuery, GetAuditTrailsPagedQueryHandler, UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged, AuditTrailResponse, CancellationToken, IAuditTrailService, IResponseWrapper, PagedResult (+1 more)
@@ -2902,7 +2884,7 @@ Nodes (8): DeactivateUserCommandHandler, UMS.Application.Features.Users.Commands
 
 ### Community 514 - "Community 514"
 Cohesion: 0.13
-Nodes (17): ChangeUserPasswordCommand, ChangeUserPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe, ForgotPasswordCommand, ForgotPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe (+9 more)
+Nodes (18): ChangeUserPasswordCommand, ChangeUserPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe, IValidateMe, LoginWith2FAQuery, LoginWith2FAQueryHandler, UMS.Application.Features.Token.Queries.LoginWith2FA (+10 more)
 
 ### Community 515 - "Community 515"
 Cohesion: 0.22
@@ -2933,8 +2915,8 @@ Cohesion: 0.20
 Nodes (10): code:csharp (group.MapPost("confirm-email",), code:csharp (group.MapPost("confirm-email-change",), code:csharp (group.MapPost("resend-confirmation-email",), code:csharp (group.MapPost("generate-change-email-token",), code:csharp (group.MapPost("generate-2fa-recovery-codes",), code:csharp (group.MapPut("lock-user",), code:csharp (group.MapPut("unlock-user",), E.1 — Add 3 anonymous routes to `AccountEndpoints` (+2 more)
 
 ### Community 522 - "Community 522"
-Cohesion: 0.24
-Nodes (6): ProfileEndpointTests, ApiTestBase, Fact, Task, CustomWebApplicationFactory, T
+Cohesion: 0.47
+Nodes (3): ProfileEndpointTests, Fact, Task
 
 ### Community 523 - "Community 523"
 Cohesion: 0.47
@@ -2944,13 +2926,17 @@ Nodes (3): SetupTwoFactorAuthEndpointTests, Fact, Task
 Cohesion: 0.33
 Nodes (8): GetRefreshTokenQuery, GetRefreshTokenQueryHandler, UMS.Application.Features.Token.Queries, CancellationToken, IResponseWrapper, ITokenService, TokenResponse, ValueTask
 
+### Community 525 - "Community 525"
+Cohesion: 0.33
+Nodes (7): ForgotPasswordCommand, ForgotPasswordCommandHandler, UMS.Application.Features.Users.Commands, CancellationToken, IResponseWrapper, IUserService, ValueTask
+
 ### Community 526 - "Community 526"
 Cohesion: 0.24
 Nodes (4): LockUserValidator, LockUserValidatorTests, Fact, LockUserValidatorTests
 
 ### Community 527 - "Community 527"
-Cohesion: 0.33
-Nodes (8): LoginWith2FAQuery, LoginWith2FAQueryHandler, UMS.Application.Features.Token.Queries.LoginWith2FA, CancellationToken, IResponseWrapper, ITokenService, TokenResponse, ValueTask
+Cohesion: 0.60
+Nodes (3): EnableTwoFactorAuthEndpointTests, Fact, Task
 
 ### Community 528 - "Community 528"
 Cohesion: 0.24
@@ -3584,12 +3570,8 @@ Nodes (4): code:csharp (# React + TypeScript + Vite), code:block364, code:block3
 Cohesion: 0.33
 Nodes (7): GenerateChangeEmailTokenCommand, GenerateChangeEmailTokenCommandHandler, UMS.Application.Features.Users.Commands, CancellationToken, IResponseWrapper, IUserService, ValueTask
 
-### Community 699 - "Community 699"
-Cohesion: 0.33
-Nodes (4): CategoryCacheKeys, UMS.Application.Features.Categories, CategoryCacheKeys, UMS.Application.Features.Categories
-
 ### Community 700 - "Community 700"
-Cohesion: 0.25
+Cohesion: 0.29
 Nodes (5): CategoryHandlerTestScope, CategoryHandlerTestScope, IAsyncDisposable, SqliteConnection, ValueTask
 
 ### Community 701 - "Community 701"
@@ -3605,7 +3587,7 @@ Cohesion: 0.40
 Nodes (3): RecordingCacheService, Dictionary, T
 
 ### Community 704 - "Community 704"
-Cohesion: 0.15
+Cohesion: 0.16
 Nodes (3): at(), m, te
 
 ### Community 711 - "Community 711"
@@ -3621,8 +3603,8 @@ Cohesion: 0.67
 Nodes (3): Product Domain Exploration, Proposal Requirements, Required Outputs
 
 ### Community 728 - "Community 728"
-Cohesion: 0.08
-Nodes (9): GetPermissionsQueryHandlerTests, GetRolesQueryHandlerTests, UpdateRolePermissionsCommandHandlerTests, UpdateRolePermissionsCommandValidatorTests, TestData, Fact, UpdateRolePermissionsCommandValidator, UpdateRolePermissionsCommandValidatorTests (+1 more)
+Cohesion: 0.09
+Nodes (8): GetPermissionsQueryHandlerTests, GetRolesQueryHandlerTests, UpdateRolePermissionsCommandHandlerTests, UpdateRolePermissionsCommandValidatorTests, TestData, Fact, UpdateRolePermissionsCommandValidator, UpdateRolePermissionsCommandValidatorTests
 
 ### Community 729 - "Community 729"
 Cohesion: 0.14
@@ -3680,9 +3662,9 @@ Nodes (6): 1. Git and Branching Conventions, 2. API Versioning, 3. OpenAPI Docum
 Cohesion: 0.48
 Nodes (3): ConfirmTwoFactorAuthEndpointTests, Fact, Task
 
-### Community 1192 - "Community 1192"
-Cohesion: 0.60
-Nodes (3): LogoutEndpointTests, Fact, Task
+### Community 1193 - "Community 1193"
+Cohesion: 0.09
+Nodes (3): g, u(), xt
 
 ### Community 1194 - "Community 1194"
 Cohesion: 0.40
@@ -3755,14 +3737,14 @@ Nodes (3): 7.6 Combine Multiple Array Iterations, code:typescript (const admins 
 ## Knowledge Gaps
 - **3643 isolated node(s):** `$schema`, `plugin`, `version`, `source`, `sourceType` (+3638 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **506 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **508 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Banner Image 1` and `Wardrobe or Lifestyle Promotion`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `TestData` connect `Community 728` to `Category Role Response Flow`, `Community 485`, `Community 487`, `Community 552`, `Community 426`, `Community 11`, `Community 462`, `Community 430`, `Community 496`, `Community 497`, `Community 526`, `Community 528`, `Community 443`?**
+- **Why does `TestData` connect `Community 728` to `Category Role Response Flow`, `Community 485`, `Community 487`, `Community 552`, `Community 426`, `Community 11`, `Community 462`, `Community 430`, `Community 496`, `Community 497`, `Community 526`, `Community 528`, `Community 443`, `Community 508`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `ValidationPipelineBehaviorTests` connect `Community 12` to `Category Role Response Flow`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
@@ -3771,6 +3753,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `$schema`, `plugin`, `version` to the rest of the system?**
   _3643 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Category Role Response Flow` be split into smaller, more focused modules?**
-  _Cohesion score 0.06038961038961039 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0438871473354232 - nodes in this community are weakly interconnected._
 - **Should `API Service Registration` be split into smaller, more focused modules?**
-  _Cohesion score 0.0593990216631726 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06976744186046512 - nodes in this community are weakly interconnected._

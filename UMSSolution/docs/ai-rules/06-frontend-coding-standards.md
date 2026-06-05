@@ -64,6 +64,7 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
   const values = useMemo(() => ({ user, hasPermission }), [user, hasPermission]);
   const handleToggle = useCallback(() => setIsOpen(prev => !prev), []);
   ```
+- **Synchronous Route Guards:** Avoid using `useEffect` for synchronous authorization checks in route guards; evaluate permissions synchronously during render.
 
 ---
 

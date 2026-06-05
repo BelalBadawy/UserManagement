@@ -2956,7 +2956,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_c",
-      "community": 362,
+      "community": 376,
       "norm_label": "c()"
     },
     {
@@ -3262,7 +3262,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_q",
-      "community": 362,
+      "community": 376,
       "norm_label": "q()"
     },
     {
@@ -3613,7 +3613,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_st_addeventlisteners",
-      "community": 362,
+      "community": 376,
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -3622,7 +3622,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_st_addtoucheventlisteners",
-      "community": 362,
+      "community": 376,
       "norm_label": "._addtoucheventlisteners()"
     },
     {
@@ -4324,7 +4324,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_qi_show",
-      "community": 362,
+      "community": 376,
       "norm_label": ".show()"
     },
     {
@@ -4594,7 +4594,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_on",
-      "community": 362,
+      "community": 376,
       "norm_label": "on"
     },
     {
@@ -4612,7 +4612,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an",
-      "community": 397,
+      "community": 376,
       "norm_label": "an"
     },
     {
@@ -4621,7 +4621,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_constructor",
-      "community": 397,
+      "community": 376,
       "norm_label": ".constructor()"
     },
     {
@@ -4630,7 +4630,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_default",
-      "community": 397,
+      "community": 376,
       "norm_label": ".default()"
     },
     {
@@ -4639,7 +4639,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_defaulttype",
-      "community": 397,
+      "community": 376,
       "norm_label": ".defaulttype()"
     },
     {
@@ -4648,7 +4648,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_name",
-      "community": 397,
+      "community": 376,
       "norm_label": ".name()"
     },
     {
@@ -4657,7 +4657,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_activate",
-      "community": 397,
+      "community": 376,
       "norm_label": ".activate()"
     },
     {
@@ -4675,7 +4675,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_handlefocusin",
-      "community": 397,
+      "community": 376,
       "norm_label": "._handlefocusin()"
     },
     {
@@ -4684,7 +4684,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_an_handlekeydown",
-      "community": 397,
+      "community": 376,
       "norm_label": "._handlekeydown()"
     },
     {
@@ -4927,7 +4927,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_ln_addeventlisteners",
-      "community": 362,
+      "community": 376,
       "norm_label": "._addeventlisteners()"
     },
     {
@@ -5539,7 +5539,7 @@
       "source_file": "reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
       "id": "js_bootstrap_min_ps_createpopper",
-      "community": 362,
+      "community": 376,
       "norm_label": "._createpopper()"
     },
     {
@@ -6538,7 +6538,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_a",
-      "community": 263,
+      "community": 348,
       "norm_label": "a()"
     },
     {
@@ -6718,7 +6718,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g",
-      "community": 508,
+      "community": 1193,
       "norm_label": "g"
     },
     {
@@ -6727,7 +6727,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_constructor",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".constructor()"
     },
     {
@@ -6736,7 +6736,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_setoptions",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".setoptions()"
     },
     {
@@ -6754,7 +6754,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_optionfor",
-      "community": 424,
+      "community": 335,
       "norm_label": ".optionfor()"
     },
     {
@@ -6763,7 +6763,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_cn",
-      "community": 263,
+      "community": 348,
       "norm_label": ".cn()"
     },
     {
@@ -6772,7 +6772,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_localize",
-      "community": 424,
+      "community": 335,
       "norm_label": ".localize()"
     },
     {
@@ -6781,7 +6781,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_on",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".on()"
     },
     {
@@ -6790,7 +6790,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_g_off",
-      "community": 508,
+      "community": 348,
       "norm_label": ".off()"
     },
     {
@@ -6826,7 +6826,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_m_attachplugins",
-      "community": 704,
+      "community": 263,
       "norm_label": ".attachplugins()"
     },
     {
@@ -7321,7 +7321,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_d_panto",
-      "community": 340,
+      "community": 1193,
       "norm_label": ".panto()"
     },
     {
@@ -7582,7 +7582,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_j",
-      "community": 340,
+      "community": 348,
       "norm_label": "j()"
     },
     {
@@ -7591,7 +7591,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_n",
-      "community": 340,
+      "community": 348,
       "norm_label": "n()"
     },
     {
@@ -7627,7 +7627,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -7636,7 +7636,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x",
-      "community": 508,
+      "community": 348,
       "norm_label": "x"
     },
     {
@@ -7645,7 +7645,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_constructor",
-      "community": 508,
+      "community": 348,
       "norm_label": ".constructor()"
     },
     {
@@ -7663,7 +7663,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_build",
-      "community": 508,
+      "community": 348,
       "norm_label": ".build()"
     },
     {
@@ -7672,7 +7672,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_refresh",
-      "community": 263,
+      "community": 348,
       "norm_label": ".refresh()"
     },
     {
@@ -7681,7 +7681,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_createitem",
-      "community": 263,
+      "community": 348,
       "norm_label": ".createitem()"
     },
     {
@@ -7690,7 +7690,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_cleanup",
-      "community": 508,
+      "community": 348,
       "norm_label": ".cleanup()"
     },
     {
@@ -7699,7 +7699,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_attach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".attach()"
     },
     {
@@ -7708,7 +7708,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_x_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -7717,7 +7717,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z",
-      "community": 508,
+      "community": 348,
       "norm_label": "z"
     },
     {
@@ -7726,7 +7726,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_constructor",
-      "community": 508,
+      "community": 348,
       "norm_label": ".constructor()"
     },
     {
@@ -7735,7 +7735,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_onrefresh",
-      "community": 508,
+      "community": 348,
       "norm_label": ".onrefresh()"
     },
     {
@@ -7744,7 +7744,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_addbtn",
-      "community": 263,
+      "community": 348,
       "norm_label": ".addbtn()"
     },
     {
@@ -7753,7 +7753,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_build",
-      "community": 263,
+      "community": 348,
       "norm_label": ".build()"
     },
     {
@@ -7762,7 +7762,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_cleanup",
-      "community": 508,
+      "community": 348,
       "norm_label": ".cleanup()"
     },
     {
@@ -7771,7 +7771,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_attach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".attach()"
     },
     {
@@ -7780,7 +7780,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_z_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -7897,7 +7897,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_u_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -7978,7 +7978,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_init",
-      "community": 340,
+      "community": 263,
       "norm_label": ".init()"
     },
     {
@@ -7987,7 +7987,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_initlayout",
-      "community": 263,
+      "community": 348,
       "norm_label": ".initlayout()"
     },
     {
@@ -7996,7 +7996,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_initslides",
-      "community": 340,
+      "community": 348,
       "norm_label": ".initslides()"
     },
     {
@@ -8014,7 +8014,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_setinitialposition",
-      "community": 340,
+      "community": 263,
       "norm_label": ".setinitialposition()"
     },
     {
@@ -8023,7 +8023,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_initpanzoom",
-      "community": 340,
+      "community": 1193,
       "norm_label": ".initpanzoom()"
     },
     {
@@ -8068,7 +8068,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_getslidemetrics",
-      "community": 263,
+      "community": 340,
       "norm_label": ".getslidemetrics()"
     },
     {
@@ -8095,7 +8095,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_createslideel",
-      "community": 263,
+      "community": 340,
       "norm_label": ".createslideel()"
     },
     {
@@ -8104,7 +8104,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_removeslideel",
-      "community": 263,
+      "community": 340,
       "norm_label": ".removeslideel()"
     },
     {
@@ -8311,7 +8311,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_addslide",
-      "community": 340,
+      "community": 1193,
       "norm_label": ".addslide()"
     },
     {
@@ -8338,7 +8338,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_removeslide",
-      "community": 263,
+      "community": 340,
       "norm_label": ".removeslide()"
     },
     {
@@ -8365,7 +8365,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_tt_setviewportheight",
-      "community": 340,
+      "community": 263,
       "norm_label": ".setviewportheight()"
     },
     {
@@ -8509,7 +8509,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt",
-      "community": 508,
+      "community": 1193,
       "norm_label": "xt"
     },
     {
@@ -8518,7 +8518,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_oncreateslide",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".oncreateslide()"
     },
     {
@@ -8527,7 +8527,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_onremoveslide",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".onremoveslide()"
     },
     {
@@ -8536,7 +8536,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_onchange",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".onchange()"
     },
     {
@@ -8545,7 +8545,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_onclose",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".onclose()"
     },
     {
@@ -8554,7 +8554,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_setimage",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".setimage()"
     },
     {
@@ -8563,7 +8563,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_process",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".process()"
     },
     {
@@ -8572,7 +8572,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_zoomin",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".zoomin()"
     },
     {
@@ -8581,7 +8581,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_getzoominfo",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".getzoominfo()"
     },
     {
@@ -8590,7 +8590,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_attach",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".attach()"
     },
     {
@@ -8599,7 +8599,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_xt_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -8617,7 +8617,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt",
-      "community": 424,
+      "community": 335,
       "norm_label": "zt"
     },
     {
@@ -8626,7 +8626,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_onbeforeinitslide",
-      "community": 424,
+      "community": 335,
       "norm_label": ".onbeforeinitslide()"
     },
     {
@@ -8635,7 +8635,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_oncreateslide",
-      "community": 424,
+      "community": 335,
       "norm_label": ".oncreateslide()"
     },
     {
@@ -8644,7 +8644,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_onclearcontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".onclearcontent()"
     },
     {
@@ -8653,7 +8653,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_onselectslide",
-      "community": 424,
+      "community": 335,
       "norm_label": ".onselectslide()"
     },
     {
@@ -8671,7 +8671,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_ondone",
-      "community": 424,
+      "community": 335,
       "norm_label": ".ondone()"
     },
     {
@@ -8680,7 +8680,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_onrefresh",
-      "community": 424,
+      "community": 335,
       "norm_label": ".onrefresh()"
     },
     {
@@ -8689,7 +8689,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_onmessage",
-      "community": 424,
+      "community": 335,
       "norm_label": ".onmessage()"
     },
     {
@@ -8698,7 +8698,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_loadajaxcontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".loadajaxcontent()"
     },
     {
@@ -8707,7 +8707,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_setinlinecontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".setinlinecontent()"
     },
     {
@@ -8716,7 +8716,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_setiframecontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".setiframecontent()"
     },
     {
@@ -8725,7 +8725,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_resizeiframe",
-      "community": 424,
+      "community": 335,
       "norm_label": ".resizeiframe()"
     },
     {
@@ -8734,7 +8734,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_playvideo",
-      "community": 424,
+      "community": 335,
       "norm_label": ".playvideo()"
     },
     {
@@ -8743,7 +8743,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_processtype",
-      "community": 424,
+      "community": 335,
       "norm_label": ".processtype()"
     },
     {
@@ -8752,7 +8752,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_setcontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".setcontent()"
     },
     {
@@ -8761,7 +8761,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_setaspectratio",
-      "community": 424,
+      "community": 335,
       "norm_label": ".setaspectratio()"
     },
     {
@@ -8770,7 +8770,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_attach",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".attach()"
     },
     {
@@ -8779,7 +8779,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_zt_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -8959,7 +8959,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_dt_attach",
-      "community": 508,
+      "community": 1193,
       "norm_label": ".attach()"
     },
     {
@@ -8968,7 +8968,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_dt_detach",
-      "community": 508,
+      "community": 348,
       "norm_label": ".detach()"
     },
     {
@@ -8986,7 +8986,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ft_onprepare",
-      "community": 704,
+      "community": 263,
       "norm_label": ".onprepare()"
     },
     {
@@ -9139,7 +9139,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_updateprops",
-      "community": 263,
+      "community": 348,
       "norm_label": "updateprops()"
     },
     {
@@ -9148,7 +9148,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_build",
-      "community": 263,
+      "community": 348,
       "norm_label": "build()"
     },
     {
@@ -9193,7 +9193,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_cleanup",
-      "community": 508,
+      "community": 348,
       "norm_label": "cleanup()"
     },
     {
@@ -9373,7 +9373,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_te_onchange",
-      "community": 340,
+      "community": 704,
       "norm_label": ".onchange()"
     },
     {
@@ -9508,7 +9508,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_init",
-      "community": 335,
+      "community": 263,
       "norm_label": ".init()"
     },
     {
@@ -9517,7 +9517,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_initlayout",
-      "community": 335,
+      "community": 263,
       "norm_label": ".initlayout()"
     },
     {
@@ -9544,7 +9544,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_detachevents",
-      "community": 335,
+      "community": 263,
       "norm_label": ".detachevents()"
     },
     {
@@ -9571,7 +9571,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_onwheel",
-      "community": 335,
+      "community": 263,
       "norm_label": ".onwheel()"
     },
     {
@@ -9634,7 +9634,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_manageclosebtn",
-      "community": 424,
+      "community": 335,
       "norm_label": ".manageclosebtn()"
     },
     {
@@ -9688,7 +9688,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_jumpto",
-      "community": 384,
+      "community": 340,
       "norm_label": ".jumpto()"
     },
     {
@@ -9724,7 +9724,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_setcontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".setcontent()"
     },
     {
@@ -9769,7 +9769,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_showloading",
-      "community": 424,
+      "community": 335,
       "norm_label": ".showloading()"
     },
     {
@@ -9787,7 +9787,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_seterror",
-      "community": 424,
+      "community": 335,
       "norm_label": ".seterror()"
     },
     {
@@ -9796,7 +9796,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_clearcontent",
-      "community": 424,
+      "community": 335,
       "norm_label": ".clearcontent()"
     },
     {
@@ -9895,7 +9895,7 @@
       "source_file": "reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
       "id": "fancybox_jquery_fancybox_min_ae_destroy",
-      "community": 335,
+      "community": 1193,
       "norm_label": ".destroy()"
     },
     {
@@ -13117,7 +13117,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L8",
       "id": "endpoints_enabletwofactorauthendpointtests_enabletwofactorauthendpointtests",
-      "community": 451,
+      "community": 527,
       "norm_label": "enabletwofactorauthendpointtests"
     },
     {
@@ -13126,7 +13126,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L15",
       "id": "endpoints_enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_unauthenticated_returns401",
-      "community": 451,
+      "community": 527,
       "norm_label": ".enabletwofactorauth_unauthenticated_returns401()"
     },
     {
@@ -13135,7 +13135,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L15",
       "id": "ums_api_tests_endpoints_enabletwofactorauthendpointtests_cs_task",
-      "community": 451,
+      "community": 527,
       "norm_label": "task"
     },
     {
@@ -13144,7 +13144,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L15",
       "id": "ums_api_tests_endpoints_enabletwofactorauthendpointtests_cs_fact",
-      "community": 451,
+      "community": 527,
       "norm_label": "fact"
     },
     {
@@ -13153,7 +13153,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L23",
       "id": "endpoints_enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_invalidcodeformat_returnsvalidationerror",
-      "community": 451,
+      "community": 527,
       "norm_label": ".enabletwofactorauth_invalidcodeformat_returnsvalidationerror()"
     },
     {
@@ -13162,7 +13162,7 @@
       "source_file": "UMS.API.Tests/Endpoints/EnableTwoFactorAuthEndpointTests.cs",
       "source_location": "L39",
       "id": "endpoints_enabletwofactorauthendpointtests_enabletwofactorauthendpointtests_enabletwofactorauth_wrongcode_returnsfailure",
-      "community": 451,
+      "community": 527,
       "norm_label": ".enabletwofactorauth_wrongcode_returnsfailure()"
     },
     {
@@ -13234,7 +13234,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L8",
       "id": "endpoints_logoutendpointtests_logoutendpointtests",
-      "community": 1192,
+      "community": 451,
       "norm_label": "logoutendpointtests"
     },
     {
@@ -13243,7 +13243,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L15",
       "id": "endpoints_logoutendpointtests_logoutendpointtests_logout_unauthenticated_returns401",
-      "community": 1192,
+      "community": 451,
       "norm_label": ".logout_unauthenticated_returns401()"
     },
     {
@@ -13252,7 +13252,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L15",
       "id": "ums_api_tests_endpoints_logoutendpointtests_cs_task",
-      "community": 1192,
+      "community": 451,
       "norm_label": "task"
     },
     {
@@ -13261,7 +13261,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L15",
       "id": "ums_api_tests_endpoints_logoutendpointtests_cs_fact",
-      "community": 1192,
+      "community": 451,
       "norm_label": "fact"
     },
     {
@@ -13270,7 +13270,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L26",
       "id": "endpoints_logoutendpointtests_logoutendpointtests_logout_authenticated_validrefreshtoken_returnssuccess",
-      "community": 1192,
+      "community": 451,
       "norm_label": ".logout_authenticated_validrefreshtoken_returnssuccess()"
     },
     {
@@ -13279,7 +13279,7 @@
       "source_file": "UMS.API.Tests/Endpoints/LogoutEndpointTests.cs",
       "source_location": "L44",
       "id": "endpoints_logoutendpointtests_logoutendpointtests_logout_authenticated_invalidrefreshtoken_returnsfailure",
-      "community": 1192,
+      "community": 451,
       "norm_label": ".logout_authenticated_invalidrefreshtoken_returnsfailure()"
     },
     {
@@ -13756,7 +13756,7 @@
       "source_file": "UMS.API.Tests/Fixtures/ApiTestBase.cs",
       "source_location": "L6",
       "id": "fixtures_apitestbase_apitestbase",
-      "community": 522,
+      "community": 451,
       "norm_label": "apitestbase"
     },
     {
@@ -13774,7 +13774,7 @@
       "source_file": "UMS.API.Tests/Fixtures/ApiTestBase.cs",
       "source_location": "L6",
       "id": "ums_api_tests_fixtures_apitestbase_cs_customwebapplicationfactory",
-      "community": 522,
+      "community": 451,
       "norm_label": "customwebapplicationfactory"
     },
     {
@@ -13783,7 +13783,7 @@
       "source_file": "UMS.API.Tests/Fixtures/ApiTestBase.cs",
       "source_location": "L21",
       "id": "fixtures_apitestbase_apitestbase_getrequiredservice",
-      "community": 522,
+      "community": 451,
       "norm_label": ".getrequiredservice()"
     },
     {
@@ -13792,7 +13792,7 @@
       "source_file": "UMS.API.Tests/Fixtures/ApiTestBase.cs",
       "source_location": "L21",
       "id": "ums_api_tests_fixtures_apitestbase_cs_t",
-      "community": 522,
+      "community": 451,
       "norm_label": "t"
     },
     {
@@ -14026,7 +14026,7 @@
       "source_file": "UMS.API.Tests/Support/ApiStateVerifier.cs",
       "source_location": "L1",
       "id": "ums_api_tests_support_apistateverifier_cs",
-      "community": 5,
+      "community": 433,
       "norm_label": "apistateverifier.cs"
     },
     {
@@ -15934,7 +15934,7 @@
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L1",
       "id": "ums_application_features_categories_categorycachekeys_cs",
-      "community": 699,
+      "community": 333,
       "norm_label": "categorycachekeys.cs"
     },
     {
@@ -15943,7 +15943,7 @@
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L1",
       "id": "categories_categorycachekeys_ums_application_features_categories",
-      "community": 699,
+      "community": 333,
       "norm_label": "ums.application.features.categories"
     },
     {
@@ -15952,7 +15952,7 @@
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L3",
       "id": "categories_categorycachekeys_categorycachekeys",
-      "community": 699,
+      "community": 333,
       "norm_label": "categorycachekeys"
     },
     {
@@ -15961,7 +15961,7 @@
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L5",
       "id": "categories_categorycachekeys_categorycachekeys_getall",
-      "community": 699,
+      "community": 333,
       "norm_label": ".getall()"
     },
     {
@@ -16060,7 +16060,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L1",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategorycommand.cs"
     },
     {
@@ -16069,7 +16069,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L5",
       "id": "create_createcategorycommand_ums_application_features_categories_commands_create",
-      "community": 445,
+      "community": 395,
       "norm_label": "ums.application.features.categories.commands.create"
     },
     {
@@ -16078,7 +16078,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L7",
       "id": "create_createcategorycommand_createcategoryrequest",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategoryrequest"
     },
     {
@@ -16087,7 +16087,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L24",
       "id": "create_createcategorycommand_createcategorycommandhandler",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategorycommandhandler"
     },
     {
@@ -16096,7 +16096,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L24",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_createcategorycommand",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategorycommand"
     },
     {
@@ -16105,7 +16105,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L24",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_iresponsewrapper",
-      "community": 445,
+      "community": 395,
       "norm_label": "iresponsewrapper"
     },
     {
@@ -16114,7 +16114,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L29",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_iapplicationdbcontext",
-      "community": 445,
+      "community": 395,
       "norm_label": "iapplicationdbcontext"
     },
     {
@@ -16123,7 +16123,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L30",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_icacheservice",
-      "community": 445,
+      "community": 395,
       "norm_label": "icacheservice"
     },
     {
@@ -16132,7 +16132,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L32",
       "id": "create_createcategorycommand_createcategorycommandhandler_handle",
-      "community": 445,
+      "community": 395,
       "norm_label": ".handle()"
     },
     {
@@ -16141,7 +16141,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L32",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_cancellationtoken",
-      "community": 445,
+      "community": 395,
       "norm_label": "cancellationtoken"
     },
     {
@@ -16150,7 +16150,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L32",
       "id": "ums_application_features_categories_commands_create_createcategorycommand_cs_valuetask",
-      "community": 445,
+      "community": 395,
       "norm_label": "valuetask"
     },
     {
@@ -16321,7 +16321,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L1",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs",
-      "community": 395,
+      "community": 424,
       "norm_label": "updatecategorycommand.cs"
     },
     {
@@ -16330,7 +16330,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L5",
       "id": "update_updatecategorycommand_ums_application_features_categories_commands_update",
-      "community": 395,
+      "community": 424,
       "norm_label": "ums.application.features.categories.commands.update"
     },
     {
@@ -16339,7 +16339,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L17",
       "id": "update_updatecategorycommand_updatecategorycommandhandler",
-      "community": 395,
+      "community": 424,
       "norm_label": "updatecategorycommandhandler"
     },
     {
@@ -16348,7 +16348,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L17",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_updatecategorycommand",
-      "community": 395,
+      "community": 424,
       "norm_label": "updatecategorycommand"
     },
     {
@@ -16357,7 +16357,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L17",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_iresponsewrapper",
-      "community": 395,
+      "community": 424,
       "norm_label": "iresponsewrapper"
     },
     {
@@ -16366,7 +16366,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L22",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_iapplicationdbcontext",
-      "community": 395,
+      "community": 424,
       "norm_label": "iapplicationdbcontext"
     },
     {
@@ -16375,7 +16375,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L23",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_icacheservice",
-      "community": 395,
+      "community": 424,
       "norm_label": "icacheservice"
     },
     {
@@ -16384,7 +16384,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L25",
       "id": "update_updatecategorycommand_updatecategorycommandhandler_handle",
-      "community": 395,
+      "community": 424,
       "norm_label": ".handle()"
     },
     {
@@ -16393,7 +16393,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L25",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_cancellationtoken",
-      "community": 395,
+      "community": 424,
       "norm_label": "cancellationtoken"
     },
     {
@@ -16402,7 +16402,7 @@
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L25",
       "id": "ums_application_features_categories_commands_update_updatecategorycommand_cs_valuetask",
-      "community": 395,
+      "community": 424,
       "norm_label": "valuetask"
     },
     {
@@ -19111,7 +19111,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L1",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs",
-      "community": 527,
+      "community": 514,
       "norm_label": "loginwith2faquery.cs"
     },
     {
@@ -19120,7 +19120,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L1",
       "id": "loginwith2fa_loginwith2faquery_ums_application_features_token_queries_loginwith2fa",
-      "community": 527,
+      "community": 514,
       "norm_label": "ums.application.features.token.queries.loginwith2fa"
     },
     {
@@ -19129,7 +19129,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L3",
       "id": "loginwith2fa_loginwith2faquery_loginwith2faquery",
-      "community": 527,
+      "community": 514,
       "norm_label": "loginwith2faquery"
     },
     {
@@ -19138,7 +19138,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L3",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs_iresponsewrapper",
-      "community": 527,
+      "community": 514,
       "norm_label": "iresponsewrapper"
     },
     {
@@ -19147,7 +19147,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L3",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs_tokenresponse",
-      "community": 527,
+      "community": 514,
       "norm_label": "tokenresponse"
     },
     {
@@ -19156,7 +19156,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L9",
       "id": "loginwith2fa_loginwith2faquery_loginwith2faqueryhandler",
-      "community": 527,
+      "community": 514,
       "norm_label": "loginwith2faqueryhandler"
     },
     {
@@ -19165,7 +19165,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L12",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs_itokenservice",
-      "community": 527,
+      "community": 514,
       "norm_label": "itokenservice"
     },
     {
@@ -19174,7 +19174,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L17",
       "id": "loginwith2fa_loginwith2faquery_loginwith2faqueryhandler_handle",
-      "community": 527,
+      "community": 514,
       "norm_label": ".handle()"
     },
     {
@@ -19183,7 +19183,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L17",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs_cancellationtoken",
-      "community": 527,
+      "community": 514,
       "norm_label": "cancellationtoken"
     },
     {
@@ -19192,7 +19192,7 @@
       "source_file": "UMS.Application/Features/Token/Queries/LoginWith2FA/LoginWith2FAQuery.cs",
       "source_location": "L17",
       "id": "ums_application_features_token_queries_loginwith2fa_loginwith2faquery_cs_valuetask",
-      "community": 527,
+      "community": 514,
       "norm_label": "valuetask"
     },
     {
@@ -20749,7 +20749,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L1",
       "id": "ums_application_features_users_commands_forgotpassword_forgotpasswordcommand_cs",
-      "community": 514,
+      "community": 525,
       "norm_label": "forgotpasswordcommand.cs"
     },
     {
@@ -20758,7 +20758,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L1",
       "id": "forgotpassword_forgotpasswordcommand_ums_application_features_users_commands",
-      "community": 514,
+      "community": 525,
       "norm_label": "ums.application.features.users.commands"
     },
     {
@@ -20767,7 +20767,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L3",
       "id": "forgotpassword_forgotpasswordcommand_forgotpasswordcommand",
-      "community": 514,
+      "community": 525,
       "norm_label": "forgotpasswordcommand"
     },
     {
@@ -20776,7 +20776,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L3",
       "id": "ums_application_features_users_commands_forgotpassword_forgotpasswordcommand_cs_iresponsewrapper",
-      "community": 514,
+      "community": 525,
       "norm_label": "iresponsewrapper"
     },
     {
@@ -20785,7 +20785,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L8",
       "id": "forgotpassword_forgotpasswordcommand_forgotpasswordcommandhandler",
-      "community": 514,
+      "community": 525,
       "norm_label": "forgotpasswordcommandhandler"
     },
     {
@@ -20794,7 +20794,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L10",
       "id": "ums_application_features_users_commands_forgotpassword_forgotpasswordcommand_cs_iuserservice",
-      "community": 514,
+      "community": 525,
       "norm_label": "iuserservice"
     },
     {
@@ -20803,7 +20803,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L17",
       "id": "forgotpassword_forgotpasswordcommand_forgotpasswordcommandhandler_handle",
-      "community": 514,
+      "community": 525,
       "norm_label": ".handle()"
     },
     {
@@ -20812,7 +20812,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L17",
       "id": "ums_application_features_users_commands_forgotpassword_forgotpasswordcommand_cs_cancellationtoken",
-      "community": 514,
+      "community": 525,
       "norm_label": "cancellationtoken"
     },
     {
@@ -20821,7 +20821,7 @@
       "source_file": "UMS.Application/Features/Users/Commands/ForgotPassword/ForgotPasswordCommand.cs",
       "source_location": "L17",
       "id": "ums_application_features_users_commands_forgotpassword_forgotpasswordcommand_cs_valuetask",
-      "community": 514,
+      "community": 525,
       "norm_label": "valuetask"
     },
     {
@@ -26680,7 +26680,7 @@
       "source_file": "UMS.Application.Tests/Support/Categories/CategoryHandlerTestSupport.cs",
       "source_location": "L135",
       "id": "categories_categoryhandlertestsupport_categoryhandlertestscope_createasync",
-      "community": 700,
+      "community": 387,
       "norm_label": ".createasync()"
     },
     {
@@ -58952,7 +58952,7 @@
       "label": "4. Component Properties (Props)",
       "file_type": "document",
       "source_file": "docs/ai-rules/06-frontend-coding-standards.md",
-      "source_location": "L70",
+      "source_location": "L71",
       "id": "ai_rules_06_frontend_coding_standards_4_component_properties_props",
       "community": 729,
       "norm_label": "4. component properties (props)"
@@ -58961,7 +58961,7 @@
       "label": "code:typescript (interface ButtonProps {)",
       "file_type": "document",
       "source_file": "docs/ai-rules/06-frontend-coding-standards.md",
-      "source_location": "L74",
+      "source_location": "L75",
       "id": "ai_rules_06_frontend_coding_standards_codeblock_6",
       "community": 729,
       "norm_label": "code:typescript (interface buttonprops {)"
@@ -58970,7 +58970,7 @@
       "label": "5. Form Management and Validation",
       "file_type": "document",
       "source_file": "docs/ai-rules/06-frontend-coding-standards.md",
-      "source_location": "L87",
+      "source_location": "L88",
       "id": "ai_rules_06_frontend_coding_standards_5_form_management_and_validation",
       "community": 729,
       "norm_label": "5. form management and validation"
@@ -58979,7 +58979,7 @@
       "label": "6. Accessibility & UX Requirements",
       "file_type": "document",
       "source_file": "docs/ai-rules/06-frontend-coding-standards.md",
-      "source_location": "L95",
+      "source_location": "L96",
       "id": "ai_rules_06_frontend_coding_standards_6_accessibility_ux_requirements",
       "community": 729,
       "norm_label": "6. accessibility & ux requirements"
@@ -71488,7 +71488,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/js/jquery-4.0.0.min.js",
       "source_location": "L2",
-      "community": 359,
+      "community": 10,
       "norm_label": "eo()",
       "id": "jquery_4_0_0_min_eo"
     },
@@ -72307,7 +72307,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 372,
+      "community": 1,
       "norm_label": ".getinstance()",
       "id": "bootstrap_min_b_getinstance"
     },
@@ -73360,7 +73360,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 372,
       "norm_label": "._createpopper()",
       "id": "bootstrap_min_qi_createpopper"
     },
@@ -73378,7 +73378,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 377,
+      "community": 372,
       "norm_label": "._getplacement()",
       "id": "bootstrap_min_qi_getplacement"
     },
@@ -73405,7 +73405,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 377,
+      "community": 372,
       "norm_label": "._getpopperconfig()",
       "id": "bootstrap_min_qi_getpopperconfig"
     },
@@ -73432,7 +73432,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 372,
+      "community": 1,
       "norm_label": ".clearmenus()",
       "id": "bootstrap_min_qi_clearmenus"
     },
@@ -73639,7 +73639,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "un",
       "id": "bootstrap_min_un"
     },
@@ -73648,7 +73648,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": ".constructor()",
       "id": "bootstrap_min_un_constructor"
     },
@@ -73657,7 +73657,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": ".getwidth()",
       "id": "bootstrap_min_un_getwidth"
     },
@@ -73666,7 +73666,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": ".hide()",
       "id": "bootstrap_min_un_hide"
     },
@@ -73675,7 +73675,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": ".reset()",
       "id": "bootstrap_min_un_reset"
     },
@@ -73684,7 +73684,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": ".isoverflowing()",
       "id": "bootstrap_min_un_isoverflowing"
     },
@@ -73693,7 +73693,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "._disableoverflow()",
       "id": "bootstrap_min_un_disableoverflow"
     },
@@ -73702,7 +73702,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "._setelementattributes()",
       "id": "bootstrap_min_un_setelementattributes"
     },
@@ -73711,7 +73711,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "._saveinitialattribute()",
       "id": "bootstrap_min_un_saveinitialattribute"
     },
@@ -73720,7 +73720,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "._resetelementattributes()",
       "id": "bootstrap_min_un_resetelementattributes"
     },
@@ -73729,7 +73729,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 1,
+      "community": 445,
       "norm_label": "._applymanipulationcallback()",
       "id": "bootstrap_min_un_applymanipulationcallback"
     },
@@ -74386,7 +74386,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 377,
+      "community": 372,
       "norm_label": "._createpopper()",
       "id": "bootstrap_min_ps_createpopper"
     },
@@ -74395,7 +74395,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 377,
+      "community": 372,
       "norm_label": "._getoffset()",
       "id": "bootstrap_min_ps_getoffset"
     },
@@ -74413,7 +74413,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/bootstrap/js/bootstrap.min.js",
       "source_location": "L6",
-      "community": 377,
+      "community": 372,
       "norm_label": "._getpopperconfig()",
       "id": "bootstrap_min_ps_getpopperconfig"
     },
@@ -76708,7 +76708,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
-      "community": 386,
+      "community": 359,
       "norm_label": ".ishorizontal()",
       "id": "jquery_fancybox_min_tt_ishorizontal"
     },
@@ -77689,7 +77689,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/fancybox/jquery.fancybox.min.js",
       "source_location": "L1",
-      "community": 396,
+      "community": 416,
       "norm_label": ".attach()",
       "id": "jquery_fancybox_min_dt_attach"
     },
@@ -78778,7 +78778,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/swiper/swiper-bundle.min.js",
       "source_location": "L13",
-      "community": 10,
+      "community": 359,
       "norm_label": "l()",
       "id": "swiper_bundle_min_l"
     },
@@ -78850,7 +78850,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/swiper/swiper-bundle.min.js",
       "source_location": "L13",
-      "community": 386,
+      "community": 359,
       "norm_label": "f()",
       "id": "swiper_bundle_min_f"
     },
@@ -79012,7 +79012,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/swiper/swiper-bundle.min.js",
       "source_location": "L13",
-      "community": 386,
+      "community": 359,
       "norm_label": "k()",
       "id": "swiper_bundle_min_k"
     },
@@ -79057,7 +79057,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/reference-bootstrap/assets/vendors/swiper/swiper-bundle.min.js",
       "source_location": "L13",
-      "community": 386,
+      "community": 359,
       "norm_label": ".getdirectionlabel()",
       "id": "swiper_bundle_min_re_getdirectionlabel"
     },
@@ -81838,7 +81838,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L1",
-      "community": 699,
+      "community": 333,
       "norm_label": "ums.application.features.categories",
       "id": "categorycachekeys_ums_application_features_categories"
     },
@@ -81847,7 +81847,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/CategoryCacheKeys.cs",
       "source_location": "L3",
-      "community": 699,
+      "community": 333,
       "norm_label": "categorycachekeys",
       "id": "categorycachekeys_categorycachekeys"
     },
@@ -81910,7 +81910,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L5",
-      "community": 445,
+      "community": 395,
       "norm_label": "ums.application.features.categories.commands.create",
       "id": "createcategorycommand_ums_application_features_categories_commands_create"
     },
@@ -81919,7 +81919,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L7",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategoryrequest",
       "id": "createcategorycommand_createcategoryrequest"
     },
@@ -81928,7 +81928,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs",
       "source_location": "L24",
-      "community": 445,
+      "community": 395,
       "norm_label": "createcategorycommandhandler",
       "id": "createcategorycommand_createcategorycommandhandler"
     },
@@ -82009,7 +82009,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L5",
-      "community": 395,
+      "community": 424,
       "norm_label": "ums.application.features.categories.commands.update",
       "id": "updatecategorycommand_ums_application_features_categories_commands_update"
     },
@@ -82018,7 +82018,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs",
       "source_location": "L17",
-      "community": 395,
+      "community": 424,
       "norm_label": "updatecategorycommandhandler",
       "id": "updatecategorycommand_updatecategorycommandhandler"
     },
@@ -84412,7 +84412,7 @@
       "file_type": "code",
       "source_file": "UMS.Application/Features/Users/Queries/GetUsersPaged/GetUsersPagedQuery.cs",
       "source_location": "L18",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle()",
       "id": "getuserspagedquery_getuserspagedqueryhandler_handle"
     },
@@ -84943,7 +84943,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Fixtures/TestData.cs",
       "source_location": "L18",
-      "community": 728,
+      "community": 508,
       "norm_label": ".userregistrationrequest()",
       "id": "testdata_testdata_userregistrationrequest"
     },
@@ -85150,7 +85150,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L11",
-      "community": 333,
+      "community": 0,
       "norm_label": "createcategorycommandhandlertests",
       "id": "categorycommandhandlertests_createcategorycommandhandlertests"
     },
@@ -85159,7 +85159,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L13",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_create_category_add_outbox_message_and_clear_category_caches()",
       "id": "categorycommandhandlertests_createcategorycommandhandlertests_handle_should_create_category_add_outbox_message_and_clear_category_caches"
     },
@@ -85168,7 +85168,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L33",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_fail_when_category_name_already_exists()",
       "id": "categorycommandhandlertests_createcategorycommandhandlertests_handle_should_fail_when_category_name_already_exists"
     },
@@ -85177,7 +85177,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L50",
-      "community": 333,
+      "community": 0,
       "norm_label": "updatecategorycommandhandlertests",
       "id": "categorycommandhandlertests_updatecategorycommandhandlertests"
     },
@@ -85186,7 +85186,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L52",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_update_category_add_outbox_message_and_clear_category_caches()",
       "id": "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_update_category_add_outbox_message_and_clear_category_caches"
     },
@@ -85195,7 +85195,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L76",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_fail_when_category_does_not_exist()",
       "id": "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_fail_when_category_does_not_exist"
     },
@@ -85204,7 +85204,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs",
       "source_location": "L90",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_fail_when_update_hits_concurrency_conflict()",
       "id": "categorycommandhandlertests_updatecategorycommandhandlertests_handle_should_fail_when_update_hits_concurrency_conflict"
     },
@@ -85636,7 +85636,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ConfirmTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L8",
-      "community": 350,
+      "community": 0,
       "norm_label": "confirmtwofactorauthcommandhandlertests",
       "id": "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests"
     },
@@ -85645,7 +85645,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ConfirmTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L12",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserserviceconfirmwithcorrectrequest()",
       "id": "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests_handle_whencalled_callsuserserviceconfirmwithcorrectrequest"
     },
@@ -85654,7 +85654,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ConfirmTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L28",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughserviceresult()",
       "id": "confirmtwofactorauthcommandhandlertests_confirmtwofactorauthcommandhandlertests_handle_whencalled_passesthroughserviceresult"
     },
@@ -85663,7 +85663,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/DisableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L7",
-      "community": 350,
+      "community": 0,
       "norm_label": "disabletwofactorauthcommandhandlertests",
       "id": "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests"
     },
@@ -85672,7 +85672,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/DisableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L11",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserservicedisablewithcorrectrequest()",
       "id": "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests_handle_whencalled_callsuserservicedisablewithcorrectrequest"
     },
@@ -85681,7 +85681,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/DisableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L27",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughserviceresult()",
       "id": "disabletwofactorauthcommandhandlertests_disabletwofactorauthcommandhandlertests_handle_whencalled_passesthroughserviceresult"
     },
@@ -85690,7 +85690,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/EnableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L8",
-      "community": 350,
+      "community": 0,
       "norm_label": "enabletwofactorauthcommandhandlertests",
       "id": "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests"
     },
@@ -85699,7 +85699,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/EnableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L12",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserserviceenablewithcorrectrequest()",
       "id": "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests_handle_whencalled_callsuserserviceenablewithcorrectrequest"
     },
@@ -85708,7 +85708,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/EnableTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L28",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughrecoverycodeslist()",
       "id": "enabletwofactorauthcommandhandlertests_enabletwofactorauthcommandhandlertests_handle_whencalled_passesthroughrecoverycodeslist"
     },
@@ -85717,7 +85717,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GenerateNew2FARecoveryCodesCommandHandlerTests.cs",
       "source_location": "L7",
-      "community": 333,
+      "community": 0,
       "norm_label": "generatenew2farecoverycodescommandhandlertests",
       "id": "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests"
     },
@@ -85726,7 +85726,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GenerateNew2FARecoveryCodesCommandHandlerTests.cs",
       "source_location": "L11",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_delegate_to_user_service_and_return_codes()",
       "id": "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests_handle_should_delegate_to_user_service_and_return_codes"
     },
@@ -85735,7 +85735,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GenerateNew2FARecoveryCodesCommandHandlerTests.cs",
       "source_location": "L26",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_propagate_failure_without_wrapping()",
       "id": "generatenew2farecoverycodescommandhandlertests_generatenew2farecoverycodescommandhandlertests_handle_should_propagate_failure_without_wrapping"
     },
@@ -85744,7 +85744,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GetMyProfileQueryHandlerTests.cs",
       "source_location": "L8",
-      "community": 350,
+      "community": 0,
       "norm_label": "getmyprofilequeryhandlertests",
       "id": "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests"
     },
@@ -85753,7 +85753,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GetMyProfileQueryHandlerTests.cs",
       "source_location": "L12",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserservicegetmyprofile()",
       "id": "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests_handle_whencalled_callsuserservicegetmyprofile"
     },
@@ -85762,7 +85762,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/GetMyProfileQueryHandlerTests.cs",
       "source_location": "L25",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughprofileresult()",
       "id": "getmyprofilequeryhandlertests_getmyprofilequeryhandlertests_handle_whencalled_passesthroughprofileresult"
     },
@@ -85888,7 +85888,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/LogoutCommandHandlerTests.cs",
       "source_location": "L7",
-      "community": 333,
+      "community": 0,
       "norm_label": "logoutcommandhandlertests",
       "id": "logoutcommandhandlertests_logoutcommandhandlertests"
     },
@@ -85897,7 +85897,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/LogoutCommandHandlerTests.cs",
       "source_location": "L11",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserservicelogoutwithcorrectrequest()",
       "id": "logoutcommandhandlertests_logoutcommandhandlertests_handle_whencalled_callsuserservicelogoutwithcorrectrequest"
     },
@@ -85906,7 +85906,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/LogoutCommandHandlerTests.cs",
       "source_location": "L27",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughserviceresult()",
       "id": "logoutcommandhandlertests_logoutcommandhandlertests_handle_whencalled_passesthroughserviceresult"
     },
@@ -85915,7 +85915,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ResendConfirmationEmailCommandHandlerTests.cs",
       "source_location": "L7",
-      "community": 333,
+      "community": 0,
       "norm_label": "resendconfirmationemailcommandhandlertests",
       "id": "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests"
     },
@@ -85924,7 +85924,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ResendConfirmationEmailCommandHandlerTests.cs",
       "source_location": "L11",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_delegate_to_user_service_and_return_success_response()",
       "id": "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response"
     },
@@ -85933,7 +85933,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/ResendConfirmationEmailCommandHandlerTests.cs",
       "source_location": "L26",
-      "community": 333,
+      "community": 0,
       "norm_label": ".handle_should_propagate_failure_without_wrapping()",
       "id": "resendconfirmationemailcommandhandlertests_resendconfirmationemailcommandhandlertests_handle_should_propagate_failure_without_wrapping"
     },
@@ -85942,7 +85942,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/SetupTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L8",
-      "community": 350,
+      "community": 0,
       "norm_label": "setuptwofactorauthcommandhandlertests",
       "id": "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests"
     },
@@ -85951,7 +85951,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/SetupTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L12",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_callsuserservicesetuptwofactorauth()",
       "id": "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests_handle_whencalled_callsuserservicesetuptwofactorauth"
     },
@@ -85960,7 +85960,7 @@
       "file_type": "code",
       "source_file": "UMS.Application.Tests/Handlers/Users/SetupTwoFactorAuthCommandHandlerTests.cs",
       "source_location": "L25",
-      "community": 350,
+      "community": 0,
       "norm_label": ".handle_whencalled_passesthroughviewmodelresult()",
       "id": "setuptwofactorauthcommandhandlertests_setuptwofactorauthcommandhandlertests_handle_whencalled_passesthroughviewmodelresult"
     },
@@ -86050,7 +86050,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Handlers/Users/UserRegistrationCommandHandlerTests.cs",
       "source_location": "L1",
-      "community": 333,
+      "community": 508,
       "norm_label": "userregistrationcommandhandlertests.cs",
       "id": "d_myapps_usermanagement_umssolution_ums_application_tests_handlers_users_userregistrationcommandhandlertests_cs"
     },
@@ -86059,7 +86059,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Handlers/Users/UserRegistrationCommandHandlerTests.cs",
       "source_location": "L8",
-      "community": 333,
+      "community": 508,
       "norm_label": "userregistrationcommandhandlertests",
       "id": "userregistrationcommandhandlertests_userregistrationcommandhandlertests"
     },
@@ -86068,7 +86068,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Handlers/Users/UserRegistrationCommandHandlerTests.cs",
       "source_location": "L12",
-      "community": 333,
+      "community": 508,
       "norm_label": ".handle_should_delegate_to_user_service_and_return_success_response()",
       "id": "userregistrationcommandhandlertests_userregistrationcommandhandlertests_handle_should_delegate_to_user_service_and_return_success_response"
     },
@@ -86077,7 +86077,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Handlers/Users/UserRegistrationCommandHandlerTests.cs",
       "source_location": "L31",
-      "community": 333,
+      "community": 508,
       "norm_label": ".handle_should_propagate_failure_response_without_wrapping_it()",
       "id": "userregistrationcommandhandlertests_userregistrationcommandhandlertests_handle_should_propagate_failure_response_without_wrapping_it"
     },
@@ -87247,7 +87247,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Validation/Users/UserRegistrationCommandValidatorTests.cs",
       "source_location": "L1",
-      "community": 728,
+      "community": 508,
       "norm_label": "userregistrationcommandvalidatortests.cs",
       "id": "d_myapps_usermanagement_umssolution_ums_application_tests_validation_users_userregistrationcommandvalidatortests_cs"
     },
@@ -87256,7 +87256,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Validation/Users/UserRegistrationCommandValidatorTests.cs",
       "source_location": "L6",
-      "community": 728,
+      "community": 508,
       "norm_label": "userregistrationcommandvalidatortests",
       "id": "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests"
     },
@@ -87265,7 +87265,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Validation/Users/UserRegistrationCommandValidatorTests.cs",
       "source_location": "L10",
-      "community": 728,
+      "community": 508,
       "norm_label": ".validate_should_pass_for_well_formed_request()",
       "id": "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_pass_for_well_formed_request"
     },
@@ -87274,7 +87274,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Validation/Users/UserRegistrationCommandValidatorTests.cs",
       "source_location": "L23",
-      "community": 728,
+      "community": 508,
       "norm_label": ".validate_should_fail_when_password_confirmation_does_not_match()",
       "id": "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_fail_when_password_confirmation_does_not_match"
     },
@@ -87283,7 +87283,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Application.Tests/Validation/Users/UserRegistrationCommandValidatorTests.cs",
       "source_location": "L39",
-      "community": 728,
+      "community": 508,
       "norm_label": ".validate_should_fail_when_email_is_invalid()",
       "id": "userregistrationcommandvalidatortests_userregistrationcommandvalidatortests_validate_should_fail_when_email_is_invalid"
     },
@@ -89380,7 +89380,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L1",
-      "community": 525,
+      "community": 333,
       "norm_label": "identitydbseeder.cs",
       "id": "d_myapps_usermanagement_umssolution_ums_infrastructure_identity_seeds_identitydbseeder_cs"
     },
@@ -89389,7 +89389,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L5",
-      "community": 525,
+      "community": 333,
       "norm_label": "ums.infrastructure.persistence.dbinitializers",
       "id": "identitydbseeder_ums_infrastructure_persistence_dbinitializers"
     },
@@ -89398,7 +89398,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L7",
-      "community": 525,
+      "community": 333,
       "norm_label": "identitydbseeder",
       "id": "identitydbseeder_identitydbseeder"
     },
@@ -89407,7 +89407,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L26",
-      "community": 525,
+      "community": 333,
       "norm_label": ".seedidentitydatabaseasync()",
       "id": "identitydbseeder_identitydbseeder_seedidentitydatabaseasync"
     },
@@ -89416,7 +89416,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L34",
-      "community": 525,
+      "community": 333,
       "norm_label": ".checkandapplypendingmigrationasync()",
       "id": "identitydbseeder_identitydbseeder_checkandapplypendingmigrationasync"
     },
@@ -89425,7 +89425,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L42",
-      "community": 525,
+      "community": 333,
       "norm_label": ".seedadminuserasync()",
       "id": "identitydbseeder_identitydbseeder_seedadminuserasync"
     },
@@ -89434,7 +89434,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L74",
-      "community": 525,
+      "community": 333,
       "norm_label": ".seedbasicuserasync()",
       "id": "identitydbseeder_identitydbseeder_seedbasicuserasync"
     },
@@ -89443,7 +89443,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L107",
-      "community": 525,
+      "community": 333,
       "norm_label": ".seedrolesasync()",
       "id": "identitydbseeder_identitydbseeder_seedrolesasync"
     },
@@ -89452,7 +89452,7 @@
       "file_type": "code",
       "source_file": "D:/_MyApps/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Seeds/IdentityDbSeeder.cs",
       "source_location": "L134",
-      "community": 525,
+      "community": 333,
       "norm_label": ".assignpermissionstoroleasync()",
       "id": "identitydbseeder_identitydbseeder_assignpermissionstoroleasync"
     },
@@ -253794,5 +253794,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "effc8237f981f5c5cb480167e2cd2886c9e43c9d"
+  "built_at_commit": "4749bfadf98f6f5e2111491ce339adf5efbfea82"
 }

@@ -5555,8 +5555,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\task_plan.md": {
-    "mtime": 1780417909.5560975,
-    "ast_hash": "6f3fdda4a041ecacaedbb7a743022ab4",
+    "mtime": 1780670882.8549385,
+    "ast_hash": "5867ce65aba968efb1292fc0e580cdbb",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\lib\\api-client.ts": {
@@ -5580,13 +5580,13 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\source-of-truth.md": {
-    "mtime": 1780417909.5560975,
-    "ast_hash": "aa53de5fd94d2ad96644358fe55d5b01",
+    "mtime": 1780670873.1899152,
+    "ast_hash": "c98bb02cb0b30c32bda8f8a501f44562",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ui\\toast.tsx": {
-    "mtime": 1780417909.5350654,
-    "ast_hash": "bc156bfc40b3fa910f3f8103c1b31b87",
+    "mtime": 1780670257.4938025,
+    "ast_hash": "7f486a48788fa142a540fd08d884615f",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\PasswordStrengthMeter.tsx": {
@@ -5650,8 +5650,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\components\\ProtectedRoute.tsx": {
-    "mtime": 1780417909.5329475,
-    "ast_hash": "4aef68cf6a12ca40850e0ebf08cea2c8",
+    "mtime": 1780670264.4615123,
+    "ast_hash": "d2e0931a46686b3d72a9b648b6280bea",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Client\\src\\lib\\jwt.ts": {
@@ -5860,8 +5860,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\06-frontend-coding-standards.md": {
-    "mtime": 1780669337.355351,
-    "ast_hash": "a2beded1e83bdf57509e2fb46220a7e2",
+    "mtime": 1780670250.996565,
+    "ast_hash": "7213e5fa97b9d131bdb9d31204cf8204",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\07-testing-standards.md": {
@@ -5940,8 +5940,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\_how-to-use-this-files.md": {
-    "mtime": 1780668068.0831592,
-    "ast_hash": "a8345046731af80b50ebf161de7140d3",
+    "mtime": 1780670709.9769566,
+    "ast_hash": "c1d888d137f55d4a7aa72fe8b722ab1b",
     "semantic_hash": ""
   }
 }

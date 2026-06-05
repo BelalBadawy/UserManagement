@@ -171,7 +171,7 @@ Phase 1: Custom Toast Notification System
 ## User Lockout Security Enhancements Flow Phases
 
 ### Phase 19: User Lockout Security Enhancements
-- [x] Update `UserService.LockUserAsync` to instantly invalidate active access tokens by updating the user's Security Stamp
+- [x] Update `UserService.LockUserAsync` to invalidate active sessions and refresh tokens immediately by updating the user's Security Stamp (preventing any future token refreshes once active short-lived JWTs expire)
 - [x] Use a safer 1,000-year lockout date offset (`DateTimeOffset.UtcNow.AddYears(1000)`) to prevent database type overflows
 - [x] Update unit tests in `UserServiceTests.cs` to verify stamp updates and dynamic dates
 - [x] Run backend test suites to verify all tests pass cleanly
