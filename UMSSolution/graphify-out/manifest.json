@@ -5830,18 +5830,18 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\00-INDEX.md": {
-    "mtime": 1780659796.7196865,
-    "ast_hash": "33f141a4ebc6525cf3bd0eeda88982b9",
+    "mtime": 1780669311.4832106,
+    "ast_hash": "5439c71308efb02ca70a3103511c9dac",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\01-backend-architecture.md": {
-    "mtime": 1780659803.8016484,
-    "ast_hash": "e11e25e307e72089b246e716517e8330",
+    "mtime": 1780669331.1044202,
+    "ast_hash": "6e7010cac40708f0ac16465d0a8e6ad9",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\02-backend-coding-standards.md": {
-    "mtime": 1780659810.4753397,
-    "ast_hash": "c888ef67816fa283a5dd92ec53187abf",
+    "mtime": 1780669318.423954,
+    "ast_hash": "c6529e24aff22ad26cf054f60faacfa4",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\03-backend-data-and-infrastructure.md": {
@@ -5860,8 +5860,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\06-frontend-coding-standards.md": {
-    "mtime": 1780659837.7453346,
-    "ast_hash": "04aefbb4f0d863deebdbbc57c96559a3",
+    "mtime": 1780669337.355351,
+    "ast_hash": "a2beded1e83bdf57509e2fb46220a7e2",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\07-testing-standards.md": {
@@ -5885,8 +5885,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-api-endpoint.md": {
-    "mtime": 1780659859.1031182,
-    "ast_hash": "605ecb50c0a852bdae353e235192fdf1",
+    "mtime": 1780669346.8426676,
+    "ast_hash": "a408c686d41ff61f833d0b4afda9720d",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-entity.md": {
@@ -5937,6 +5937,11 @@
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Application.Tests\\Handlers\\Users\\DeactivateUserCommandHandlerTests.cs": {
     "mtime": 1780660976.1683958,
     "ast_hash": "e5446e0fca7d3335da8e16b259d4b045",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\_how-to-use-this-files.md": {
+    "mtime": 1780668068.0831592,
+    "ast_hash": "a8345046731af80b50ebf161de7140d3",
     "semantic_hash": ""
   }
 }

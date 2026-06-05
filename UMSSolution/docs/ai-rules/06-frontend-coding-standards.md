@@ -88,7 +88,7 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
 
 - **Controlled Inputs:** Map form elements to React states using controlled value variables (e.g. `<input value={name} onChange={...} />`).
 - **Input Sanitization:** Sanitize user inputs dynamically (e.g. automatically trimming inputs on changes).
-- **Validation Timing:** Validate forms on input blur AND on form submission. Display clear, inline validation error messages.
+- **Validation Timing:** Validate forms on input blur (ONLY after the field has been touched/submitted) AND on form submission. Avoid validating while the user is actively typing in the field. Display clear, inline validation error messages.
 
 ---
 

@@ -7,9 +7,9 @@
 ---
 
 ## Related Rules
-- [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md) (Clean architecture references, Mediator commands/queries boundaries)
-- [02-backend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/02-backend-coding-standards.md) (Minimal API extensions, ResponseWrapper, Validation behaviors)
-- [04-backend-security.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/04-backend-security.md) (Endpoint security guards and AppPermission constants)
+- [01-backend-architecture.md](01-backend-architecture.md) (Clean architecture references, Mediator commands/queries boundaries)
+- [02-backend-coding-standards.md](02-backend-coding-standards.md) (Minimal API extensions, ResponseWrapper, Validation behaviors)
+- [04-backend-security.md](04-backend-security.md) (Endpoint security guards and AppPermission constants)
 
 ---
 
@@ -56,7 +56,10 @@
        }
    }
    ```
-2. Note: For mutations, ensure database changes are saved via `await _applicationDbContext.SaveChangesAsync(ct)`. If outbox notifications are required, add them within the same transaction: `_applicationDbContext.AddOutboxMessage(new CategoryCreatedEvent(entity.Id))`.
+2. **For Commands (Mutations):**
+   - Save database changes via `await _applicationDbContext.SaveChangesAsync(ct)`.
+   - **Outbox Requirement:** If the mutation triggers a domain event or integration event, add it to the outbox in the same transaction: `_applicationDbContext.AddOutboxMessage(new EntityCreatedEvent(entity.Id));`
+3. **For Queries:** Simply return the projected data wrapped in `ResponseWrapper<T>.Success(...)`.
 
 ### Step 4: Map the Minimal API Endpoint
 1. Open the matching routing map class in `UMS.API/Endpoints/` (e.g. `CategoryEndpoints.cs`).

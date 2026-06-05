@@ -1,16 +1,16 @@
 # Graph Report - UMSSolution  (2026-06-05)
 
 ## Corpus Check
-- 625 files · ~2,246,318 words
+- 626 files · ~2,246,794 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 10265 nodes · 15732 edges · 1209 communities (704 shown, 505 thin omitted)
+- 10266 nodes · 15732 edges · 1212 communities (706 shown, 506 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 1123 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2edec624`
+- Built from commit: `effc8237`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1159,6 +1159,8 @@
 - [[_COMMUNITY_Community 1206|Community 1206]]
 - [[_COMMUNITY_Community 1207|Community 1207]]
 - [[_COMMUNITY_Community 1208|Community 1208]]
+- [[_COMMUNITY_Community 1209|Community 1209]]
+- [[_COMMUNITY_Community 1210|Community 1210]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Project Files` - 665 edges
@@ -1184,7 +1186,7 @@
 - `PipelineTestRequest` --implements--> `IValidateMe`  [EXTRACTED]
   UMS.Application.Tests/Behaviors/ValidationPipelineBehaviorTests.cs → UMS.Application/Interfaces/Common/IValidateMe.cs
 
-## Communities (1209 total, 505 thin omitted)
+## Communities (1212 total, 506 thin omitted)
 
 ### Community 0 - "Category Role Response Flow"
 Cohesion: 0.06
@@ -1200,10 +1202,10 @@ Nodes (5): d(), e(), h(), N(), reduce()
 
 ### Community 4 - "Banner Image Concepts"
 Cohesion: 0.06
-Nodes (31): 6.10 Use React DOM Resource Hints, 6.11 Use useTransition Over Manual Loading States, 6.1 Animate SVG Wrapper Instead of SVG Element, 6.2 CSS content-visibility for Long Lists, 6.3 Hoist Static JSX Elements, 6.5 Prevent Hydration Mismatch Without Flickering, 6.6 Suppress Expected Hydration Mismatches, 6.7 Use Activity Component for Show/Hide (+23 more)
+Nodes (35): 6.10 Use React DOM Resource Hints, 6.11 Use useTransition Over Manual Loading States, 6.1 Animate SVG Wrapper Instead of SVG Element, 6.2 CSS content-visibility for Long Lists, 6.3 Hoist Static JSX Elements, 6.4 Optimize SVG Precision, 6.5 Prevent Hydration Mismatch Without Flickering, 6.6 Suppress Expected Hydration Mismatches (+27 more)
 
 ### Community 5 - "Account Endpoints"
-Cohesion: 0.16
+Cohesion: 0.15
 Nodes (4): ApiStateVerifier, ApiTestBase, IClassFixture, RoleEndpointsTests
 
 ### Community 6 - "User Endpoints"
@@ -1248,7 +1250,7 @@ Nodes (11): 11. Changelog Updates, 13. Changelog Updates, 1. Project Overview, 2
 
 ### Community 16 - "Community 16"
 Cohesion: 0.29
-Nodes (7): 7.6 Combine Multiple Array Iterations, 7.9 Early Return from Functions, 7. JavaScript Performance, code:typescript (const admins = users.filter(u => u.isAdmin)), code:typescript (const admins: User[] = []), code:typescript (function validateUsers(users: User[]) {), code:typescript (function validateUsers(users: User[]) {)
+Nodes (7): 7.2 Build Index Maps for Repeated Lookups, 7.9 Early Return from Functions, 7. JavaScript Performance, code:typescript (function processOrders(orders: Order[], users: User[]) {), code:typescript (function processOrders(orders: Order[], users: User[]) {), code:typescript (function validateUsers(users: User[]) {), code:typescript (function validateUsers(users: User[]) {)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.15
@@ -2176,7 +2178,7 @@ Nodes (6): Category, IDataConcurrency, UMS.Domain.Interfaces, IDataConcurrency, 
 
 ### Community 263 - "Community 263"
 Cohesion: 0.05
-Nodes (4): d(), e(), j(), N()
+Nodes (5): a(), build(), d(), e(), updateProps()
 
 ### Community 264 - "Community 264"
 Cohesion: 0.67
@@ -2263,12 +2265,16 @@ Cohesion: 0.20
 Nodes (9): net10.0, Bogus (35.6.1), coverlet.collector (6.0.4), FluentAssertions (8.9.0), Microsoft.NET.Test.Sdk (17.14.1), Moq (4.20.72), xunit (2.9.3), xunit.runner.visualstudio (3.1.4) (+1 more)
 
 ### Community 335 - "Community 335"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (4): Ae, be(), ot(), p()
 
 ### Community 339 - "Community 339"
 Cohesion: 0.13
 Nodes (40): be(), bi(), Ce(), d(), De(), _e(), ei(), Fe() (+32 more)
+
+### Community 340 - "Community 340"
+Cohesion: 0.09
+Nodes (3): j(), N(), tt
 
 ### Community 341 - "Community 341"
 Cohesion: 0.09
@@ -2287,8 +2293,8 @@ Cohesion: 0.14
 Nodes (28): ChangeUserStatusCommand, ConfirmEmailChangeCommand, ConfirmEmailCommand, ConfirmTwoFactorAuthCommand, CreateRoleCommand, DeleteRoleCommand, DisableTwoFactorAuthCommand, EnableTwoFactorAuthCommand (+20 more)
 
 ### Community 345 - "Community 345"
-Cohesion: 0.09
-Nodes (5): a(), es, Gn(), r(), W
+Cohesion: 0.07
+Nodes (6): a(), b(), es, Gn(), r(), W
 
 ### Community 346 - "Community 346"
 Cohesion: 0.05
@@ -2300,7 +2306,7 @@ Nodes (9): TempDirectoryFixture, IDisposable, RoleService, RoleServiceTests, Tem
 
 ### Community 348 - "Community 348"
 Cohesion: 0.07
-Nodes (31): _(), a(), addSlide(), b, build(), ee, getShift(), getSlides() (+23 more)
+Nodes (28): _(), addSlide(), b, ee, getShift(), getSlides(), getThumb(), h() (+20 more)
 
 ### Community 349 - "Community 349"
 Cohesion: 0.09
@@ -2308,7 +2314,7 @@ Nodes (3): Ln, qt, u()
 
 ### Community 350 - "Community 350"
 Cohesion: 0.08
-Nodes (6): ConfirmTwoFactorAuthCommandHandlerTests, DisableTwoFactorAuthCommandHandlerTests, EnableTwoFactorAuthCommandHandlerTests, LogoutCommandHandlerTests, SetupTwoFactorAuthCommandHandlerTests, UserServiceAuthTests
+Nodes (6): ConfirmTwoFactorAuthCommandHandlerTests, DisableTwoFactorAuthCommandHandlerTests, EnableTwoFactorAuthCommandHandlerTests, GetMyProfileQueryHandlerTests, SetupTwoFactorAuthCommandHandlerTests, UserServiceAuthTests
 
 ### Community 351 - "Community 351"
 Cohesion: 0.17
@@ -2347,8 +2353,8 @@ Cohesion: 0.08
 Nodes (18): ApplicationUserClaim, ApplicationUserLogin, ApplicationUserRole, ApplicationUserToken, ApplicationDbContext, UMS.Infrastructure.Persistence.Contexts, DbContextOptionsBuilder, IDbContextTransaction (+10 more)
 
 ### Community 362 - "Community 362"
-Cohesion: 0.08
-Nodes (3): h(), ps, vs
+Cohesion: 0.07
+Nodes (6): c(), h(), on, ps, q(), vs
 
 ### Community 363 - "Community 363"
 Cohesion: 0.11
@@ -2357,10 +2363,6 @@ Nodes (22): ITokenService, TokenService, UMS.Infrastructure.Identity.Services, S
 ### Community 364 - "Community 364"
 Cohesion: 0.13
 Nodes (32): description, post, post, post, post, post, post, post (+24 more)
-
-### Community 365 - "Community 365"
-Cohesion: 0.09
-Nodes (4): c(), q(), Qi, v()
 
 ### Community 366 - "Community 366"
 Cohesion: 0.23
@@ -2391,16 +2393,16 @@ Cohesion: 0.12
 Nodes (4): c(), q(), Qi, v()
 
 ### Community 373 - "Community 373"
-Cohesion: 0.06
-Nodes (31): 3.10 Use after() for Non-Blocking Operations, 3.1 Authenticate Server Actions Like API Routes, 3.3 Avoid Shared Module State for Request Data, 3.4 Cross-Request LRU Caching, 3.5 Hoist Static I/O to Module Level, 3.6 Minimize Serialization at RSC Boundaries, 3.7 Parallel Data Fetching with Component Composition, 3.8 Parallel Nested Data Fetching (+23 more)
+Cohesion: 0.07
+Nodes (28): 3.10 Use after() for Non-Blocking Operations, 3.1 Authenticate Server Actions Like API Routes, 3.2 Avoid Duplicate Serialization in RSC Props, 3.3 Avoid Shared Module State for Request Data, 3.4 Cross-Request LRU Caching, 3.5 Hoist Static I/O to Module Level, 3.6 Minimize Serialization at RSC Boundaries, 3.8 Parallel Nested Data Fetching (+20 more)
 
 ### Community 375 - "Community 375"
 Cohesion: 0.16
 Nodes (29): description, get, get, get, get, get, get, get (+21 more)
 
 ### Community 376 - "Community 376"
-Cohesion: 0.09
-Nodes (5): _(), b(), on, ot, Zi
+Cohesion: 0.13
+Nodes (3): _(), ot, Zi
 
 ### Community 377 - "Community 377"
 Cohesion: 0.11
@@ -2427,8 +2429,8 @@ Cohesion: 0.11
 Nodes (9): CustomWebApplicationFactory, CustomWebApplicationFactory, IAsyncLifetime, IWebHostBuilder, object, Program, HttpClient, Task (+1 more)
 
 ### Community 384 - "Community 384"
-Cohesion: 0.07
-Nodes (8): at(), ft(), gt(), isDisabled(), m, mt(), te, vt()
+Cohesion: 0.10
+Nodes (5): ft(), gt(), isDisabled(), mt(), vt()
 
 ### Community 385 - "Community 385"
 Cohesion: 0.14
@@ -2439,7 +2441,7 @@ Cohesion: 0.11
 Nodes (11): b(), de(), emit(), f(), K(), n(), oe(), pe() (+3 more)
 
 ### Community 387 - "Community 387"
-Cohesion: 0.17
+Cohesion: 0.18
 Nodes (8): CategoryHandlerTestDbContext, CancellationToken, Category, JsonSerializerOptions, ModelBuilder, Task, TEntity, TNotification
 
 ### Community 388 - "Community 388"
@@ -2595,7 +2597,7 @@ Cohesion: 0.12
 Nodes (16): Phase 4: Testing & Cleanup, Task 4.10: Delete placeholder UnitTest1 file from Infrastructure tests, Task 4.11: Decide and enforce ownership of legacy UMS.Tests project, Task 4.12: Decide and enforce ownership of legacy UMS.IntegrationTests project, Task 4.13: Update testing strategy documentation to match actual test project structure, Task 4.14: Regenerate stale coverage audit documentation, Task 4.15: Run solution test suite after refactoring completion, Task 4.1: Add unit tests for validation pipeline mixed-pass mixed-fail scenario (+8 more)
 
 ### Community 433 - "Community 433"
-Cohesion: 0.23
+Cohesion: 0.25
 Nodes (9): ApiStateVerifier, ApplicationRole, ApplicationRoleClaim, ApplicationUser, CancellationToken, Category, CustomWebApplicationFactory, List (+1 more)
 
 ### Community 434 - "Community 434"
@@ -2900,7 +2902,7 @@ Nodes (8): DeactivateUserCommandHandler, UMS.Application.Features.Users.Commands
 
 ### Community 514 - "Community 514"
 Cohesion: 0.13
-Nodes (18): ChangeUserPasswordCommand, ChangeUserPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe, GetTokenQuery, GetTokenQueryHandler, UMS.Application.Features.Token.Queries, IValidateMe (+10 more)
+Nodes (17): ChangeUserPasswordCommand, ChangeUserPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe, ForgotPasswordCommand, ForgotPasswordCommandHandler, UMS.Application.Features.Users.Commands, IValidateMe (+9 more)
 
 ### Community 515 - "Community 515"
 Cohesion: 0.22
@@ -3587,7 +3589,7 @@ Cohesion: 0.33
 Nodes (4): CategoryCacheKeys, UMS.Application.Features.Categories, CategoryCacheKeys, UMS.Application.Features.Categories
 
 ### Community 700 - "Community 700"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (5): CategoryHandlerTestScope, CategoryHandlerTestScope, IAsyncDisposable, SqliteConnection, ValueTask
 
 ### Community 701 - "Community 701"
@@ -3603,8 +3605,8 @@ Cohesion: 0.40
 Nodes (3): RecordingCacheService, Dictionary, T
 
 ### Community 704 - "Community 704"
-Cohesion: 0.33
-Nodes (7): ForgotPasswordCommand, ForgotPasswordCommandHandler, UMS.Application.Features.Users.Commands, CancellationToken, IResponseWrapper, IUserService, ValueTask
+Cohesion: 0.15
+Nodes (3): at(), m, te
 
 ### Community 711 - "Community 711"
 Cohesion: 0.67
@@ -3682,17 +3684,13 @@ Nodes (3): ConfirmTwoFactorAuthEndpointTests, Fact, Task
 Cohesion: 0.60
 Nodes (3): LogoutEndpointTests, Fact, Task
 
-### Community 1193 - "Community 1193"
-Cohesion: 0.40
-Nodes (5): 3.2 Avoid Duplicate Serialization in RSC Props, code:tsx (// RSC: sends 6 strings (2 arrays × 3 items)), code:tsx (// RSC: send once), code:tsx (// string[] - duplicates everything), code:tsx (// ❌ Bad)
-
 ### Community 1194 - "Community 1194"
 Cohesion: 0.40
 Nodes (5): 7.12 Use Loop for Min/Max Instead of Sort, code:typescript (interface Project {), code:typescript (function getOldestAndNewest(projects: Project[]) {), code:typescript (function getLatestProject(projects: Project[]) {), code:typescript (const numbers = [5, 2, 8, 1, 9])
 
 ### Community 1195 - "Community 1195"
-Cohesion: 0.50
-Nodes (4): 6.4 Optimize SVG Precision, code:svg (<path d="M 10.293847 20.847362 L 30.938472 40.192837" />), code:svg (<path d="M 10.3 20.8 L 30.9 40.2" />), code:bash (npx svgo --precision=1 --multipass icon.svg)
+Cohesion: 0.33
+Nodes (8): GetTokenQuery, GetTokenQueryHandler, UMS.Application.Features.Token.Queries, CancellationToken, IResponseWrapper, ITokenService, TokenResponse, ValueTask
 
 ### Community 1197 - "Community 1197"
 Cohesion: 0.38
@@ -3731,8 +3729,8 @@ Cohesion: 0.67
 Nodes (3): 7.13 Use Set/Map for O(1) Lookups, code:typescript (const allowedIds = ['a', 'b', 'c', ...]), code:typescript (const allowedIds = new Set(['a', 'b', 'c', ...]))
 
 ### Community 1206 - "Community 1206"
-Cohesion: 0.67
-Nodes (3): 7.2 Build Index Maps for Repeated Lookups, code:typescript (function processOrders(orders: Order[], users: User[]) {), code:typescript (function processOrders(orders: Order[], users: User[]) {)
+Cohesion: 0.50
+Nodes (4): 3.7 Parallel Data Fetching with Component Composition, code:tsx (export default async function Page() {), code:tsx (async function Header() {), code:tsx (async function Header() {)
 
 ### Community 1207 - "Community 1207"
 Cohesion: 0.67
@@ -3742,6 +3740,14 @@ Nodes (3): 7.3 Cache Property Access in Loops, code:typescript (for (let i = 0; 
 Cohesion: 0.67
 Nodes (3): 7.8 Early Length Check for Array Comparisons, code:typescript (function hasChanges(current: string[], original: string[]) {), code:typescript (function hasChanges(current: string[], original: string[]) {)
 
+### Community 1209 - "Community 1209"
+Cohesion: 0.50
+Nodes (4): 3.9 Per-Request Deduplication with React.cache(), code:typescript (import { cache } from 'react'), code:typescript (const getUser = cache(async (params: { uid: number }) => {), code:typescript (const params = { uid: 1 })
+
+### Community 1210 - "Community 1210"
+Cohesion: 0.67
+Nodes (3): 7.6 Combine Multiple Array Iterations, code:typescript (const admins = users.filter(u => u.isAdmin)), code:typescript (const admins: User[] = [])
+
 ## Ambiguous Edges - Review These
 - `Banner Image 1` → `Wardrobe or Lifestyle Promotion`  [AMBIGUOUS]
   UMS.API/wwwroot/images/banners/1.jpg · relation: conceptually_related_to
@@ -3749,18 +3755,18 @@ Nodes (3): 7.8 Early Length Check for Array Comparisons, code:typescript (functi
 ## Knowledge Gaps
 - **3643 isolated node(s):** `$schema`, `plugin`, `version`, `source`, `sourceType` (+3638 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **505 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **506 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Banner Image 1` and `Wardrobe or Lifestyle Promotion`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
+- **Why does `TestData` connect `Community 728` to `Category Role Response Flow`, `Community 485`, `Community 487`, `Community 552`, `Community 426`, `Community 11`, `Community 462`, `Community 430`, `Community 496`, `Community 497`, `Community 526`, `Community 528`, `Community 443`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `ValidationPipelineBehaviorTests` connect `Community 12` to `Category Role Response Flow`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Why does `Project Files` connect `Community 129` to `Community 663`, `Community 696`, `Community 759`, `Community 760`, `Community 761`, `Community 762`, `Community 763`, `Community 764`, `Community 765`, `Community 766`, `Community 767`, `Community 768`, `Community 769`, `Community 770`, `Community 771`, `Community 772`, `Community 773`, `Community 774`, `Community 775`, `Community 776`, `Community 777`, `Community 778`, `Community 779`, `Community 780`, `Community 781`, `Community 782`, `Community 783`, `Community 784`, `Community 785`, `Community 786`, `Community 787`, `Community 788`, `Community 789`, `Community 790`, `Community 791`, `Community 792`, `Community 793`, `Community 794`, `Community 795`, `Community 796`, `Community 797`, `Community 798`, `Community 799`, `Community 800`, `Community 801`, `Community 802`, `Community 803`, `Community 804`, `Community 805`, `Community 806`, `Community 807`, `Community 808`, `Community 809`, `Community 810`, `Community 811`, `Community 812`, `Community 813`, `Community 814`, `Community 815`, `Community 816`, `Community 817`, `Community 818`, `Community 819`, `Community 820`, `Community 821`, `Community 822`, `Community 823`, `Community 824`, `Community 825`, `Community 826`, `Community 827`, `Community 828`, `Community 829`, `Community 830`, `Community 831`, `Community 832`, `Community 833`, `Community 834`, `Community 835`, `Community 836`, `Community 837`, `Community 838`, `Community 839`, `Community 840`, `Community 841`, `Community 842`, `Community 843`, `Community 844`, `Community 845`, `Community 846`, `Community 847`, `Community 848`, `Community 849`, `Community 850`, `Community 851`, `Community 852`, `Community 853`, `Community 854`, `Community 855`, `Community 856`, `Community 857`, `Community 858`, `Community 859`, `Community 860`, `Community 861`, `Community 862`, `Community 863`, `Community 864`, `Community 865`, `Community 866`, `Community 867`, `Community 868`, `Community 869`, `Community 870`, `Community 871`, `Community 872`, `Community 873`, `Community 874`, `Community 875`, `Community 876`, `Community 877`, `Community 878`, `Community 879`, `Community 880`, `Community 881`, `Community 882`, `Community 883`, `Community 884`, `Community 885`, `Community 886`, `Community 887`, `Community 888`, `Community 889`, `Community 890`, `Community 891`, `Community 892`, `Community 893`, `Community 894`, `Community 895`, `Community 896`, `Community 897`, `Community 898`, `Community 899`, `Community 900`, `Community 901`, `Community 902`, `Community 903`, `Community 904`, `Community 905`, `Community 906`, `Community 907`, `Community 908`, `Community 909`, `Community 910`, `Community 911`, `Community 912`, `Community 913`, `Community 914`, `Community 915`, `Community 916`, `Community 917`, `Community 918`, `Community 919`, `Community 920`, `Community 921`, `Community 922`, `Community 923`, `Community 924`, `Community 925`, `Community 926`, `Community 927`, `Community 928`, `Community 929`, `Community 930`, `Community 931`, `Community 932`, `Community 933`, `Community 934`, `Community 935`, `Community 936`, `Community 937`, `Community 938`, `Community 939`, `Community 940`, `Community 941`, `Community 942`, `Community 943`, `Community 944`, `Community 945`, `Community 946`, `Community 947`, `Community 948`, `Community 949`, `Community 950`, `Community 951`, `Community 952`, `Community 953`, `Community 954`, `Community 955`, `Community 956`, `Community 957`, `Community 958`, `Community 959`, `Community 960`, `Community 961`, `Community 962`, `Community 963`, `Community 964`, `Community 965`, `Community 966`, `Community 967`, `Community 968`, `Community 969`, `Community 970`, `Community 971`, `Community 972`, `Community 973`, `Community 974`, `Community 975`, `Community 976`, `Community 977`, `Community 978`, `Community 979`, `Community 980`, `Community 981`, `Community 982`, `Community 983`, `Community 984`, `Community 985`, `Community 986`, `Community 987`, `Community 988`, `Community 989`, `Community 990`, `Community 991`, `Community 992`, `Community 993`, `Community 994`, `Community 995`, `Community 996`, `Community 997`, `Community 998`, `Community 999`, `Community 1000`, `Community 1001`, `Community 1002`, `Community 1003`, `Community 1004`, `Community 1005`, `Community 1006`, `Community 1007`, `Community 1008`, `Community 1009`, `Community 1010`, `Community 1011`, `Community 1012`, `Community 1013`, `Community 1014`, `Community 1015`, `Community 1016`, `Community 1017`, `Community 1018`, `Community 1019`, `Community 1020`, `Community 1021`, `Community 1022`, `Community 1023`, `Community 1024`, `Community 1025`, `Community 1026`, `Community 1027`, `Community 1028`, `Community 1029`, `Community 1030`, `Community 1031`, `Community 1032`, `Community 1033`, `Community 1034`, `Community 1035`, `Community 1036`, `Community 1037`, `Community 1038`, `Community 1039`, `Community 1040`, `Community 1041`, `Community 1042`, `Community 1043`, `Community 1044`, `Community 1045`, `Community 1046`, `Community 1047`, `Community 1048`, `Community 1049`, `Community 1050`, `Community 1051`, `Community 1052`, `Community 1053`, `Community 1054`, `Community 1055`, `Community 1056`, `Community 1057`, `Community 1058`, `Community 1059`, `Community 1060`, `Community 1061`, `Community 1062`, `Community 1063`, `Community 1064`, `Community 1065`, `Community 1066`, `Community 1067`, `Community 1068`, `Community 1069`, `Community 1070`, `Community 1071`, `Community 1072`, `Community 1073`, `Community 1074`, `Community 1075`, `Community 1076`, `Community 1077`, `Community 1078`, `Community 1079`, `Community 1080`, `Community 1081`, `Community 1082`, `Community 1083`, `Community 1084`, `Community 1085`, `Community 1086`, `Community 1087`, `Community 1088`, `Community 1089`, `Community 1090`, `Community 1091`, `Community 1092`, `Community 1093`, `Community 1094`, `Community 1095`, `Community 1096`, `Community 1097`, `Community 1098`, `Community 1099`, `Community 1100`, `Community 1101`, `Community 1102`, `Community 1103`, `Community 1104`, `Community 1105`, `Community 1106`, `Community 1107`, `Community 1108`, `Community 1109`, `Community 1110`, `Community 1111`, `Community 1112`, `Community 1113`, `Community 1114`, `Community 1115`, `Community 1116`, `Community 1117`, `Community 1118`, `Community 1119`, `Community 1120`, `Community 1121`, `Community 1122`, `Community 1123`, `Community 1124`, `Community 1125`, `Community 1126`, `Community 1127`, `Community 1128`, `Community 1129`, `Community 1130`, `Community 1131`, `Community 1132`, `Community 1133`, `Community 1134`, `Community 1135`, `Community 1136`, `Community 1137`, `Community 1138`, `Community 1139`, `Community 1140`, `Community 1141`, `Community 1142`, `Community 1143`, `Community 1144`, `Community 1145`, `Community 1146`, `Community 1147`, `Community 1148`, `Community 1149`, `Community 1150`, `Community 1151`, `Community 1152`, `Community 1153`, `Community 1154`, `Community 1155`, `Community 1156`, `Community 1157`, `Community 1158`, `Community 1159`, `Community 1160`, `Community 1161`, `Community 1162`, `Community 1163`, `Community 1164`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `TestData` connect `Community 728` to `Category Role Response Flow`, `Community 485`, `Community 487`, `Community 552`, `Community 426`, `Community 11`, `Community 462`, `Community 430`, `Community 496`, `Community 497`, `Community 526`, `Community 528`, `Community 443`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `$schema`, `plugin`, `version` to the rest of the system?**
   _3643 weakly-connected nodes found - possible documentation gaps or missing edges._
