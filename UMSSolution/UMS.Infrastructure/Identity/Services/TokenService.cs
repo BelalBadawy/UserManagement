@@ -279,16 +279,21 @@ namespace UMS.Infrastructure.Identity.Services
                     .ToList();
             }
 
-            return new List<Claim>
+            var allClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Name, user.FullName),
+                new(ClaimTypes.Email, user.Email ?? string.Empty),
+                new(ClaimTypes.Name, user.FullName ?? string.Empty),
                 new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
             }
             .Union(roleClaims)
             .Union(userClaims)
             .Union(permissionClaims);
+
+            return allClaims
+                .GroupBy(c => new { c.Type, c.Value })
+                .Select(g => g.First())
+                .ToList();
         }
 
         private SigningCredentials GetSigningCredentials()

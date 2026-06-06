@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { auditLogsApi } from '../lib/audit-logs-api'
-import type { AuditTrailResponse } from '../lib/audit-logs-api'
+import { parse, format } from 'date-fns'
+import { useAuditLogs } from '../hooks/useAuditLogs'
+import { useUserLookups } from '../hooks/useUsers'
+import { auditLogsApi, type AuditTrailResponse } from '../lib/audit-logs-api'
 import { useToast } from '../components/ui/toast'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
+import { DatePicker } from '../components/ui/date-picker'
 import { Badge } from '../components/ui/badge'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '../components/ui/select'
+import DataTableExport from '../components/ui/DataTableExport'
 import { 
   FileText, 
   Search, 
@@ -25,73 +36,231 @@ export default function AuditLogsManagement() {
   const [searchParams, setSearchParams] = useSearchParams()
   const toast = useToast()
 
-  // State Management
-  const [logs, setLogs] = useState<AuditTrailResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [totalCount, setTotalCount] = useState(0)
-
-  // Query Params Synchronized State
-  const page = parseInt(searchParams.get('page') || '1')
-  const pageSize = 10
-  const search = searchParams.get('search') || ''
-  const sortBy = searchParams.get('sortBy') || 'datetime'
-  const sortDirection = (searchParams.get('sortDirection') || 'desc') as 'asc' | 'desc'
-
   // Details Sheet State
   const [selectedLog, setSelectedLog] = useState<AuditTrailResponse | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  // Sync controls with URL search params
-  const updateUrlParam = (key: string, value: string | null) => {
-    const newParams = new URLSearchParams(searchParams)
-    if (value) {
-      newParams.set(key, value)
-    } else {
-      newParams.delete(key)
-    }
-    setSearchParams(newParams)
-  }
+  // Query Params Synchronized State
+  const page = parseInt(searchParams.get('page') || '1', 10)
+  const pageSize = 10
+  const search = searchParams.get('search') || ''
+  const sortBy = searchParams.get('sortBy') || 'datetime'
+  const sortDirection = (searchParams.get('sortDirection') || 'desc') as 'asc' | 'desc'
+  const tableName = searchParams.get('tableName') || 'all'
+  const entityId = searchParams.get('entityId') || ''
+  const actionTypes = searchParams.get('actionTypes') || ''
+  const fromDate = searchParams.get('fromDate') || ''
+  const toDate = searchParams.get('toDate') || ''
+  const userId = searchParams.get('userId') || 'all'
 
-  // Fetch Audit Logs
-  const fetchLogs = async () => {
-    setLoading(true)
+  // Local filter states (bound to form controls)
+  const [localSearch, setLocalSearch] = useState(search)
+  const [localEntityId, setLocalEntityId] = useState(entityId)
+  const [localTableName, setLocalTableName] = useState(tableName)
+  const [localActionTypes, setLocalActionTypes] = useState(actionTypes)
+  const [localUserId, setLocalUserId] = useState(userId)
+  const [localFromDate, setLocalFromDate] = useState(fromDate)
+  const [localToDate, setLocalToDate] = useState(toDate)
+  // Export loading state
+  const [isExporting, setIsExporting] = useState(false)
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search,
+    entityId,
+    tableName,
+    actionTypes,
+    userId,
+    fromDate,
+    toDate,
+  })
+
+  if (
+    search !== prevParams.search ||
+    entityId !== prevParams.entityId ||
+    tableName !== prevParams.tableName ||
+    actionTypes !== prevParams.actionTypes ||
+    userId !== prevParams.userId ||
+    fromDate !== prevParams.fromDate ||
+    toDate !== prevParams.toDate
+  ) {
+    setPrevParams({
+      search,
+      entityId,
+      tableName,
+      actionTypes,
+      userId,
+      fromDate,
+      toDate,
+    })
+    setLocalSearch(search)
+    setLocalEntityId(entityId)
+    setLocalTableName(tableName)
+    setLocalActionTypes(actionTypes)
+    setLocalUserId(userId)
+    setLocalFromDate(fromDate)
+    setLocalToDate(toDate)
+  }
+  // Helper to parse date string safely from yyyy/MM/dd to Date
+  const parseDateString = (dateStr: string): Date | undefined => {
+    if (!dateStr) return undefined
     try {
-      const response = await auditLogsApi.getPagedList({
-        pageNumber: page,
-        pageSize: pageSize,
-        searchTerm: search || undefined,
-        sortBy: sortBy,
-        sortDirection: sortDirection
-      })
-      if (response.isSuccessful && response.data) {
-        setLogs(response.data.data)
-        setTotalCount(response.data.totalCount)
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve audit logs.')
-      }
-    } catch (err) {
-      toast.error('An error occurred while loading audit logs.')
-    } finally {
-      setLoading(false)
+      const parsed = parse(dateStr, 'yyyy/MM/dd', new Date())
+      return isNaN(parsed.getTime()) ? undefined : parsed
+    } catch {
+      return undefined
     }
   }
 
+  const handleFromDateChange = (date?: Date) => {
+    setLocalFromDate(date ? format(date, 'yyyy/MM/dd') : '')
+  }
+
+  const handleToDateChange = (date?: Date) => {
+    setLocalToDate(date ? format(date, 'yyyy/MM/dd') : '')
+  }
+
+  // Fetch users lookup for dropdown filter
+  const { data: userLookups = [] } = useUserLookups()
+
+  // Fetch Audit Logs using TanStack Query custom hook
+  const { data: queryData, isLoading: loading, error } = useAuditLogs({
+    pageNumber: page,
+    pageSize,
+    searchTerm: search || undefined,
+    sortBy,
+    sortDirection,
+    tableName: tableName !== 'all' ? tableName : undefined,
+    entityId: entityId || undefined,
+    actionTypes: actionTypes || undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    userId: userId !== 'all' ? parseInt(userId, 10) : undefined,
+  })
+
+  const logs = queryData?.data || []
+  const totalCount = queryData?.totalCount || 0
+
+  // Display toast error on query failures
   useEffect(() => {
-    fetchLogs()
-  }, [page, search, sortBy, sortDirection])
+    if (error) {
+      toast.error(error.message || 'Failed to retrieve audit logs.')
+    }
+  }, [error, toast])
+
+  // Sync controls with URL search params (supporting multiple key-value pairs)
+  const updateUrlParams = (params: Record<string, string | null>) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) {
+          next.set(key, value)
+        } else {
+          next.delete(key)
+        }
+      })
+      return next
+    })
+  }
+
+  // Backwards compatibility helper
+  const updateUrlParam = (key: string, value: string | null) => {
+    updateUrlParams({ [key]: value })
+  }
 
   // Sorting Handler
   const handleSort = (field: string) => {
     const isAsc = sortBy === field && sortDirection === 'asc'
-    updateUrlParam('sortBy', field)
-    updateUrlParam('sortDirection', isAsc ? 'desc' : 'asc')
-    updateUrlParam('page', '1') // Reset to first page
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('sortBy', field)
+      next.set('sortDirection', isAsc ? 'desc' : 'asc')
+      next.set('page', '1') // Reset to first page
+      return next
+    })
   }
 
-  // Search Handler
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateUrlParam('search', e.target.value || null)
-    updateUrlParam('page', '1') // Reset to page 1 on new search
+  // Dirty check to enable/disable the "Apply Filters" button
+  const isDirty = 
+    localSearch.trim() !== search ||
+    localEntityId.trim() !== entityId ||
+    localTableName !== tableName ||
+    localActionTypes !== actionTypes ||
+    localUserId !== userId ||
+    localFromDate !== fromDate ||
+    localToDate !== toDate
+
+  // Batch apply filters to URL
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (localFromDate && localToDate) {
+    const from = parseDateString(localFromDate)
+    const to = parseDateString(localToDate)
+    if (from && to && to < from) {
+        toast.error("To Date cannot be before From Date")
+        return
+      }
+    }
+
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+
+      if (localSearch.trim()) {
+        next.set('search', localSearch.trim())
+      } else {
+        next.delete('search')
+      }
+
+      if (localEntityId.trim()) {
+        next.set('entityId', localEntityId.trim())
+      } else {
+        next.delete('entityId')
+      }
+
+      if (localTableName && localTableName !== 'all') {
+        next.set('tableName', localTableName)
+      } else {
+        next.delete('tableName')
+      }
+
+      if (localActionTypes) {
+        next.set('actionTypes', localActionTypes)
+      } else {
+        next.delete('actionTypes')
+      }
+
+      if (localUserId && localUserId !== 'all') {
+        next.set('userId', localUserId)
+      } else {
+        next.delete('userId')
+      }
+
+      if (localFromDate) {
+        next.set('fromDate', localFromDate)
+      } else {
+        next.delete('fromDate')
+      }
+
+      if (localToDate) {
+        next.set('toDate', localToDate)
+      } else {
+        next.delete('toDate')
+      }
+
+      next.set('page', '1')
+      return next
+    })
+  }
+
+  // Reset all advanced and basic filters
+  const handleResetFilters = () => {
+    setLocalSearch('')
+    setLocalEntityId('')
+    setLocalTableName('all')
+    setLocalActionTypes('')
+    setLocalUserId('all')
+    setLocalFromDate('')
+    setLocalToDate('')
+    setSearchParams(new URLSearchParams())
   }
 
   // Helper: Audit Type Badge styling
@@ -124,23 +293,214 @@ export default function AuditLogsManagement() {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search by Table, Actor Email, or IP Address..."
-            className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
-          />
+      {/* Advanced Filters Container */}
+      <form onSubmit={handleApplyFilters} className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+        
+        {/* Row 1: Search, Table Name Select, Entity ID Input, User Lookup */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          {/* General Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              placeholder="Search Actor Email or IP Address..."
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
+
+          {/* Table Name Select */}
+          <div>
+            <Select 
+              data-testid="table-name-select"
+              value={localTableName} 
+              onValueChange={(val) => setLocalTableName(val)}
+            >
+              <SelectTrigger className="w-full rounded-xl text-sm border-neutral-300 bg-neutral-50/50">
+                <SelectValue placeholder="All Tables" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tables</SelectItem>
+                <SelectItem value="Category">Category</SelectItem>
+                <SelectItem value="ApplicationUser">ApplicationUser</SelectItem>
+                <SelectItem value="ApplicationRole">ApplicationRole</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Entity ID Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              value={localEntityId}
+              onChange={(e) => setLocalEntityId(e.target.value)}
+              placeholder="Search by Entity ID..."
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
+
+          {/* User Select Dropdown */}
+          <div>
+            <Select 
+              data-testid="user-select"
+              value={localUserId} 
+              onValueChange={(val) => setLocalUserId(val)}
+            >
+              <SelectTrigger className="w-full rounded-xl text-sm border-neutral-300 bg-neutral-50/50">
+                <SelectValue placeholder="All Users" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Users</SelectItem>
+                {userLookups.map((u) => (
+                  <SelectItem key={u.id} value={String(u.id)}>
+                    {u.fullName} ({u.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+
+        {/* Row 2: Action Types Badges, Date Range Pickers & Reset Button */}
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pt-2 border-t border-neutral-100">
+          
+          {/* Action Types Filter Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-neutral-500 mr-1">Event Type:</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Create') 
+                  ? active.filter(t => t !== 'Create') 
+                  : [...active, 'Create'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Create')
+                  ? 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Update') 
+                  ? active.filter(t => t !== 'Update') 
+                  : [...active, 'Update'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Update')
+                  ? 'bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Update
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Delete') 
+                  ? active.filter(t => t !== 'Delete') 
+                  : [...active, 'Delete'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Delete')
+                  ? 'bg-rose-100 border-rose-300 text-rose-800 hover:bg-rose-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Delete
+            </Button>
+          </div>
+
+          {/* Date Picker Bounds & Reset Button */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-neutral-500">From:</span>
+              <DatePicker 
+                date={parseDateString(localFromDate)}
+                setDate={handleFromDateChange}
+                placeholder="From Date"
+                className="w-36"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-neutral-500">To:</span>
+              <DatePicker 
+                date={parseDateString(localToDate)}
+                setDate={handleToDateChange}
+                placeholder="To Date"
+                className="w-36"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={!isDirty}
+              className="h-8 bg-[#4285F4] hover:bg-[#3273DC] text-white font-semibold text-xs rounded-xl flex items-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Apply Filters
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-8 border-neutral-300 text-neutral-600 hover:bg-neutral-100 font-semibold text-xs rounded-xl flex items-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              Reset Filters
+            </Button>
+            <DataTableExport
+              isExporting={isExporting}
+              onExport={async (format) => {
+                try {
+                  setIsExporting(true);
+                  await auditLogsApi.exportAuditLogs({
+                    // pageNumber and pageSize are not needed for export
+                    exportFormat: format,
+                    searchTerm: search || undefined,
+                    tableName: tableName !== 'all' ? tableName : undefined,
+                    entityId: entityId || undefined,
+                    actionTypes: actionTypes || undefined,
+                    fromDate: fromDate || undefined,
+                    toDate: toDate || undefined,
+                    userId: userId !== 'all' ? parseInt(userId, 10) : undefined,
+                  });
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  toast.error(message);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+            />
+          </div>
+
+        </div>
+
+        {/* Dynamic Result Count Label */}
+        <div className="flex justify-end text-xs text-neutral-400 pt-1">
+          <SlidersHorizontal className="w-3.5 h-3.5 mr-1" />
           <span>Showing {logs.length} of {totalCount} records</span>
         </div>
-      </div>
+      </form>
 
       {/* Main Grid table */}
       <Card className="rounded-2xl border border-neutral-200 shadow-sm overflow-hidden bg-white">

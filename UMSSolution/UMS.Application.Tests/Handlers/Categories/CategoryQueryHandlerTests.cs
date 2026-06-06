@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
@@ -121,14 +123,7 @@ public class GetCategoriesPagedQueryHandlerTests
     [Fact]
     public async Task Handle_should_filter_sort_and_page_active_categories()
     {
-        await using var scope = await CategoryHandlerTestScope.CreateAsync();
-        await scope.SeedCategoryAsync("Alpha", "alpha", 3, isActive: true);
-        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
-        await scope.SeedCategoryAsync("Gamma", "gamma", 1, isActive: true);
-        await scope.SeedCategoryAsync("Alpha Hidden", "alpha-hidden", 4, isActive: false);
-        var mockCurrentUserService = new Mock<ICurrentUserService>();
-        mockCurrentUserService.Setup(s => s.IsAuthenticated()).Returns(false);
-        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext, mockCurrentUserService.Object);
+        var mockCategoryService = new Mock<ICategoryService>();
         var query = new GetCategoriesPagedQuery
         {
             PagedFilterRequest = new()
@@ -140,6 +135,22 @@ public class GetCategoriesPagedQueryHandlerTests
                 PageSize = 2
             }
         };
+
+        var mockPagedResult = PagedResult<CategoryResponse>.Create(
+            new List<CategoryResponse>
+            {
+                new(3, "Gamma", "gamma", null, 1, true, Array.Empty<byte>()),
+                new(2, "Beta", "beta", null, 2, true, Array.Empty<byte>())
+            },
+            3,
+            1,
+            2);
+
+        mockCategoryService
+            .Setup(s => s.GetCategoriesPagedQueryAsync(query.PagedFilterRequest, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ResponseWrapper<PagedResult<CategoryResponse>>.Success(mockPagedResult));
+
+        var handler = new GetCategoriesPagedQueryHandler(mockCategoryService.Object);
 
         var result = await handler.Handle(query, CancellationToken.None);
 

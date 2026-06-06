@@ -1,4 +1,4 @@
-﻿using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Pagination;
 
 namespace UMS.Application.Features.Users.Queries
 {
@@ -10,7 +10,7 @@ namespace UMS.Application.Features.Users.Queries
                 .SetValidator(new PagedFilterValidator());
 
             RuleFor(x => x.PagedFilterRequest.SortBy)
-                .Must(field => new[] { "fullname", "email", "id" }.Contains(field))
+                .Must(field => string.IsNullOrEmpty(field) || new[] { "fullname", "email", "id" }.Contains(field))
                 .WithMessage("Invalid SortBy value");
         }
     }

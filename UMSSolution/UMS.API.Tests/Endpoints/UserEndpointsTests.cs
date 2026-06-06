@@ -109,7 +109,7 @@ public class UserEndpointsTests : ApiTestBase
         var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read);
         UseUserClient(authMode, requiredPermission);
 
-        var response = await Client.GetAsync("/api/v1/users/paged-list?pageNumber=1&pageSize=10&sortBy=fullname&sortDirection=asc");
+        var response = await Client.GetAsync("/api/v1/users/paged?pageNumber=1&pageSize=10&sortBy=fullname&sortDirection=asc");
 
         response.StatusCode.Should().Be(expectedStatusCode);
 

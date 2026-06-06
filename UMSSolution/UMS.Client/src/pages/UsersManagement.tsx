@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter';
+import { usersApi } from '../lib/users-api';
 import type { UserResponse } from '../lib/users-api';
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -15,6 +16,8 @@ import {
   Plus, Edit2, Trash2, UserCheck, AlertTriangle, 
   Search, RotateCcw, Lock, Unlock, Loader2 
 } from 'lucide-react';
+import { useToast } from '../components/ui/toast';
+import DataTableExport from '../components/ui/DataTableExport';
 import { 
   useReactTable, 
   getCoreRowModel, 
@@ -39,7 +42,7 @@ const columns: ColumnDef<UserResponse>[] = [
   { accessorKey: 'status', header: 'Status' },
 ];
 
-export default function UserManagement() {
+export default function UsersManagement() {
   const { hasPermission } = useAuth();
 
   // Query / Filter / Pagination States from URL
@@ -54,18 +57,80 @@ export default function UserManagement() {
   const sortBy = searchParams.get('sortBy') || 'fullname';
   const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
 
-  const [searchInput, setSearchInput] = useState(searchTerm);
+  // Local filter states
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const [localActive, setLocalActive] = useState(activeParam);
+  const [localLocked, setLocalLocked] = useState(lockedParam);
+  const [localRole, setLocalRole] = useState(roleParam);
 
-  // Sync search input if searchTerm changes (e.g. from reset or back navigation)
-  useEffect(() => {
-    setSearchInput(searchTerm);
-  }, [searchTerm]);
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search: searchTerm,
+    active: activeParam,
+    locked: lockedParam,
+    role: roleParam,
+  });
+
+  if (
+    searchTerm !== prevParams.search ||
+    activeParam !== prevParams.active ||
+    lockedParam !== prevParams.locked ||
+    roleParam !== prevParams.role
+  ) {
+    setPrevParams({
+      search: searchTerm,
+      active: activeParam,
+      locked: lockedParam,
+      role: roleParam,
+    });
+    setLocalSearch(searchTerm);
+    setLocalActive(activeParam);
+    setLocalLocked(lockedParam);
+    setLocalRole(roleParam);
+  }
+
+  const isDirty =
+    localSearch.trim() !== searchTerm ||
+    localActive !== activeParam ||
+    localLocked !== lockedParam ||
+    localRole !== roleParam;
+
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('page', '1');
+
+    const newParams = {
+      search: localSearch.trim(),
+      active: localActive,
+      locked: localLocked,
+      role: localRole,
+    };
+
+    Object.entries(newParams).forEach(([key, val]) => {
+      if (!val || val === 'all' || val === '') {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, val);
+      }
+    });
+
+    setSearchParams(nextParams);
+  };
+
+  const handleResetFilters = () => {
+    setLocalSearch('');
+    setLocalActive('all');
+    setLocalLocked('all');
+    setLocalRole('all');
+    setSearchParams(new URLSearchParams());
+  };
 
   const updateFilters = (newParams: Record<string, string | null>) => {
     const nextParams = new URLSearchParams(searchParams);
     
-    // Changing filters or searching resets to page 1
-    if (newParams.page === undefined && (newParams.search !== undefined || newParams.active !== undefined || newParams.locked !== undefined || newParams.role !== undefined || newParams.sortBy !== undefined || newParams.sortDir !== undefined)) {
+    // Changing page/size/sortBy/sortDir resets to page 1 if applicable
+    if (newParams.page === undefined && (newParams.sortBy !== undefined || newParams.sortDir !== undefined)) {
       nextParams.set('page', '1');
     }
 
@@ -99,6 +164,8 @@ export default function UserManagement() {
 
   // Validation States
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isExporting, setIsExporting] = useState(false);
+  const toast = useToast();
 
   // Query & Mutation Hooks
   const isActiveParam = activeParam === 'active' ? true : activeParam === 'inactive' ? false : null;
@@ -174,25 +241,7 @@ export default function UserManagement() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Handle Searches
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateFilters({ search: searchInput.trim() });
-  };
 
-  const handleResetFilters = () => {
-    setSearchInput('');
-    updateFilters({
-      page: '1',
-      size: '10',
-      search: '',
-      active: 'all',
-      locked: 'all',
-      role: 'all',
-      sortBy: 'fullname',
-      sortDir: 'asc',
-    });
-  };
 
   // Toggle Sorting
   const toggleSort = (field: string) => {
@@ -393,81 +442,114 @@ export default function UserManagement() {
         )}
       </div>
 
-      {/* Search & Filters */}
-      <Card className="bg-white border-neutral-200 shadow-sm rounded-xl">
-        <CardContent className="p-4">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search by full name or email..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] bg-neutral-50/50"
-              />
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <Button type="submit" variant="default" className="rounded-xl px-5">
-                Search
-              </Button>
-              <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-4 flex items-center gap-1">
-                <RotateCcw className="w-3.5 h-3.5" />
-                Reset
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Consolidated Filters Container */}
+      <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+        {/* Row 1: Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* General Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search by full name or email..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
 
-      {/* Advanced Filter Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-        {/* Status Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</span>
-          <Select value={activeParam} onValueChange={(val) => updateFilters({ active: val })}>
-            <SelectTrigger className="w-[160px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Status Filter */}
+          <div>
+            <Select value={localActive} onValueChange={(val) => setLocalActive(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active Only</SelectItem>
+                <SelectItem value="inactive">Inactive Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Lockout Filter */}
+          <div>
+            <Select value={localLocked} onValueChange={(val) => setLocalLocked(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Lockouts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Lockouts</SelectItem>
+                <SelectItem value="locked">Locked Only</SelectItem>
+                <SelectItem value="unlocked">Unlocked Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Role Filter */}
+          <div>
+            <Select value={localRole} onValueChange={(val) => setLocalRole(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={String(role.id)}>
+                    {role.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Lockout Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Lockout</span>
-          <Select value={lockedParam} onValueChange={(val) => updateFilters({ locked: val })}>
-            <SelectTrigger className="w-[160px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="locked">Locked</SelectItem>
-              <SelectItem value="unlocked">Unlocked</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Role Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Assigned Role</span>
-          <Select value={roleParam} onValueChange={(val) => updateFilters({ role: val })}>
-            <SelectTrigger className="w-[200px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              {availableRoles.map((role) => (
-                <SelectItem key={role.id} value={String(role.id)}>
-                  {role.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Row 2: Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 border-t border-neutral-100">
+          <div className="text-xs text-neutral-400">
+            Showing {users.length} of {totalCount} records
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Button
+              type="button"
+              onClick={() => handleApplyFilters()}
+              disabled={!isDirty}
+              className="h-8 bg-[#4285F4] hover:bg-[#3273DC] text-white font-semibold text-xs rounded-xl flex items-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Apply Filters
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-8 border-neutral-300 text-neutral-600 hover:bg-neutral-100 font-semibold text-xs rounded-xl flex items-center gap-1"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Filters
+            </Button>
+            <DataTableExport
+              isExporting={isExporting}
+              onExport={async (format) => {
+                try {
+                  setIsExporting(true);
+                  await usersApi.exportUsers({
+                    searchTerm: searchTerm || undefined,
+                    isActive: isActiveParam,
+                    isLocked: isLockedParam,
+                    roleId: roleIdParam,
+                    sortBy: sortBy || undefined,
+                    sortDirection: sortDirection || undefined,
+                    exportFormat: format
+                  });
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : String(err));
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
 

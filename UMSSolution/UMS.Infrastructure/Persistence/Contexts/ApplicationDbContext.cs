@@ -95,66 +95,99 @@ namespace UMS.Infrastructure.Persistence.Contexts
             return result;
         }
 
-        private List<AuditEntry> OnBeforeSaveChanges(int? userId, string? ipAddress)
+
+
+    private List<AuditEntry> OnBeforeSaveChanges(int? userId, string? ipAddress)
+{
+    ChangeTracker.DetectChanges();
+    var auditEntries = new List<AuditEntry>();
+
+    foreach (var entry in ChangeTracker.Entries())
+    {
+        if (entry.Entity is AuditTrail 
+            || entry.Entity.GetType().Name == nameof(AuditTrail) 
+            || entry.Entity.GetType().BaseType?.Name == nameof(AuditTrail)
+            || entry.State is EntityState.Detached or EntityState.Unchanged)
         {
-            ChangeTracker.DetectChanges();
-            var auditEntries = new List<AuditEntry>();
-
-            foreach (var entry in ChangeTracker.Entries())
-            {
-                if (entry.Entity is AuditTrail 
-                    || entry.Entity.GetType().Name == nameof(AuditTrail) 
-                    || entry.Entity.GetType().BaseType?.Name == nameof(AuditTrail)
-                    || entry.State is EntityState.Detached or EntityState.Unchanged)
-                {
-                    continue;
-                }
-
-                var auditEntry = new AuditEntry(entry)
-                {
-                    TableName = entry.Entity.GetType().Name,
-                    UserId = userId,
-                    IpAddress = ipAddress
-                };
-                auditEntries.Add(auditEntry);
-
-                foreach (var property in entry.Properties)
-                {
-                    var propertyName = property.Metadata.Name;
-
-                    if (property.Metadata.IsPrimaryKey())
-                    {
-                        auditEntry.KeyValues[propertyName] = property.CurrentValue!;
-                        continue;
-                    }
-
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            auditEntry.Type = AuditType.Create;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue!;
-                            break;
-                        case EntityState.Deleted:
-                            auditEntry.Type = AuditType.Delete;
-                            auditEntry.OldValues[propertyName] = property.OriginalValue!;
-                            break;
-                        case EntityState.Modified when property.IsModified:
-                            auditEntry.Type = AuditType.Update;
-                            auditEntry.OldValues[propertyName] = property.OriginalValue!;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue!;
-                            break;
-                    }
-                }
-            }
-
-            foreach (var auditEntry in auditEntries.Where(e => !e.HasTemporaryProperties))
-            {
-                AuditTrails.Add(auditEntry.ToAudit());
-            }
-
-            return auditEntries.Where(e => e.HasTemporaryProperties).ToList();
+            continue;
         }
 
+        var auditEntry = new AuditEntry(entry)
+        {
+            TableName = entry.Entity.GetType().Name,
+            UserId = userId,
+            IpAddress = ipAddress
+        };
+        
+        // 1. DETERMINE AUDIT TYPE AT THE ENTRY LEVEL FIRST
+        if (entry.State == EntityState.Added)
+        {
+            auditEntry.Type = AuditType.Create;
+        }
+        else if (entry.State == EntityState.Deleted)
+        {
+            auditEntry.Type = AuditType.Delete;
+        }
+        else if (entry.State == EntityState.Modified)
+        {
+            // FIX: Check if this is a Soft Delete flipping from false to true
+            if (entry.Entity is ISoftDelete softDeleteEntity && softDeleteEntity.SoftDeleted)
+            {
+                var softDeletedProp = entry.Property(nameof(ISoftDelete.SoftDeleted));
+                if (softDeletedProp.OriginalValue is bool originalVal && !originalVal)
+                {
+                    auditEntry.Type = AuditType.Delete; // It's a soft delete!
+                }
+                else
+                {
+                    auditEntry.Type = AuditType.Update; // It's an update (e.g., un-deleting)
+                }
+            }
+            else
+            {
+                auditEntry.Type = AuditType.Update; // Normal update
+            }
+        }
+
+        auditEntries.Add(auditEntry);
+
+        // 2. NOW LOOP THROUGH PROPERTIES TO GET OLD/NEW VALUES
+        foreach (var property in entry.Properties)
+        {
+            var propertyName = property.Metadata.Name;
+
+            if (property.Metadata.IsPrimaryKey())
+            {
+                auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                continue;
+            }
+
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    break;
+                case EntityState.Deleted:
+                    auditEntry.OldValues[propertyName] = property.OriginalValue!;
+                    break;
+                case EntityState.Modified when property.IsModified:
+                    // We already set the Type above, so we just record the values here.
+                    // This ensures we still capture the old/new values for the SoftDeleted flag,
+                    // DeletedDate, etc., as we decided in the previous prompt.
+                    auditEntry.OldValues[propertyName] = property.OriginalValue!;
+                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    break;
+            }
+        }
+    }
+
+    foreach (var auditEntry in auditEntries.Where(e => !e.HasTemporaryProperties))
+    {
+        AuditTrails.Add(auditEntry.ToAudit());
+    }
+
+    return auditEntries.Where(e => e.HasTemporaryProperties).ToList();
+}
         private async Task OnAfterSaveChanges(List<AuditEntry> auditEntries, CancellationToken cancellationToken)
         {
             if (auditEntries == null || auditEntries.Count == 0)

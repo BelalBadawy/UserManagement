@@ -7,6 +7,7 @@ using UMS.Application.Authorization;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+using UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails;
 
 namespace UMS.API.Endpoints
 {
@@ -17,14 +18,72 @@ namespace UMS.API.Endpoints
             var group = app.MapGroup("api/v{version:apiVersion}/audit-logs")
                 .WithTags("AuditLogs");
 
-            group.MapGet("/", async (ISender sender, [AsParameters] PagedFilterRequest filter, CancellationToken ct) =>
+            group.MapGet("paged", async (
+                ISender sender, 
+                [AsParameters] PagedFilterRequest filter, 
+                string? tableName,
+                string? entityId,
+                string? actionTypes,
+                string? fromDate,
+                string? toDate,
+                int? userId,
+                CancellationToken ct) =>
             {
-                var query = new GetAuditTrailsPagedQuery { PagedFilterRequest = filter };
+                var query = new GetAuditTrailsPagedQuery 
+                {
+                    PagedFilterRequest = filter,
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId
+                };
                 var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper<PagedResult<AuditTrailResponse>>>()
             .WithName("GetAuditTrailsPaged")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.AuditTrails, AppAction.Read));
+
+            group.MapGet("/export", async (
+                ISender sender,
+                string? tableName,
+                string? entityId,
+                string? actionTypes,
+                string? fromDate,
+                string? toDate,
+                int? userId,
+                string? exportFormat,
+                CancellationToken ct) =>
+            {
+                var query = new ExportAuditTrailsQuery
+                {
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId,
+                    ExportFormat = exportFormat ?? "excel"
+                };
+                var response = await sender.Send(query, ct);
+                if (!response.IsSuccessful || response.Data == null)
+                {
+                    return response.ToApiResult();
+                }
+
+                var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+                var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var extension = isPdf ? "pdf" : "xlsx";
+                var fileName = $"AuditLogs_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+                return Results.File(response.Data, contentType, fileName);
+            })
+            .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+            .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+            .WithName("ExportAuditTrails")
             .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.AuditTrails, AppAction.Read));
 
             return app;

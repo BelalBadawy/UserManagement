@@ -13,6 +13,8 @@ using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
 using UMS.Infrastructure.Services.Common;
 using UMS.Application.Features.AuditTrails;
+using UMS.Application.Features.Categories;
+using QuestPDF.Infrastructure;
 
 namespace UMS.Infrastructure
 {
@@ -32,6 +34,9 @@ namespace UMS.Infrastructure
             IConfiguration configuration,
             IHostEnvironment environment)
         {
+            // Register QuestPDF Community License
+            QuestPDF.Settings.License = LicenseType.Community;
+
             return services
                 .AddDatabase(configuration, environment)
                 .AddIdentityServices(configuration)
@@ -49,6 +54,7 @@ namespace UMS.Infrastructure
                 .AddScoped<IDateTimeService, DateTimeService>()
                 .AddScoped<IFileStorageService, LocalFileStorageService>()
                 .AddScoped<IAuditTrailService, AuditTrailService>()
+                .AddScoped<ICategoryService, CategoryService>()
                 .AddFeatures();
         }
 

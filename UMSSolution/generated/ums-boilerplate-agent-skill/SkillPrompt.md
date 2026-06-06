@@ -103,7 +103,9 @@ If script execution is not possible, reproduce the same workflow manually:
   - Dtos\Wrappers\ResponseWrapperExtension.cs
   - Enums\AppEnums.cs
   - Features\AuditTrails\IAuditTrailService.cs
+  - Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs
   - Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs
+  - Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs
   - Features\Categories\CategoryCacheKeys.cs
   - Features\Categories\Commands\CategoryWriteGuards.cs
   - Features\Categories\Commands\Create\CreateCategoryCommand.cs
@@ -115,6 +117,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - Features\Categories\Events\CategoryCreatedEvent.cs
   - Features\Categories\Events\CategoryDeletedEvent.cs
   - Features\Categories\Events\CategoryUpdatedEvent.cs
+  - Features\Categories\ICategoryService.cs
+  - Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs
   - Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs
   - Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs
   - Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs
@@ -169,6 +173,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - Features\Users\Commands\ConfirmEmailChange\ConfirmEmailChangeValidator.cs
   - Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs
   - Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthValidator.cs
+  - Features\Users\Commands\DeactivateUser\DeactivateUserCommand.cs
+  - Features\Users\Commands\DeactivateUser\DeactivateUserCommandValidator.cs
   - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthCommand.cs
   - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthRequest.cs
   - Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthValidator.cs
@@ -210,7 +216,9 @@ If script execution is not possible, reproduce the same workflow manually:
   - Features\Users\Models\Requests\UserRoleViewModel.cs
   - Features\Users\Models\Responses\ProfileResponse.cs
   - Features\Users\Models\Responses\TwoFactorAuthViewModel.cs
+  - Features\Users\Models\Responses\UserExportResponse.cs
   - Features\Users\Models\Responses\UserResponse.cs
+  - Features\Users\Queries\ExportUsers\ExportUsersQuery.cs
   - Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs
   - Features\Users\Queries\GetUserById\GetUserByIdQuery.cs
   - Features\Users\Queries\GetUserById\GetUserByIdQueryValidator.cs
@@ -238,6 +246,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - GlobalUsings.cs
   - Handlers\Categories\CategoryCommandHandlerTests.cs
   - Handlers\Categories\CategoryQueryHandlerTests.cs
+  - Handlers\Categories\ExportCategoriesQueryHandlerTests.cs
   - Handlers\Roles\RoleHandlerTests.cs
   - Handlers\Token\GetRefreshTokenQueryHandlerTests.cs
   - Handlers\Token\GetTokenQueryHandlerTests.cs
@@ -247,8 +256,10 @@ If script execution is not possible, reproduce the same workflow manually:
   - Handlers\Users\ConfirmEmailChangeCommandHandlerTests.cs
   - Handlers\Users\ConfirmEmailCommandHandlerTests.cs
   - Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\DeactivateUserCommandHandlerTests.cs
   - Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs
   - Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs
+  - Handlers\Users\ExportUsersQueryHandlerTests.cs
   - Handlers\Users\ForgotPasswordCommandHandlerTests.cs
   - Handlers\Users\GenerateChangeEmailTokenCommandHandlerTests.cs
   - Handlers\Users\GenerateNew2FARecoveryCodesCommandHandlerTests.cs
@@ -347,6 +358,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - Persistence\Seeds\ApplicationDbSeeder.cs
   - ServiceCollectionExtensions.cs
   - Services\AuditTrailService.cs
+  - Services\CategoryService.cs
   - Services\Common\CurrentUserService.cs
   - Services\Common\DateTimeService.cs
   - Services\Common\DistributedCacheService.cs
@@ -364,6 +376,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - Identity\Services\TokenServiceTests.cs
   - Identity\Services\UserServiceAuthTests.cs
   - Identity\Services\UserServiceTests.cs
+  - Services\CategoryExportTest.cs
   - Services\Common\CurrentUserServiceTests.cs
   - Services\Common\DateTimeServiceTests.cs
   - Services\Common\DistributedCacheServiceTests.cs
@@ -441,12 +454,22 @@ If script execution is not possible, reproduce the same workflow manually:
   - src\components\ProtectedRoute.tsx
   - src\components\ui\badge.tsx
   - src\components\ui\button.tsx
+  - src\components\ui\calendar.tsx
   - src\components\ui\card.tsx
+  - src\components\ui\DataTableExport.tsx
+  - src\components\ui\DataTablePagination.test.tsx
+  - src\components\ui\DataTablePagination.tsx
+  - src\components\ui\date-picker.tsx
   - src\components\ui\dialog.tsx
   - src\components\ui\pagination.tsx
+  - src\components\ui\popover.tsx
   - src\components\ui\select.tsx
   - src\components\ui\sheet.tsx
   - src\components\ui\toast.tsx
+  - src\hooks\useAuditLogs.ts
+  - src\hooks\useCategories.ts
+  - src\hooks\useUsers.test.tsx
+  - src\hooks\useUsers.ts
   - src\index.css
   - src\layouts\AdminLayout.tsx
   - src\layouts\LoginLayout.tsx
@@ -459,6 +482,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - src\lib\utils.ts
   - src\main.tsx
   - src\pages\AdminHome.tsx
+  - src\pages\AuditLogsManagement.test.tsx
   - src\pages\AuditLogsManagement.tsx
   - src\pages\CategoriesManagement.tsx
   - src\pages\ConfirmEmail.tsx
@@ -471,7 +495,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - src\pages\ResendConfirmation.tsx
   - src\pages\ResetPassword.tsx
   - src\pages\RoleManagement.tsx
-  - src\pages\UserManagement.tsx
+  - src\pages\UsersManagement.tsx
+  - src\test\setup.ts
   - tailwind.config.js
   - tsconfig.app.json
   - tsconfig.json
@@ -507,6 +532,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - xunit 2.9.3
   - xunit.runner.visualstudio 3.1.4
 - UMS.Infrastructure
+  - ClosedXML 0.105.0
   - FluentEmail.Core 3.0.2
   - FluentEmail.Smtp 3.0.2
   - Microsoft.AspNetCore.Authentication.JwtBearer 10.0.6
@@ -516,6 +542,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - Microsoft.EntityFrameworkCore.SqlServer 10.0.6
   - Microsoft.EntityFrameworkCore.Tools 10.0.6
   - Microsoft.EntityFrameworkCore.InMemory 10.0.6
+  - QuestPDF 2026.5.0
 - UMS.Infrastructure.Tests
   - Bogus 35.6.1
   - coverlet.collector 6.0.4
@@ -661,7 +688,8 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.API\Endpoints\AuditTrailEndpoints.cs:7:using UMS.Application.Dtos.Pagination;
 - UMS.API\Endpoints\AuditTrailEndpoints.cs:8:using UMS.Application.Dtos.Wrappers;
 - UMS.API\Endpoints\AuditTrailEndpoints.cs:9:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
-- UMS.API\Endpoints\AuditTrailEndpoints.cs:11:namespace UMS.API.Endpoints
+- UMS.API\Endpoints\AuditTrailEndpoints.cs:10:using UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails;
+- UMS.API\Endpoints\AuditTrailEndpoints.cs:12:namespace UMS.API.Endpoints
 - UMS.API\Endpoints\CategoryEndpoints.cs:3:using UMS.API.Extensions;
 - UMS.API\Endpoints\CategoryEndpoints.cs:4:using UMS.Application.Dtos.Pagination;
 - UMS.API\Endpoints\CategoryEndpoints.cs:5:using UMS.Application.Dtos.Wrappers;
@@ -672,8 +700,9 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.API\Endpoints\CategoryEndpoints.cs:10:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 - UMS.API\Endpoints\CategoryEndpoints.cs:11:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 - UMS.API\Endpoints\CategoryEndpoints.cs:12:using UMS.Application.Features.Categories.Queries.GetCategoryById;
-- UMS.API\Endpoints\CategoryEndpoints.cs:13:using UMS.Application.Authorization;
-- UMS.API\Endpoints\CategoryEndpoints.cs:15:namespace UMS.API.Endpoints
+- UMS.API\Endpoints\CategoryEndpoints.cs:13:using UMS.Application.Features.Categories.Queries.ExportCategories;
+- UMS.API\Endpoints\CategoryEndpoints.cs:14:using UMS.Application.Authorization;
+- UMS.API\Endpoints\CategoryEndpoints.cs:16:namespace UMS.API.Endpoints
 - UMS.API\Endpoints\RoleEndpoints.cs:2:using UMS.API.Extensions;
 - UMS.API\Endpoints\RoleEndpoints.cs:3:using UMS.Application.Dtos.Wrappers;
 - UMS.API\Endpoints\RoleEndpoints.cs:4:using UMS.Application.Features.Roles;
@@ -692,6 +721,8 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.API\Endpoints\UserEndpoints.cs:11:using UMS.Application.Features.Users.Models.Requests;
 - UMS.API\Endpoints\UserEndpoints.cs:12:using UMS.Application.Features.Users.Models.Responses;
 - UMS.API\Endpoints\UserEndpoints.cs:13:using UMS.Application.Features.Users.Queries;
+- UMS.API\Endpoints\UserEndpoints.cs:14:using UMS.Application.Features.Users.Queries.ExportUsers;
+- UMS.API\Endpoints\UserEndpoints.cs:15:using UMS.Application.Features.Users.Commands.DeactivateUser;
 - UMS.API\Extensions\ResponseResultExtensions.cs:3:using UMS.Application.Dtos.Wrappers;
 - UMS.API\Extensions\ResponseResultExtensions.cs:5:namespace UMS.API.Extensions;
 - UMS.API\Helpers\BearerSchemeTransformer.cs:4:namespace UMS.API.Helpers
@@ -730,17 +761,24 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:6:using UMS.Application.Features.Categories.Events;
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:7:using UMS.Application.Tests.Support.Categories;
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:9:namespace UMS.Application.Tests.Handlers.Categories;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:2:using UMS.Application.Features.Categories;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:3:using UMS.Application.Features.Categories.Queries.GetAllCategories;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:4:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:5:using UMS.Application.Features.Categories.Queries.GetCategoriesAdmin;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:6:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:7:using UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:8:using UMS.Application.Features.Categories.Queries.GetCategoryById;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:9:using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:11:using UMS.Application.Interfaces.Common;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:12:using UMS.Application.Tests.Support.Categories;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:14:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:2:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:3:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:4:using UMS.Application.Features.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:5:using UMS.Application.Features.Categories.Queries.GetAllCategories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:6:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:7:using UMS.Application.Features.Categories.Queries.GetCategoriesAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:8:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:9:using UMS.Application.Features.Categories.Queries.GetCategoriesPagedAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:10:using UMS.Application.Features.Categories.Queries.GetCategoryById;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:11:using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:13:using UMS.Application.Interfaces.Common;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:14:using UMS.Application.Tests.Support.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:16:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:8:using UMS.Application.Features.Categories;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:9:using UMS.Application.Features.Categories.Queries.ExportCategories;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:10:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:13:namespace UMS.Application.Tests.Handlers.Categories
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:2:using UMS.Application.Features.Roles;
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:3:using UMS.Application.Features.Roles.Commands;
@@ -786,6 +824,11 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth;
 - UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Requests;
 - UMS.Application.Tests\Handlers\Users\ConfirmTwoFactorAuthCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\DeactivateUserCommandHandlerTests.cs:4:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\DeactivateUserCommandHandlerTests.cs:5:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\DeactivateUserCommandHandlerTests.cs:6:using UMS.Application.Features.Users.Commands;
+- UMS.Application.Tests\Handlers\Users\DeactivateUserCommandHandlerTests.cs:7:using UMS.Application.Features.Users.Commands.DeactivateUser;
+- UMS.Application.Tests\Handlers\Users\DeactivateUserCommandHandlerTests.cs:9:namespace UMS.Application.Tests.Handlers.Users
 - UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
 - UMS.Application.Tests\Handlers\Users\DisableTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
@@ -795,6 +838,12 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands.EnableTwoFactorAuth;
 - UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:4:using UMS.Application.Features.Users.Models.Requests;
 - UMS.Application.Tests\Handlers\Users\EnableTwoFactorAuthCommandHandlerTests.cs:6:namespace UMS.Application.Tests.Handlers.Users;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:6:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:8:using UMS.Application.Features.Users;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:9:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:10:using UMS.Application.Features.Users.Queries.ExportUsers;
+- UMS.Application.Tests\Handlers\Users\ExportUsersQueryHandlerTests.cs:13:namespace UMS.Application.Tests.Handlers.Users
 - UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:2:using UMS.Application.Features.Users;
 - UMS.Application.Tests\Handlers\Users\ForgotPasswordCommandHandlerTests.cs:3:using UMS.Application.Features.Users.Commands;
@@ -1008,10 +1057,15 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\AuditTrails\IAuditTrailService.cs:2:using UMS.Application.Dtos.Wrappers;
 - UMS.Application\Features\AuditTrails\IAuditTrailService.cs:3:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
 - UMS.Application\Features\AuditTrails\IAuditTrailService.cs:5:namespace UMS.Application.Features.AuditTrails
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:5:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:6:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:8:namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:2:using UMS.Application.Dtos.Pagination;
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:3:using UMS.Application.Dtos.Wrappers;
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:4:using UMS.Application.Interfaces.Common;
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:6:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs:2:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs:5:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
 - UMS.Application\Features\Categories\CategoryCacheKeys.cs:1:namespace UMS.Application.Features.Categories
 - UMS.Application\Features\Categories\Commands\CategoryWriteGuards.cs:1:namespace UMS.Application.Features.Categories.Commands;
 - UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:1:using UMS.Application.Features.Categories.Commands;
@@ -1031,6 +1085,13 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Categories\Events\CategoryCreatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
 - UMS.Application\Features\Categories\Events\CategoryDeletedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
 - UMS.Application\Features\Categories\Events\CategoryUpdatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
+- UMS.Application\Features\Categories\ICategoryService.cs:1:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\ICategoryService.cs:2:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\ICategoryService.cs:3:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Features\Categories\ICategoryService.cs:5:namespace UMS.Application.Features.Categories
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:5:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:6:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:8:namespace UMS.Application.Features.Categories.Queries.ExportCategories
 - UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:1:using UMS.Application.Interfaces.Common;
 - UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetAllCategories
 - UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs:1:namespace UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
@@ -1101,6 +1162,9 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs:1:using UMS.Application.Features.Users.Models.Requests;
 - UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthCommand.cs:3:namespace UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth
 - UMS.Application\Features\Users\Commands\ConfirmTwoFactorAuth\ConfirmTwoFactorAuthValidator.cs:1:namespace UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth
+- UMS.Application\Features\Users\Commands\DeactivateUser\DeactivateUserCommand.cs:1:using UMS.Application.Features.Users.Commands;
+- UMS.Application\Features\Users\Commands\DeactivateUser\DeactivateUserCommand.cs:3:namespace UMS.Application.Features.Users.Commands.DeactivateUser
+- UMS.Application\Features\Users\Commands\DeactivateUser\DeactivateUserCommandValidator.cs:3:namespace UMS.Application.Features.Users.Commands.DeactivateUser
 - UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthCommand.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth
 - UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthRequest.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
 - UMS.Application\Features\Users\Commands\DisableTwoFactorAuth\DisableTwoFactorAuthValidator.cs:1:namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth
@@ -1150,7 +1214,12 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Users\Models\Requests\UserRoleViewModel.cs:1:namespace UMS.Application.Features.Users.Models.Requests
 - UMS.Application\Features\Users\Models\Responses\ProfileResponse.cs:1:namespace UMS.Application.Features.Users.Models.Responses;
 - UMS.Application\Features\Users\Models\Responses\TwoFactorAuthViewModel.cs:3:namespace UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Models\Responses\UserExportResponse.cs:3:namespace UMS.Application.Features.Users.Models.Responses
 - UMS.Application\Features\Users\Models\Responses\UserResponse.cs:1:namespace UMS.Application.Features.Users.Models.Responses
+- UMS.Application\Features\Users\Queries\ExportUsers\ExportUsersQuery.cs:5:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Users\Queries\ExportUsers\ExportUsersQuery.cs:6:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Users\Queries\ExportUsers\ExportUsersQuery.cs:7:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Application\Features\Users\Queries\ExportUsers\ExportUsersQuery.cs:9:namespace UMS.Application.Features.Users.Queries.ExportUsers
 - UMS.Application\Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs:1:using UMS.Application.Features.Users.Models.Responses;
 - UMS.Application\Features\Users\Queries\GetMyProfile\GetMyProfileQuery.cs:3:namespace UMS.Application.Features.Users.Queries.GetMyProfile
 - UMS.Application\Features\Users\Queries\GetUserById\GetUserByIdQuery.cs:1:using UMS.Application.Features.Users.Models.Responses;
@@ -1273,6 +1342,9 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:786:It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto => dto.MailTo == "u@t.com"),
 - UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:824:_emailService.Setup(e => e.SendAsync(It.IsAny<UMS.Application.Dtos.Email.SendEmailDto>(), It.IsAny<CancellationToken>()))
 - UMS.Infrastructure.Tests\Identity\Services\UserServiceTests.cs:832:It.Is<UMS.Application.Dtos.Email.SendEmailDto>(dto =>
+- UMS.Infrastructure.Tests\Services\CategoryExportTest.cs:5:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Infrastructure.Tests\Services\CategoryExportTest.cs:6:using UMS.Infrastructure.Services;
+- UMS.Infrastructure.Tests\Services\CategoryExportTest.cs:9:namespace UMS.Infrastructure.Tests.Services
 - UMS.Infrastructure.Tests\Services\Common\CurrentUserServiceTests.cs:3:using UMS.Infrastructure.Services.Common;
 - UMS.Infrastructure.Tests\Services\Common\CurrentUserServiceTests.cs:5:namespace UMS.Infrastructure.Tests.Services.Common;
 - UMS.Infrastructure.Tests\Services\Common\DateTimeServiceTests.cs:1:using UMS.Infrastructure.Services.Common;
@@ -1345,21 +1417,22 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure\Identity\Services\TokenService.cs:13:using UMS.Application.Interfaces.Common;
 - UMS.Infrastructure\Identity\Services\TokenService.cs:14:using UMS.Infrastructure.Persistence.Contexts;
 - UMS.Infrastructure\Identity\Services\TokenService.cs:16:namespace UMS.Infrastructure.Identity.Services
-- UMS.Infrastructure\Identity\Services\UserService.cs:7:using UMS.Application.Dtos.Common;
-- UMS.Infrastructure\Identity\Services\UserService.cs:8:using UMS.Application.Dtos.Email;
-- UMS.Infrastructure\Identity\Services\UserService.cs:9:using UMS.Application.Dtos.Pagination;
-- UMS.Infrastructure\Identity\Services\UserService.cs:10:using UMS.Application.Dtos.TwoFactor;
-- UMS.Infrastructure\Identity\Services\UserService.cs:11:using UMS.Application.Dtos.Wrappers;
-- UMS.Infrastructure\Identity\Services\UserService.cs:12:using UMS.Application.Features.Users;
-- UMS.Infrastructure\Identity\Services\UserService.cs:13:using UMS.Application.Features.Users.Commands;
-- UMS.Infrastructure\Identity\Services\UserService.cs:14:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
-- UMS.Infrastructure\Identity\Services\UserService.cs:15:using UMS.Application.Features.Users.Commands.Logout;
-- UMS.Infrastructure\Identity\Services\UserService.cs:16:using UMS.Application.Features.Users.Models.Requests;
-- UMS.Infrastructure\Identity\Services\UserService.cs:17:using UMS.Application.Features.Users.Models.Responses;
-- UMS.Infrastructure\Identity\Services\UserService.cs:18:using UMS.Application.Interfaces.Common;
-- UMS.Infrastructure\Identity\Services\UserService.cs:19:using UMS.Infrastructure.Identity.Configurations;
-- UMS.Infrastructure\Identity\Services\UserService.cs:20:using UMS.Infrastructure.Identity.Models;
-- UMS.Infrastructure\Identity\Services\UserService.cs:23:namespace UMS.Infrastructure.Identity.Services
+- UMS.Infrastructure\Identity\Services\UserService.cs:12:using UMS.Application.Dtos.Common;
+- UMS.Infrastructure\Identity\Services\UserService.cs:13:using UMS.Application.Dtos.Email;
+- UMS.Infrastructure\Identity\Services\UserService.cs:14:using UMS.Application.Dtos.Pagination;
+- UMS.Infrastructure\Identity\Services\UserService.cs:15:using UMS.Application.Dtos.TwoFactor;
+- UMS.Infrastructure\Identity\Services\UserService.cs:16:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Identity\Services\UserService.cs:17:using UMS.Application.Features.Users;
+- UMS.Infrastructure\Identity\Services\UserService.cs:18:using UMS.Application.Features.Users.Commands;
+- UMS.Infrastructure\Identity\Services\UserService.cs:19:using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
+- UMS.Infrastructure\Identity\Services\UserService.cs:20:using UMS.Application.Features.Users.Commands.Logout;
+- UMS.Infrastructure\Identity\Services\UserService.cs:21:using UMS.Application.Features.Users.Models.Requests;
+- UMS.Infrastructure\Identity\Services\UserService.cs:22:using UMS.Application.Features.Users.Models.Responses;
+- UMS.Infrastructure\Identity\Services\UserService.cs:23:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Identity\Services\UserService.cs:24:using UMS.Infrastructure.Identity.Configurations;
+- UMS.Infrastructure\Identity\Services\UserService.cs:25:using UMS.Infrastructure.Identity.Models;
+- UMS.Infrastructure\Identity\Services\UserService.cs:26:using UMS.Application.Features.Users.Queries;
+- UMS.Infrastructure\Identity\Services\UserService.cs:30:namespace UMS.Infrastructure.Identity.Services
 - UMS.Infrastructure\Migrations\20260418130054_InitiailDb.cs:6:namespace UMS.Infrastructure.Migrations
 - UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:8:using UMS.Infrastructure.Persistence.Contexts;
 - UMS.Infrastructure\Migrations\20260418130054_InitiailDb.Designer.cs:12:namespace UMS.Infrastructure.Migrations
@@ -1529,14 +1602,23 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:13:using UMS.Infrastructure.Services;
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:14:using UMS.Infrastructure.Services.Common;
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:15:using UMS.Application.Features.AuditTrails;
-- UMS.Infrastructure\ServiceCollectionExtensions.cs:17:namespace UMS.Infrastructure
-- UMS.Infrastructure\Services\AuditTrailService.cs:2:using UMS.Application.Dtos.Pagination;
-- UMS.Infrastructure\Services\AuditTrailService.cs:3:using UMS.Application.Dtos.Wrappers;
-- UMS.Infrastructure\Services\AuditTrailService.cs:4:using UMS.Application.Features.AuditTrails;
-- UMS.Infrastructure\Services\AuditTrailService.cs:5:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
-- UMS.Infrastructure\Services\AuditTrailService.cs:6:using UMS.Application.Interfaces.Common;
-- UMS.Infrastructure\Services\AuditTrailService.cs:7:using UMS.Infrastructure.Persistence.Contexts;
-- UMS.Infrastructure\Services\AuditTrailService.cs:9:namespace UMS.Infrastructure.Services
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:16:using UMS.Application.Features.Categories;
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:19:namespace UMS.Infrastructure
+- UMS.Infrastructure\Services\AuditTrailService.cs:13:using UMS.Application.Dtos.Pagination;
+- UMS.Infrastructure\Services\AuditTrailService.cs:14:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Services\AuditTrailService.cs:15:using UMS.Application.Features.AuditTrails;
+- UMS.Infrastructure\Services\AuditTrailService.cs:16:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Infrastructure\Services\AuditTrailService.cs:17:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\AuditTrailService.cs:18:using UMS.Domain.Enums;
+- UMS.Infrastructure\Services\AuditTrailService.cs:19:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Services\AuditTrailService.cs:21:namespace UMS.Infrastructure.Services
+- UMS.Infrastructure\Services\CategoryService.cs:12:using UMS.Application.Dtos.Pagination;
+- UMS.Infrastructure\Services\CategoryService.cs:13:using UMS.Application.Dtos.Wrappers;
+- UMS.Infrastructure\Services\CategoryService.cs:14:using UMS.Application.Features.Categories;
+- UMS.Infrastructure\Services\CategoryService.cs:15:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Infrastructure\Services\CategoryService.cs:16:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\CategoryService.cs:17:using UMS.Domain.Entities;
+- UMS.Infrastructure\Services\CategoryService.cs:19:namespace UMS.Infrastructure.Services
 - UMS.Infrastructure\Services\Common\CurrentUserService.cs:1:using UMS.Application.Interfaces.Common;
 - UMS.Infrastructure\Services\Common\CurrentUserService.cs:5:namespace UMS.Infrastructure.Services.Common;
 - UMS.Infrastructure\Services\Common\DateTimeService.cs:1:using UMS.Application.Interfaces.Common;
@@ -1553,5 +1635,5 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure\Services\LocalFileStorageService.cs:2:using UMS.Application.Dtos.Common;
 - UMS.Infrastructure\Services\LocalFileStorageService.cs:3:using UMS.Application.Interfaces.Common;
 - UMS.Infrastructure\Services\LocalFileStorageService.cs:5:namespace UMS.Infrastructure.Services
-- UMS.Infrastructure\UMS.Infrastructure.csproj:25:<ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
-- UMS.Infrastructure\UMS.Infrastructure.csproj:26:<ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.Infrastructure\UMS.Infrastructure.csproj:27:<ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
+- UMS.Infrastructure\UMS.Infrastructure.csproj:28:<ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
