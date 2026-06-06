@@ -22,6 +22,12 @@ namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
     public class GetAuditTrailsPagedQuery : IRequest<IResponseWrapper<PagedResult<AuditTrailResponse>>>, IValidateMe
     {
         public PagedFilterRequest PagedFilterRequest { get; set; } = new();
+        public string? TableName { get; set; }
+        public string? EntityId { get; set; }
+        public string? ActionTypes { get; set; }
+        public string? FromDate { get; set; }
+        public string? ToDate { get; set; }
+        public int? UserId { get; set; }
     }
 
     public class GetAuditTrailsPagedQueryHandler(IAuditTrailService auditTrailService)
@@ -31,7 +37,15 @@ namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
 
         public async ValueTask<IResponseWrapper<PagedResult<AuditTrailResponse>>> Handle(GetAuditTrailsPagedQuery request, CancellationToken ct)
         {
-            return await _auditTrailService.GetAuditTrailsPagedQueryAsync(request.PagedFilterRequest, ct);
+            return await _auditTrailService.GetAuditTrailsPagedQueryAsync(
+                request.PagedFilterRequest,
+                request.TableName,
+                request.EntityId,
+                request.ActionTypes,
+                request.FromDate,
+                request.ToDate,
+                request.UserId,
+                ct);
         }
     }
 }

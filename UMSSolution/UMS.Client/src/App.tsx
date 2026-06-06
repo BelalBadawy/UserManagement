@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { lazy, Suspense } from 'react'
 import LoginLayout from './layouts/LoginLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -12,15 +13,16 @@ import ResetPassword from './pages/ResetPassword'
 import AdminHome from './pages/AdminHome'
 import PublicHome from './pages/PublicHome'
 import Profile from './pages/Profile'
-import UserManagement from './pages/UserManagement'
-import RoleManagement from './pages/RoleManagement'
-import CategoriesManagement from './pages/CategoriesManagement'
-import AuditLogsManagement from './pages/AuditLogsManagement'
 import AdminLayout from './layouts/AdminLayout'
 import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import './App.css'
+
+const UsersManagement = lazy(() => import('./pages/UsersManagement'))
+const RoleManagement = lazy(() => import('./pages/RoleManagement'))
+const CategoriesManagement = lazy(() => import('./pages/CategoriesManagement'))
+const AuditLogsManagement = lazy(() => import('./pages/AuditLogsManagement'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,19 +76,35 @@ function AppContent() {
 
           {/* Permission-Guarded Routes */}
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Users.Read']} />}>
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/users" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <UsersManagement />
+              </Suspense>
+            } />
           </Route>
           
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Roles.Read']} />}>
-            <Route path="/admin/roles" element={<RoleManagement />} />
+            <Route path="/admin/roles" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <RoleManagement />
+              </Suspense>
+            } />
           </Route>
 
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Product.Categories.Read']} />}>
-            <Route path="/admin/categories" element={<CategoriesManagement />} />
+            <Route path="/admin/categories" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <CategoriesManagement />
+              </Suspense>
+            } />
           </Route>
 
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.AuditTrails.Read']} />}>
-            <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+            <Route path="/admin/audit-logs" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <AuditLogsManagement />
+              </Suspense>
+            } />
           </Route>
         </Route>
       </Route>

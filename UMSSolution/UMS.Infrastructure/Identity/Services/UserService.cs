@@ -4,6 +4,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Web;
+using System.IO;
+using ClosedXML.Excel;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.Pagination;
@@ -18,7 +23,9 @@ using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Identity.Models;
+using UMS.Application.Features.Users.Queries;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -165,13 +172,12 @@ namespace UMS.Infrastructure.Identity.Services
                 return ResponseWrapper<UserResponse>.Success(data: mappedUser);
             }
 
-            return ResponseWrapper<UserResponse>.Fail("User does not exists.");
+            return ResponseWrapper<UserResponse>.Fail("User does not exists.", StatusCodes.Status404NotFound);
         }
 
-        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct)
+        private IQueryable<ApplicationUser> BuildUserQuery(GetUsersPagedQuery query)
         {
+            var pagedFilterRequest = query.PagedFilterRequest;
             var dbContext = _context as DbContext;
             var usersQuery = dbContext != null 
                 ? dbContext.Set<ApplicationUser>() 
@@ -230,6 +236,15 @@ namespace UMS.Infrastructure.Identity.Services
                     : usersQuery.OrderBy(u => u.FullName),
             };
 
+            return usersQuery;
+        }
+
+        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            CancellationToken ct)
+        {
+            var usersQuery = BuildUserQuery(new GetUsersPagedQuery { PagedFilterRequest = pagedFilterRequest });
+
             var totalRecords = await usersQuery.CountAsync(ct);
 
             var users = await usersQuery
@@ -257,6 +272,190 @@ namespace UMS.Infrastructure.Identity.Services
             };
 
             return ResponseWrapper<PagedResult<UserResponse>>.Success(data: data);
+        }
+
+        public async Task<IResponseWrapper<List<UserExportResponse>>> GetUsersListAsync(
+            PagedFilterRequest filter,
+            CancellationToken ct)
+        {
+            var dbContext = _context as DbContext;
+            if (dbContext == null)
+            {
+                return ResponseWrapper<List<UserExportResponse>>.Fail("Invalid database context.");
+            }
+
+            var usersQuery = BuildUserQuery(new GetUsersPagedQuery { PagedFilterRequest = filter });
+
+            var userRolesQuery = from ur in dbContext.Set<ApplicationUserRole>()
+                                 join r in dbContext.Set<ApplicationRole>() on ur.RoleId equals r.Id
+                                 select new { ur.UserId, RoleName = r.Name };
+
+            var usersData = await usersQuery.ToListAsync(ct);
+            var userIds = usersData.Select(u => u.Id).ToList();
+
+            var rolesList = await userRolesQuery
+                .Where(ur => userIds.Contains(ur.UserId))
+                .ToListAsync(ct);
+
+            var rolesGrouped = rolesList
+                .GroupBy(ur => ur.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(ur => ur.RoleName!).ToList());
+
+            var result = usersData.Select(u => new UserExportResponse
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.Email,
+                UserName = u.UserName,
+                IsActive = u.IsActive,
+                EmailConfirmed = u.EmailConfirmed,
+                PhoneNumber = u.PhoneNumber,
+                IsLocked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow,
+                Roles = rolesGrouped.TryGetValue(u.Id, out var roles) ? roles : new List<string>()
+            }).ToList();
+
+            return ResponseWrapper<List<UserExportResponse>>.Success(result);
+        }
+
+        public async Task<byte[]> ExportUsersAsync(List<UserExportResponse> data, string format, CancellationToken ct)
+        {
+            if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return GeneratePdfExport(data);
+            }
+            else
+            {
+                return GenerateExcelExport(data);
+            }
+        }
+
+        private byte[] GenerateExcelExport(List<UserExportResponse> data)
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Users");
+
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Full Name";
+            worksheet.Cell(1, 3).Value = "Email";
+            worksheet.Cell(1, 4).Value = "Phone Number";
+            worksheet.Cell(1, 5).Value = "Assigned Roles";
+            worksheet.Cell(1, 6).Value = "Status";
+            worksheet.Cell(1, 7).Value = "Lockout Status";
+            worksheet.Cell(1, 8).Value = "Email Confirmed";
+
+            var headerRange = worksheet.Range(1, 1, 1, 8);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4F46E5"); // Indigo-600
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            int row = 2;
+            foreach (var item in data)
+            {
+                worksheet.Cell(row, 1).Value = item.Id;
+                worksheet.Cell(row, 2).Value = item.FullName;
+                worksheet.Cell(row, 3).Value = item.Email;
+                worksheet.Cell(row, 4).Value = item.PhoneNumber ?? "N/A";
+                worksheet.Cell(row, 5).Value = string.Join(", ", item.Roles);
+                worksheet.Cell(row, 6).Value = item.IsActive ? "Active" : "Inactive";
+                worksheet.Cell(row, 7).Value = item.IsLocked ? "Locked" : "Unlocked";
+                worksheet.Cell(row, 8).Value = item.EmailConfirmed ? "Yes" : "No";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        private byte[] GeneratePdfExport(List<UserExportResponse> data)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(1.5f, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(8).FontFamily("Helvetica"));
+
+                    page.Header()
+                        .PaddingBottom(10)
+                        .Text("System Users Report")
+                        .SemiBold().FontSize(16).FontColor(Colors.Indigo.Medium);
+
+                    page.Content()
+                        .Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(30); // ID
+                                columns.RelativeColumn(2.5f); // Full Name
+                                columns.RelativeColumn(3f); // Email
+                                columns.RelativeColumn(1.8f); // Phone
+                                columns.RelativeColumn(2.5f); // Roles
+                                columns.RelativeColumn(1.2f); // Status
+                                columns.RelativeColumn(1.2f); // Locked
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(HeaderStyle).Text("ID").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Full Name").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Email").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Phone").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Roles").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Status").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Locked").SemiBold().FontColor(Colors.White);
+
+                                static IContainer HeaderStyle(IContainer container)
+                                {
+                                    return container
+                                        .Background(Colors.Indigo.Medium)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            });
+
+                            foreach (var item in data)
+                            {
+                                table.Cell().Element(CellStyle).Text(item.Id.ToString());
+                                table.Cell().Element(CellStyle).Text(item.FullName);
+                                table.Cell().Element(CellStyle).Text(item.Email);
+                                table.Cell().Element(CellStyle).Text(item.PhoneNumber ?? "N/A");
+                                table.Cell().Element(CellStyle).Text(string.Join(", ", item.Roles));
+                                table.Cell().Element(CellStyle).Text(item.IsActive ? "Active" : "Inactive");
+                                table.Cell().Element(CellStyle).Text(item.IsLocked ? "Locked" : "Unlocked");
+
+                                static IContainer CellStyle(IContainer container)
+                                {
+                                    return container
+                                        .BorderBottom(0.5f)
+                                        .BorderColor(Colors.Grey.Lighten3)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            }
+                        });
+
+                    page.Footer()
+                        .PaddingTop(10)
+                        .AlignCenter()
+                        .Text(x =>
+                        {
+                            x.Span("Page ");
+                            x.CurrentPageNumber();
+                            x.Span(" of ");
+                            x.TotalPages();
+                        });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
         }
 
         public async Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword)

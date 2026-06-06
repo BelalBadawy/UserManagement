@@ -73,8 +73,14 @@
    ```
 5. Map Minimal API endpoints under `UMS.API/Endpoints/`. Protect endpoints with `.RequireAuthorization(AppPermission.NameFor(...))`.
 
-### Step 6: Create Baseline Tests
-1. Write unit tests for the command and query handlers under `UMS.Application.Tests/Handlers/`.
+### Step 6: Implement Export Functionality
+1. Add non-paged list and export methods to the entity service interface and implementation.
+2. Create the Mediator `Export{EntityName}Query` and its handler under queries feature folder.
+3. Map the `/export` endpoint in the API endpoints group, returning a binary file via `Results.File()`.
+4. Integrate the `<DataTableExport />` dropdown component and `isExporting` state in the frontend management page.
+
+### Step 7: Create Baseline Tests
+1. Write unit tests for the command and query handlers (including the export query) under `UMS.Application.Tests/Handlers/`.
 2. Write integration tests under `UMS.API.Tests/Endpoints/` to verify endpoint routing, schema returns, and role matrices.
 
 ---
@@ -86,6 +92,7 @@
 - EF migration successfully generated, applied, and verified against SQL Server.
 - Mediator CRUD logic, command validators, and handlers implemented in UMS.Application.
 - Minimal API routes mapped and authorized in UMS.API.
+- Excel and PDF export functionality implemented (service methods, export query, `/export` route, and UI integration).
 - Full test coverage (handler unit tests and API integration tests) passes.
 
 ---

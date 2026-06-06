@@ -238,6 +238,14 @@ if ($ProjectName -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
     throw "ProjectName must be a valid C# root namespace: letters, digits, underscore, and not starting with a digit."
 }
 
+# Generate random ports to prevent port conflicts when running multiple scaffolded projects
+$HttpsPort = Get-Random -Minimum 7100 -Maximum 7299
+$HttpPort = Get-Random -Minimum 5000 -Maximum 5099
+$ClientPort = Get-Random -Minimum 5100 -Maximum 5199
+
+Write-Host "Assigned Ports - HTTPS: $HttpsPort, HTTP: $HttpPort, Client Dev Server: $ClientPort" -ForegroundColor Cyan
+
+
 function Invoke-Step([string]$Command, [string[]]$Arguments) {
     Write-Host "> dotnet $Command $($Arguments -join ' ')"
     & dotnet $Command @Arguments
@@ -247,6 +255,7 @@ function Invoke-Step([string]$Command, [string[]]$Arguments) {
 function Get-ProjectDir([string]$Suffix) { return "$ProjectName.$Suffix" }
 function Get-ProjectPath([string]$Suffix) { return Join-Path (Get-ProjectDir $Suffix) "$ProjectName.$Suffix.csproj" }
 
+if ($OutputPath -and -not (Test-Path $OutputPath)) { New-Item -ItemType Directory -Force -Path $OutputPath | Out-Null }
 $Root = Join-Path (Resolve-Path $OutputPath).Path $ProjectName
 if (Test-Path $Root) { throw "Output directory already exists: $Root" }
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
@@ -321,6 +330,23 @@ try {
         $rendered = [regex]::Replace($rendered, '\bUMS\.(Domain|Application|Infrastructure|API|Client)\b', "${ProjectName}.`$1")
         $rendered = [regex]::Replace($rendered, '\bums-client\b', ($ProjectName.ToLower() + "-client"))
         
+        # Port replacements to avoid conflicts
+        $rendered = $rendered -replace 'https://localhost:7122', "https://localhost:$HttpsPort"
+        $rendered = $rendered -replace 'http://localhost:7122', "http://localhost:$HttpsPort"
+        $rendered = $rendered -replace 'http://localhost:5055', "http://localhost:$HttpPort"
+        $rendered = $rendered -replace 'http://localhost:5173', "http://localhost:$ClientPort"
+        if ($RelativePath -match 'vite\.config\.ts$') {
+            $rendered = $rendered -replace 'plugins: \[react\(\)\]', "plugins: [react()],`r`n  server: {`r`n    port: $ClientPort`r`n  }"
+        }
+        
+        # Connection String & Database Name Replacement
+        if ($RelativePath -match 'appsettings\.json$') {
+            $rendered = [regex]::Replace($rendered, 'Database=(UMS|UMSDb|UMSDB)\b', "Database=${ProjectName}DB")
+        }
+        elseif ($RelativePath -match 'appsettings\.Testing\.json$') {
+            $rendered = [regex]::Replace($rendered, 'Database=(UMS|UMSDbTest|UMSDBTest)\b', "Database=${ProjectName}DBTest")
+        }
+        
         [System.IO.File]::WriteAllText($target, $rendered, [System.Text.UTF8Encoding]::new($false))
     }
 
@@ -391,6 +417,24 @@ foreach ($f in $allFiles) {
     Invoke-Step 'restore' @()
     Invoke-Step 'build' @()
 
+    Write-Host "Checking for dotnet-ef tool..."
+    $efInstalled = $false
+    try {
+        $efCheck = & dotnet ef --version 2>&1
+        if ($LASTEXITCODE -eq 0) { $efInstalled = $true }
+    } catch {}
+    if (-not $efInstalled) {
+        Write-Host "Installing dotnet-ef tool globally..."
+        & dotnet tool install -g dotnet-ef
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Failed to install dotnet-ef tool globally."
+        }
+    }
+
+    Write-Host "Applying EF Core Migrations..." -ForegroundColor Cyan
+    & dotnet ef database update --project "$Root\$ProjectName.Infrastructure" --startup-project "$Root\$ProjectName.API"
+    if ($LASTEXITCODE -ne 0) { throw "EF Core Migration failed." }
+
     Write-Host "Scaffold complete: $Root"
 }
 finally {
@@ -436,6 +480,13 @@ if [[ ! "$PROJECT_NAME" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
   echo "ProjectName must be a valid C# root namespace: letters, digits, underscore, and not starting with a digit." >&2
   exit 2
 fi
+
+# Generate random ports to prevent port conflicts
+HTTPS_PORT=$((7100 + RANDOM % 200))
+HTTP_PORT=$((5000 + RANDOM % 100))
+CLIENT_PORT=$((5100 + RANDOM % 100))
+
+echo "Assigned Ports - HTTPS: $HTTPS_PORT, HTTP: $HTTP_PORT, Client Dev Server: $CLIENT_PORT"
 
 # Resolve absolute path for ROOT
 mkdir -p "$OUTPUT_PATH"
@@ -508,6 +559,23 @@ replace_namespaces() {
   local lower_name
   lower_name=$(echo "$PROJECT_NAME" | tr "[:upper:]" "[:lower:]")
   PROJECT_NAME_LOWER="$lower_name" perl -pi -e 's/\bums-client\b/$ENV{PROJECT_NAME_LOWER}-client/g' "$filepath"
+
+  # Connection String & Database Name Replacement
+  if [[ "$filepath" =~ appsettings\.json$ ]]; then
+    PROJECT_NAME="$PROJECT_NAME" perl -pi -e 's/Database=(UMS|UMSDb|UMSDB)\b/Database=$ENV{PROJECT_NAME}DB/g' "$filepath"
+  elif [[ "$filepath" =~ appsettings\.Testing\.json$ ]]; then
+    PROJECT_NAME="$PROJECT_NAME" perl -pi -e 's/Database=(UMS|UMSDbTest|UMSDBTest)\b/Database=$ENV{PROJECT_NAME}DBTest/g' "$filepath"
+  fi
+
+  # Port replacements to avoid conflicts
+  HTTPS_PORT="$HTTPS_PORT" perl -pi -e 's/https:\/\/localhost:7122/https:\/\/localhost:$ENV{HTTPS_PORT}/g' "$filepath"
+  HTTPS_PORT="$HTTPS_PORT" perl -pi -e 's/http:\/\/localhost:7122/http:\/\/localhost:$ENV{HTTPS_PORT}/g' "$filepath"
+  HTTP_PORT="$HTTP_PORT" perl -pi -e 's/http:\/\/localhost:5055/http:\/\/localhost:$ENV{HTTP_PORT}/g' "$filepath"
+  CLIENT_PORT="$CLIENT_PORT" perl -pi -e 's/http:\/\/localhost:5173/http:\/\/localhost:$ENV{CLIENT_PORT}/g' "$filepath"
+
+  if [[ "$filepath" =~ vite\.config\.ts$ ]]; then
+    CLIENT_PORT="$CLIENT_PORT" perl -pi -e 's/plugins: \[react\(\)\]/plugins: [react()],\n  server: {\n    port: $ENV{CLIENT_PORT}\n  }/g' "$filepath"
+  fi
 }
 
 write_template_file() {
@@ -573,6 +641,16 @@ fi
 echo "Restoring and building solution..."
 run_dotnet restore
 run_dotnet build
+
+echo "Checking for dotnet-ef tool..."
+if ! command -v dotnet-ef &>/dev/null; then
+  echo "Installing dotnet-ef tool globally..."
+  dotnet tool install -g dotnet-ef || echo "Warning: dotnet-ef installation failed, attempting to run anyway..."
+fi
+
+echo "Applying EF Core Migrations..."
+dotnet ef database update --project "$ROOT/$PROJECT_NAME.Infrastructure" --startup-project "$ROOT/$PROJECT_NAME.API"
+if [ $? -ne 0 ]; then echo "Error: EF Core Migration failed." >&2; exit 1; fi
 
 popd >/dev/null
 printf 'Scaffold complete: %s\n' "$ROOT"

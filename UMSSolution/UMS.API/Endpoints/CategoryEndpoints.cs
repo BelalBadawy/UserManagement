@@ -10,6 +10,7 @@ using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
+using UMS.Application.Features.Categories.Queries.ExportCategories;
 using UMS.Application.Authorization;
 
 namespace UMS.API.Endpoints
@@ -41,6 +42,42 @@ namespace UMS.API.Endpoints
             .Produces<IResponseWrapper<PagedResult<CategoryResponse>>>()
             .WithName("GetCategoriesPaged")
             .AllowAnonymous();
+
+            group.MapGet("/export", async (
+                ISender sender,
+                string? searchTerm,
+                bool? isActive,
+                string? sortBy,
+                string? sortDirection,
+                string? exportFormat,
+                CancellationToken ct) =>
+            {
+                var query = new ExportCategoriesQuery
+                {
+                    SearchTerm = searchTerm,
+                    IsActive = isActive,
+                    SortBy = sortBy,
+                    SortDirection = sortDirection,
+                    ExportFormat = exportFormat ?? "excel"
+                };
+                var response = await sender.Send(query, ct);
+                if (!response.IsSuccessful || response.Data == null)
+                {
+                    return response.ToApiResult();
+                }
+
+                var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+                var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var extension = isPdf ? "pdf" : "xlsx";
+                var fileName = $"Categories_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+                return Results.File(response.Data, contentType, fileName);
+            })
+            .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+            .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+            .WithName("ExportCategories")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
 
             group.MapGet("/for-list", async (ISender sender, CancellationToken ct) =>
             {

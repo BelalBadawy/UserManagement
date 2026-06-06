@@ -1,4 +1,4 @@
-﻿using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Pagination;
 using UMS.Application.Features.Users.Commands;
 using UMS.Application.Features.Users.Commands.DisableTwoFactorAuth;
 using UMS.Application.Features.Users.Commands.Logout;
@@ -15,6 +15,8 @@ namespace UMS.Application.Features.Users
         // Start
         Task<IResponseWrapper<UserResponse>> GetUserByIdAsync(int userId);
         Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct);
+        Task<IResponseWrapper<List<UserExportResponse>>> GetUsersListAsync(PagedFilterRequest filter, CancellationToken ct);
+        Task<byte[]> ExportUsersAsync(List<UserExportResponse> data, string format, CancellationToken ct);
         Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword);
         Task<IResponseWrapper> ChangeUserStatusAsync(ChangeUserStatusRequest changeUserStatus);
         Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId);

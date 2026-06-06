@@ -205,3 +205,20 @@ export function useDeleteUser() {
     },
   });
 }
+
+export function useUserLookups() {
+  return useQuery({
+    queryKey: ['users', 'lookup'],
+    queryFn: async () => {
+      const response = await usersApi.getPagedList({ pageNumber: 1, pageSize: 100, sortBy: 'id', sortDirection: 'asc' });
+      if (!response.isSuccessful || !response.data) {
+        throw new Error(response.messages[0] || 'Failed to retrieve users for lookup.');
+      }
+      return response.data.data.map(u => ({
+        id: u.id,
+        fullName: u.fullName,
+        email: u.email,
+      }));
+    },
+  });
+}

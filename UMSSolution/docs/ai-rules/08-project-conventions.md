@@ -51,5 +51,6 @@
 
 - **No N+1 Queries:** Database operations must use EF Core query projections `.Select(x => new Dto(...))` to load related records in a single database transaction. Avoid calling `.Include` followed by loops.
 - **Required Pagination:** All list endpoints (e.g. `/users`, `/categories/paged`) must accept paging filters (`pageNumber`, `pageSize`) and return wrapped records matching the `PagedResult<T>` structure.
+- **Standard Exports:** All paged list endpoints must have a corresponding `/export` endpoint that accepts the same filter parameters (ignoring pagination limits) and returns a binary file via `Results.File()`.
 - **Asynchronous Stack:** All execution paths must run asynchronously (e.g., utilizing `ValueTask` or `Task`) to prevent blocking execution threads on I/O.
 - **Reference Data Caching:** Use `ICacheService` to cache and retrieve read-heavy, low-frequency data (such as product categories or roles lookup catalogs). Caches must be updated or invalidated on mutations.

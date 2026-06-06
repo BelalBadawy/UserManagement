@@ -1,4 +1,4 @@
-﻿using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Pagination;
 using UMS.Application.Features.Users.Models.Responses;
 
 namespace UMS.Application.Features.Users.Queries
@@ -8,13 +8,9 @@ namespace UMS.Application.Features.Users.Queries
         public PagedFilterRequest PagedFilterRequest { get; set; }
     }
 
-    public class GetUsersPagedQueryHandler : IRequestHandler<GetUsersPagedQuery, IResponseWrapper<PagedResult<UserResponse>>>
+    public class GetUsersPagedQueryHandler(IUserService userService) : IRequestHandler<GetUsersPagedQuery, IResponseWrapper<PagedResult<UserResponse>>>
     {
-        private readonly IUserService _userService;
-        public GetUsersPagedQueryHandler(IUserService userService)
-        {
-            _userService = userService;
-        }
+        private readonly IUserService _userService = userService;
         public async ValueTask<IResponseWrapper<PagedResult<UserResponse>>> Handle(GetUsersPagedQuery request, CancellationToken cancellationToken)
         {
             return await _userService.GetUsersPagedQueryAsync(request.PagedFilterRequest, cancellationToken);

@@ -11,6 +11,7 @@ using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Features.Users.Queries;
+using UMS.Application.Features.Users.Queries.ExportUsers;
 using UMS.Application.Features.Users.Commands.DeactivateUser;
 
 namespace WebApi.Endpoints;
@@ -36,23 +37,65 @@ public static class UserEndpoints
         group.MapGet("{userId:int}", async (int userId, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUserByIdQuery { UserId = userId }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<UserResponse>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapGet("paged-list", async ([AsParameters] PagedFilterRequest query, ISender sender, CancellationToken ct) =>
+        group.MapGet("paged", async ([AsParameters] PagedFilterRequest query, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUsersPagedQuery { PagedFilterRequest = query }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<PagedResult<UserResponse>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
+        group.MapGet("export", async (
+            string? searchTerm,
+            bool? isActive,
+            bool? isLocked,
+            int? roleId,
+            string? sortBy,
+            string? sortDirection,
+            string? exportFormat,
+            ISender sender,
+            CancellationToken ct) =>
+        {
+            var query = new ExportUsersQuery
+            {
+                PagedFilterRequest = new PagedFilterRequest
+                {
+                    SearchTerm = searchTerm,
+                    IsActive = isActive,
+                    IsLocked = isLocked,
+                    RoleId = roleId,
+                    SortBy = sortBy,
+                    SortDirection = sortDirection
+                },
+                ExportFormat = exportFormat ?? "excel"
+            };
+            var response = await sender.Send(query, ct);
+            if (!response.IsSuccessful || response.Data == null)
+            {
+                return response.ToApiResult();
+            }
+
+            var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+            var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            var extension = isPdf ? "pdf" : "xlsx";
+            var fileName = $"Users_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+            return Results.File(response.Data, contentType, fileName);
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
+          .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+          .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+          .WithName("ExportUsers");
+
         group.MapPut("update", async (UpdateUserRequest updateUser, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new UpdateUserCommand { UpdateUser = updateUser }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
@@ -60,14 +103,14 @@ public static class UserEndpoints
         group.MapPut("change-password", async (ChangePasswordRequest changePassword, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new ChangeUserPasswordCommand { ChangePassword = changePassword }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
         group.MapPut("change-status", async (ChangeUserStatusRequest changeUserStatus, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new ChangeUserStatusCommand { ChangeUserStatus = changeUserStatus }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
@@ -93,7 +136,7 @@ public static class UserEndpoints
         group.MapGet("roles/{userId:int}", async (int userId, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUserRolesQuery { UserId = userId }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<List<UserRoleViewModel>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);

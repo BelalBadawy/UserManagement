@@ -204,6 +204,50 @@ Phase 1: Custom Toast Notification System
 - [x] Update `docs/source-of-truth.md` and `docs/task_plan.md`
 - **Status:** complete
 
+## Audit Logs Search Input Fix Flow Phases
 
+### Phase 22: Audit Logs Search Input Fix
+- [x] Introduced local `searchInput` state in `AuditLogsManagement.tsx` to handle keystroke updates smoothly.
+- [x] Implemented debounced effect (400ms delay) that updates browser search params and resets page index to 1.
+- [x] Provided proper cleanup return in the effect `clearTimeout(timer)` to prevent memory leaks.
+- [x] Implemented RTL integration tests in `AuditLogsManagement.test.tsx` verifying initial hydration, typing state updates, and debounced URL propagation.
+- [x] Verify production compilation (`npm run build`) and zero lint warnings.
+- **Status:** complete
 
+## Advanced Filters to Audit Logs Flow Phases
+
+### Phase 23: Advanced Filters to Audit Logs
+- [x] Extended `GetAuditTrailsPagedQuery` class, service interfaces, service classes, and endpoint mapping to support TableName, EntityId, ActionTypes, FromDate, and ToDate filters.
+- [x] Configured exact match on TableName, substring database containment check on `PrimaryKey` for EntityId, comma-separated enum parser for ActionTypes, and inclusive date boundary range parsing (adjusting `toDate` to end of day).
+- [x] Created custom query hook `useAuditLogs` in `useAuditLogs.ts` mapping server state keys.
+- [x] Integrated `useAuditLogs` hook and batch URL parameter helper `updateUrlParams` in `AuditLogsManagement.tsx` to prevent search parameter overwrites.
+- [x] Conformed to zero warnings ESLint checks using React's render-phase state adjustment pattern.
+- [x] Updated unit tests in `AuditLogsManagement.test.tsx` verifying TableName selects, Action Badges clicks, and Date picker inputs.
+- [x] Confirm all 242 backend tests and 14 frontend tests pass cleanly.
+- **Status:** complete
+
+## User Filter in Admin Audit Logs Flow Phases
+
+### Phase 24: User Filter in Admin Audit Logs
+- [x] Extended `GetAuditTrailsPagedQuery` and endpoint mapping with optional `UserId` parameter.
+- [x] Implemented exact match filtering by `UserId` in `AuditTrailService`.
+- [x] Extended `AuditLogsFilterRequest` model and `useAuditLogs` query keys to map `userId`.
+- [x] Created lightweight `useUserLookups` hook in `useUsers.ts` querying users with a limit of 1000 and without heavy parallel role requests.
+- [x] Rendered Radix `<Select data-testid="user-select">` dropdown filter bound directly to `userId` URL parameter in `AuditLogsManagement.tsx`.
+- [x] Updated Vitest unit tests in `AuditLogsManagement.test.tsx` to mock lookups and check user dropdown updates and parameter clearing during resets.
+- [x] Verified all 242 backend tests and 15 frontend tests pass cleanly with zero ESLint warnings and successful production builds.
+- **Status:** complete
+
+## Enforce yyyy/MM/dd Date Format in Audit Logs Flow Phases
+
+### Phase 25: Enforce yyyy/MM/dd Date Format in Audit Logs
+- [x] Installed `date-fns` and `react-day-picker` packages.
+- [x] Imported standard `DayPicker` stylesheet in `index.css`.
+- [x] Created `DatePicker` UI component under `src/components/ui/` with custom dropdown calendar layout.
+- [x] Refactored `AuditLogsManagement.tsx` to bind date filters to the new `DatePicker` and serialize date URL params as `yyyy/MM/dd` strings.
+- [x] Mocked the new `DatePicker` component inside `AuditLogsManagement.test.tsx` and modified date format assertions to check for slash parameters.
+- [x] Fixed ESLint `any` errors and unused typescript compilation warning issues.
+- [x] Modified C# backend `AuditTrailService.cs` to explicitly parse date inputs using `DateTime.TryParseExact` with `"yyyy/MM/dd"` format and `CultureInfo.InvariantCulture`.
+- [x] Confirmed all 474 backend tests and 15 frontend tests pass cleanly with successful build/lint checks.
+- **Status:** complete
 

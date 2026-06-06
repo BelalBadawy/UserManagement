@@ -289,4 +289,28 @@ public class CategoryEndpointsTests : ApiTestBase
         deletedCategory.Should().NotBeNull();
         deletedCategory!.SoftDeleted.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Export_categories_excel_should_return_file_bytes()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
+        
+        var response = await Client.GetAsync("/api/v1/categories/export?exportFormat=excel");
+        var errorContent = await response.Content.ReadAsStringAsync();
+        
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    [Fact]
+    public async Task Export_categories_pdf_should_return_file_bytes()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
+        
+        var response = await Client.GetAsync("/api/v1/categories/export?exportFormat=pdf");
+        var errorContent = await response.Content.ReadAsStringAsync();
+        
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/pdf");
+    }
 }

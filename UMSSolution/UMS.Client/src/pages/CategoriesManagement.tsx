@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
+import { categoriesApi } from '../lib/categories-api';
 import type { CategoryResponse } from '../lib/categories-api';
 import { 
   Plus, Edit2, Trash2, ShieldCheck, AlertTriangle, 
@@ -24,6 +25,8 @@ import {
   useDeleteCategory 
 } from '../hooks/useCategories';
 import { DataTablePagination } from '../components/ui/DataTablePagination';
+import { useToast } from '../components/ui/toast';
+import DataTableExport from '../components/ui/DataTableExport';
 
 const columns: ColumnDef<CategoryResponse>[] = [
   { accessorKey: 'id', header: 'ID' },
@@ -47,13 +50,31 @@ export default function CategoriesManagement() {
   const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
   const statusFilter = (searchParams.get('status') || 'all') as 'all' | 'active' | 'inactive';
 
-  // Search input state (local to prevent queries on keystroke)
-  const [searchInput, setSearchInput] = useState(searchTerm);
+  // Local filter states
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const [localStatus, setLocalStatus] = useState(statusFilter);
 
-  // Synchronize local search input if URL search term changes
-  useEffect(() => {
-    setSearchInput(searchTerm);
-  }, [searchTerm]);
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search: searchTerm,
+    status: statusFilter,
+  });
+
+  if (
+    searchTerm !== prevParams.search ||
+    statusFilter !== prevParams.status
+  ) {
+    setPrevParams({
+      search: searchTerm,
+      status: statusFilter,
+    });
+    setLocalSearch(searchTerm);
+    setLocalStatus(statusFilter);
+  }
+
+  const isDirty =
+    localSearch.trim() !== searchTerm ||
+    localStatus !== statusFilter;
 
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
@@ -68,6 +89,8 @@ export default function CategoriesManagement() {
   const [formSortOrder, setFormSortOrder] = useState<number>(0);
   const [formIsActive, setFormIsActive] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isExporting, setIsExporting] = useState(false);
+  const toast = useToast();
 
   // API Hooks
   const isActiveParam = statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : null;
@@ -149,30 +172,30 @@ export default function CategoriesManagement() {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSearchParams(prev => {
-      if (searchInput.trim()) {
-        prev.set('search', searchInput.trim());
+      const next = new URLSearchParams(prev);
+      if (localSearch.trim()) {
+        next.set('search', localSearch.trim());
       } else {
-        prev.delete('search');
+        next.delete('search');
       }
-      prev.set('page', '1');
-      return prev;
+
+      if (localStatus && localStatus !== 'all') {
+        next.set('status', localStatus);
+      } else {
+        next.delete('status');
+      }
+      next.set('page', '1');
+      return next;
     });
   };
 
   const handleResetFilters = () => {
-    setSearchInput('');
-    setSearchParams(prev => {
-      prev.delete('search');
-      prev.delete('page');
-      prev.delete('size');
-      prev.delete('status');
-      prev.delete('sortBy');
-      prev.delete('sortDir');
-      return prev;
-    });
+    setLocalSearch('');
+    setLocalStatus('all');
+    setSearchParams(new URLSearchParams());
   };
 
   const toggleSort = (field: string) => {
@@ -325,30 +348,22 @@ export default function CategoriesManagement() {
       {/* Search & Filters */}
       <Card className="bg-white border-neutral-200 shadow-sm rounded-xl">
         <CardContent className="p-4">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
+          <form onSubmit={handleApplyFilters} className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search categories by name or slug..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] bg-neutral-50/50"
               />
             </div>
             
             <div className="flex gap-2 shrink-0">
               <select
-                value={statusFilter}
-                onChange={(e) => setSearchParams(prev => {
-                  if (e.target.value === 'all') {
-                    prev.delete('status');
-                  } else {
-                    prev.set('status', e.target.value);
-                  }
-                  prev.set('page', '1');
-                  return prev;
-                })}
+                value={localStatus}
+                onChange={(e) => setLocalStatus(e.target.value as 'all' | 'active' | 'inactive')}
                 className="border border-neutral-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 font-medium text-neutral-700"
               >
                 <option value="all">All Statuses</option>
@@ -356,13 +371,32 @@ export default function CategoriesManagement() {
                 <option value="inactive">Inactive Only</option>
               </select>
 
-              <Button type="submit" variant="default" className="rounded-xl px-5">
-                Search
+              <Button type="submit" variant="default" disabled={!isDirty} className="rounded-xl px-5 disabled:opacity-50 disabled:pointer-events-none">
+                Apply Filters
               </Button>
               <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-4 flex items-center gap-1">
                 <RotateCcw className="w-3.5 h-3.5" />
-                Reset
+                Reset Filters
               </Button>
+              <DataTableExport
+                isExporting={isExporting}
+                onExport={async (format) => {
+                  try {
+                    setIsExporting(true);
+                    await categoriesApi.exportCategories({
+                      searchTerm: searchTerm || undefined,
+                      isActive: isActiveParam,
+                      sortBy: sortBy || undefined,
+                      sortDirection: sortDirection || undefined,
+                      exportFormat: format
+                    });
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : String(err));
+                  } finally {
+                    setIsExporting(false);
+                  }
+                }}
+              />
             </div>
           </form>
         </CardContent>

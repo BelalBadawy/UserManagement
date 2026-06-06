@@ -145,9 +145,17 @@ Governs tracking database events, inspecting mutated properties, identifying rem
 
 * **List & Traversal Flow**:
   1. The Admin navigates to `/admin/audit-logs`. The route is guarded at the routing tier to only allow users possessing `Permission.Identity.AuditTrails.Read`.
-  2. On load, the page dispatches a paginated request `GET /api/v1/audit-logs` with `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, and `searchTerm`.
-  3. The page displays log events (Log ID, Affected Table, Event Type, Actor Email, IP Address, Timestamp) in a structured table.
-  4. Users can sort by ID, Affected Table, Event Type, or Timestamp, and filter logs dynamically using the real-time search bar.
+  2. On load, the page parses URL query parameters (`page`, `size`, `search`, `tableName`, `entityId`, `actionTypes`, `fromDate`, `toDate`, `userId`) to initialize query and filtering states reactively.
+  3. The page presents a premium advanced filter bar including:
+     - **General Search**: Text input targeting Actor Email or IP Address, utilizing local state and 400ms debounce sync to the URL to prevent typing freezes.
+     - **Table Name Filter**: A Shadcn/Radix select dropdown to filter by specific affected tables (e.g., *Category*, *ApplicationUser*, *ApplicationRole*), updating URL parameters immediately.
+     - **Entity ID Search**: Text input to match database serialized primary keys via safe string contains checks, utilizing local state and 400ms debounce updates.
+     - **Event Type Filters**: Badge buttons supporting multi-select checks for *Create*, *Update*, and *Delete* actions, updating URL query strings immediately.
+     - **Date Range Bounds**: Shadcn `<DatePicker>` inputs (`fromDate` and `toDate`) filtering records within inclusive ranges (backend adjusts `toDate` to the end of the day).
+     - **User Lookup dropdown**: A Shadcn/Radix select dropdown dynamically populated by a lightweight lookups hook `useUserLookups` (which queries the first page of users up to 1000 without fetching heavy user roles), allowing admins to filter logs of a specific user immediately.
+     - **Reset Filters**: Action button to clear all active search text, checkboxes, dropdown options, and date constraints, resetting pagination back to Page 1.
+  4. The page fetches logs using custom query hook `useAuditLogs`, dispatching `GET /api/v1/audit-logs` with `pageNumber`, `pageSize`, `sortBy`, `sortDirection`, `searchTerm`, `tableName`, `entityId`, `actionTypes`, `fromDate`, `toDate`, and `userId`.
+  5. Header columns are interactive; clicking them triggers sorting dynamically, syncing to URL parameters and refetching from the API.
   
 * **Guarded Action Operations**:
   1. **Inspection Sheet**: Clicking "View Details" opens a side-panel `<Sheet>` showing advanced details: affected columns list (as labels), and an interactive `<EntityDiffViewer>` component containing:
@@ -276,13 +284,19 @@ Governs tracking database events, inspecting mutated properties, identifying rem
 
 #### `GET /api/v1/audit-logs`
 - **Access**: Authenticated, requires `Permission.Identity.AuditTrails.Read`
-- **Purpose**: Retrieves a paged, sorted, and searchable list of audit trails.
+- **Purpose**: Retrieves a paged, sorted, and searchable list of audit trails with advanced filters.
 - **Request Parameters**:
   - `pageNumber` (integer, query parameter): Page index.
   - `pageSize` (integer, query parameter): Page capacity.
   - `sortBy` (string, query parameter): Field name to sort by (`tablename`, `type`, `datetime`, `id`).
   - `sortDirection` (string, query parameter): Sort direction (`asc` or `desc`).
-  - `searchTerm` (string, query parameter): Search query to filter audit logs by table name, IP address, or user email.
+  - `searchTerm` (string, query parameter): Search query to filter audit logs by IP address or actor user email.
+  - `tableName` (string, optional query parameter): Exact affected database table name to filter by (e.g., `Category`, `ApplicationUser`, `ApplicationRole`).
+  - `entityId` (string, optional query parameter): Substring to match against the database serialized primary key.
+  - `actionTypes` (string, optional query parameter): Comma-separated list of audit action types (e.g., `Create,Update,Delete`).
+  - `fromDate` (string, optional query parameter): Start boundary date (format: `yyyy/MM/dd`) for inclusive date range filtering.
+  - `toDate` (string, optional query parameter): End boundary date (format: `yyyy/MM/dd`) for inclusive date range filtering (adjusted to the end of the day on the backend).
+  - `userId` (integer, optional query parameter): Exact actor user ID filter.
 - **Response Wrapper**: Returns a standard `ResponseWrapper` containing the paginated data list of `AuditTrailResponse`.
 
 ---
@@ -493,6 +507,12 @@ The `useAuth()` context hook provides a `hasPermission(permissionName: string)` 
   - **Safe Date Constraint**: Changed lockout end date to `DateTimeOffset.UtcNow.AddYears(1000)` to bypass SQL Server MaxValue conversion/overflow bugs.
   - **Testing**: Updated Mock assertions in `UserServiceTests.cs` and verified all backend unit tests pass cleanly.
   - **Documentation**: Updated `docs/task_plan.md` and `docs/source-of-truth.md` specifications.
+- **2026-06-05**: Added Advanced Filtering, Debounced Search, and User Lookups to Audit Logs.
+  - **Debounced Search**: Implemented a local `searchInput` state in `AuditLogsManagement.tsx` with a 400ms debounce timer for actor email/IP address search to prevent browser thread freeze.
+  - **Advanced Filters**: Added backend query support and frontend controls for Table Name (exact match dropdown), Entity ID (serialized primary key substring search via safe database `.Contains`), Action Type (multi-select badged toggles supporting comma-separated parameter parsing), and inclusive Date Range bounds (adjusting `toDate` to end of day).
+  - **User Dropdown Filter**: Created a lightweight `useUserLookups` React Query hook requesting a flat, role-free page of 1000 users. Integrated a Radix-based `<Select>` dropdown to filter audit trail records by actor User ID instantly.
+  - **URL Sync**: All filters and search values are synchronized with URL query string parameters via `updateUrlParams` to support refresh persistence and direct links.
+  - **Verification**: Wrote comprehensive Vitest unit/integration tests in `AuditLogsManagement.test.tsx` and custom hook tests, verified zero ESLint warnings, and ran all 242 backend tests and 15 frontend tests successfully.
 
 
 

@@ -99,3 +99,12 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
 - **ARIA Annotations:** Always supply accessible ARIA descriptions (`aria-label`, `aria-describedby`) for interactive buttons and dialog inputs.
 - **Error Boundaries:** Every major page entry point must be wrapped within or near a React Error Boundary to catch and handle rendering crashes gracefully.
 - **ESLint Conformance:** The codebase maintains zero warnings. All ESLint rules must be strictly adhered to during development.
+
+---
+
+## 7. Date Handling Standards
+
+- **Forbidden Native Inputs:** Basic HTML `<input type="date">` inputs are strictly forbidden due to browser locale and formatting inconsistencies.
+- **DatePicker Component:** All date input and selection fields must use the custom `<DatePicker>` component (located at `src/components/ui/date-picker.tsx` which wraps `react-day-picker` and uses `date-fns` for internal date operations).
+- **Date Format Standard:** Both user-facing displays and API-transmitted/URL date query parameters must strictly enforce the `yyyy/MM/dd` format (e.g. `2026/06/05` instead of `2026-06-05`).
+- **Backend Date Parsing:** The backend must safely parse date filters passed from the client using `DateTime.TryParseExact` with `"yyyy/MM/dd"` format and `CultureInfo.InvariantCulture` to prevent locale-specific server culture parsing issues.
