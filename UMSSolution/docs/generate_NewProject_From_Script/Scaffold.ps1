@@ -11,6 +11,14 @@ if ($ProjectName -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') {
     throw "ProjectName must be a valid C# root namespace: letters, digits, underscore, and not starting with a digit."
 }
 
+# Generate random ports to prevent port conflicts when running multiple scaffolded projects
+$HttpsPort = Get-Random -Minimum 7100 -Maximum 7299
+$HttpPort = Get-Random -Minimum 5000 -Maximum 5099
+$ClientPort = Get-Random -Minimum 5100 -Maximum 5199
+
+Write-Host "Assigned Ports - HTTPS: $HttpsPort, HTTP: $HttpPort, Client Dev Server: $ClientPort" -ForegroundColor Cyan
+
+
 function Invoke-Step([string]$Command, [string[]]$Arguments) {
     Write-Host "> dotnet $Command $($Arguments -join ' ')"
     & dotnet $Command @Arguments
@@ -20,6 +28,7 @@ function Invoke-Step([string]$Command, [string[]]$Arguments) {
 function Get-ProjectDir([string]$Suffix) { return "$ProjectName.$Suffix" }
 function Get-ProjectPath([string]$Suffix) { return Join-Path (Get-ProjectDir $Suffix) "$ProjectName.$Suffix.csproj" }
 
+if ($OutputPath -and -not (Test-Path $OutputPath)) { New-Item -ItemType Directory -Force -Path $OutputPath | Out-Null }
 $Root = Join-Path (Resolve-Path $OutputPath).Path $ProjectName
 if (Test-Path $Root) { throw "Output directory already exists: $Root" }
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
@@ -93,6 +102,23 @@ try {
         $rendered = [regex]::Replace($rendered, '(?i)InternalsVisibleTo\("UMS\.', "InternalsVisibleTo(`"$ProjectName.")
         $rendered = [regex]::Replace($rendered, '\bUMS\.(Domain|Application|Infrastructure|API|Client)\b', "${ProjectName}.`$1")
         $rendered = [regex]::Replace($rendered, '\bums-client\b', ($ProjectName.ToLower() + "-client"))
+        
+        # Port replacements to avoid conflicts
+        $rendered = $rendered -replace 'https://localhost:7122', "https://localhost:$HttpsPort"
+        $rendered = $rendered -replace 'http://localhost:7122', "http://localhost:$HttpsPort"
+        $rendered = $rendered -replace 'http://localhost:5055', "http://localhost:$HttpPort"
+        $rendered = $rendered -replace 'http://localhost:5173', "http://localhost:$ClientPort"
+        if ($RelativePath -match 'vite\.config\.ts$') {
+            $rendered = $rendered -replace 'plugins: \[react\(\)\]', "plugins: [react()],`r`n  server: {`r`n    port: $ClientPort`r`n  }"
+        }
+        
+        # Connection String & Database Name Replacement
+        if ($RelativePath -match 'appsettings\.json$') {
+            $rendered = [regex]::Replace($rendered, 'Database=(UMS|UMSDb|UMSDB)\b', "Database=${ProjectName}DB")
+        }
+        elseif ($RelativePath -match 'appsettings\.Testing\.json$') {
+            $rendered = [regex]::Replace($rendered, 'Database=(UMS|UMSDbTest|UMSDBTest)\b', "Database=${ProjectName}DBTest")
+        }
         
         [System.IO.File]::WriteAllText($target, $rendered, [System.Text.UTF8Encoding]::new($false))
     }
@@ -826,6 +852,30 @@ public class CategoryEndpointsTests : ApiTestBase
         var deletedCategory = await Verifier.GetCategoryByIdIncludingSoftDeletedAsync(categoryToDelete.Id);
         deletedCategory.Should().NotBeNull();
         deletedCategory!.SoftDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Export_categories_excel_should_return_file_bytes()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
+        
+        var response = await Client.GetAsync("/api/v1/categories/export?exportFormat=excel");
+        var errorContent = await response.Content.ReadAsStringAsync();
+        
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    [Fact]
+    public async Task Export_categories_pdf_should_return_file_bytes()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
+        
+        var response = await Client.GetAsync("/api/v1/categories/export?exportFormat=pdf");
+        var errorContent = await response.Content.ReadAsStringAsync();
+        
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/pdf");
     }
 }
 '@
@@ -1587,7 +1637,7 @@ public class UserEndpointsTests : ApiTestBase
         var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read);
         UseUserClient(authMode, requiredPermission);
 
-        var response = await Client.GetAsync("/api/v1/users/paged-list?pageNumber=1&pageSize=10&sortBy=fullname&sortDirection=asc");
+        var response = await Client.GetAsync("/api/v1/users/paged?pageNumber=1&pageSize=10&sortBy=fullname&sortDirection=asc");
 
         response.StatusCode.Should().Be(expectedStatusCode);
 
@@ -1713,6 +1763,34 @@ public class UserEndpointsTests : ApiTestBase
         {
             return;
         }
+
+        var updatedUser = await Verifier.GetUserByIdAsync(user.Id);
+        updatedUser.Should().NotBeNull();
+        updatedUser!.IsActive.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("anonymous", HttpStatusCode.Unauthorized)]
+    [InlineData("low-privilege", HttpStatusCode.Forbidden)]
+    [InlineData("privileged", HttpStatusCode.OK)]
+    public async Task Deactivate_user_should_follow_authorization_matrix(string authMode, HttpStatusCode expectedStatusCode)
+    {
+        var user = await Seeder.SeedUserAsync($"deactivate-{Guid.NewGuid():N}@example.com", "Admin@123", ["Basic"]);
+        var requiredPermission = AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update);
+        UseUserClient(authMode, requiredPermission);
+
+        var response = await Client.PutAsync($"/api/v1/users/{user.Id}/deactivate", null);
+
+        response.StatusCode.Should().Be(expectedStatusCode);
+
+        if (expectedStatusCode != HttpStatusCode.OK)
+        {
+            return;
+        }
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<object>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
 
         var updatedUser = await Verifier.GetUserByIdAsync(user.Id);
         updatedUser.Should().NotBeNull();
@@ -2939,6 +3017,7 @@ using UMS.Application.Authorization;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+using UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails;
 
 namespace UMS.API.Endpoints
 {
@@ -2949,14 +3028,72 @@ namespace UMS.API.Endpoints
             var group = app.MapGroup("api/v{version:apiVersion}/audit-logs")
                 .WithTags("AuditLogs");
 
-            group.MapGet("/", async (ISender sender, [AsParameters] PagedFilterRequest filter, CancellationToken ct) =>
+            group.MapGet("paged", async (
+                ISender sender, 
+                [AsParameters] PagedFilterRequest filter, 
+                string? tableName,
+                string? entityId,
+                string? actionTypes,
+                string? fromDate,
+                string? toDate,
+                int? userId,
+                CancellationToken ct) =>
             {
-                var query = new GetAuditTrailsPagedQuery { PagedFilterRequest = filter };
+                var query = new GetAuditTrailsPagedQuery 
+                {
+                    PagedFilterRequest = filter,
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId
+                };
                 var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
             .Produces<IResponseWrapper<PagedResult<AuditTrailResponse>>>()
             .WithName("GetAuditTrailsPaged")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.AuditTrails, AppAction.Read));
+
+            group.MapGet("/export", async (
+                ISender sender,
+                string? tableName,
+                string? entityId,
+                string? actionTypes,
+                string? fromDate,
+                string? toDate,
+                int? userId,
+                string? exportFormat,
+                CancellationToken ct) =>
+            {
+                var query = new ExportAuditTrailsQuery
+                {
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId,
+                    ExportFormat = exportFormat ?? "excel"
+                };
+                var response = await sender.Send(query, ct);
+                if (!response.IsSuccessful || response.Data == null)
+                {
+                    return response.ToApiResult();
+                }
+
+                var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+                var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var extension = isPdf ? "pdf" : "xlsx";
+                var fileName = $"AuditLogs_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+                return Results.File(response.Data, contentType, fileName);
+            })
+            .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+            .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+            .WithName("ExportAuditTrails")
             .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.AuditTrails, AppAction.Read));
 
             return app;
@@ -2977,6 +3114,7 @@ using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
+using UMS.Application.Features.Categories.Queries.ExportCategories;
 using UMS.Application.Authorization;
 
 namespace UMS.API.Endpoints
@@ -3008,6 +3146,42 @@ namespace UMS.API.Endpoints
             .Produces<IResponseWrapper<PagedResult<CategoryResponse>>>()
             .WithName("GetCategoriesPaged")
             .AllowAnonymous();
+
+            group.MapGet("/export", async (
+                ISender sender,
+                string? searchTerm,
+                bool? isActive,
+                string? sortBy,
+                string? sortDirection,
+                string? exportFormat,
+                CancellationToken ct) =>
+            {
+                var query = new ExportCategoriesQuery
+                {
+                    SearchTerm = searchTerm,
+                    IsActive = isActive,
+                    SortBy = sortBy,
+                    SortDirection = sortDirection,
+                    ExportFormat = exportFormat ?? "excel"
+                };
+                var response = await sender.Send(query, ct);
+                if (!response.IsSuccessful || response.Data == null)
+                {
+                    return response.ToApiResult();
+                }
+
+                var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+                var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var extension = isPdf ? "pdf" : "xlsx";
+                var fileName = $"Categories_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+                return Results.File(response.Data, contentType, fileName);
+            })
+            .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+            .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+            .WithName("ExportCategories")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Read));
 
             group.MapGet("/for-list", async (ISender sender, CancellationToken ct) =>
             {
@@ -3161,6 +3335,8 @@ using UMS.Application.Features.Users.Commands.SetupTwoFactorAuth;
 using UMS.Application.Features.Users.Models.Requests;
 using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Features.Users.Queries;
+using UMS.Application.Features.Users.Queries.ExportUsers;
+using UMS.Application.Features.Users.Commands.DeactivateUser;
 
 namespace WebApi.Endpoints;
 
@@ -3185,23 +3361,65 @@ public static class UserEndpoints
         group.MapGet("{userId:int}", async (int userId, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUserByIdQuery { UserId = userId }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<UserResponse>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
-        group.MapGet("paged-list", async ([AsParameters] PagedFilterRequest query, ISender sender, CancellationToken ct) =>
+        group.MapGet("paged", async ([AsParameters] PagedFilterRequest query, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUsersPagedQuery { PagedFilterRequest = query }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<PagedResult<UserResponse>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
+        group.MapGet("export", async (
+            string? searchTerm,
+            bool? isActive,
+            bool? isLocked,
+            int? roleId,
+            string? sortBy,
+            string? sortDirection,
+            string? exportFormat,
+            ISender sender,
+            CancellationToken ct) =>
+        {
+            var query = new ExportUsersQuery
+            {
+                PagedFilterRequest = new PagedFilterRequest
+                {
+                    SearchTerm = searchTerm,
+                    IsActive = isActive,
+                    IsLocked = isLocked,
+                    RoleId = roleId,
+                    SortBy = sortBy,
+                    SortDirection = sortDirection
+                },
+                ExportFormat = exportFormat ?? "excel"
+            };
+            var response = await sender.Send(query, ct);
+            if (!response.IsSuccessful || response.Data == null)
+            {
+                return response.ToApiResult();
+            }
+
+            var isPdf = (exportFormat ?? "").Equals("pdf", StringComparison.OrdinalIgnoreCase);
+            var contentType = isPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            var extension = isPdf ? "pdf" : "xlsx";
+            var fileName = $"Users_{DateTime.UtcNow:yyyyMMddHHmmss}.{extension}";
+
+            return Results.File(response.Data, contentType, fileName);
+        }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
+          .Produces(StatusCodes.Status200OK, contentType: "application/pdf")
+          .Produces(StatusCodes.Status200OK, contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest)
+          .WithName("ExportUsers");
+
         group.MapPut("update", async (UpdateUserRequest updateUser, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new UpdateUserCommand { UpdateUser = updateUser }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
@@ -3209,17 +3427,27 @@ public static class UserEndpoints
         group.MapPut("change-password", async (ChangePasswordRequest changePassword, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new ChangeUserPasswordCommand { ChangePassword = changePassword }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
 
         group.MapPut("change-status", async (ChangeUserStatusRequest changeUserStatus, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new ChangeUserStatusCommand { ChangeUserStatus = changeUserStatus }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
           .Produces<IResponseWrapper>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
+
+        group.MapPut("{userId:int}/deactivate", async (int userId, ISender sender, CancellationToken ct) =>
+        {
+            var response = await sender.Send(new DeactivateUserCommand(userId), ct);
+            return response.ToApiResult();
+        })
+        .RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Update))
+        .WithName("DeactivateUser")
+        .Produces<IResponseWrapper>(StatusCodes.Status200OK)
+        .Produces<IResponseWrapper>(StatusCodes.Status400BadRequest);
 
         group.MapPut("user-roles", async (UpdateUserRolesRequest updateUserRoles, ISender sender, CancellationToken ct) =>
         {
@@ -3232,7 +3460,7 @@ public static class UserEndpoints
         group.MapGet("roles/{userId:int}", async (int userId, ISender sender, CancellationToken ct) =>
         {
             var response = await sender.Send(new GetUserRolesQuery { UserId = userId }, ct);
-            return response.IsSuccessful ? Results.Ok(response) : Results.NotFound(response);
+            return response.ToApiResult();
         }).RequireAuthorization(AppPermission.NameFor(AppService.Identity, AppFeature.Users, AppAction.Read))
           .Produces<IResponseWrapper<List<UserRoleViewModel>>>(StatusCodes.Status200OK)
           .Produces<IResponseWrapper>(StatusCodes.Status404NotFound);
@@ -4090,6 +4318,8 @@ public class DeleteCategoryCommandHandlerTests
 '@
     Write-TemplateFile 'UMS.Application.Tests/Handlers/Categories/CategoryQueryHandlerTests.cs' @'
 using Microsoft.EntityFrameworkCore;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
@@ -4212,14 +4442,7 @@ public class GetCategoriesPagedQueryHandlerTests
     [Fact]
     public async Task Handle_should_filter_sort_and_page_active_categories()
     {
-        await using var scope = await CategoryHandlerTestScope.CreateAsync();
-        await scope.SeedCategoryAsync("Alpha", "alpha", 3, isActive: true);
-        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
-        await scope.SeedCategoryAsync("Gamma", "gamma", 1, isActive: true);
-        await scope.SeedCategoryAsync("Alpha Hidden", "alpha-hidden", 4, isActive: false);
-        var mockCurrentUserService = new Mock<ICurrentUserService>();
-        mockCurrentUserService.Setup(s => s.IsAuthenticated()).Returns(false);
-        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext, mockCurrentUserService.Object);
+        var mockCategoryService = new Mock<ICategoryService>();
         var query = new GetCategoriesPagedQuery
         {
             PagedFilterRequest = new()
@@ -4231,6 +4454,22 @@ public class GetCategoriesPagedQueryHandlerTests
                 PageSize = 2
             }
         };
+
+        var mockPagedResult = PagedResult<CategoryResponse>.Create(
+            new List<CategoryResponse>
+            {
+                new(3, "Gamma", "gamma", null, 1, true, Array.Empty<byte>()),
+                new(2, "Beta", "beta", null, 2, true, Array.Empty<byte>())
+            },
+            3,
+            1,
+            2);
+
+        mockCategoryService
+            .Setup(s => s.GetCategoriesPagedQueryAsync(query.PagedFilterRequest, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ResponseWrapper<PagedResult<CategoryResponse>>.Success(mockPagedResult));
+
+        var handler = new GetCategoriesPagedQueryHandler(mockCategoryService.Object);
 
         var result = await handler.Handle(query, CancellationToken.None);
 
@@ -4336,6 +4575,88 @@ public class GetCategoriesPagedAdminQueryHandlerTests
         result.IsSuccessful.Should().BeTrue();
         result.Data!.TotalCount.Should().Be(3);
         result.Data.Data.Select(x => x.Name).Should().Equal("Gamma", "Beta");
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application.Tests/Handlers/Categories/ExportCategoriesQueryHandlerTests.cs' @'
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Moq;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Categories;
+using UMS.Application.Features.Categories.Queries.ExportCategories;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using Xunit;
+
+namespace UMS.Application.Tests.Handlers.Categories
+{
+    public class ExportCategoriesQueryHandlerTests
+    {
+        private readonly Mock<ICategoryService> _categoryService = new();
+
+        [Fact]
+        public async Task Handle_should_return_file_bytes_when_successful()
+        {
+            var query = new ExportCategoriesQuery
+            {
+                SearchTerm = "test",
+                IsActive = true,
+                SortBy = "name",
+                SortDirection = "asc",
+                ExportFormat = "excel"
+            };
+
+            var categories = new List<CategoryResponse>
+            {
+                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+            };
+
+            var fileBytes = new byte[] { 1, 2, 3 };
+
+            _categoryService
+                .Setup(s => s.GetCategoriesListAsync("test", true, "name", "asc", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ResponseWrapper<List<CategoryResponse>>.Success(categories));
+
+            _categoryService
+                .Setup(s => s.ExportCategoriesAsync(categories, "excel", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fileBytes);
+
+            var handler = new ExportCategoriesQueryHandler(_categoryService.Object);
+
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            result.IsSuccessful.Should().BeTrue();
+            result.Data.Should().BeEquivalentTo(fileBytes);
+            _categoryService.Verify(s => s.GetCategoriesListAsync("test", true, "name", "asc", CancellationToken.None), Times.Once);
+            _categoryService.Verify(s => s.ExportCategoriesAsync(categories, "excel", CancellationToken.None), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_should_return_failure_when_list_retrieval_fails()
+        {
+            var query = new ExportCategoriesQuery
+            {
+                SearchTerm = "test",
+                ExportFormat = "pdf"
+            };
+
+            _categoryService
+                .Setup(s => s.GetCategoriesListAsync("test", null, null, null, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ResponseWrapper<List<CategoryResponse>>.Fail("Failed", 400));
+
+            var handler = new ExportCategoriesQueryHandler(_categoryService.Object);
+
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            result.IsSuccessful.Should().BeFalse();
+            result.Messages.Should().Contain("Failed");
+            _categoryService.Verify(s => s.GetCategoriesListAsync("test", null, null, null, CancellationToken.None), Times.Once);
+            _categoryService.Verify(s => s.ExportCategoriesAsync(It.IsAny<List<CategoryResponse>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
     }
 }
 '@
@@ -4911,6 +5232,63 @@ public class ConfirmTwoFactorAuthCommandHandlerTests
     }
 }
 '@
+    Write-TemplateFile 'UMS.Application.Tests/Handlers/Users/DeactivateUserCommandHandlerTests.cs' @'
+using Moq;
+using FluentAssertions;
+using Xunit;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Users;
+using UMS.Application.Features.Users.Commands;
+using UMS.Application.Features.Users.Commands.DeactivateUser;
+
+namespace UMS.Application.Tests.Handlers.Users
+{
+    public class DeactivateUserCommandHandlerTests
+    {
+        private readonly Mock<IUserService> _userService = new();
+
+        [Fact]
+        public async Task Handle_should_delegate_deactivation_to_user_service_and_return_success_response()
+        {
+            var userId = 5;
+            var command = new DeactivateUserCommand(userId);
+            var expected = ResponseWrapper.Success("User de-activated successfully");
+
+            _userService
+                .Setup(service => service.ChangeUserStatusAsync(It.Is<ChangeUserStatusRequest>(r => r.UserId == userId && !r.ActivateOrDeactivate)))
+                .ReturnsAsync(expected);
+
+            var handler = new DeactivateUserCommandHandler(_userService.Object);
+
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            result.Should().BeSameAs(expected);
+            _userService.Verify(service => service.ChangeUserStatusAsync(It.Is<ChangeUserStatusRequest>(r => r.UserId == userId && !r.ActivateOrDeactivate)), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_should_propagate_failure_response_when_deactivation_fails()
+        {
+            var userId = 5;
+            var command = new DeactivateUserCommand(userId);
+            var expected = ResponseWrapper.Fail("User not found.", 404);
+
+            _userService
+                .Setup(service => service.ChangeUserStatusAsync(It.Is<ChangeUserStatusRequest>(r => r.UserId == userId && !r.ActivateOrDeactivate)))
+                .ReturnsAsync(expected);
+
+            var handler = new DeactivateUserCommandHandler(_userService.Object);
+
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            result.IsSuccessful.Should().BeFalse();
+            result.Messages.Should().Contain("User not found.");
+            result.StatusCode.Should().Be(404);
+            _userService.Verify(service => service.ChangeUserStatusAsync(It.Is<ChangeUserStatusRequest>(r => r.UserId == userId && !r.ActivateOrDeactivate)), Times.Once);
+        }
+    }
+}
+'@
     Write-TemplateFile 'UMS.Application.Tests/Handlers/Users/DisableTwoFactorAuthCommandHandlerTests.cs' @'
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Users;
@@ -5001,6 +5379,87 @@ public class EnableTwoFactorAuthCommandHandlerTests
 
         result.Should().BeSameAs(expected);
         result.Data.Should().HaveCount(10);
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application.Tests/Handlers/Users/ExportUsersQueryHandlerTests.cs' @'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Moq;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Users;
+using UMS.Application.Features.Users.Models.Responses;
+using UMS.Application.Features.Users.Queries.ExportUsers;
+using Xunit;
+
+namespace UMS.Application.Tests.Handlers.Users
+{
+    public class ExportUsersQueryHandlerTests
+    {
+        private readonly Mock<IUserService> _userService = new();
+
+        [Fact]
+        public async Task Handle_should_return_file_bytes_when_successful()
+        {
+            var filter = new PagedFilterRequest
+            {
+                SearchTerm = "john",
+                SortBy = "email"
+            };
+
+            var query = new ExportUsersQuery
+            {
+                PagedFilterRequest = filter,
+                ExportFormat = "pdf"
+            };
+
+            var users = new List<UserExportResponse>
+            {
+                new() { Id = 1, FullName = "John Doe", Email = "john@doe.com", Roles = new List<string> { "Admin" } }
+            };
+
+            var fileBytes = new byte[] { 4, 5, 6 };
+
+            _userService
+                .Setup(s => s.GetUsersListAsync(filter, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ResponseWrapper<List<UserExportResponse>>.Success(users));
+
+            _userService
+                .Setup(s => s.ExportUsersAsync(users, "pdf", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fileBytes);
+
+            var handler = new ExportUsersQueryHandler(_userService.Object);
+
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            result.IsSuccessful.Should().BeTrue();
+            result.Data.Should().BeEquivalentTo(fileBytes);
+            _userService.Verify(s => s.GetUsersListAsync(filter, CancellationToken.None), Times.Once);
+            _userService.Verify(s => s.ExportUsersAsync(users, "pdf", CancellationToken.None), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_should_return_failure_when_list_retrieval_fails()
+        {
+            var filter = new PagedFilterRequest();
+            var query = new ExportUsersQuery { PagedFilterRequest = filter };
+
+            _userService
+                .Setup(s => s.GetUsersListAsync(filter, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ResponseWrapper<List<UserExportResponse>>.Fail("Error retrieving list", 500));
+
+            var handler = new ExportUsersQueryHandler(_userService.Object);
+
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            result.IsSuccessful.Should().BeFalse();
+            result.Messages.Should().Contain("Error retrieving list");
+            _userService.Verify(s => s.GetUsersListAsync(filter, CancellationToken.None), Times.Once);
+            _userService.Verify(s => s.ExportUsersAsync(It.IsAny<List<UserExportResponse>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
     }
 }
 '@
@@ -8567,7 +9026,77 @@ namespace UMS.Application.Features.AuditTrails
 {
     public interface IAuditTrailService
     {
-        Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct);
+        Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            string? tableName,
+            string? entityId,
+            string? actionTypes,
+            string? fromDate,
+            string? toDate,
+            int? userId,
+            CancellationToken ct);
+
+        Task<IResponseWrapper<List<AuditTrailResponse>>> GetAuditTrailsListAsync(
+            string? tableName,
+            string? entityId,
+            string? actionTypes,
+            string? fromDate,
+            string? toDate,
+            int? userId,
+            CancellationToken ct);
+
+        Task<byte[]> ExportAuditTrailsAsync(List<AuditTrailResponse> data, string format, CancellationToken ct);
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application/Features/AuditTrails/Queries/ExportAuditTrails/ExportAuditTrailsQuery.cs' @'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Mediator;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+
+namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
+{
+    public class ExportAuditTrailsQuery : IQuery<IResponseWrapper<byte[]>>
+    {
+        public string? TableName { get; set; }
+        public string? EntityId { get; set; }
+        public string? ActionTypes { get; set; }
+        public string? FromDate { get; set; }
+        public string? ToDate { get; set; }
+        public int? UserId { get; set; }
+        public string ExportFormat { get; set; } = "excel";
+    }
+
+    public class ExportAuditTrailsQueryHandler(IAuditTrailService auditTrailService)
+        : IQueryHandler<ExportAuditTrailsQuery, IResponseWrapper<byte[]>>
+    {
+        private readonly IAuditTrailService _auditTrailService = auditTrailService;
+
+        public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportAuditTrailsQuery request, CancellationToken ct)
+        {
+            var listResponse = await _auditTrailService.GetAuditTrailsListAsync(
+                request.TableName,
+                request.EntityId,
+                request.ActionTypes,
+                request.FromDate,
+                request.ToDate,
+                request.UserId,
+                ct);
+
+            if (!listResponse.IsSuccessful || listResponse.Data == null)
+            {
+                return ResponseWrapper<byte[]>.Fail(
+                    listResponse.Messages ?? new List<string> { "Failed to retrieve audit trails for export." },
+                    listResponse.StatusCode);
+            }
+
+            var fileBytes = await _auditTrailService.ExportAuditTrailsAsync(listResponse.Data, request.ExportFormat, ct);
+
+            return ResponseWrapper<byte[]>.Success(fileBytes);
+        }
     }
 }
 '@
@@ -8596,6 +9125,12 @@ namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
     public class GetAuditTrailsPagedQuery : IRequest<IResponseWrapper<PagedResult<AuditTrailResponse>>>, IValidateMe
     {
         public PagedFilterRequest PagedFilterRequest { get; set; } = new();
+        public string? TableName { get; set; }
+        public string? EntityId { get; set; }
+        public string? ActionTypes { get; set; }
+        public string? FromDate { get; set; }
+        public string? ToDate { get; set; }
+        public int? UserId { get; set; }
     }
 
     public class GetAuditTrailsPagedQueryHandler(IAuditTrailService auditTrailService)
@@ -8605,7 +9140,36 @@ namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
 
         public async ValueTask<IResponseWrapper<PagedResult<AuditTrailResponse>>> Handle(GetAuditTrailsPagedQuery request, CancellationToken ct)
         {
-            return await _auditTrailService.GetAuditTrailsPagedQueryAsync(request.PagedFilterRequest, ct);
+            return await _auditTrailService.GetAuditTrailsPagedQueryAsync(
+                request.PagedFilterRequest,
+                request.TableName,
+                request.EntityId,
+                request.ActionTypes,
+                request.FromDate,
+                request.ToDate,
+                request.UserId,
+                ct);
+        }
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application/Features/AuditTrails/Queries/GetAuditTrailsPaged/GetAuditTrailsPagedQueryValidator.cs' @'
+using FluentValidation;
+using UMS.Application.Dtos.Pagination;
+using System.Linq;
+
+namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
+{
+    public class GetAuditTrailsPagedQueryValidator : AbstractValidator<GetAuditTrailsPagedQuery>
+    {
+        public GetAuditTrailsPagedQueryValidator()
+        {
+            RuleFor(x => x.PagedFilterRequest)
+                .SetValidator(new PagedFilterValidator());
+
+            RuleFor(x => x.PagedFilterRequest.SortBy)
+                .Must(field => string.IsNullOrEmpty(field) || new[] { "tablename", "type", "datetime", "id" }.Contains(field.ToLower()))
+                .WithMessage("Invalid SortBy value");
         }
     }
 }
@@ -9136,6 +9700,77 @@ namespace UMS.Application.Features.Categories.Events
     }
 }
 '@
+    Write-TemplateFile 'UMS.Application/Features/Categories/ICategoryService.cs' @'
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+
+namespace UMS.Application.Features.Categories
+{
+    public interface ICategoryService
+    {
+        Task<IResponseWrapper<PagedResult<CategoryResponse>>> GetCategoriesPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            CancellationToken ct);
+
+        Task<IResponseWrapper<List<CategoryResponse>>> GetCategoriesListAsync(
+            string? searchTerm,
+            bool? isActive,
+            string? sortBy,
+            string? sortDirection,
+            CancellationToken ct);
+
+        Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct);
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application/Features/Categories/Queries/ExportCategories/ExportCategoriesQuery.cs' @'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Mediator;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+
+namespace UMS.Application.Features.Categories.Queries.ExportCategories
+{
+    public class ExportCategoriesQuery : IQuery<IResponseWrapper<byte[]>>
+    {
+        public string? SearchTerm { get; set; }
+        public bool? IsActive { get; set; }
+        public string? SortBy { get; set; }
+        public string? SortDirection { get; set; }
+        public string ExportFormat { get; set; } = "excel";
+    }
+
+    public class ExportCategoriesQueryHandler(ICategoryService categoryService)
+        : IQueryHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
+    {
+        private readonly ICategoryService _categoryService = categoryService;
+
+        public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportCategoriesQuery request, CancellationToken ct)
+        {
+            var listResponse = await _categoryService.GetCategoriesListAsync(
+                request.SearchTerm,
+                request.IsActive,
+                request.SortBy,
+                request.SortDirection,
+                ct);
+
+            if (!listResponse.IsSuccessful || listResponse.Data == null)
+            {
+                return ResponseWrapper<byte[]>.Fail(
+                    listResponse.Messages ?? new List<string> { "Failed to retrieve categories for export." },
+                    listResponse.StatusCode);
+            }
+
+            var fileBytes = await _categoryService.ExportCategoriesAsync(listResponse.Data, request.ExportFormat, ct);
+
+            return ResponseWrapper<byte[]>.Success(fileBytes);
+        }
+    }
+}
+'@
     Write-TemplateFile 'UMS.Application/Features/Categories/Queries/GetAllCategories/GetAllCategoriesQuery.cs' @'
 using UMS.Application.Interfaces.Common;
 
@@ -9301,89 +9936,14 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
         public PagedFilterRequest PagedFilterRequest { get; set; } = new();
     }
 
-    public class GetCategoriesPagedQueryHandler(
-        IApplicationDbContext applicationDbContext,
-        ICurrentUserService currentUserService)
+    public class GetCategoriesPagedQueryHandler(ICategoryService categoryService)
         : IRequestHandler<GetCategoriesPagedQuery, IResponseWrapper<PagedResult<CategoryResponse>>>
     {
-        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
-        private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly ICategoryService _categoryService = categoryService;
 
         public async ValueTask<IResponseWrapper<PagedResult<CategoryResponse>>> Handle(GetCategoriesPagedQuery request, CancellationToken ct)
         {
-            var pagedFilter = request.PagedFilterRequest;
-            var categoriesQuery = _applicationDbContext.Categories
-                .AsNoTracking();
-
-            // 0. Status Filtering
-            if (pagedFilter.IsActive.HasValue)
-            {
-                categoriesQuery = categoriesQuery.Where(c => c.IsActive == pagedFilter.IsActive.Value);
-            }
-            else
-            {
-                // For anonymous or non-privileged requests, show only active categories.
-                // For authenticated admins/managers (who have read permission), show all by default if no filter is set.
-                if (!_currentUserService.IsAuthenticated() || !_currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
-                {
-                    categoriesQuery = categoriesQuery.Where(c => c.IsActive);
-                }
-            }
-
-            // 1. Filtering
-            if (!string.IsNullOrWhiteSpace(pagedFilter.SearchTerm))
-            {
-                var term = pagedFilter.SearchTerm.Trim();
-                var pattern = $"%{term}%";
-                categoriesQuery = categoriesQuery.Where(c =>
-                    EF.Functions.Like(c.Name, pattern) ||
-                    EF.Functions.Like(c.Slug, pattern));
-            }
-
-            // 2. Sorting
-            categoriesQuery = pagedFilter.SortBy?.ToLower() switch
-            {
-                "name" => pagedFilter.SortDirection == "desc"
-                    ? categoriesQuery.OrderByDescending(c => c.Name)
-                    : categoriesQuery.OrderBy(c => c.Name),
-                "slug" => pagedFilter.SortDirection == "desc"
-                    ? categoriesQuery.OrderByDescending(c => c.Slug)
-                    : categoriesQuery.OrderBy(c => c.Slug),
-                "sortorder" => pagedFilter.SortDirection == "desc"
-                    ? categoriesQuery.OrderByDescending(c => c.SortOrder)
-                    : categoriesQuery.OrderBy(c => c.SortOrder),
-                "id" => pagedFilter.SortDirection == "desc"
-                    ? categoriesQuery.OrderByDescending(c => c.Id)
-                    : categoriesQuery.OrderBy(c => c.Id),
-                _ => pagedFilter.SortDirection == "desc"
-                    ? categoriesQuery.OrderByDescending(c => c.SortOrder).ThenBy(c => c.Name)
-                    : categoriesQuery.OrderBy(c => c.SortOrder).ThenBy(c => c.Name)
-            };
-
-            // 3. Pagination
-            var totalCount = await categoriesQuery.CountAsync(ct);
-
-            var categories = await categoriesQuery
-                .Skip((pagedFilter.PageNumber - 1) * pagedFilter.PageSize)
-                .Take(pagedFilter.PageSize)
-                .Select(c => new CategoryResponse(
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.ParentId,
-                    c.SortOrder,
-                    c.IsActive,
-                    c.RowVersion
-                ))
-                .ToListAsync(ct);
-
-            var pagedResult = PagedResult<CategoryResponse>.Create(
-                categories,
-                totalCount,
-                pagedFilter.PageNumber,
-                pagedFilter.PageSize);
-
-            return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
+            return await _categoryService.GetCategoriesPagedQueryAsync(request.PagedFilterRequest, ct);
         }
     }
 }
@@ -10447,6 +11007,47 @@ namespace UMS.Application.Features.Users.Commands.ConfirmTwoFactorAuth
     }
 }
 '@
+    Write-TemplateFile 'UMS.Application/Features/Users/Commands/DeactivateUser/DeactivateUserCommand.cs' @'
+using UMS.Application.Features.Users.Commands;
+
+namespace UMS.Application.Features.Users.Commands.DeactivateUser
+{
+    public record DeactivateUserCommand(int UserId) : ICommand<IResponseWrapper>, IValidateMe;
+
+    public class DeactivateUserCommandHandler(IUserService userService)
+        : ICommandHandler<DeactivateUserCommand, IResponseWrapper>
+    {
+        private readonly IUserService _userService = userService;
+
+        public async ValueTask<IResponseWrapper> Handle(DeactivateUserCommand request, CancellationToken ct)
+        {
+            var statusRequest = new ChangeUserStatusRequest
+            {
+                UserId = request.UserId,
+                ActivateOrDeactivate = false
+            };
+
+            return await _userService.ChangeUserStatusAsync(statusRequest);
+        }
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application/Features/Users/Commands/DeactivateUser/DeactivateUserCommandValidator.cs' @'
+using FluentValidation;
+
+namespace UMS.Application.Features.Users.Commands.DeactivateUser
+{
+    public class DeactivateUserCommandValidator : AbstractValidator<DeactivateUserCommand>
+    {
+        public DeactivateUserCommandValidator()
+        {
+            RuleFor(x => x.UserId)
+                .GreaterThan(0)
+                .WithMessage("User ID must be greater than 0.");
+        }
+    }
+}
+'@
     Write-TemplateFile 'UMS.Application/Features/Users/Commands/DisableTwoFactorAuth/DisableTwoFactorAuthCommand.cs' @'
 namespace UMS.Application.Features.Users.Commands.DisableTwoFactorAuth
 {
@@ -11142,6 +11743,8 @@ namespace UMS.Application.Features.Users
         // Start
         Task<IResponseWrapper<UserResponse>> GetUserByIdAsync(int userId);
         Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(PagedFilterRequest pagedFilterRequest, CancellationToken ct);
+        Task<IResponseWrapper<List<UserExportResponse>>> GetUsersListAsync(PagedFilterRequest filter, CancellationToken ct);
+        Task<byte[]> ExportUsersAsync(List<UserExportResponse> data, string format, CancellationToken ct);
         Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword);
         Task<IResponseWrapper> ChangeUserStatusAsync(ChangeUserStatusRequest changeUserStatus);
         Task<IResponseWrapper<List<UserRoleViewModel>>> GetUserRolesAsync(int userId);
@@ -11216,6 +11819,17 @@ public class TwoFactorAuthViewModel
     public string? VerificationCode { get; set; }
 }
 '@
+    Write-TemplateFile 'UMS.Application/Features/Users/Models/Responses/UserExportResponse.cs' @'
+using System.Collections.Generic;
+
+namespace UMS.Application.Features.Users.Models.Responses
+{
+    public class UserExportResponse : UserResponse
+    {
+        public List<string> Roles { get; set; } = new();
+    }
+}
+'@
     Write-TemplateFile 'UMS.Application/Features/Users/Models/Responses/UserResponse.cs' @'
 namespace UMS.Application.Features.Users.Models.Responses
 {
@@ -11229,6 +11843,46 @@ namespace UMS.Application.Features.Users.Models.Responses
         public bool EmailConfirmed { get; set; }
         public string PhoneNumber { get; set; }
         public bool IsLocked { get; set; }
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Application/Features/Users/Queries/ExportUsers/ExportUsersQuery.cs' @'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Mediator;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Users.Models.Responses;
+
+namespace UMS.Application.Features.Users.Queries.ExportUsers
+{
+    public class ExportUsersQuery : IQuery<IResponseWrapper<byte[]>>
+    {
+        public PagedFilterRequest PagedFilterRequest { get; set; } = new();
+        public string ExportFormat { get; set; } = "excel";
+    }
+
+    public class ExportUsersQueryHandler(IUserService userService)
+        : IQueryHandler<ExportUsersQuery, IResponseWrapper<byte[]>>
+    {
+        private readonly IUserService _userService = userService;
+
+        public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportUsersQuery request, CancellationToken ct)
+        {
+            var listResponse = await _userService.GetUsersListAsync(request.PagedFilterRequest, ct);
+
+            if (!listResponse.IsSuccessful || listResponse.Data == null)
+            {
+                return ResponseWrapper<byte[]>.Fail(
+                    listResponse.Messages ?? new List<string> { "Failed to retrieve users for export." },
+                    listResponse.StatusCode);
+            }
+
+            var fileBytes = await _userService.ExportUsersAsync(listResponse.Data, request.ExportFormat, ct);
+
+            return ResponseWrapper<byte[]>.Success(fileBytes);
+        }
     }
 }
 '@
@@ -11343,13 +11997,9 @@ namespace UMS.Application.Features.Users.Queries
         public PagedFilterRequest PagedFilterRequest { get; set; }
     }
 
-    public class GetUsersPagedQueryHandler : IRequestHandler<GetUsersPagedQuery, IResponseWrapper<PagedResult<UserResponse>>>
+    public class GetUsersPagedQueryHandler(IUserService userService) : IRequestHandler<GetUsersPagedQuery, IResponseWrapper<PagedResult<UserResponse>>>
     {
-        private readonly IUserService _userService;
-        public GetUsersPagedQueryHandler(IUserService userService)
-        {
-            _userService = userService;
-        }
+        private readonly IUserService _userService = userService;
         public async ValueTask<IResponseWrapper<PagedResult<UserResponse>>> Handle(GetUsersPagedQuery request, CancellationToken cancellationToken)
         {
             return await _userService.GetUsersPagedQueryAsync(request.PagedFilterRequest, cancellationToken);
@@ -11370,7 +12020,7 @@ namespace UMS.Application.Features.Users.Queries
                 .SetValidator(new PagedFilterValidator());
 
             RuleFor(x => x.PagedFilterRequest.SortBy)
-                .Must(field => new[] { "fullname", "email", "id" }.Contains(field))
+                .Must(field => string.IsNullOrEmpty(field) || new[] { "fullname", "email", "id" }.Contains(field))
                 .WithMessage("Invalid SortBy value");
         }
     }
@@ -11690,17 +12340,22 @@ export default defineConfig([
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-query-devtools": "^5.101.0",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "lucide-react": "^1.17.0",
     "qrcode.react": "^4.2.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
+    "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.16.0",
     "shadcn": "^4.8.3",
@@ -11710,6 +12365,9 @@ export default defineConfig([
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.12.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -11719,11 +12377,13 @@ export default defineConfig([
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vitest": "^4.1.8"
   }
 }
 '@
@@ -11821,6 +12481,9 @@ export default defineConfig([
 '@
     Write-TemplateFile 'UMS.Client/src/App.tsx' @'
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { lazy, Suspense } from 'react'
 import LoginLayout from './layouts/LoginLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -11832,15 +12495,25 @@ import ResetPassword from './pages/ResetPassword'
 import AdminHome from './pages/AdminHome'
 import PublicHome from './pages/PublicHome'
 import Profile from './pages/Profile'
-import UserManagement from './pages/UserManagement'
-import RoleManagement from './pages/RoleManagement'
-import CategoriesManagement from './pages/CategoriesManagement'
-import AuditLogsManagement from './pages/AuditLogsManagement'
 import AdminLayout from './layouts/AdminLayout'
 import { ToastProvider } from './components/ui/toast'
 import { AuthProvider, useAuth } from './components/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import './App.css'
+
+const UsersManagement = lazy(() => import('./pages/UsersManagement'))
+const RoleManagement = lazy(() => import('./pages/RoleManagement'))
+const CategoriesManagement = lazy(() => import('./pages/CategoriesManagement'))
+const AuditLogsManagement = lazy(() => import('./pages/AuditLogsManagement'))
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+})
 
 // Helper component to redirect authenticated users away from Auth pages
 function PublicOnlyRoute() {
@@ -11885,19 +12558,35 @@ function AppContent() {
 
           {/* Permission-Guarded Routes */}
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Users.Read']} />}>
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/users" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <UsersManagement />
+              </Suspense>
+            } />
           </Route>
           
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.Roles.Read']} />}>
-            <Route path="/admin/roles" element={<RoleManagement />} />
+            <Route path="/admin/roles" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <RoleManagement />
+              </Suspense>
+            } />
           </Route>
 
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Product.Categories.Read']} />}>
-            <Route path="/admin/categories" element={<CategoriesManagement />} />
+            <Route path="/admin/categories" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <CategoriesManagement />
+              </Suspense>
+            } />
           </Route>
 
           <Route element={<ProtectedRoute allowedPermissions={['Permission.Identity.AuditTrails.Read']} />}>
-            <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+            <Route path="/admin/audit-logs" element={
+              <Suspense fallback={<div className="p-8 text-center text-neutral-400">Loading...</div>}>
+                <AuditLogsManagement />
+              </Suspense>
+            } />
           </Route>
         </Route>
       </Route>
@@ -11910,17 +12599,21 @@ function AppContent() {
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   )
 }
 
 export default App
+
 '@
     Write-BinaryFile 'UMS.Client/src/assets/hero.png' @'
 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
@@ -12519,7 +13212,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, al
   }, [loading, refreshAccessToken]);
 
   useEffect(() => {
-    if (!loading && !checkingToken && isAuthenticated && user) {
+    if (!loading && !checkingToken && isAuthenticated && user && !permissionDenied) {
       // Check permissions if specified
       if (allowedPermissions) {
         const hasPerm = allowedPermissions.some((perm) => user.permissions.includes(perm));
@@ -12538,7 +13231,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, al
         }
       }
     }
-  }, [loading, checkingToken, isAuthenticated, user, allowedPermissions, allowedRoles, toast]);
+  }, [loading, checkingToken, isAuthenticated, user, allowedPermissions, allowedRoles, toast, permissionDenied]);
 
   if (loading || checkingToken) {
     return (
@@ -12670,6 +13363,79 @@ function Button({
 
 export { Button, buttonVariants }
 '@
+    Write-TemplateFile 'UMS.Client/src/components/ui/calendar.tsx' @'
+import * as React from "react"
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
+import { DayPicker } from "react-day-picker"
+
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "./button"
+
+export type CalendarProps = React.ComponentProps<typeof DayPicker>
+
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  ...props
+}: CalendarProps) {
+  return (
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn("p-3", className)}
+      classNames={{
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        month: "space-y-4",
+        month_caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "text-sm font-medium",
+        nav: "space-x-1 flex items-center",
+        button_previous: cn(
+          buttonVariants({ variant: "outline" }),
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1"
+        ),
+        button_next: cn(
+          buttonVariants({ variant: "outline" }),
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1"
+        ),
+        month_grid: "w-full border-collapse space-y-1",
+        weekdays: "flex",
+        weekday:
+          "text-neutral-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-neutral-400 text-center",
+        week: "flex w-full mt-2",
+        day: "h-9 w-9 p-0 text-center text-sm relative flex items-center justify-center focus-within:relative focus-within:z-20",
+        day_button: cn(
+          buttonVariants({ variant: "ghost" }),
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-neutral-100 hover:text-neutral-900 rounded-md"
+        ),
+        selected: "[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground [&>button]:focus:bg-primary [&>button]:focus:text-primary-foreground",
+        today: "[&>button]:bg-accent [&>button]:text-accent-foreground",
+        outside:
+          "day-outside text-neutral-400 opacity-50 aria-selected:bg-neutral-100/50 aria-selected:text-neutral-400 aria-selected:opacity-30 dark:text-neutral-500",
+        disabled: "text-neutral-400 opacity-50 dark:text-neutral-500",
+        range_middle:
+          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        hidden: "invisible",
+        ...classNames,
+      }}
+      components={{
+        Chevron: ({ orientation, className: chevronClassName, ...chevronProps }) => {
+          if (orientation === "left") {
+            return <ChevronLeft className={cn("h-4 w-4", chevronClassName)} {...chevronProps} />
+          }
+          if (orientation === "right") {
+            return <ChevronRight className={cn("h-4 w-4", chevronClassName)} {...chevronProps} />
+          }
+          return <ChevronDown className={cn("h-4 w-4", chevronClassName)} {...chevronProps} />
+        }
+      }}
+      {...props}
+    />
+  )
+}
+Calendar.displayName = "Calendar"
+
+export { Calendar }
+'@
     Write-TemplateFile 'UMS.Client/src/components/ui/card.tsx' @'
 import * as React from "react"
 import { cn } from "@/lib/utils"
@@ -12737,6 +13503,412 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+'@
+    Write-TemplateFile 'UMS.Client/src/components/ui/DataTableExport.tsx' @'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { Button } from './button';
+import { Loader2 } from 'lucide-react';
+
+interface DataTableExportProps {
+  /**
+   * Callback invoked when the user selects an export format.
+   * Should return a promise that resolves when the export is complete.
+   */
+  onExport: (format: 'excel' | 'pdf') => Promise<void> | void;
+  /**
+   * Indicates whether an export operation is currently in progress.
+   * When true, the dropdown trigger and items are disabled and a spinner is shown.
+   */
+  isExporting?: boolean;
+}
+
+/**
+ * Reusable dropdown component for exporting a data table.
+ *
+ * It uses Radix UI's {@code DropdownMenu} primitives to ensure proper
+ * accessibility semantics and keyboard navigation. The UI follows the
+ * project's design system: the trigger is a small {@code Button} styled
+ * with the "outline" variant, and each menu item calls {@code onExport}
+ * with the corresponding format.
+ */
+export default function DataTableExport({
+  onExport,
+  isExporting = false,
+}: DataTableExportProps) {
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    if (isExporting) return;
+    await onExport(format);
+  };
+
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild disabled={isExporting}>
+        <Button variant="outline" size="sm" className="h-8 flex items-center gap-1">
+          {isExporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            'Export'
+          )}
+        </Button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Content
+        sideOffset={4}
+        align="end"
+        className="z-50 min-w-[200px] rounded-md border bg-popover p-1 shadow-md outline-none"
+      >
+        <DropdownMenu.Item
+          onSelect={(e) => {
+            e.preventDefault();
+            void handleExport('excel');
+          }}
+          disabled={isExporting}
+          className="flex cursor-pointer select-none items-center rounded-sm px-2 py-1 text-sm outline-none focus:bg-accent focus:text-accent-foreground"
+        >
+          Export to Excel (.xlsx)
+        </DropdownMenu.Item>
+        <DropdownMenu.Item
+          onSelect={(e) => {
+            e.preventDefault();
+            void handleExport('pdf');
+          }}
+          disabled={isExporting}
+          className="flex cursor-pointer select-none items-center rounded-sm px-2 py-1 text-sm outline-none focus:bg-accent focus:text-accent-foreground"
+        >
+          Export to PDF (.pdf)
+        </DropdownMenu.Item>
+        <DropdownMenu.Arrow className="fill-popover" />
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  );
+}
+'@
+    Write-TemplateFile 'UMS.Client/src/components/ui/DataTablePagination.test.tsx' @'
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import type { Table } from '@tanstack/react-table';
+import { DataTablePagination } from './DataTablePagination';
+
+interface MockTable {
+  getState: () => { pagination: { pageIndex: number; pageSize: number } };
+  getPageCount: () => number;
+  getFilteredSelectedRowModel: () => { rows: { length: number } };
+  getFilteredRowModel: () => { rows: { length: number } };
+  getCanPreviousPage: () => boolean;
+  getCanNextPage: () => boolean;
+  setPageIndex: (index: number) => void;
+  setPageSize: (size: number) => void;
+  previousPage: () => void;
+  nextPage: () => void;
+}
+
+describe('DataTablePagination', () => {
+  let tableMock: MockTable;
+
+  beforeEach(() => {
+    tableMock = {
+      getState: vi.fn().mockReturnValue({
+        pagination: {
+          pageIndex: 1, // Page 2
+          pageSize: 10,
+        },
+      }),
+      getPageCount: vi.fn().mockReturnValue(5),
+      getFilteredSelectedRowModel: vi.fn().mockReturnValue({
+        rows: { length: 2 },
+      }),
+      getFilteredRowModel: vi.fn().mockReturnValue({
+        rows: { length: 50 },
+      }),
+      getCanPreviousPage: vi.fn().mockReturnValue(true),
+      getCanNextPage: vi.fn().mockReturnValue(true),
+      setPageIndex: vi.fn(),
+      setPageSize: vi.fn(),
+      previousPage: vi.fn(),
+      nextPage: vi.fn(),
+    };
+  });
+
+  it('renders selection count and pagination status correctly', () => {
+    render(<DataTablePagination table={tableMock as unknown as Table<unknown>} />);
+
+    expect(screen.getByText('2 of 50 row(s) selected.')).toBeInTheDocument();
+    expect(screen.getByText('Page 2 of 5')).toBeInTheDocument();
+  });
+
+  it('renders numeric page buttons with correct active state', () => {
+    render(<DataTablePagination table={tableMock as unknown as Table<unknown>} />);
+
+    const page2Button = screen.getByRole('button', { name: 'Go to page 2' });
+    expect(page2Button).toBeInTheDocument();
+    expect(page2Button).toHaveAttribute('aria-current', 'page');
+
+    const page1Button = screen.getByRole('button', { name: 'Go to page 1' });
+    expect(page1Button).toBeInTheDocument();
+    expect(page1Button).not.toHaveAttribute('aria-current');
+  });
+
+  it('calls setPageIndex when page number is clicked', async () => {
+    render(<DataTablePagination table={tableMock as unknown as Table<unknown>} />);
+
+    const page3Button = screen.getByRole('button', { name: 'Go to page 3' });
+    await userEvent.click(page3Button);
+
+    expect(tableMock.setPageIndex).toHaveBeenCalledWith(2);
+  });
+
+  it('calls nextPage and previousPage when chevrons are clicked', async () => {
+    render(<DataTablePagination table={tableMock as unknown as Table<unknown>} />);
+
+    const nextButton = screen.getByRole('button', { name: 'Go to next page' });
+    const prevButton = screen.getByRole('button', { name: 'Go to previous page' });
+
+    await userEvent.click(nextButton);
+    expect(tableMock.nextPage).toHaveBeenCalled();
+
+    await userEvent.click(prevButton);
+    expect(tableMock.previousPage).toHaveBeenCalled();
+  });
+
+  it('calls setPageIndex to 0 and pageCount-1 when first and last page buttons are clicked', async () => {
+    render(<DataTablePagination table={tableMock as unknown as Table<unknown>} />);
+
+    const firstButton = screen.getByRole('button', { name: 'Go to first page' });
+    const lastButton = screen.getByRole('button', { name: 'Go to last page' });
+
+    await userEvent.click(firstButton);
+    expect(tableMock.setPageIndex).toHaveBeenCalledWith(0);
+
+    await userEvent.click(lastButton);
+    expect(tableMock.setPageIndex).toHaveBeenCalledWith(4);
+  });
+});
+'@
+    Write-TemplateFile 'UMS.Client/src/components/ui/DataTablePagination.tsx' @'
+import type { Table } from "@tanstack/react-table";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+
+import { Button } from "./button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
+
+interface DataTablePaginationProps<TData> {
+  table: Table<TData>;
+}
+
+export function DataTablePagination<TData>({
+  table,
+}: DataTablePaginationProps<TData>) {
+  const pageIndex = table.getState().pagination.pageIndex;
+  const pageCount = table.getPageCount();
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const siblingCount = 1;
+
+    if (pageCount <= 5) {
+      for (let i = 0; i < pageCount; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
+    pages.push(0);
+
+    const leftSiblingIndex = Math.max(pageIndex - siblingCount, 1);
+    const rightSiblingIndex = Math.min(pageIndex + siblingCount, pageCount - 2);
+
+    const shouldShowLeftDots = leftSiblingIndex > 1;
+    const shouldShowRightDots = rightSiblingIndex < pageCount - 2;
+
+    if (shouldShowLeftDots) {
+      pages.push("ellipsis-left");
+    }
+
+    for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
+      pages.push(i);
+    }
+
+    if (shouldShowRightDots) {
+      pages.push("ellipsis-right");
+    }
+
+    pages.push(pageCount - 1);
+
+    return pages;
+  };
+
+  const pages = getPageNumbers();
+
+  return (
+    <div className="flex items-center justify-between px-2">
+      <div className="flex-1 text-sm text-neutral-500">
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <>
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </>
+        )}
+      </div>
+      <div className="flex items-center space-x-6 lg:space-x-8">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          Page {pageIndex + 1} of {pageCount || 1}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Go to first page"
+          >
+            <span className="sr-only">Go to first page</span>
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Go to previous page"
+          >
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          {/* Render Page Numbers */}
+          <div className="hidden sm:flex items-center space-x-1">
+            {pages.map((page, idx) => {
+              if (typeof page === "string") {
+                return (
+                  <span
+                    key={`${page}-${idx}`}
+                    className="flex h-8 w-8 items-center justify-center text-sm text-neutral-400"
+                    data-testid={page}
+                  >
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <Button
+                  key={page}
+                  variant={pageIndex === page ? "default" : "outline"}
+                  className="h-8 w-8 p-0 text-sm"
+                  onClick={() => table.setPageIndex(page)}
+                  aria-label={`Go to page ${page + 1}`}
+                  aria-current={pageIndex === page ? "page" : undefined}
+                >
+                  {page + 1}
+                </Button>
+              );
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            aria-label="Go to next page"
+          >
+            <span className="sr-only">Go to next page</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => table.setPageIndex(pageCount - 1)}
+            disabled={!table.getCanNextPage()}
+            aria-label="Go to last page"
+          >
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+'@
+    Write-TemplateFile 'UMS.Client/src/components/ui/date-picker.tsx' @'
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "./button"
+import { Calendar } from "./calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+
+export interface DatePickerProps {
+  readonly date?: Date
+  readonly setDate: (date?: Date) => void
+  readonly placeholder?: string
+  readonly className?: string
+}
+
+export function DatePicker({
+  date,
+  setDate,
+  placeholder = "Pick a date",
+  className,
+}: DatePickerProps) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left font-normal h-8 text-xs px-3 rounded-xl border border-neutral-300 bg-neutral-50/50 hover:bg-neutral-100 whitespace-nowrap outline-none transition-all flex items-center gap-2",
+            !date && "text-neutral-500",
+            className
+          )}
+        >
+          <CalendarIcon className="h-3.5 w-3.5 text-neutral-500" />
+          {date ? format(date, "yyyy/MM/dd") : <span>{placeholder}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
 '@
     Write-TemplateFile 'UMS.Client/src/components/ui/dialog.tsx' @'
 import * as React from "react"
@@ -12939,6 +14111,48 @@ export {
   PaginationNext,
   PaginationPrevious,
 }
+'@
+    Write-TemplateFile 'UMS.Client/src/components/ui/popover.tsx' @'
+import * as React from "react"
+import { Popover as PopoverPrimitive } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+
+function Popover({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+}
+
+function PopoverTrigger({
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+}
+
+function PopoverContent({
+  className,
+  align = "center",
+  sideOffset = 4,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  return (
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Content
+        data-slot="popover-content"
+        align={align}
+        sideOffset={sideOffset}
+        className={cn(
+          "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          className
+        )}
+        {...props}
+      />
+    </PopoverPrimitive.Portal>
+  )
+}
+
+export { Popover, PopoverTrigger, PopoverContent }
 '@
     Write-TemplateFile 'UMS.Client/src/components/ui/select.tsx' @'
 import * as React from "react"
@@ -13199,7 +14413,7 @@ export function SheetFooter({ children, className }: { children: React.ReactNode
 }
 '@
     Write-TemplateFile 'UMS.Client/src/components/ui/toast.tsx' @'
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
@@ -13241,12 +14455,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => [...prev, { id, type, message }])
   }, [])
 
-  const toast = {
+  const toast = useMemo(() => ({
     success: (msg: string) => addToast('success', msg),
     error: (msg: string) => addToast('error', msg),
     info: (msg: string) => addToast('info', msg),
     warning: (msg: string) => addToast('warning', msg),
-  }
+  }), [addToast])
 
   return (
     <ToastContext.Provider value={{ toast }}>
@@ -13320,6 +14534,529 @@ const ToastItem: React.FC<{ toast: ToastMessage; onClose: (id: string) => void }
       </button>
     </div>
   )
+}
+'@
+    Write-TemplateFile 'UMS.Client/src/hooks/useAuditLogs.ts' @'
+import { useQuery } from '@tanstack/react-query';
+import { auditLogsApi } from '../lib/audit-logs-api';
+import type { AuditLogsFilterRequest } from '../lib/audit-logs-api';
+
+export function useAuditLogs(params: AuditLogsFilterRequest) {
+  return useQuery({
+    queryKey: [
+      'audit-logs',
+      'list',
+      params.pageNumber,
+      params.pageSize,
+      params.searchTerm,
+      params.sortBy,
+      params.sortDirection,
+      params.tableName,
+      params.entityId,
+      params.actionTypes,
+      params.fromDate,
+      params.toDate,
+      params.userId,
+    ],
+    queryFn: async () => {
+      const response = await auditLogsApi.getPagedList(params);
+      if (!response.isSuccessful) {
+        throw new Error(response.messages[0] || 'Failed to retrieve audit logs.');
+      }
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+}
+'@
+    Write-TemplateFile 'UMS.Client/src/hooks/useCategories.ts' @'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { categoriesApi } from '../lib/categories-api';
+import type { 
+  PagedFilterRequest, 
+  CreateCategoryRequest, 
+  UpdateCategoryRequest 
+} from '../lib/categories-api';
+import { useToast } from '../components/ui/toast';
+
+export function useCategoryList(params: PagedFilterRequest) {
+  return useQuery({
+    queryKey: [
+      'categories', 
+      'list', 
+      params.pageNumber, 
+      params.pageSize, 
+      params.searchTerm, 
+      params.sortBy, 
+      params.sortDirection, 
+      params.isActive
+    ],
+    queryFn: async () => {
+      const response = await categoriesApi.getPagedList(params);
+      if (!response.isSuccessful) {
+        throw new Error(response.messages[0] || 'Failed to retrieve categories.');
+      }
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useCategoryLookups() {
+  return useQuery({
+    queryKey: ['categories', 'lookups'],
+    queryFn: async () => {
+      const response = await categoriesApi.getForList();
+      if (!response.isSuccessful) {
+        throw new Error(response.messages[0] || 'Failed to load parent category lookups.');
+      }
+      return response.data || [];
+    },
+  });
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: CreateCategoryRequest) => categoriesApi.create(data),
+    onSuccess: (response) => {
+      if (response.isSuccessful) {
+        toast.success('Category created successfully!');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+      } else {
+        toast.error(response.messages[0] || 'Failed to create category.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during save.');
+    },
+  });
+}
+
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: UpdateCategoryRequest) => categoriesApi.update(data),
+    onSuccess: (response) => {
+      if (response.isSuccessful) {
+        toast.success('Category updated successfully!');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+      } else {
+        toast.error(response.messages[0] || 'Failed to update category.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during save.');
+    },
+  });
+}
+
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (id: number) => categoriesApi.delete(id),
+    onSuccess: (response) => {
+      if (response.isSuccessful) {
+        toast.success('Category deleted successfully.');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+      } else {
+        toast.error(response.messages[0] || 'Failed to delete category.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during deletion.');
+    },
+  });
+}
+'@
+    Write-TemplateFile 'UMS.Client/src/hooks/useUsers.test.tsx' @'
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { useUserList, useAvailableRoles } from './useUsers';
+import { usersApi } from '../lib/users-api';
+
+vi.mock('../lib/users-api', () => ({
+  usersApi: {
+    getPagedList: vi.fn(),
+    getUserRoles: vi.fn(),
+    getRolesAll: vi.fn(),
+    register: vi.fn(),
+    update: vi.fn(),
+    updateUserRoles: vi.fn(),
+    lock: vi.fn(),
+    unlock: vi.fn(),
+    changeStatus: vi.fn(),
+  },
+}));
+
+vi.mock('../components/ui/toast', () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+  }),
+}));
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
+describe('useUsers Hooks', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('useUserList', () => {
+    it('successfully fetches users list and fetches user roles in parallel', async () => {
+      const mockUsers = [
+        { id: 1, fullName: 'John Doe', email: 'john@example.com', isActive: true, emailConfirmed: true, phoneNumber: '123', isLocked: false, userName: 'john@example.com' },
+        { id: 2, fullName: 'Jane Doe', email: 'jane@example.com', isActive: true, emailConfirmed: true, phoneNumber: '456', isLocked: false, userName: 'jane@example.com' },
+      ];
+
+      vi.mocked(usersApi.getPagedList).mockResolvedValue({
+        isSuccessful: true,
+        messages: [],
+        statusCode: 200,
+        data: {
+          data: mockUsers,
+          totalCount: 2,
+          currentPage: 1,
+          pageSize: 10,
+        },
+      });
+
+      vi.mocked(usersApi.getUserRoles).mockImplementation(async (userId) => {
+        if (userId === 1) {
+          return {
+            isSuccessful: true,
+            messages: [],
+            statusCode: 200,
+            data: [{ roleName: 'Admin', roleDescription: 'Administrator' }],
+          };
+        }
+        return {
+          isSuccessful: true,
+          messages: [],
+          statusCode: 200,
+          data: [{ roleName: 'Basic', roleDescription: 'Basic User' }],
+        };
+      });
+
+      const { result } = renderHook(
+        () => useUserList({ pageNumber: 1, pageSize: 10, searchTerm: '' }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(result.current.data?.data).toEqual(mockUsers);
+      expect(result.current.data?.totalCount).toBe(2);
+      expect(result.current.data?.rolesMap).toEqual({
+        1: ['Admin'],
+        2: ['Basic'],
+      });
+
+      expect(usersApi.getPagedList).toHaveBeenCalledTimes(1);
+      expect(usersApi.getUserRoles).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles user roles fetch failures gracefully without crashing the list query', async () => {
+      const mockUsers = [
+        { id: 1, fullName: 'John Doe', email: 'john@example.com', isActive: true, emailConfirmed: true, phoneNumber: '123', isLocked: false, userName: 'john@example.com' },
+      ];
+
+      vi.mocked(usersApi.getPagedList).mockResolvedValue({
+        isSuccessful: true,
+        messages: [],
+        statusCode: 200,
+        data: {
+          data: mockUsers,
+          totalCount: 1,
+          currentPage: 1,
+          pageSize: 10,
+        },
+      });
+
+      vi.mocked(usersApi.getUserRoles).mockRejectedValue(new Error('Network error'));
+
+      const { result } = renderHook(
+        () => useUserList({ pageNumber: 1, pageSize: 10, searchTerm: '' }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(result.current.data?.data).toEqual(mockUsers);
+      expect(result.current.data?.rolesMap).toEqual({
+        1: [],
+      });
+      expect(usersApi.getUserRoles).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('useAvailableRoles', () => {
+    it('successfully retrieves available roles list', async () => {
+      const mockRoles = [
+        { id: 1, name: 'Admin', description: 'Admin role' },
+        { id: 2, name: 'Basic', description: 'Basic role' },
+      ];
+
+      vi.mocked(usersApi.getRolesAll).mockResolvedValue({
+        isSuccessful: true,
+        messages: [],
+        statusCode: 200,
+        data: mockRoles,
+      });
+
+      const { result } = renderHook(() => useAvailableRoles(), { wrapper: createWrapper() });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual(mockRoles);
+    });
+  });
+});
+'@
+    Write-TemplateFile 'UMS.Client/src/hooks/useUsers.ts' @'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usersApi } from '../lib/users-api';
+import type { 
+  PagedFilterRequest, 
+  UserRegistrationRequest 
+} from '../lib/users-api';
+import { useToast } from '../components/ui/toast';
+
+export function useUserList(params: PagedFilterRequest) {
+  return useQuery({
+    queryKey: [
+      'users', 
+      'list', 
+      params.pageNumber, 
+      params.pageSize, 
+      params.searchTerm, 
+      params.sortBy, 
+      params.sortDirection, 
+      params.isActive, 
+      params.isLocked, 
+      params.roleId
+    ],
+    queryFn: async () => {
+      const response = await usersApi.getPagedList(params);
+      if (!response.isSuccessful || !response.data) {
+        throw new Error(response.messages[0] || 'Failed to retrieve users.');
+      }
+
+      const usersData = response.data.data;
+
+      // Resolve user roles in parallel with isolated try/catch failsafes
+      const rolesPromises = usersData.map(async (u) => {
+        try {
+          const roleResponse = await usersApi.getUserRoles(u.id);
+          if (roleResponse.isSuccessful && roleResponse.data) {
+            return { userId: u.id, roles: roleResponse.data.map(r => r.roleName) };
+          }
+        } catch (e) {
+          console.error(`Failed to fetch roles for user ${u.id}`, e);
+        }
+        return { userId: u.id, roles: [] };
+      });
+
+      const results = await Promise.all(rolesPromises);
+      const rolesMap: Record<number, string[]> = {};
+      results.forEach(res => {
+        rolesMap[res.userId] = res.roles;
+      });
+
+      return {
+        data: usersData,
+        totalCount: response.data.totalCount,
+        rolesMap,
+      };
+    },
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useAvailableRoles() {
+  return useQuery({
+    queryKey: ['roles', 'available'],
+    queryFn: async () => {
+      const response = await usersApi.getRolesAll();
+      if (!response.isSuccessful) {
+        throw new Error(response.messages[0] || 'Failed to load roles.');
+      }
+      return response.data || [];
+    },
+  });
+}
+
+export function useRegisterUser() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: UserRegistrationRequest) => usersApi.register(data),
+    onSuccess: (res) => {
+      if (res.isSuccessful) {
+        toast.success('User created successfully!');
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+      } else {
+        toast.error(res.messages[0] || 'Registration failed.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during registration.');
+    },
+  });
+}
+
+export interface UpdateUserAndRolesRequest {
+  userId: number;
+  fullName: string;
+  phoneNumber: string;
+  roles: string[];
+}
+
+export function useUpdateUserAndRoles() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: async (data: UpdateUserAndRolesRequest) => {
+      const profileRes = await usersApi.update({
+        userId: data.userId,
+        fullName: data.fullName,
+        phoneNumber: data.phoneNumber,
+      });
+      if (!profileRes.isSuccessful) {
+        throw new Error(profileRes.messages[0] || 'Failed to update user details.');
+      }
+
+      const rolesRes = await usersApi.updateUserRoles(data.userId, data.roles);
+      if (!rolesRes.isSuccessful) {
+        throw new Error(rolesRes.messages[0] || 'Failed to update assigned roles.');
+      }
+
+      return { profileRes, rolesRes };
+    },
+    onSuccess: () => {
+      toast.success('User details and roles updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during updates.');
+    },
+  });
+}
+
+export function useLockUser() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (userId: number) => usersApi.lock(userId),
+    onSuccess: (res) => {
+      if (res.isSuccessful) {
+        toast.success('User locked successfully.');
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+      } else {
+        toast.error(res.messages[0] || 'Failed to lock user.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Operation failed.');
+    },
+  });
+}
+
+export function useUnlockUser() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (userId: number) => usersApi.unlock(userId),
+    onSuccess: (res) => {
+      if (res.isSuccessful) {
+        toast.success('User unlocked successfully.');
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+      } else {
+        toast.error(res.messages[0] || 'Failed to unlock user.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Operation failed.');
+    },
+  });
+}
+
+export function useChangeUserStatus() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: { userId: number; activate: boolean }) =>
+      usersApi.changeStatus(data.userId, data.activate),
+    onSuccess: (res, data) => {
+      if (res.isSuccessful) {
+        toast.success(`User ${data.activate ? 'activated' : 'deactivated'} successfully.`);
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+      } else {
+        toast.error(res.messages[0] || 'Failed to change user status.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Operation failed.');
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: async (userFullName: string) => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return userFullName;
+    },
+    onSuccess: (name) => {
+      toast.success(
+        `Delete operation simulated successfully for user "${name}"! (Verified claim: Permission.Identity.Users.Delete)`
+      );
+    },
+  });
+}
+
+export function useUserLookups() {
+  return useQuery({
+    queryKey: ['users', 'lookup'],
+    queryFn: async () => {
+      const response = await usersApi.getPagedList({ pageNumber: 1, pageSize: 100, sortBy: 'id', sortDirection: 'asc' });
+      if (!response.isSuccessful || !response.data) {
+        throw new Error(response.messages[0] || 'Failed to retrieve users for lookup.');
+      }
+      return response.data.data.map(u => ({
+        id: u.id,
+        fullName: u.fullName,
+        email: u.email,
+      }));
+    },
+  });
 }
 '@
     Write-TemplateFile 'UMS.Client/src/index.css' @'
@@ -13789,7 +15526,7 @@ export default function LoginLayout() {
 }
 '@
     Write-TemplateFile 'UMS.Client/src/lib/api-client.ts' @'
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7122';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7122';
 
 export interface ApiResponse<T = any> {
   messages: string[];
@@ -13878,7 +15615,7 @@ export const api = {
 };
 '@
     Write-TemplateFile 'UMS.Client/src/lib/audit-logs-api.ts' @'
-import { api } from './api-client';
+import { api, BASE_URL } from './api-client';
 import type { ApiResponse } from './api-client';
 import type { PagedResult } from './categories-api';
 
@@ -13902,24 +15639,92 @@ export interface AuditLogsFilterRequest {
   searchTerm?: string;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  tableName?: string;
+  entityId?: string;
+  actionTypes?: string;
+  fromDate?: string;
+  toDate?: string;
+  userId?: number;
 }
 
 export const auditLogsApi = {
   getPagedList: (params: AuditLogsFilterRequest): Promise<ApiResponse<PagedResult<AuditTrailResponse>>> => {
-    const queryParams: Record<string, string> = {
+    const query = new URLSearchParams({
       pageNumber: String(params.pageNumber),
       pageSize: String(params.pageSize),
-    };
-    if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
-    if (params.sortBy) queryParams.sortBy = params.sortBy;
-    if (params.sortDirection) queryParams.sortDirection = params.sortDirection;
-    const query = new URLSearchParams(queryParams);
-    return api.get(`api/v1/audit-logs?${query.toString()}`);
+      ...(params.searchTerm && { searchTerm: params.searchTerm }),
+      ...(params.sortBy && { sortBy: params.sortBy }),
+      ...(params.sortDirection && { sortDirection: params.sortDirection }),
+      ...(params.tableName && { tableName: params.tableName }),
+      ...(params.entityId && { entityId: params.entityId }),
+      ...(params.actionTypes && { actionTypes: params.actionTypes }),
+      ...(params.fromDate && { fromDate: params.fromDate }),
+      ...(params.toDate && { toDate: params.toDate }),
+      ...(params.userId !== undefined && params.userId !== null && { userId: String(params.userId) }),
+    });
+    return api.get(`api/v1/audit-logs/paged?${query.toString()}`);
+  },
+
+  exportAuditLogs: async (params: Omit<AuditLogsFilterRequest, 'pageNumber' | 'pageSize'> & { exportFormat: 'excel' | 'pdf' }): Promise<void> => {
+    const query = new URLSearchParams({
+      exportFormat: params.exportFormat,
+      ...(params.searchTerm && { searchTerm: params.searchTerm }),
+      ...(params.tableName && { tableName: params.tableName }),
+      ...(params.entityId && { entityId: params.entityId }),
+      ...(params.actionTypes && { actionTypes: params.actionTypes }),
+      ...(params.fromDate && { fromDate: params.fromDate }),
+      ...(params.toDate && { toDate: params.toDate }),
+      ...(params.userId !== undefined && params.userId !== null && { userId: String(params.userId) }),
+    });
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${BASE_URL.replace(/\/$/, '')}/api/v1/audit-logs/export?${query.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to export audit logs.';
+      try {
+        const data = await response.json();
+        if (data?.messages && data.messages.length > 0) {
+          errorMessage = data.messages[0];
+        }
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let fileName = `AuditLogs_${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.${params.exportFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
+    
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;\n]+)/i) || contentDisposition.match(/filename="?([^";\n]+)"?/i);
+      if (match && match[1]) {
+        fileName = decodeURIComponent(match[1]);
+      }
+    }
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
   }
 };
 '@
     Write-TemplateFile 'UMS.Client/src/lib/categories-api.ts' @'
-import { api } from './api-client';
+import { api, BASE_URL } from './api-client';
 import type { ApiResponse } from './api-client';
 
 export interface CategoryResponse {
@@ -13974,17 +15779,14 @@ export interface CategoryLookupDto {
 
 export const categoriesApi = {
   getPagedList: (params: PagedFilterRequest): Promise<ApiResponse<PagedResult<CategoryResponse>>> => {
-    const queryParams: Record<string, string> = {
+    const query = new URLSearchParams({
       pageNumber: String(params.pageNumber),
       pageSize: String(params.pageSize),
-    };
-    if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
-    if (params.sortBy) queryParams.sortBy = params.sortBy;
-    if (params.sortDirection) queryParams.sortDirection = params.sortDirection;
-    if (params.isActive !== undefined && params.isActive !== null) {
-      queryParams.isActive = String(params.isActive);
-    }
-    const query = new URLSearchParams(queryParams);
+      ...(params.searchTerm && { searchTerm: params.searchTerm }),
+      ...(params.sortBy && { sortBy: params.sortBy }),
+      ...(params.sortDirection && { sortDirection: params.sortDirection }),
+      ...(params.isActive !== undefined && params.isActive !== null && { isActive: String(params.isActive) }),
+    });
     return api.get(`api/v1/categories/paged?${query.toString()}`);
   },
 
@@ -14012,6 +15814,60 @@ export const categoriesApi = {
   delete: (id: number): Promise<ApiResponse> => {
     return api.delete(`api/v1/categories/${id}`);
   },
+
+  exportCategories: async (params: Omit<PagedFilterRequest, 'pageNumber' | 'pageSize'> & { exportFormat: 'excel' | 'pdf' }): Promise<void> => {
+    const query = new URLSearchParams({
+      exportFormat: params.exportFormat,
+      ...(params.searchTerm && { searchTerm: params.searchTerm }),
+      ...(params.sortBy && { sortBy: params.sortBy }),
+      ...(params.sortDirection && { sortDirection: params.sortDirection }),
+      ...(params.isActive !== undefined && params.isActive !== null && { isActive: String(params.isActive) }),
+    });
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${BASE_URL.replace(/\/$/, '')}/api/v1/categories/export?${query.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to export categories.';
+      try {
+        const data = await response.json();
+        if (data?.messages && data.messages.length > 0) {
+          errorMessage = data.messages[0];
+        }
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let fileName = `Categories_${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.${params.exportFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
+
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;\n]+)/i) || contentDisposition.match(/filename="?([^";\n]+)"?/i);
+      if (match && match[1]) {
+        fileName = decodeURIComponent(match[1]);
+      }
+    }
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  }
 };
 '@
     Write-TemplateFile 'UMS.Client/src/lib/jwt.ts' @'
@@ -14156,7 +16012,7 @@ export const rolesApi = {
 };
 '@
     Write-TemplateFile 'UMS.Client/src/lib/users-api.ts' @'
-import { api } from './api-client';
+import { api, BASE_URL } from './api-client';
 import type { ApiResponse } from './api-client';
 
 export interface UserResponse {
@@ -14227,7 +16083,7 @@ export const usersApi = {
       ...(params.isLocked !== undefined && params.isLocked !== null && { isLocked: String(params.isLocked) }),
       ...(params.roleId !== undefined && params.roleId !== null && { roleId: String(params.roleId) }),
     });
-    return api.get(`api/v1/users/paged-list?${query.toString()}`);
+    return api.get(`api/v1/users/paged?${query.toString()}`);
   },
 
   register: (data: UserRegistrationRequest): Promise<ApiResponse> => {
@@ -14264,6 +16120,70 @@ export const usersApi = {
   getRolesAll: (): Promise<ApiResponse<RoleResponse[]>> => {
     return api.get('api/v1/roles/all');
   },
+
+  exportUsers: async (params: Omit<PagedFilterRequest, 'pageNumber' | 'pageSize'> & { exportFormat: 'excel' | 'pdf' }): Promise<void> => {
+    const queryParams: Record<string, string> = {
+      exportFormat: params.exportFormat
+    };
+    if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+    if (params.sortBy) queryParams.sortBy = params.sortBy;
+    if (params.sortDirection) queryParams.sortDirection = params.sortDirection;
+    if (params.isActive !== undefined && params.isActive !== null) {
+      queryParams.isActive = String(params.isActive);
+    }
+    if (params.isLocked !== undefined && params.isLocked !== null) {
+      queryParams.isLocked = String(params.isLocked);
+    }
+    if (params.roleId !== undefined && params.roleId !== null) {
+      queryParams.roleId = String(params.roleId);
+    }
+
+    const query = new URLSearchParams(queryParams);
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${BASE_URL.replace(/\/$/, '')}/api/v1/users/export?${query.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to export users.';
+      try {
+        const data = await response.json();
+        if (data?.messages && data.messages.length > 0) {
+          errorMessage = data.messages[0];
+        }
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let fileName = `Users_${new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '')}.${params.exportFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
+
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;\n]+)/i) || contentDisposition.match(/filename="?([^";\n]+)"?/i);
+      if (match && match[1]) {
+        fileName = decodeURIComponent(match[1]);
+      }
+    }
+
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  }
 };
 '@
     Write-TemplateFile 'UMS.Client/src/lib/utils.ts' @'
@@ -14386,15 +16306,431 @@ export default function AdminHome() {
   )
 }
 '@
+    Write-TemplateFile 'UMS.Client/src/pages/AuditLogsManagement.test.tsx' @'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
+import React from 'react'
+import { MemoryRouter, Route, Routes, useSearchParams } from 'react-router-dom'
+import AuditLogsManagement from './AuditLogsManagement'
+import { useAuditLogs } from '../hooks/useAuditLogs'
+import { useUserLookups } from '../hooks/useUsers'
+
+vi.mock('../hooks/useAuditLogs', () => ({
+  useAuditLogs: vi.fn(),
+}))
+
+vi.mock('../hooks/useUsers', () => ({
+  useUserLookups: vi.fn(),
+}))
+
+const mockToast = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
+}
+vi.mock('../components/ui/toast', () => ({
+  useToast: () => mockToast,
+}))
+
+vi.mock('../components/ui/date-picker', () => ({
+  DatePicker: ({ date, setDate, placeholder }: { date?: Date; setDate: (d?: Date) => void; placeholder: string }) => (
+    <input 
+      type="text" 
+      placeholder={placeholder}
+      value={date ? date.toISOString().split('T')[0] : ''} 
+      onChange={(e) => setDate(e.target.value ? new Date(e.target.value) : undefined)} 
+      data-testid={`date-picker-${placeholder.toLowerCase().replace(' ', '-')}`}
+    />
+  )
+}))
+
+vi.mock('../components/ui/select', () => ({
+  Select: ({ children, value, onValueChange, 'data-testid': testId }: { children: React.ReactNode; value: string; onValueChange: (val: string) => void; 'data-testid'?: string }) => (
+    <select 
+      value={value} 
+      onChange={(e) => onValueChange(e.target.value)} 
+      data-testid={testId || "select-mock"}
+    >
+      {children}
+    </select>
+  ),
+  SelectTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => <>{placeholder}</>,
+  SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SelectItem: ({ value, children }: { value: string; children: React.ReactNode }) => (
+    <option value={value}>{children}</option>
+  ),
+}))
+
+describe('AuditLogsManagement Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+
+    vi.mocked(useAuditLogs).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: 1,
+            userId: 100,
+            userEmail: 'actor@domain.com',
+            ipAddress: '127.0.0.1',
+            type: 'Create',
+            tableName: 'Category',
+            dateTime: '2026-06-05T12:00:00Z',
+            oldValues: null,
+            newValues: '{"Name":"Test"}',
+            affectedColumns: '["Name"]',
+            primaryKey: '{"Id":5}',
+          }
+        ],
+        totalCount: 1,
+        currentPage: 1,
+        pageSize: 10,
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAuditLogs>)
+
+    vi.mocked(useUserLookups).mockReturnValue({
+      data: [
+        { id: 10, fullName: 'User Ten', email: 'ten@domain.com' },
+        { id: 11, fullName: 'User Eleven', email: 'eleven@domain.com' },
+      ],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useUserLookups>)
+  })
+
+  it('hydrates initial search state from URL query parameters', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs?search=test-query']}>
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const input = screen.getByPlaceholderText('Search Actor Email or IP Address...') as HTMLInputElement
+    expect(input.value).toBe('test-query')
+
+    expect(useAuditLogs).toHaveBeenCalledWith(
+      expect.objectContaining({ searchTerm: 'test-query' })
+    )
+  })
+
+  it('updates local input immediately but does NOT update URL until Apply Filters is clicked', async () => {
+    let urlSearch = ''
+    const handleUrlChange = vi.fn((val) => {
+      urlSearch = val
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        handleUrlChange(searchParams.get('search') || '')
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const input = screen.getByPlaceholderText('Search Actor Email or IP Address...') as HTMLInputElement
+    expect(input.value).toBe('')
+
+    // Simulate typing
+    fireEvent.change(input, { target: { value: 'audit' } })
+
+    // Input state changes immediately
+    expect(input.value).toBe('audit')
+
+    // URL parameter is not updated instantly
+    expect(urlSearch).toBe('')
+
+    // Click Apply Filters button
+    const applyButton = screen.getByRole('button', { name: /Apply Filters/i })
+    fireEvent.click(applyButton)
+
+    // URL parameter is now updated
+    expect(urlSearch).toBe('audit')
+  })
+
+  it('updates URL parameters only when Apply Filters is clicked for table name, action types, or dates', async () => {
+    let urlParams: Record<string, string> = {}
+    const handleUrlChange = vi.fn((params) => {
+      urlParams = params
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        const params: Record<string, string> = {}
+        searchParams.forEach((val, key) => {
+          params[key] = val
+        })
+        handleUrlChange(params)
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    // 1. Table Name Select
+    const select = screen.getByTestId('table-name-select')
+    fireEvent.change(select, { target: { value: 'Category' } })
+    expect(urlParams.tableName).toBeUndefined() // Should not update immediately
+
+    // 2. Action Types (Create, Update, Delete buttons)
+    const createButton = screen.getByRole('button', { name: 'Create' })
+    fireEvent.click(createButton)
+    expect(urlParams.actionTypes).toBeUndefined() // Should not update immediately
+
+    // 3. Date Inputs (using mocked DatePicker text inputs)
+    const fromInput = screen.getByTestId('date-picker-from-date')
+    const toInput = screen.getByTestId('date-picker-to-date')
+
+    // Change From Date
+    fireEvent.change(fromInput, { target: { value: '2026-06-01' } })
+    expect(urlParams.fromDate).toBeUndefined()
+
+    // Change To Date
+    fireEvent.change(toInput, { target: { value: '2026-06-05' } })
+    expect(urlParams.toDate).toBeUndefined()
+
+    // Click Apply Filters
+    const applyButton = screen.getByRole('button', { name: /Apply Filters/i })
+    fireEvent.click(applyButton)
+
+    // Verify all URL parameters updated together
+    expect(urlParams.tableName).toBe('Category')
+    expect(urlParams.actionTypes).toBe('Create')
+    expect(urlParams.fromDate).toBe('2026/06/01')
+    expect(urlParams.toDate).toBe('2026/06/05')
+  })
+
+  it('updates Entity ID input locally immediately and propagates to URL only on Apply click', async () => {
+    let urlEntityId = ''
+    const handleUrlChange = vi.fn((val) => {
+      urlEntityId = val
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        handleUrlChange(searchParams.get('entityId') || '')
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const input = screen.getByPlaceholderText('Search by Entity ID...') as HTMLInputElement
+    expect(input.value).toBe('')
+
+    // Simulate typing
+    fireEvent.change(input, { target: { value: '5' } })
+
+    // Input changes immediately
+    expect(input.value).toBe('5')
+
+    // URL parameter is not updated instantly
+    expect(urlEntityId).toBe('')
+
+    // Click Apply Filters
+    const applyButton = screen.getByRole('button', { name: /Apply Filters/i })
+    fireEvent.click(applyButton)
+
+    expect(urlEntityId).toBe('5')
+  })
+
+  it('hydrates initial Entity ID state from URL query parameters', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs?entityId=123']}>
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const input = screen.getByPlaceholderText('Search by Entity ID...') as HTMLInputElement
+    expect(input.value).toBe('123')
+
+    expect(useAuditLogs).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: '123' })
+    )
+  })
+
+  it('updates URL parameter only on Apply when a user is selected from dropdown', async () => {
+    let urlParams: Record<string, string> = {}
+    const handleUrlChange = vi.fn((params) => {
+      urlParams = params
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        const params: Record<string, string> = {}
+        searchParams.forEach((val, key) => {
+          params[key] = val
+        })
+        handleUrlChange(params)
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const select = screen.getByTestId('user-select')
+    fireEvent.change(select, { target: { value: '11' } })
+    expect(urlParams.userId).toBeUndefined()
+
+    // Click Apply Filters
+    const applyButton = screen.getByRole('button', { name: /Apply Filters/i })
+    fireEvent.click(applyButton)
+
+    expect(urlParams.userId).toBe('11')
+  })
+
+  it('resets all filters when the Reset Filters button is clicked and updates URL immediately', async () => {
+    let urlParams: Record<string, string> = {}
+    const handleUrlChange = vi.fn((params) => {
+      urlParams = params
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        const params: Record<string, string> = {}
+        searchParams.forEach((val, key) => {
+          params[key] = val
+        })
+        handleUrlChange(params)
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs?search=test&entityId=5&tableName=Category&actionTypes=Create&fromDate=2026/06/01&userId=10']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    // Verify initial values
+    const searchInput = screen.getByPlaceholderText('Search Actor Email or IP Address...') as HTMLInputElement
+    const entityInput = screen.getByPlaceholderText('Search by Entity ID...') as HTMLInputElement
+    expect(searchInput.value).toBe('test')
+    expect(entityInput.value).toBe('5')
+
+    // Click Reset
+    const resetButton = screen.getByRole('button', { name: /Reset Filters/i })
+    fireEvent.click(resetButton)
+
+    // Check that state resets
+    expect(searchInput.value).toBe('')
+    expect(entityInput.value).toBe('')
+    expect(urlParams).toEqual({})
+  })
+
+  it('shows an error toast and prevents applying when To Date is earlier than From Date', async () => {
+    let urlParams: Record<string, string> = {}
+    const handleUrlChange = vi.fn((params) => {
+      urlParams = params
+    })
+
+    const UrlObserver = () => {
+      const [searchParams] = useSearchParams()
+      React.useEffect(() => {
+        const params: Record<string, string> = {}
+        searchParams.forEach((val, key) => {
+          params[key] = val
+        })
+        handleUrlChange(params)
+      }, [searchParams])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/admin/audit-logs']}>
+        <UrlObserver />
+        <Routes>
+          <Route path="/admin/audit-logs" element={<AuditLogsManagement />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const fromInput = screen.getByTestId('date-picker-from-date')
+    const toInput = screen.getByTestId('date-picker-to-date')
+
+    // Change From Date to 2026-06-05
+    fireEvent.change(fromInput, { target: { value: '2026-06-05' } })
+    // Change To Date to 2026-06-01 (earlier than from date)
+    fireEvent.change(toInput, { target: { value: '2026-06-01' } })
+
+    // Reset calls on mockToast
+    mockToast.error.mockClear()
+
+    // Click Apply Filters
+    const applyButton = screen.getByRole('button', { name: /Apply Filters/i })
+    fireEvent.click(applyButton)
+
+    // Should call toast error
+    expect(mockToast.error).toHaveBeenCalledWith('To Date cannot be before From Date')
+    // Should NOT update URL
+    expect(urlParams.fromDate).toBeUndefined()
+    expect(urlParams.toDate).toBeUndefined()
+  })
+})
+'@
     Write-TemplateFile 'UMS.Client/src/pages/AuditLogsManagement.tsx' @'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { auditLogsApi } from '../lib/audit-logs-api'
-import type { AuditTrailResponse } from '../lib/audit-logs-api'
+import { parse, format } from 'date-fns'
+import { useAuditLogs } from '../hooks/useAuditLogs'
+import { useUserLookups } from '../hooks/useUsers'
+import { auditLogsApi, type AuditTrailResponse } from '../lib/audit-logs-api'
 import { useToast } from '../components/ui/toast'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
+import { DatePicker } from '../components/ui/date-picker'
 import { Badge } from '../components/ui/badge'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '../components/ui/select'
+import DataTableExport from '../components/ui/DataTableExport'
 import { 
   FileText, 
   Search, 
@@ -14414,73 +16750,231 @@ export default function AuditLogsManagement() {
   const [searchParams, setSearchParams] = useSearchParams()
   const toast = useToast()
 
-  // State Management
-  const [logs, setLogs] = useState<AuditTrailResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [totalCount, setTotalCount] = useState(0)
-
-  // Query Params Synchronized State
-  const page = parseInt(searchParams.get('page') || '1')
-  const pageSize = 10
-  const search = searchParams.get('search') || ''
-  const sortBy = searchParams.get('sortBy') || 'datetime'
-  const sortDirection = (searchParams.get('sortDirection') || 'desc') as 'asc' | 'desc'
-
   // Details Sheet State
   const [selectedLog, setSelectedLog] = useState<AuditTrailResponse | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  // Sync controls with URL search params
-  const updateUrlParam = (key: string, value: string | null) => {
-    const newParams = new URLSearchParams(searchParams)
-    if (value) {
-      newParams.set(key, value)
-    } else {
-      newParams.delete(key)
-    }
-    setSearchParams(newParams)
-  }
+  // Query Params Synchronized State
+  const page = parseInt(searchParams.get('page') || '1', 10)
+  const pageSize = 10
+  const search = searchParams.get('search') || ''
+  const sortBy = searchParams.get('sortBy') || 'datetime'
+  const sortDirection = (searchParams.get('sortDirection') || 'desc') as 'asc' | 'desc'
+  const tableName = searchParams.get('tableName') || 'all'
+  const entityId = searchParams.get('entityId') || ''
+  const actionTypes = searchParams.get('actionTypes') || ''
+  const fromDate = searchParams.get('fromDate') || ''
+  const toDate = searchParams.get('toDate') || ''
+  const userId = searchParams.get('userId') || 'all'
 
-  // Fetch Audit Logs
-  const fetchLogs = async () => {
-    setLoading(true)
+  // Local filter states (bound to form controls)
+  const [localSearch, setLocalSearch] = useState(search)
+  const [localEntityId, setLocalEntityId] = useState(entityId)
+  const [localTableName, setLocalTableName] = useState(tableName)
+  const [localActionTypes, setLocalActionTypes] = useState(actionTypes)
+  const [localUserId, setLocalUserId] = useState(userId)
+  const [localFromDate, setLocalFromDate] = useState(fromDate)
+  const [localToDate, setLocalToDate] = useState(toDate)
+  // Export loading state
+  const [isExporting, setIsExporting] = useState(false)
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search,
+    entityId,
+    tableName,
+    actionTypes,
+    userId,
+    fromDate,
+    toDate,
+  })
+
+  if (
+    search !== prevParams.search ||
+    entityId !== prevParams.entityId ||
+    tableName !== prevParams.tableName ||
+    actionTypes !== prevParams.actionTypes ||
+    userId !== prevParams.userId ||
+    fromDate !== prevParams.fromDate ||
+    toDate !== prevParams.toDate
+  ) {
+    setPrevParams({
+      search,
+      entityId,
+      tableName,
+      actionTypes,
+      userId,
+      fromDate,
+      toDate,
+    })
+    setLocalSearch(search)
+    setLocalEntityId(entityId)
+    setLocalTableName(tableName)
+    setLocalActionTypes(actionTypes)
+    setLocalUserId(userId)
+    setLocalFromDate(fromDate)
+    setLocalToDate(toDate)
+  }
+  // Helper to parse date string safely from yyyy/MM/dd to Date
+  const parseDateString = (dateStr: string): Date | undefined => {
+    if (!dateStr) return undefined
     try {
-      const response = await auditLogsApi.getPagedList({
-        pageNumber: page,
-        pageSize: pageSize,
-        searchTerm: search || undefined,
-        sortBy: sortBy,
-        sortDirection: sortDirection
-      })
-      if (response.isSuccessful && response.data) {
-        setLogs(response.data.data)
-        setTotalCount(response.data.totalCount)
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve audit logs.')
-      }
-    } catch (err) {
-      toast.error('An error occurred while loading audit logs.')
-    } finally {
-      setLoading(false)
+      const parsed = parse(dateStr, 'yyyy/MM/dd', new Date())
+      return isNaN(parsed.getTime()) ? undefined : parsed
+    } catch {
+      return undefined
     }
   }
 
+  const handleFromDateChange = (date?: Date) => {
+    setLocalFromDate(date ? format(date, 'yyyy/MM/dd') : '')
+  }
+
+  const handleToDateChange = (date?: Date) => {
+    setLocalToDate(date ? format(date, 'yyyy/MM/dd') : '')
+  }
+
+  // Fetch users lookup for dropdown filter
+  const { data: userLookups = [] } = useUserLookups()
+
+  // Fetch Audit Logs using TanStack Query custom hook
+  const { data: queryData, isLoading: loading, error } = useAuditLogs({
+    pageNumber: page,
+    pageSize,
+    searchTerm: search || undefined,
+    sortBy,
+    sortDirection,
+    tableName: tableName !== 'all' ? tableName : undefined,
+    entityId: entityId || undefined,
+    actionTypes: actionTypes || undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    userId: userId !== 'all' ? parseInt(userId, 10) : undefined,
+  })
+
+  const logs = queryData?.data || []
+  const totalCount = queryData?.totalCount || 0
+
+  // Display toast error on query failures
   useEffect(() => {
-    fetchLogs()
-  }, [page, search, sortBy, sortDirection])
+    if (error) {
+      toast.error(error.message || 'Failed to retrieve audit logs.')
+    }
+  }, [error, toast])
+
+  // Sync controls with URL search params (supporting multiple key-value pairs)
+  const updateUrlParams = (params: Record<string, string | null>) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) {
+          next.set(key, value)
+        } else {
+          next.delete(key)
+        }
+      })
+      return next
+    })
+  }
+
+  // Backwards compatibility helper
+  const updateUrlParam = (key: string, value: string | null) => {
+    updateUrlParams({ [key]: value })
+  }
 
   // Sorting Handler
   const handleSort = (field: string) => {
     const isAsc = sortBy === field && sortDirection === 'asc'
-    updateUrlParam('sortBy', field)
-    updateUrlParam('sortDirection', isAsc ? 'desc' : 'asc')
-    updateUrlParam('page', '1') // Reset to first page
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('sortBy', field)
+      next.set('sortDirection', isAsc ? 'desc' : 'asc')
+      next.set('page', '1') // Reset to first page
+      return next
+    })
   }
 
-  // Search Handler
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateUrlParam('search', e.target.value || null)
-    updateUrlParam('page', '1') // Reset to page 1 on new search
+  // Dirty check to enable/disable the "Apply Filters" button
+  const isDirty = 
+    localSearch.trim() !== search ||
+    localEntityId.trim() !== entityId ||
+    localTableName !== tableName ||
+    localActionTypes !== actionTypes ||
+    localUserId !== userId ||
+    localFromDate !== fromDate ||
+    localToDate !== toDate
+
+  // Batch apply filters to URL
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (localFromDate && localToDate) {
+    const from = parseDateString(localFromDate)
+    const to = parseDateString(localToDate)
+    if (from && to && to < from) {
+        toast.error("To Date cannot be before From Date")
+        return
+      }
+    }
+
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+
+      if (localSearch.trim()) {
+        next.set('search', localSearch.trim())
+      } else {
+        next.delete('search')
+      }
+
+      if (localEntityId.trim()) {
+        next.set('entityId', localEntityId.trim())
+      } else {
+        next.delete('entityId')
+      }
+
+      if (localTableName && localTableName !== 'all') {
+        next.set('tableName', localTableName)
+      } else {
+        next.delete('tableName')
+      }
+
+      if (localActionTypes) {
+        next.set('actionTypes', localActionTypes)
+      } else {
+        next.delete('actionTypes')
+      }
+
+      if (localUserId && localUserId !== 'all') {
+        next.set('userId', localUserId)
+      } else {
+        next.delete('userId')
+      }
+
+      if (localFromDate) {
+        next.set('fromDate', localFromDate)
+      } else {
+        next.delete('fromDate')
+      }
+
+      if (localToDate) {
+        next.set('toDate', localToDate)
+      } else {
+        next.delete('toDate')
+      }
+
+      next.set('page', '1')
+      return next
+    })
+  }
+
+  // Reset all advanced and basic filters
+  const handleResetFilters = () => {
+    setLocalSearch('')
+    setLocalEntityId('')
+    setLocalTableName('all')
+    setLocalActionTypes('')
+    setLocalUserId('all')
+    setLocalFromDate('')
+    setLocalToDate('')
+    setSearchParams(new URLSearchParams())
   }
 
   // Helper: Audit Type Badge styling
@@ -14513,23 +17007,214 @@ export default function AuditLogsManagement() {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search by Table, Actor Email, or IP Address..."
-            className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
-          />
+      {/* Advanced Filters Container */}
+      <form onSubmit={handleApplyFilters} className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+        
+        {/* Row 1: Search, Table Name Select, Entity ID Input, User Lookup */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          {/* General Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              placeholder="Search Actor Email or IP Address..."
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
+
+          {/* Table Name Select */}
+          <div>
+            <Select 
+              data-testid="table-name-select"
+              value={localTableName} 
+              onValueChange={(val) => setLocalTableName(val)}
+            >
+              <SelectTrigger className="w-full rounded-xl text-sm border-neutral-300 bg-neutral-50/50">
+                <SelectValue placeholder="All Tables" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tables</SelectItem>
+                <SelectItem value="Category">Category</SelectItem>
+                <SelectItem value="ApplicationUser">ApplicationUser</SelectItem>
+                <SelectItem value="ApplicationRole">ApplicationRole</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Entity ID Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              value={localEntityId}
+              onChange={(e) => setLocalEntityId(e.target.value)}
+              placeholder="Search by Entity ID..."
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
+
+          {/* User Select Dropdown */}
+          <div>
+            <Select 
+              data-testid="user-select"
+              value={localUserId} 
+              onValueChange={(val) => setLocalUserId(val)}
+            >
+              <SelectTrigger className="w-full rounded-xl text-sm border-neutral-300 bg-neutral-50/50">
+                <SelectValue placeholder="All Users" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Users</SelectItem>
+                {userLookups.map((u) => (
+                  <SelectItem key={u.id} value={String(u.id)}>
+                    {u.fullName} ({u.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+
+        {/* Row 2: Action Types Badges, Date Range Pickers & Reset Button */}
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pt-2 border-t border-neutral-100">
+          
+          {/* Action Types Filter Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-neutral-500 mr-1">Event Type:</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Create') 
+                  ? active.filter(t => t !== 'Create') 
+                  : [...active, 'Create'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Create')
+                  ? 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Update') 
+                  ? active.filter(t => t !== 'Update') 
+                  : [...active, 'Update'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Update')
+                  ? 'bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Update
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const active = localActionTypes ? localActionTypes.split(',') : [];
+                const nextTypes = active.includes('Delete') 
+                  ? active.filter(t => t !== 'Delete') 
+                  : [...active, 'Delete'];
+                setLocalActionTypes(nextTypes.join(','));
+              }}
+              className={`h-8 rounded-lg text-xs font-bold transition-all px-3 ${
+                (localActionTypes ? localActionTypes.split(',') : []).includes('Delete')
+                  ? 'bg-rose-100 border-rose-300 text-rose-800 hover:bg-rose-200'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              Delete
+            </Button>
+          </div>
+
+          {/* Date Picker Bounds & Reset Button */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-neutral-500">From:</span>
+              <DatePicker 
+                date={parseDateString(localFromDate)}
+                setDate={handleFromDateChange}
+                placeholder="From Date"
+                className="w-36"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-neutral-500">To:</span>
+              <DatePicker 
+                date={parseDateString(localToDate)}
+                setDate={handleToDateChange}
+                placeholder="To Date"
+                className="w-36"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={!isDirty}
+              className="h-8 bg-[#4285F4] hover:bg-[#3273DC] text-white font-semibold text-xs rounded-xl flex items-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Apply Filters
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-8 border-neutral-300 text-neutral-600 hover:bg-neutral-100 font-semibold text-xs rounded-xl flex items-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              Reset Filters
+            </Button>
+            <DataTableExport
+              isExporting={isExporting}
+              onExport={async (format) => {
+                try {
+                  setIsExporting(true);
+                  await auditLogsApi.exportAuditLogs({
+                    // pageNumber and pageSize are not needed for export
+                    exportFormat: format,
+                    searchTerm: search || undefined,
+                    tableName: tableName !== 'all' ? tableName : undefined,
+                    entityId: entityId || undefined,
+                    actionTypes: actionTypes || undefined,
+                    fromDate: fromDate || undefined,
+                    toDate: toDate || undefined,
+                    userId: userId !== 'all' ? parseInt(userId, 10) : undefined,
+                  });
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  toast.error(message);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+            />
+          </div>
+
+        </div>
+
+        {/* Dynamic Result Count Label */}
+        <div className="flex justify-end text-xs text-neutral-400 pt-1">
+          <SlidersHorizontal className="w-3.5 h-3.5 mr-1" />
           <span>Showing {logs.length} of {totalCount} records</span>
         </div>
-      </div>
+      </form>
 
       {/* Main Grid table */}
       <Card className="rounded-2xl border border-neutral-200 shadow-sm overflow-hidden bg-white">
@@ -14799,39 +17484,83 @@ export default function AuditLogsManagement() {
 }
 '@
     Write-TemplateFile 'UMS.Client/src/pages/CategoriesManagement.tsx' @'
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { useToast } from '../components/ui/toast';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
 import { categoriesApi } from '../lib/categories-api';
-import type { CategoryResponse, CategoryLookupDto } from '../lib/categories-api';
+import type { CategoryResponse } from '../lib/categories-api';
 import { 
   Plus, Edit2, Trash2, ShieldCheck, AlertTriangle, 
-  Search, RotateCcw, ChevronLeft, ChevronRight, Loader2
+  Search, RotateCcw, Loader2
 } from 'lucide-react';
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+} from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
+import { 
+  useCategoryList, 
+  useCategoryLookups, 
+  useCreateCategory, 
+  useUpdateCategory, 
+  useDeleteCategory 
+} from '../hooks/useCategories';
+import { DataTablePagination } from '../components/ui/DataTablePagination';
+import { useToast } from '../components/ui/toast';
+import DataTableExport from '../components/ui/DataTableExport';
+
+const columns: ColumnDef<CategoryResponse>[] = [
+  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'name', header: 'Category Name' },
+  { accessorKey: 'slug', header: 'Slug' },
+  { accessorKey: 'parentId', header: 'Parent Category' },
+  { accessorKey: 'sortOrder', header: 'Sort Order' },
+  { accessorKey: 'isActive', header: 'Status' },
+];
 
 export default function CategoriesManagement() {
   const { hasPermission } = useAuth();
-  const toast = useToast();
 
-  // List States
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [parentLookups, setParentLookups] = useState<CategoryLookupDto[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Query / Filter / Pagination States
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(10);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('sortorder');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  // Query parameters from URL
+  const pageNumber = Number(searchParams.get('page') || '1');
+  const pageSize = Number(searchParams.get('size') || '10');
+  const searchTerm = searchParams.get('search') || '';
+  const sortBy = searchParams.get('sortBy') || 'sortorder';
+  const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
+  const statusFilter = (searchParams.get('status') || 'all') as 'all' | 'active' | 'inactive';
+
+  // Local filter states
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const [localStatus, setLocalStatus] = useState(statusFilter);
+
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search: searchTerm,
+    status: statusFilter,
+  });
+
+  if (
+    searchTerm !== prevParams.search ||
+    statusFilter !== prevParams.status
+  ) {
+    setPrevParams({
+      search: searchTerm,
+      status: statusFilter,
+    });
+    setLocalSearch(searchTerm);
+    setLocalStatus(statusFilter);
+  }
+
+  const isDirty =
+    localSearch.trim() !== searchTerm ||
+    localStatus !== statusFilter;
 
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
@@ -14845,8 +17574,71 @@ export default function CategoriesManagement() {
   const [formParentId, setFormParentId] = useState<number | null>(null);
   const [formSortOrder, setFormSortOrder] = useState<number>(0);
   const [formIsActive, setFormIsActive] = useState(true);
-  const [formSubmitting, setFormSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isExporting, setIsExporting] = useState(false);
+  const toast = useToast();
+
+  // API Hooks
+  const isActiveParam = statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : null;
+  const { data: pagedData, isLoading: loading } = useCategoryList({
+    pageNumber,
+    pageSize,
+    searchTerm,
+    sortBy,
+    sortDirection,
+    isActive: isActiveParam,
+  });
+
+  const { data: parentLookups = [] } = useCategoryLookups();
+
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  const categories = pagedData?.data || [];
+  const totalCount = pagedData?.totalCount || 0;
+
+  const formSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // React Table Instance
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: categories,
+    columns,
+    pageCount: Math.ceil(totalCount / pageSize),
+    state: {
+      pagination: {
+        pageIndex: pageNumber - 1,
+        pageSize,
+      },
+      sorting: [{ id: sortBy, desc: sortDirection === 'desc' }],
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' 
+        ? updater({ pageIndex: pageNumber - 1, pageSize }) 
+        : updater;
+      setSearchParams(prev => {
+        prev.set('page', String(next.pageIndex + 1));
+        prev.set('size', String(next.pageSize));
+        return prev;
+      });
+    },
+    onSortingChange: (updater) => {
+      const current = [{ id: sortBy, desc: sortDirection === 'desc' }];
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      if (next && next.length > 0) {
+        setSearchParams(prev => {
+          prev.set('sortBy', next[0].id);
+          prev.set('sortDir', next[0].desc ? 'desc' : 'asc');
+          prev.set('page', '1');
+          return prev;
+        });
+      }
+    },
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   // Helper to dynamically slugify text
   const generateSlug = (val: string) => {
@@ -14858,53 +17650,6 @@ export default function CategoriesManagement() {
       .replace(/^-+|-+$/g, '');    // trim hyphens
   };
 
-  // Fetch Category lookups for dropdowns
-  const fetchParentLookups = async () => {
-    try {
-      const response = await categoriesApi.getForList();
-      if (response.isSuccessful && response.data) {
-        setParentLookups(response.data);
-      }
-    } catch (err) {
-      console.error('Failed to load parent category lookups', err);
-    }
-  };
-
-  // Fetch categories paged list
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const isActiveParam = 
-        statusFilter === 'active' ? true : 
-        statusFilter === 'inactive' ? false : null;
-
-      const response = await categoriesApi.getPagedList({
-        pageNumber,
-        pageSize,
-        searchTerm,
-        sortBy,
-        sortDirection,
-        isActive: isActiveParam,
-      });
-
-      if (response.isSuccessful && response.data) {
-        setCategories(response.data.data);
-        setTotalCount(response.data.totalCount);
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve categories.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred while loading categories.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [pageNumber, pageSize, searchTerm, sortBy, sortDirection, statusFilter]);
-
   // Handle name input change to auto-suggest slug
   const handleNameChange = (val: string) => {
     setFormName(val);
@@ -14913,28 +17658,45 @@ export default function CategoriesManagement() {
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchTerm(searchInput);
-    setPageNumber(1);
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (localSearch.trim()) {
+        next.set('search', localSearch.trim());
+      } else {
+        next.delete('search');
+      }
+
+      if (localStatus && localStatus !== 'all') {
+        next.set('status', localStatus);
+      } else {
+        next.delete('status');
+      }
+      next.set('page', '1');
+      return next;
+    });
   };
 
   const handleResetFilters = () => {
-    setSearchInput('');
-    setSearchTerm('');
-    setPageNumber(1);
-    setStatusFilter('all');
-    setSortBy('sortorder');
-    setSortDirection('asc');
+    setLocalSearch('');
+    setLocalStatus('all');
+    setSearchParams(new URLSearchParams());
   };
 
   const toggleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDirection('asc');
-    }
+    setSearchParams(prev => {
+      const currentSortBy = prev.get('sortBy') || 'sortorder';
+      const currentSortDir = prev.get('sortDir') || 'asc';
+      if (currentSortBy === field) {
+        prev.set('sortDir', currentSortDir === 'asc' ? 'desc' : 'asc');
+      } else {
+        prev.set('sortBy', field);
+        prev.set('sortDir', 'asc');
+      }
+      prev.set('page', '1');
+      return prev;
+    });
   };
 
   // Form Validation
@@ -14970,7 +17732,6 @@ export default function CategoriesManagement() {
     setFormIsActive(true);
     setErrors({});
     setIsFormSheetOpen(true);
-    fetchParentLookups();
   };
 
   const openEditSheet = (cat: CategoryResponse) => {
@@ -14983,56 +17744,43 @@ export default function CategoriesManagement() {
     setFormIsActive(cat.isActive);
     setErrors({});
     setIsFormSheetOpen(true);
-    fetchParentLookups();
   };
 
   const handleSubmitCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setFormSubmitting(true);
-    try {
-      if (formMode === 'create') {
-        const response = await categoriesApi.create({
-          name: formName,
-          slug: formSlug,
-          parentId: formParentId,
-          isActive: formIsActive,
-          sortOrder: formSortOrder,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('Category created successfully!');
-          setIsFormSheetOpen(false);
-          fetchCategories();
-        } else {
-          toast.error(response.messages[0] || 'Failed to create category.');
+    if (formMode === 'create') {
+      createMutation.mutate({
+        name: formName,
+        slug: formSlug,
+        parentId: formParentId,
+        isActive: formIsActive,
+        sortOrder: formSortOrder,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
         }
-      } else {
-        if (!targetCategory) return;
-        const response = await categoriesApi.update({
-          id: targetCategory.id,
-          name: formName,
-          slug: formSlug,
-          parentId: formParentId,
-          isActive: formIsActive,
-          sortOrder: formSortOrder,
-          rowVersion: targetCategory.rowVersion,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('Category updated successfully!');
-          setIsFormSheetOpen(false);
-          fetchCategories();
-        } else {
-          toast.error(response.messages[0] || 'Failed to update category.');
+      });
+    } else {
+      if (!targetCategory) return;
+      updateMutation.mutate({
+        id: targetCategory.id,
+        name: formName,
+        slug: formSlug,
+        parentId: formParentId,
+        isActive: formIsActive,
+        sortOrder: formSortOrder,
+        rowVersion: targetCategory.rowVersion,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
         }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during save.');
-    } finally {
-      setFormSubmitting(false);
+      });
     }
   };
 
@@ -15043,21 +17791,14 @@ export default function CategoriesManagement() {
 
   const executeDeleteCategory = async () => {
     if (!targetCategory) return;
-    try {
-      const response = await categoriesApi.delete(targetCategory.id);
-      if (response.isSuccessful) {
-        toast.success(`Category "${targetCategory.name}" deleted successfully.`);
-        fetchCategories();
-      } else {
-        toast.error(response.messages[0] || 'Failed to delete category.');
+    deleteMutation.mutate(targetCategory.id, {
+      onSuccess: (response) => {
+        if (response.isSuccessful) {
+          setIsDeleteDialogOpen(false);
+          setTargetCategory(null);
+        }
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during deletion.');
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setTargetCategory(null);
-    }
+    });
   };
 
   // Find parent category name from lists
@@ -15066,8 +17807,6 @@ export default function CategoriesManagement() {
     const lookup = parentLookups.find(p => p.id === parentId);
     return lookup ? lookup.name : `Category #${parentId}`;
   };
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
@@ -15095,22 +17834,22 @@ export default function CategoriesManagement() {
       {/* Search & Filters */}
       <Card className="bg-white border-neutral-200 shadow-sm rounded-xl">
         <CardContent className="p-4">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
+          <form onSubmit={handleApplyFilters} className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Search categories by name or slug..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] bg-neutral-50/50"
               />
             </div>
             
             <div className="flex gap-2 shrink-0">
               <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                value={localStatus}
+                onChange={(e) => setLocalStatus(e.target.value as 'all' | 'active' | 'inactive')}
                 className="border border-neutral-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 font-medium text-neutral-700"
               >
                 <option value="all">All Statuses</option>
@@ -15118,13 +17857,32 @@ export default function CategoriesManagement() {
                 <option value="inactive">Inactive Only</option>
               </select>
 
-              <Button type="submit" variant="default" className="rounded-xl px-5">
-                Search
+              <Button type="submit" variant="default" disabled={!isDirty} className="rounded-xl px-5 disabled:opacity-50 disabled:pointer-events-none">
+                Apply Filters
               </Button>
               <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-4 flex items-center gap-1">
                 <RotateCcw className="w-3.5 h-3.5" />
-                Reset
+                Reset Filters
               </Button>
+              <DataTableExport
+                isExporting={isExporting}
+                onExport={async (format) => {
+                  try {
+                    setIsExporting(true);
+                    await categoriesApi.exportCategories({
+                      searchTerm: searchTerm || undefined,
+                      isActive: isActiveParam,
+                      sortBy: sortBy || undefined,
+                      sortDirection: sortDirection || undefined,
+                      exportFormat: format
+                    });
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : String(err));
+                  } finally {
+                    setIsExporting(false);
+                  }
+                }}
+              />
             </div>
           </form>
         </CardContent>
@@ -15202,12 +17960,12 @@ export default function CategoriesManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge 
-                          variant="outline" 
-                          className={
-                            cat.isActive 
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
-                              : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
-                          }
+                           variant="outline" 
+                           className={
+                             cat.isActive 
+                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
+                               : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
+                           }
                         >
                           {cat.isActive ? 'Active' : 'Inactive'}
                         </Badge>
@@ -15251,33 +18009,9 @@ export default function CategoriesManagement() {
             </table>
           </div>
 
-          {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
-              <div className="text-xs text-neutral-500">
-                Page {pageNumber} of {totalPages}
-              </div>
-              <div className="flex gap-1.5">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={pageNumber === 1}
-                  onClick={() => setPageNumber(p => Math.max(p - 1, 1))}
-                  className="rounded-lg py-1 px-3 flex items-center gap-1 border-neutral-200"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  Prev
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={pageNumber === totalPages}
-                  onClick={() => setPageNumber(p => Math.min(p + 1, totalPages))}
-                  className="rounded-lg py-1 px-3 flex items-center gap-1 border-neutral-200"
-                >
-                  Next
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Button>
-              </div>
+          {!loading && totalCount > 0 && (
+            <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
+              <DataTablePagination table={table} />
             </div>
           )}
         </CardContent>
@@ -15413,9 +18147,11 @@ export default function CategoriesManagement() {
             </DialogClose>
             <Button
               type="button"
+              disabled={deleteMutation.isPending}
               onClick={executeDeleteCategory}
               className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl border-transparent"
             >
+              {deleteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-1.5 inline" />}
               Delete Permanently
             </Button>
           </DialogFooter>
@@ -18344,70 +21080,145 @@ export default function RoleManagement() {
   );
 }
 '@
-    Write-TemplateFile 'UMS.Client/src/pages/UserManagement.tsx' @'
-import React, { useEffect, useState } from 'react';
+    Write-TemplateFile 'UMS.Client/src/pages/UsersManagement.tsx' @'
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { useToast } from '../components/ui/toast';
 import { Sheet, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '../components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../components/ui/dialog';
 import { PasswordStrengthMeter } from '../components/PasswordStrengthMeter';
 import { usersApi } from '../lib/users-api';
-import type { UserResponse, RoleResponse } from '../lib/users-api';
+import type { UserResponse } from '../lib/users-api';
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from '../components/ui/select';
-import {
-  Pagination, PaginationContent, PaginationEllipsis, PaginationItem,
-  PaginationLink, PaginationNext, PaginationPrevious
-} from '../components/ui/pagination';
 import { 
   Plus, Edit2, Trash2, UserCheck, AlertTriangle, 
   Search, RotateCcw, Lock, Unlock, Loader2 
 } from 'lucide-react';
+import { useToast } from '../components/ui/toast';
+import DataTableExport from '../components/ui/DataTableExport';
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+} from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
+import {
+  useUserList,
+  useAvailableRoles,
+  useRegisterUser,
+  useUpdateUserAndRoles,
+  useLockUser,
+  useUnlockUser,
+  useChangeUserStatus,
+  useDeleteUser,
+} from '../hooks/useUsers';
+import { DataTablePagination } from '../components/ui/DataTablePagination';
 
-export default function UserManagement() {
+const columns: ColumnDef<UserResponse>[] = [
+  { accessorKey: 'fullName', header: 'User' },
+  { accessorKey: 'email', header: 'Email' },
+  { accessorKey: 'roles', header: 'Assigned Roles' },
+  { accessorKey: 'status', header: 'Status' },
+];
+
+export default function UsersManagement() {
   const { hasPermission } = useAuth();
-  const toast = useToast();
 
-  // List States
-  const [users, setUsers] = useState<UserResponse[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [availableRoles, setAvailableRoles] = useState<RoleResponse[]>([]);
-
-  // Query / Filter / Pagination States
+  // Query / Filter / Pagination States from URL
   const [searchParams, setSearchParams] = useSearchParams();
 
   const pageNumber = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = parseInt(searchParams.get('size') || '10', 10);
   const searchTerm = searchParams.get('search') || '';
   const activeParam = searchParams.get('active') || 'all';
   const lockedParam = searchParams.get('locked') || 'all';
   const roleParam = searchParams.get('role') || 'all';
+  const sortBy = searchParams.get('sortBy') || 'fullname';
+  const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
 
-  const [searchInput, setSearchInput] = useState(searchTerm);
-  const [pageSize] = useState(10);
-  const [sortBy, setSortBy] = useState('fullname');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  // Local filter states
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const [localActive, setLocalActive] = useState(activeParam);
+  const [localLocked, setLocalLocked] = useState(lockedParam);
+  const [localRole, setLocalRole] = useState(roleParam);
 
-  // Sync search input if searchTerm changes (e.g. from reset or back navigation)
-  useEffect(() => {
-    setSearchInput(searchTerm);
-  }, [searchTerm]);
+  // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
+  const [prevParams, setPrevParams] = useState({
+    search: searchTerm,
+    active: activeParam,
+    locked: lockedParam,
+    role: roleParam,
+  });
+
+  if (
+    searchTerm !== prevParams.search ||
+    activeParam !== prevParams.active ||
+    lockedParam !== prevParams.locked ||
+    roleParam !== prevParams.role
+  ) {
+    setPrevParams({
+      search: searchTerm,
+      active: activeParam,
+      locked: lockedParam,
+      role: roleParam,
+    });
+    setLocalSearch(searchTerm);
+    setLocalActive(activeParam);
+    setLocalLocked(lockedParam);
+    setLocalRole(roleParam);
+  }
+
+  const isDirty =
+    localSearch.trim() !== searchTerm ||
+    localActive !== activeParam ||
+    localLocked !== lockedParam ||
+    localRole !== roleParam;
+
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('page', '1');
+
+    const newParams = {
+      search: localSearch.trim(),
+      active: localActive,
+      locked: localLocked,
+      role: localRole,
+    };
+
+    Object.entries(newParams).forEach(([key, val]) => {
+      if (!val || val === 'all' || val === '') {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, val);
+      }
+    });
+
+    setSearchParams(nextParams);
+  };
+
+  const handleResetFilters = () => {
+    setLocalSearch('');
+    setLocalActive('all');
+    setLocalLocked('all');
+    setLocalRole('all');
+    setSearchParams(new URLSearchParams());
+  };
 
   const updateFilters = (newParams: Record<string, string | null>) => {
     const nextParams = new URLSearchParams(searchParams);
     
-    // Changing filters or searching resets to page 1
-    if (newParams.page === undefined && (newParams.search !== undefined || newParams.active !== undefined || newParams.locked !== undefined || newParams.role !== undefined)) {
+    // Changing page/size/sortBy/sortDir resets to page 1 if applicable
+    if (newParams.page === undefined && (newParams.sortBy !== undefined || newParams.sortDir !== undefined)) {
       nextParams.set('page', '1');
     }
 
     Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null || val === 'all' || (key === 'page' && val === '1') || (key === 'search' && val === '')) {
+      if (val === null || val === 'all' || (key === 'page' && val === '1') || (key === 'search' && val === '') || (key === 'sortBy' && val === 'fullname') || (key === 'sortDir' && val === 'asc') || (key === 'size' && val === '10')) {
         nextParams.delete(key);
       } else {
         nextParams.set(key, val);
@@ -18433,119 +21244,96 @@ export default function UserManagement() {
   const [formActivateUser, setFormActivateUser] = useState(true);
   const [formAutoConfirmEmail, setFormAutoConfirmEmail] = useState(false);
   const [formRoles, setFormRoles] = useState<string[]>([]);
-  const [formSubmitting, setFormSubmitting] = useState(false);
 
   // Validation States
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isExporting, setIsExporting] = useState(false);
+  const toast = useToast();
 
-  // Map user ID to their roles for visual rendering
-  const [userRolesMap, setUserRolesMap] = useState<Record<number, string[]>>({});
+  // Query & Mutation Hooks
+  const isActiveParam = activeParam === 'active' ? true : activeParam === 'inactive' ? false : null;
+  const isLockedParam = lockedParam === 'locked' ? true : lockedParam === 'unlocked' ? false : null;
+  const roleIdParam = roleParam !== 'all' ? parseInt(roleParam, 10) : null;
 
-  // Load available roles on mount
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await usersApi.getRolesAll();
-        if (response.isSuccessful && response.data) {
-          setAvailableRoles(response.data);
-        }
-      } catch (err) {
-        console.error('Failed to load roles', err);
-      }
-    };
-    fetchRoles();
-  }, []);
+  const { data: pagedData, isLoading: loading } = useUserList({
+    pageNumber,
+    pageSize,
+    searchTerm,
+    sortBy,
+    sortDirection,
+    isActive: isActiveParam,
+    isLocked: isLockedParam,
+    roleId: roleIdParam,
+  });
 
-  // Fetch users paged list
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      let isActive: boolean | null = null;
-      if (activeParam === 'active') isActive = true;
-      if (activeParam === 'inactive') isActive = false;
+  const { data: availableRoles = [] } = useAvailableRoles();
 
-      let isLocked: boolean | null = null;
-      if (lockedParam === 'locked') isLocked = true;
-      if (lockedParam === 'unlocked') isLocked = false;
+  const registerMutation = useRegisterUser();
+  const updateMutation = useUpdateUserAndRoles();
+  const lockMutation = useLockUser();
+  const unlockMutation = useUnlockUser();
+  const changeStatusMutation = useChangeUserStatus();
+  const deleteMutation = useDeleteUser();
 
-      const roleId = roleParam !== 'all' ? parseInt(roleParam, 10) : null;
+  const users = pagedData?.data || [];
+  const totalCount = pagedData?.totalCount || 0;
+  const userRolesMap = pagedData?.rolesMap || {};
 
-      const response = await usersApi.getPagedList({
-        pageNumber,
+  const formSubmitting = registerMutation.isPending || updateMutation.isPending;
+  const confirmPending = 
+    lockMutation.isPending || 
+    unlockMutation.isPending || 
+    changeStatusMutation.isPending || 
+    deleteMutation.isPending;
+
+  // React Table Instance
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: users,
+    columns,
+    pageCount: Math.ceil(totalCount / pageSize),
+    state: {
+      pagination: {
+        pageIndex: pageNumber - 1,
         pageSize,
-        searchTerm,
-        sortBy,
-        sortDirection,
-        isActive,
-        isLocked,
-        roleId,
+      },
+      sorting: [{ id: sortBy, desc: sortDirection === 'desc' }],
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' 
+        ? updater({ pageIndex: pageNumber - 1, pageSize }) 
+        : updater;
+      updateFilters({
+        page: String(next.pageIndex + 1),
+        size: String(next.pageSize),
       });
-
-      if (response.isSuccessful && response.data) {
-        setUsers(response.data.data);
-        setTotalCount(response.data.totalCount);
-
-        // Fetch roles for each user in parallel to render in the table
-        const rolesPromises = response.data.data.map(async (u) => {
-          try {
-            const roleResponse = await usersApi.getUserRoles(u.id);
-            if (roleResponse.isSuccessful && roleResponse.data) {
-              return { userId: u.id, roles: roleResponse.data.map(r => r.roleName) };
-            }
-          } catch (e) {
-            console.error(`Failed to fetch roles for user ${u.id}`, e);
-          }
-          return { userId: u.id, roles: [] };
+    },
+    onSortingChange: (updater) => {
+      const current = [{ id: sortBy, desc: sortDirection === 'desc' }];
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      if (next && next.length > 0) {
+        updateFilters({
+          sortBy: next[0].id,
+          sortDir: next[0].desc ? 'desc' : 'asc',
+          page: '1',
         });
-
-        const results = await Promise.all(rolesPromises);
-        const nextMap: Record<number, string[]> = {};
-        results.forEach(res => {
-          nextMap[res.userId] = res.roles;
-        });
-        setUserRolesMap(nextMap);
-      } else {
-        toast.error(response.messages[0] || 'Failed to retrieve users.');
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred while loading users.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [pageNumber, pageSize, searchTerm, activeParam, lockedParam, roleParam, sortBy, sortDirection]);
 
-  // Handle Searches
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateFilters({ search: searchInput });
-  };
-
-  const handleResetFilters = () => {
-    setSearchInput('');
-    updateFilters({
-      page: '1',
-      search: '',
-      active: 'all',
-      locked: 'all',
-      role: 'all'
-    });
-    setSortBy('fullname');
-    setSortDirection('asc');
-  };
 
   // Toggle Sorting
   const toggleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortDirection('asc');
-    }
+    const dir = sortBy === field && sortDirection === 'asc' ? 'desc' : 'asc';
+    updateFilters({
+      sortBy: field,
+      sortDir: dir,
+      page: '1',
+    });
   };
 
   // Form Validation
@@ -18627,54 +21415,36 @@ export default function UserManagement() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setFormSubmitting(true);
-    try {
-      if (formMode === 'create') {
-        const response = await usersApi.register({
-          fullName: formFullName,
-          email: formEmail,
-          password: formPassword,
-          confirmPassword: formConfirmPassword,
-          phoneNumber: formPhoneNumber,
-          activateUser: formActivateUser,
-          autoConfirmEmail: formAutoConfirmEmail,
-        });
-
-        if (response.isSuccessful) {
-          toast.success('User created successfully!');
-          setIsFormSheetOpen(false);
-          fetchUsers();
-        } else {
-          toast.error(response.messages[0] || 'Registration failed.');
-        }
-      } else {
-        // Edit Flow
-        if (!targetUser) return;
-        const profileRes = await usersApi.update({
-          userId: targetUser.id,
-          fullName: formFullName,
-          phoneNumber: formPhoneNumber,
-        });
-
-        if (profileRes.isSuccessful) {
-          // Update assigned roles
-          const rolesRes = await usersApi.updateUserRoles(targetUser.id, formRoles);
-          if (rolesRes.isSuccessful) {
-            toast.success('User details and roles updated successfully!');
+    if (formMode === 'create') {
+      registerMutation.mutate({
+        fullName: formFullName,
+        email: formEmail,
+        password: formPassword,
+        confirmPassword: formConfirmPassword,
+        phoneNumber: formPhoneNumber,
+        activateUser: formActivateUser,
+        autoConfirmEmail: formAutoConfirmEmail,
+      }, {
+        onSuccess: (response) => {
+          if (response.isSuccessful) {
             setIsFormSheetOpen(false);
-            fetchUsers();
-          } else {
-            toast.warning('User details updated, but role assignment failed: ' + rolesRes.messages[0]);
           }
-        } else {
-          toast.error(profileRes.messages[0] || 'Failed to update user details.');
         }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('An error occurred during form submission.');
-    } finally {
-      setFormSubmitting(false);
+      });
+    } else {
+      if (!targetUser) return;
+      updateMutation.mutate({
+        userId: targetUser.id,
+        fullName: formFullName,
+        phoneNumber: formPhoneNumber,
+        roles: formRoles,
+      }, {
+        onSuccess: (response) => {
+          if (response.profileRes.isSuccessful && response.rolesRes.isSuccessful) {
+            setIsFormSheetOpen(false);
+          }
+        }
+      });
     }
   };
 
@@ -18698,54 +21468,38 @@ export default function UserManagement() {
   const executeConfirmAction = async () => {
     if (!targetUser || !confirmAction) return;
 
-    try {
-      if (confirmAction === 'lock') {
-        const res = await usersApi.lock(targetUser.id);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" locked successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to lock user.');
+    if (confirmAction === 'lock') {
+      lockMutation.mutate(targetUser.id, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'unlock') {
-        const res = await usersApi.unlock(targetUser.id);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" unlocked successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to unlock user.');
+      });
+    } else if (confirmAction === 'unlock') {
+      unlockMutation.mutate(targetUser.id, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'activate') {
-        const res = await usersApi.changeStatus(targetUser.id, true);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" activated successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to activate user.');
+      });
+    } else if (confirmAction === 'activate') {
+      changeStatusMutation.mutate({ userId: targetUser.id, activate: true }, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'deactivate') {
-        const res = await usersApi.changeStatus(targetUser.id, false);
-        if (res.isSuccessful) {
-          toast.success(`User "${targetUser.fullName}" deactivated successfully.`);
-          fetchUsers();
-        } else {
-          toast.error(res.messages[0] || 'Failed to deactivate user.');
+      });
+    } else if (confirmAction === 'deactivate') {
+      changeStatusMutation.mutate({ userId: targetUser.id, activate: false }, {
+        onSuccess: (res) => {
+          if (res.isSuccessful) setIsConfirmDialogOpen(false);
         }
-      } else if (confirmAction === 'delete') {
-        // simulated delete operation
-        toast.success(`Delete operation simulated successfully for user "${targetUser.fullName}"! (Verified claim: Permission.Identity.Users.Delete)`);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Operation failed.');
-    } finally {
-      setIsConfirmDialogOpen(false);
-      setConfirmAction(null);
-      setTargetUser(null);
+      });
+    } else if (confirmAction === 'delete') {
+      deleteMutation.mutate(targetUser.fullName, {
+        onSuccess: () => {
+          setIsConfirmDialogOpen(false);
+        }
+      });
     }
   };
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
@@ -18771,81 +21525,114 @@ export default function UserManagement() {
         )}
       </div>
 
-      {/* Search & Filters */}
-      <Card className="bg-white border-neutral-200 shadow-sm rounded-xl">
-        <CardContent className="p-4">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search by full name or email..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] bg-neutral-50/50"
-              />
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <Button type="submit" variant="default" className="rounded-xl px-5">
-                Search
-              </Button>
-              <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-4 flex items-center gap-1">
-                <RotateCcw className="w-3.5 h-3.5" />
-                Reset
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Consolidated Filters Container */}
+      <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+        {/* Row 1: Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* General Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search by full name or email..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4285F4]/30 focus:border-[#4285F4] transition-all bg-neutral-50/50"
+            />
+          </div>
 
-      {/* Advanced Filter Bar */}
-      <div className="flex flex-wrap items-center gap-4 bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-        {/* Status Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</span>
-          <Select value={activeParam} onValueChange={(val) => updateFilters({ active: val })}>
-            <SelectTrigger className="w-[160px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Status Filter */}
+          <div>
+            <Select value={localActive} onValueChange={(val) => setLocalActive(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active Only</SelectItem>
+                <SelectItem value="inactive">Inactive Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Lockout Filter */}
+          <div>
+            <Select value={localLocked} onValueChange={(val) => setLocalLocked(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Lockouts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Lockouts</SelectItem>
+                <SelectItem value="locked">Locked Only</SelectItem>
+                <SelectItem value="unlocked">Unlocked Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Role Filter */}
+          <div>
+            <Select value={localRole} onValueChange={(val) => setLocalRole(val)}>
+              <SelectTrigger className="w-full h-[38px] border-neutral-300 rounded-xl bg-neutral-50/50 focus:ring-[#4285F4]/30">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={String(role.id)}>
+                    {role.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Lockout Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Lockout</span>
-          <Select value={lockedParam} onValueChange={(val) => updateFilters({ locked: val })}>
-            <SelectTrigger className="w-[160px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="locked">Locked</SelectItem>
-              <SelectItem value="unlocked">Unlocked</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Role Filter */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Assigned Role</span>
-          <Select value={roleParam} onValueChange={(val) => updateFilters({ role: val })}>
-            <SelectTrigger className="w-[200px] h-9 border-neutral-200 rounded-xl bg-neutral-50/30 focus:ring-[#4285F4]/30">
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              {availableRoles.map((role) => (
-                <SelectItem key={role.id} value={String(role.id)}>
-                  {role.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Row 2: Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2 border-t border-neutral-100">
+          <div className="text-xs text-neutral-400">
+            Showing {users.length} of {totalCount} records
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <Button
+              type="button"
+              onClick={() => handleApplyFilters()}
+              disabled={!isDirty}
+              className="h-8 bg-[#4285F4] hover:bg-[#3273DC] text-white font-semibold text-xs rounded-xl flex items-center gap-1 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Apply Filters
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-8 border-neutral-300 text-neutral-600 hover:bg-neutral-100 font-semibold text-xs rounded-xl flex items-center gap-1"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Filters
+            </Button>
+            <DataTableExport
+              isExporting={isExporting}
+              onExport={async (format) => {
+                try {
+                  setIsExporting(true);
+                  await usersApi.exportUsers({
+                    searchTerm: searchTerm || undefined,
+                    isActive: isActiveParam,
+                    isLocked: isLockedParam,
+                    roleId: roleIdParam,
+                    sortBy: sortBy || undefined,
+                    sortDirection: sortDirection || undefined,
+                    exportFormat: format
+                  });
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : String(err));
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -19051,74 +21838,9 @@ export default function UserManagement() {
             </table>
           </div>
 
-          {/* Table Pagination */}
-          {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
-              <div className="text-xs text-neutral-500">
-                Page {pageNumber} of {totalPages}
-              </div>
-              <Pagination className="w-auto mx-0">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pageNumber > 1) updateFilters({ page: String(pageNumber - 1) });
-                      }}
-                      className={pageNumber === 1 ? 'pointer-events-none opacity-50' : ''}
-                    />
-                  </PaginationItem>
-                  
-                  {(() => {
-                    const pages: (number | 'ellipsis')[] = [];
-                    pages.push(1);
-                    if (pageNumber > 3) {
-                      pages.push('ellipsis');
-                    }
-                    for (let i = Math.max(2, pageNumber - 1); i <= Math.min(totalPages - 1, pageNumber + 1); i++) {
-                      if (!pages.includes(i)) {
-                        pages.push(i);
-                      }
-                    }
-                    if (pageNumber < totalPages - 2) {
-                      pages.push('ellipsis');
-                    }
-                    if (totalPages > 1 && !pages.includes(totalPages)) {
-                      pages.push(totalPages);
-                    }
-                    return pages;
-                  })().map((page, idx) => (
-                    <PaginationItem key={idx}>
-                      {page === 'ellipsis' ? (
-                        <PaginationEllipsis />
-                      ) : (
-                        <PaginationLink
-                          href="#"
-                          isActive={page === pageNumber}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            updateFilters({ page: String(page) });
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      )}
-                    </PaginationItem>
-                  ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pageNumber < totalPages) updateFilters({ page: String(pageNumber + 1) });
-                      }}
-                      className={pageNumber === totalPages ? 'pointer-events-none opacity-50' : ''}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+          {!loading && totalCount > 0 && (
+            <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50/50">
+              <DataTablePagination table={table} />
             </div>
           )}
         </CardContent>
@@ -19311,12 +22033,14 @@ export default function UserManagement() {
             <DialogFooter>
               <Button 
                 variant={confirmAction === 'delete' ? 'destructive' : 'default'}
+                disabled={confirmPending}
                 onClick={executeConfirmAction}
                 className="rounded-xl px-5"
               >
+                {confirmPending && <Loader2 className="w-4 h-4 animate-spin mr-1.5 inline" />}
                 Confirm
               </Button>
-              <DialogClose onClick={() => setIsConfirmDialogOpen(false)}>
+              <DialogClose onClick={() => setIsConfirmDialogOpen(false)} className="border-neutral-200 text-neutral-600 hover:bg-neutral-100 font-bold">
                 Cancel
               </DialogClose>
             </DialogFooter>
@@ -19326,6 +22050,9 @@ export default function UserManagement() {
     </div>
   );
 }
+'@
+    Write-TemplateFile 'UMS.Client/src/test/setup.ts' @'
+import '@testing-library/jest-dom';
 '@
     Write-TemplateFile 'UMS.Client/tailwind.config.js' @'
 /** @type {import('tailwindcss').Config} */
@@ -19415,8 +22142,9 @@ export default {
 }
 '@
     Write-TemplateFile 'UMS.Client/vite.config.ts' @'
+/// <reference types="vitest" />
 import path from "path"
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
@@ -19427,7 +22155,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+  },
 })
+
 '@
     Write-TemplateFile 'UMS.Domain.Tests/.graphifyignore' @'
 bin/
@@ -22690,6 +25424,58 @@ public class UserServiceTests
     }
 }
 '@
+    Write-TemplateFile 'UMS.Infrastructure.Tests/Services/CategoryExportTest.cs' @'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Infrastructure.Services;
+using Xunit;
+
+namespace UMS.Infrastructure.Tests.Services
+{
+    public class CategoryExportTest
+    {
+        public CategoryExportTest()
+        {
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+        }
+
+        [Fact]
+        public async Task ExportCategoriesAsync_Excel_should_not_throw()
+        {
+            var data = new List<CategoryResponse>
+            {
+                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+            };
+
+            var service = new CategoryService(null!, null!);
+            
+            var bytes = await service.ExportCategoriesAsync(data, "excel", CancellationToken.None);
+            bytes.Should().NotBeNull();
+            bytes.Length.Should().BeGreaterThan(0);
+        }
+
+        [Fact]
+        public async Task ExportCategoriesAsync_Pdf_should_not_throw()
+        {
+            var data = new List<CategoryResponse>
+            {
+                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+            };
+
+            var service = new CategoryService(null!, null!);
+            
+            var bytes = await service.ExportCategoriesAsync(data, "pdf", CancellationToken.None);
+            bytes.Should().NotBeNull();
+            bytes.Length.Should().BeGreaterThan(0);
+        }
+    }
+}
+'@
     Write-TemplateFile 'UMS.Infrastructure.Tests/Services/Common/CurrentUserServiceTests.cs' @'
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
@@ -24720,16 +27506,21 @@ namespace UMS.Infrastructure.Identity.Services
                     .ToList();
             }
 
-            return new List<Claim>
+            var allClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Name, user.FullName),
+                new(ClaimTypes.Email, user.Email ?? string.Empty),
+                new(ClaimTypes.Name, user.FullName ?? string.Empty),
                 new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
             }
             .Union(roleClaims)
             .Union(userClaims)
             .Union(permissionClaims);
+
+            return allClaims
+                .GroupBy(c => new { c.Type, c.Value })
+                .Select(g => g.First())
+                .ToList();
         }
 
         private SigningCredentials GetSigningCredentials()
@@ -24825,6 +27616,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Web;
+using System.IO;
+using ClosedXML.Excel;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using UMS.Application.Dtos.Common;
 using UMS.Application.Dtos.Email;
 using UMS.Application.Dtos.Pagination;
@@ -24839,7 +27635,9 @@ using UMS.Application.Features.Users.Models.Responses;
 using UMS.Application.Interfaces.Common;
 using UMS.Infrastructure.Identity.Configurations;
 using UMS.Infrastructure.Identity.Models;
+using UMS.Application.Features.Users.Queries;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace UMS.Infrastructure.Identity.Services
 {
@@ -24986,13 +27784,12 @@ namespace UMS.Infrastructure.Identity.Services
                 return ResponseWrapper<UserResponse>.Success(data: mappedUser);
             }
 
-            return ResponseWrapper<UserResponse>.Fail("User does not exists.");
+            return ResponseWrapper<UserResponse>.Fail("User does not exists.", StatusCodes.Status404NotFound);
         }
 
-        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct)
+        private IQueryable<ApplicationUser> BuildUserQuery(GetUsersPagedQuery query)
         {
+            var pagedFilterRequest = query.PagedFilterRequest;
             var dbContext = _context as DbContext;
             var usersQuery = dbContext != null 
                 ? dbContext.Set<ApplicationUser>() 
@@ -25051,6 +27848,15 @@ namespace UMS.Infrastructure.Identity.Services
                     : usersQuery.OrderBy(u => u.FullName),
             };
 
+            return usersQuery;
+        }
+
+        public async Task<IResponseWrapper<PagedResult<UserResponse>>> GetUsersPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            CancellationToken ct)
+        {
+            var usersQuery = BuildUserQuery(new GetUsersPagedQuery { PagedFilterRequest = pagedFilterRequest });
+
             var totalRecords = await usersQuery.CountAsync(ct);
 
             var users = await usersQuery
@@ -25078,6 +27884,190 @@ namespace UMS.Infrastructure.Identity.Services
             };
 
             return ResponseWrapper<PagedResult<UserResponse>>.Success(data: data);
+        }
+
+        public async Task<IResponseWrapper<List<UserExportResponse>>> GetUsersListAsync(
+            PagedFilterRequest filter,
+            CancellationToken ct)
+        {
+            var dbContext = _context as DbContext;
+            if (dbContext == null)
+            {
+                return ResponseWrapper<List<UserExportResponse>>.Fail("Invalid database context.");
+            }
+
+            var usersQuery = BuildUserQuery(new GetUsersPagedQuery { PagedFilterRequest = filter });
+
+            var userRolesQuery = from ur in dbContext.Set<ApplicationUserRole>()
+                                 join r in dbContext.Set<ApplicationRole>() on ur.RoleId equals r.Id
+                                 select new { ur.UserId, RoleName = r.Name };
+
+            var usersData = await usersQuery.ToListAsync(ct);
+            var userIds = usersData.Select(u => u.Id).ToList();
+
+            var rolesList = await userRolesQuery
+                .Where(ur => userIds.Contains(ur.UserId))
+                .ToListAsync(ct);
+
+            var rolesGrouped = rolesList
+                .GroupBy(ur => ur.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(ur => ur.RoleName!).ToList());
+
+            var result = usersData.Select(u => new UserExportResponse
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.Email,
+                UserName = u.UserName,
+                IsActive = u.IsActive,
+                EmailConfirmed = u.EmailConfirmed,
+                PhoneNumber = u.PhoneNumber,
+                IsLocked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow,
+                Roles = rolesGrouped.TryGetValue(u.Id, out var roles) ? roles : new List<string>()
+            }).ToList();
+
+            return ResponseWrapper<List<UserExportResponse>>.Success(result);
+        }
+
+        public async Task<byte[]> ExportUsersAsync(List<UserExportResponse> data, string format, CancellationToken ct)
+        {
+            if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return GeneratePdfExport(data);
+            }
+            else
+            {
+                return GenerateExcelExport(data);
+            }
+        }
+
+        private byte[] GenerateExcelExport(List<UserExportResponse> data)
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Users");
+
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Full Name";
+            worksheet.Cell(1, 3).Value = "Email";
+            worksheet.Cell(1, 4).Value = "Phone Number";
+            worksheet.Cell(1, 5).Value = "Assigned Roles";
+            worksheet.Cell(1, 6).Value = "Status";
+            worksheet.Cell(1, 7).Value = "Lockout Status";
+            worksheet.Cell(1, 8).Value = "Email Confirmed";
+
+            var headerRange = worksheet.Range(1, 1, 1, 8);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4F46E5"); // Indigo-600
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            int row = 2;
+            foreach (var item in data)
+            {
+                worksheet.Cell(row, 1).Value = item.Id;
+                worksheet.Cell(row, 2).Value = item.FullName;
+                worksheet.Cell(row, 3).Value = item.Email;
+                worksheet.Cell(row, 4).Value = item.PhoneNumber ?? "N/A";
+                worksheet.Cell(row, 5).Value = string.Join(", ", item.Roles);
+                worksheet.Cell(row, 6).Value = item.IsActive ? "Active" : "Inactive";
+                worksheet.Cell(row, 7).Value = item.IsLocked ? "Locked" : "Unlocked";
+                worksheet.Cell(row, 8).Value = item.EmailConfirmed ? "Yes" : "No";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        private byte[] GeneratePdfExport(List<UserExportResponse> data)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(1.5f, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(8).FontFamily("Helvetica"));
+
+                    page.Header()
+                        .PaddingBottom(10)
+                        .Text("System Users Report")
+                        .SemiBold().FontSize(16).FontColor(Colors.Indigo.Medium);
+
+                    page.Content()
+                        .Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(30); // ID
+                                columns.RelativeColumn(2.5f); // Full Name
+                                columns.RelativeColumn(3f); // Email
+                                columns.RelativeColumn(1.8f); // Phone
+                                columns.RelativeColumn(2.5f); // Roles
+                                columns.RelativeColumn(1.2f); // Status
+                                columns.RelativeColumn(1.2f); // Locked
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(HeaderStyle).Text("ID").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Full Name").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Email").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Phone").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Roles").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Status").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Locked").SemiBold().FontColor(Colors.White);
+
+                                static IContainer HeaderStyle(IContainer container)
+                                {
+                                    return container
+                                        .Background(Colors.Indigo.Medium)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            });
+
+                            foreach (var item in data)
+                            {
+                                table.Cell().Element(CellStyle).Text(item.Id.ToString());
+                                table.Cell().Element(CellStyle).Text(item.FullName);
+                                table.Cell().Element(CellStyle).Text(item.Email);
+                                table.Cell().Element(CellStyle).Text(item.PhoneNumber ?? "N/A");
+                                table.Cell().Element(CellStyle).Text(string.Join(", ", item.Roles));
+                                table.Cell().Element(CellStyle).Text(item.IsActive ? "Active" : "Inactive");
+                                table.Cell().Element(CellStyle).Text(item.IsLocked ? "Locked" : "Unlocked");
+
+                                static IContainer CellStyle(IContainer container)
+                                {
+                                    return container
+                                        .BorderBottom(0.5f)
+                                        .BorderColor(Colors.Grey.Lighten3)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            }
+                        });
+
+                    page.Footer()
+                        .PaddingTop(10)
+                        .AlignCenter()
+                        .Text(x =>
+                        {
+                            x.Span("Page ");
+                            x.CurrentPageNumber();
+                            x.Span(" of ");
+                            x.TotalPages();
+                        });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
         }
 
         public async Task<IResponseWrapper> ChangeUserPasswordAsync(int userId, ChangePasswordRequest changePassword)
@@ -29003,66 +31993,99 @@ namespace UMS.Infrastructure.Persistence.Contexts
             return result;
         }
 
-        private List<AuditEntry> OnBeforeSaveChanges(int? userId, string? ipAddress)
+
+
+    private List<AuditEntry> OnBeforeSaveChanges(int? userId, string? ipAddress)
+{
+    ChangeTracker.DetectChanges();
+    var auditEntries = new List<AuditEntry>();
+
+    foreach (var entry in ChangeTracker.Entries())
+    {
+        if (entry.Entity is AuditTrail 
+            || entry.Entity.GetType().Name == nameof(AuditTrail) 
+            || entry.Entity.GetType().BaseType?.Name == nameof(AuditTrail)
+            || entry.State is EntityState.Detached or EntityState.Unchanged)
         {
-            ChangeTracker.DetectChanges();
-            var auditEntries = new List<AuditEntry>();
-
-            foreach (var entry in ChangeTracker.Entries())
-            {
-                if (entry.Entity is AuditTrail 
-                    || entry.Entity.GetType().Name == nameof(AuditTrail) 
-                    || entry.Entity.GetType().BaseType?.Name == nameof(AuditTrail)
-                    || entry.State is EntityState.Detached or EntityState.Unchanged)
-                {
-                    continue;
-                }
-
-                var auditEntry = new AuditEntry(entry)
-                {
-                    TableName = entry.Entity.GetType().Name,
-                    UserId = userId,
-                    IpAddress = ipAddress
-                };
-                auditEntries.Add(auditEntry);
-
-                foreach (var property in entry.Properties)
-                {
-                    var propertyName = property.Metadata.Name;
-
-                    if (property.Metadata.IsPrimaryKey())
-                    {
-                        auditEntry.KeyValues[propertyName] = property.CurrentValue!;
-                        continue;
-                    }
-
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            auditEntry.Type = AuditType.Create;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue!;
-                            break;
-                        case EntityState.Deleted:
-                            auditEntry.Type = AuditType.Delete;
-                            auditEntry.OldValues[propertyName] = property.OriginalValue!;
-                            break;
-                        case EntityState.Modified when property.IsModified:
-                            auditEntry.Type = AuditType.Update;
-                            auditEntry.OldValues[propertyName] = property.OriginalValue!;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue!;
-                            break;
-                    }
-                }
-            }
-
-            foreach (var auditEntry in auditEntries.Where(e => !e.HasTemporaryProperties))
-            {
-                AuditTrails.Add(auditEntry.ToAudit());
-            }
-
-            return auditEntries.Where(e => e.HasTemporaryProperties).ToList();
+            continue;
         }
 
+        var auditEntry = new AuditEntry(entry)
+        {
+            TableName = entry.Entity.GetType().Name,
+            UserId = userId,
+            IpAddress = ipAddress
+        };
+        
+        // 1. DETERMINE AUDIT TYPE AT THE ENTRY LEVEL FIRST
+        if (entry.State == EntityState.Added)
+        {
+            auditEntry.Type = AuditType.Create;
+        }
+        else if (entry.State == EntityState.Deleted)
+        {
+            auditEntry.Type = AuditType.Delete;
+        }
+        else if (entry.State == EntityState.Modified)
+        {
+            // FIX: Check if this is a Soft Delete flipping from false to true
+            if (entry.Entity is ISoftDelete softDeleteEntity && softDeleteEntity.SoftDeleted)
+            {
+                var softDeletedProp = entry.Property(nameof(ISoftDelete.SoftDeleted));
+                if (softDeletedProp.OriginalValue is bool originalVal && !originalVal)
+                {
+                    auditEntry.Type = AuditType.Delete; // It's a soft delete!
+                }
+                else
+                {
+                    auditEntry.Type = AuditType.Update; // It's an update (e.g., un-deleting)
+                }
+            }
+            else
+            {
+                auditEntry.Type = AuditType.Update; // Normal update
+            }
+        }
+
+        auditEntries.Add(auditEntry);
+
+        // 2. NOW LOOP THROUGH PROPERTIES TO GET OLD/NEW VALUES
+        foreach (var property in entry.Properties)
+        {
+            var propertyName = property.Metadata.Name;
+
+            if (property.Metadata.IsPrimaryKey())
+            {
+                auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                continue;
+            }
+
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    break;
+                case EntityState.Deleted:
+                    auditEntry.OldValues[propertyName] = property.OriginalValue!;
+                    break;
+                case EntityState.Modified when property.IsModified:
+                    // We already set the Type above, so we just record the values here.
+                    // This ensures we still capture the old/new values for the SoftDeleted flag,
+                    // DeletedDate, etc., as we decided in the previous prompt.
+                    auditEntry.OldValues[propertyName] = property.OriginalValue!;
+                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    break;
+            }
+        }
+    }
+
+    foreach (var auditEntry in auditEntries.Where(e => !e.HasTemporaryProperties))
+    {
+        AuditTrails.Add(auditEntry.ToAudit());
+    }
+
+    return auditEntries.Where(e => e.HasTemporaryProperties).ToList();
+}
         private async Task OnAfterSaveChanges(List<AuditEntry> auditEntries, CancellationToken cancellationToken)
         {
             if (auditEntries == null || auditEntries.Count == 0)
@@ -29391,6 +32414,8 @@ using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
 using UMS.Infrastructure.Services.Common;
 using UMS.Application.Features.AuditTrails;
+using UMS.Application.Features.Categories;
+using QuestPDF.Infrastructure;
 
 namespace UMS.Infrastructure
 {
@@ -29410,6 +32435,9 @@ namespace UMS.Infrastructure
             IConfiguration configuration,
             IHostEnvironment environment)
         {
+            // Register QuestPDF Community License
+            QuestPDF.Settings.License = LicenseType.Community;
+
             return services
                 .AddDatabase(configuration, environment)
                 .AddIdentityServices(configuration)
@@ -29427,6 +32455,7 @@ namespace UMS.Infrastructure
                 .AddScoped<IDateTimeService, DateTimeService>()
                 .AddScoped<IFileStorageService, LocalFileStorageService>()
                 .AddScoped<IAuditTrailService, AuditTrailService>()
+                .AddScoped<ICategoryService, CategoryService>()
                 .AddFeatures();
         }
 
@@ -29503,44 +32532,134 @@ namespace UMS.Infrastructure
 }
 '@
     Write-TemplateFile 'UMS.Infrastructure/Services/AuditTrailService.cs' @'
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.AuditTrails;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
 using UMS.Application.Interfaces.Common;
+using UMS.Domain.Enums;
 using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.Infrastructure.Services
 {
+    internal class AuditTrailQueryModel
+    {
+        public Domain.Entities.AuditTrail Audit { get; set; } = null!;
+        public string? UserEmail { get; set; }
+    }
+
     public class AuditTrailService(IApplicationDbContext context) : IAuditTrailService
     {
         private readonly IApplicationDbContext _context = context;
 
-        public async Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct)
+        private IQueryable<AuditTrailQueryModel> BuildAuditTrailQuery(GetAuditTrailsPagedQuery request)
         {
             var dbContext = _context as ApplicationDbContext;
             if (dbContext == null)
             {
-                return ResponseWrapper<PagedResult<AuditTrailResponse>>.Fail("Invalid database context.");
+                throw new InvalidOperationException("Invalid database context.");
             }
 
             var auditQuery = from audit in dbContext.AuditTrails
                              join user in dbContext.Users on audit.UserId equals user.Id into userGroup
                              from user in userGroup.DefaultIfEmpty()
-                             select new { audit, UserEmail = user != null ? user.Email : null };
+                             select new AuditTrailQueryModel
+                             {
+                                 Audit = audit,
+                                 UserEmail = user != null ? user.Email : null
+                             };
+
+            // Conditionally filter by UserId (exact match)
+            if (request.UserId.HasValue)
+            {
+                auditQuery = auditQuery.Where(a => a.Audit.UserId == request.UserId.Value);
+            }
+
+            // Conditionally filter by TableName (exact match)
+            if (!string.IsNullOrWhiteSpace(request.TableName))
+            {
+                auditQuery = auditQuery.Where(a => a.Audit.TableName == request.TableName.Trim());
+            }
+
+            // Conditionally filter by EntityId (PrimaryKey substring search)
+            if (!string.IsNullOrWhiteSpace(request.EntityId))
+            {
+                var idTrimmed = request.EntityId.Trim();
+                auditQuery = auditQuery.Where(a => a.Audit.PrimaryKey != null && a.Audit.PrimaryKey.Contains(idTrimmed));
+            }
+
+            // Conditionally filter by ActionTypes list
+            if (!string.IsNullOrWhiteSpace(request.ActionTypes))
+            {
+                var typesList = request.ActionTypes.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => Enum.TryParse<AuditType>(t.Trim(), true, out var result) ? result : (AuditType?)null)
+                    .Where(t => t.HasValue)
+                    .Select(t => t!.Value)
+                    .ToList();
+
+                if (typesList.Count > 0)
+                {
+                    auditQuery = auditQuery.Where(a => typesList.Contains(a.Audit.Type));
+                }
+            }
+
+            // Conditionally filter by FromDate (inclusive)
+            if (!string.IsNullOrWhiteSpace(request.FromDate) && DateTime.TryParseExact(request.FromDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedFromDate))
+            {
+                auditQuery = auditQuery.Where(a => a.Audit.DateTime >= parsedFromDate);
+            }
+
+            // Conditionally filter by ToDate (inclusive, adjusted to end of day)
+            if (!string.IsNullOrWhiteSpace(request.ToDate) && DateTime.TryParseExact(request.ToDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedToDate))
+            {
+                var adjustedToDate = parsedToDate.Date.AddDays(1).AddTicks(-1);
+                auditQuery = auditQuery.Where(a => a.Audit.DateTime <= adjustedToDate);
+            }
+
+            return auditQuery;
+        }
+
+        public async Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            string? tableName,
+            string? entityId,
+            string? actionTypes,
+            string? fromDate,
+            string? toDate,
+            int? userId,
+            CancellationToken ct)
+        {
+            var auditQuery = BuildAuditTrailQuery(new GetAuditTrailsPagedQuery
+                {
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId
+                });
 
             // Apply SearchTerm filter
             if (!string.IsNullOrWhiteSpace(pagedFilterRequest.SearchTerm))
             {
                 var term = pagedFilterRequest.SearchTerm.Trim();
                 var pattern = $"%{term}%";
-                
+
                 auditQuery = auditQuery.Where(a =>
-                    EF.Functions.Like(a.audit.TableName ?? "", pattern) ||
-                    EF.Functions.Like(a.audit.IpAddress ?? "", pattern) ||
+                    EF.Functions.Like(a.Audit.TableName ?? "", pattern) ||
+                    EF.Functions.Like(a.Audit.IpAddress ?? "", pattern) ||
                     EF.Functions.Like(a.UserEmail ?? "", pattern)
                 );
             }
@@ -29549,20 +32668,20 @@ namespace UMS.Infrastructure.Services
             auditQuery = pagedFilterRequest.SortBy?.ToLower() switch
             {
                 "tablename" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.audit.TableName)
-                    : auditQuery.OrderBy(a => a.audit.TableName),
+                    ? auditQuery.OrderByDescending(a => a.Audit.TableName)
+                    : auditQuery.OrderBy(a => a.Audit.TableName),
                 "type" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.audit.Type)
-                    : auditQuery.OrderBy(a => a.audit.Type),
+                    ? auditQuery.OrderByDescending(a => a.Audit.Type)
+                    : auditQuery.OrderBy(a => a.Audit.Type),
                 "datetime" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.audit.DateTime)
-                    : auditQuery.OrderBy(a => a.audit.DateTime),
+                    ? auditQuery.OrderByDescending(a => a.Audit.DateTime)
+                    : auditQuery.OrderBy(a => a.Audit.DateTime),
                 "id" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.audit.Id)
-                    : auditQuery.OrderBy(a => a.audit.Id),
+                    ? auditQuery.OrderByDescending(a => a.Audit.Id)
+                    : auditQuery.OrderBy(a => a.Audit.Id),
                 _ => pagedFilterRequest.SortDirection == "asc"
-                    ? auditQuery.OrderBy(a => a.audit.DateTime).ThenBy(a => a.audit.Id)
-                    : auditQuery.OrderByDescending(a => a.audit.DateTime).ThenByDescending(a => a.audit.Id)
+                    ? auditQuery.OrderBy(a => a.Audit.DateTime).ThenBy(a => a.Audit.Id)
+                    : auditQuery.OrderByDescending(a => a.Audit.DateTime).ThenByDescending(a => a.Audit.Id)
             };
 
             var totalCount = await auditQuery.CountAsync(ct);
@@ -29571,17 +32690,17 @@ namespace UMS.Infrastructure.Services
                 .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
                 .Take(pagedFilterRequest.PageSize)
                 .Select(a => new AuditTrailResponse(
-                    a.audit.Id,
-                    a.audit.UserId,
+                    a.Audit.Id,
+                    a.Audit.UserId,
                     a.UserEmail,
-                    a.audit.IpAddress,
-                    a.audit.Type.ToString(),
-                    a.audit.TableName,
-                    a.audit.DateTime,
-                    a.audit.OldValues,
-                    a.audit.NewValues,
-                    a.audit.AffectedColumns,
-                    a.audit.PrimaryKey
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
                 ))
                 .ToListAsync(ct);
 
@@ -29592,6 +32711,479 @@ namespace UMS.Infrastructure.Services
                 pagedFilterRequest.PageSize);
 
             return ResponseWrapper<PagedResult<AuditTrailResponse>>.Success(pagedResult);
+        }
+
+        public async Task<IResponseWrapper<List<AuditTrailResponse>>> GetAuditTrailsListAsync(
+            string? tableName,
+            string? entityId,
+            string? actionTypes,
+            string? fromDate,
+            string? toDate,
+            int? userId,
+            CancellationToken ct)
+        {
+            var auditQuery = BuildAuditTrailQuery(new GetAuditTrailsPagedQuery
+                {
+                    TableName = tableName,
+                    EntityId = entityId,
+                    ActionTypes = actionTypes,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    UserId = userId
+                });
+
+            // Default sort descending by DateTime, then Id
+            auditQuery = auditQuery.OrderByDescending(a => a.Audit.DateTime).ThenByDescending(a => a.Audit.Id);
+
+            var auditTrails = await auditQuery
+                .Select(a => new AuditTrailResponse(
+                    a.Audit.Id,
+                    a.Audit.UserId,
+                    a.UserEmail,
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
+                ))
+                .ToListAsync(ct);
+
+            return ResponseWrapper<List<AuditTrailResponse>>.Success(auditTrails);
+        }
+
+        public async Task<byte[]> ExportAuditTrailsAsync(List<AuditTrailResponse> data, string format, CancellationToken ct)
+        {
+            if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return GeneratePdfExport(data);
+            }
+            else
+            {
+                return GenerateExcelExport(data);
+            }
+        }
+
+        private byte[] GenerateExcelExport(List<AuditTrailResponse> data)
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Audit Logs");
+
+            // Define headers
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "User Email";
+            worksheet.Cell(1, 3).Value = "IP Address";
+            worksheet.Cell(1, 4).Value = "Type";
+            worksheet.Cell(1, 5).Value = "Table Name";
+            worksheet.Cell(1, 6).Value = "DateTime (UTC)";
+            worksheet.Cell(1, 7).Value = "PrimaryKey";
+            worksheet.Cell(1, 8).Value = "Affected Columns";
+            worksheet.Cell(1, 9).Value = "Old Values";
+            worksheet.Cell(1, 10).Value = "New Values";
+
+            // Format Header Row
+            var headerRange = worksheet.Range(1, 1, 1, 10);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4F46E5"); // Indigo-600
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            // Populate rows
+            int row = 2;
+            foreach (var log in data)
+            {
+                worksheet.Cell(row, 1).Value = log.Id;
+                worksheet.Cell(row, 2).Value = log.UserEmail ?? "System / Guest";
+                worksheet.Cell(row, 3).Value = log.IpAddress ?? "N/A";
+                worksheet.Cell(row, 4).Value = log.Type;
+                worksheet.Cell(row, 5).Value = log.TableName ?? "N/A";
+                worksheet.Cell(row, 6).Value = log.DateTime;
+                worksheet.Cell(row, 6).Style.DateFormat.Format = "yyyy-MM-dd HH:mm:ss";
+                worksheet.Cell(row, 7).Value = log.PrimaryKey ?? "N/A";
+                worksheet.Cell(row, 8).Value = log.AffectedColumns ?? "N/A";
+                worksheet.Cell(row, 9).Value = log.OldValues ?? "";
+                worksheet.Cell(row, 10).Value = log.NewValues ?? "";
+                row++;
+            }
+
+            // Auto-fit columns
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        private byte[] GeneratePdfExport(List<AuditTrailResponse> data)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(1.5f, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(8).FontFamily("Helvetica"));
+
+                    // Header
+                    page.Header()
+                        .PaddingBottom(10)
+                        .Text("Audit Trails Report")
+                        .SemiBold().FontSize(16).FontColor(Colors.Indigo.Medium);
+
+                    // Content
+                    page.Content()
+                        .Table(table =>
+                        {
+                            // Columns definition
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(35); // ID
+                                columns.RelativeColumn(2.5f); // User Email
+                                columns.RelativeColumn(1.2f); // Type
+                                columns.RelativeColumn(2f); // Table Name
+                                columns.RelativeColumn(1.5f); // IP Address
+                                columns.RelativeColumn(2.5f); // DateTime
+                                columns.RelativeColumn(1.5f); // Primary Key
+                            });
+
+                            // Table Header
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(HeaderStyle).Text("ID").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("User Email").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Type").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Table Name").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("IP Address").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("DateTime (UTC)").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Primary Key").SemiBold().FontColor(Colors.White);
+
+                                static IContainer HeaderStyle(IContainer container)
+                                {
+                                    return container
+                                        .Background(Colors.Indigo.Medium)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            });
+
+                            // Table Rows
+                            foreach (var log in data)
+                            {
+                                table.Cell().Element(CellStyle).Text(log.Id.ToString());
+                                table.Cell().Element(CellStyle).Text(log.UserEmail ?? "System / Guest");
+                                table.Cell().Element(CellStyle).Text(log.Type);
+                                table.Cell().Element(CellStyle).Text(log.TableName ?? "N/A");
+                                table.Cell().Element(CellStyle).Text(log.IpAddress ?? "N/A");
+                                table.Cell().Element(CellStyle).Text(log.DateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                                table.Cell().Element(CellStyle).Text(log.PrimaryKey ?? "N/A");
+
+                                static IContainer CellStyle(IContainer container)
+                                {
+                                    return container
+                                        .BorderBottom(0.5f)
+                                        .BorderColor(Colors.Grey.Lighten3)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            }
+                        });
+
+                    // Footer
+                    page.Footer()
+                        .PaddingTop(10)
+                        .AlignCenter()
+                        .Text(x =>
+                        {
+                            x.Span("Page ");
+                            x.CurrentPageNumber();
+                            x.Span(" of ");
+                            x.TotalPages();
+                        });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
+        }
+    }
+}
+'@
+    Write-TemplateFile 'UMS.Infrastructure/Services/CategoryService.cs' @'
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ClosedXML.Excel;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Categories;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
+
+namespace UMS.Infrastructure.Services
+{
+    public class CategoryService(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService)
+        : ICategoryService
+    {
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
+
+        private IQueryable<Category> BuildCategoryQuery(GetCategoriesPagedQuery query)
+        {
+            var request = query.PagedFilterRequest;
+            var categoriesQuery = _applicationDbContext.Categories.AsNoTracking();
+
+            // Status Filtering
+            if (request.IsActive.HasValue)
+            {
+                categoriesQuery = categoriesQuery.Where(c => c.IsActive == request.IsActive.Value);
+            }
+            else
+            {
+                // For anonymous or non-privileged requests, show only active categories.
+                if (!_currentUserService.IsAuthenticated() || !_currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
+                {
+                    categoriesQuery = categoriesQuery.Where(c => c.IsActive);
+                }
+            }
+
+            // Search Term Filtering
+            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+            {
+                var term = request.SearchTerm.Trim();
+                var pattern = $"%{term}%";
+                categoriesQuery = categoriesQuery.Where(c =>
+                    EF.Functions.Like(c.Name, pattern) ||
+                    EF.Functions.Like(c.Slug, pattern));
+            }
+
+            return categoriesQuery;
+        }
+
+        private IQueryable<Category> ApplySorting(IQueryable<Category> query, string? sortBy, string? sortDirection)
+        {
+            return sortBy?.ToLower() switch
+            {
+                "name" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Name)
+                    : query.OrderBy(c => c.Name),
+                "slug" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Slug)
+                    : query.OrderBy(c => c.Slug),
+                "sortorder" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.SortOrder)
+                    : query.OrderBy(c => c.SortOrder),
+                "id" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Id)
+                    : query.OrderBy(c => c.Id),
+                _ => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.SortOrder).ThenBy(c => c.Name)
+                    : query.OrderBy(c => c.SortOrder).ThenBy(c => c.Name)
+            };
+        }
+
+        public async Task<IResponseWrapper<PagedResult<CategoryResponse>>> GetCategoriesPagedQueryAsync(
+            PagedFilterRequest pagedFilterRequest,
+            CancellationToken ct)
+        {
+            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = pagedFilterRequest });
+            query = ApplySorting(query, pagedFilterRequest.SortBy, pagedFilterRequest.SortDirection);
+
+            var totalCount = await query.CountAsync(ct);
+
+            var categories = await query
+                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
+                .Take(pagedFilterRequest.PageSize)
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
+
+            var pagedResult = PagedResult<CategoryResponse>.Create(
+                categories,
+                totalCount,
+                pagedFilterRequest.PageNumber,
+                pagedFilterRequest.PageSize);
+
+            return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
+        }
+
+        public async Task<IResponseWrapper<List<CategoryResponse>>> GetCategoriesListAsync(
+            string? searchTerm,
+            bool? isActive,
+            string? sortBy,
+            string? sortDirection,
+            CancellationToken ct)
+        {
+            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = new PagedFilterRequest { SearchTerm = searchTerm, IsActive = isActive } });
+            query = ApplySorting(query, sortBy, sortDirection);
+
+            var categories = await query
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
+
+            return ResponseWrapper<List<CategoryResponse>>.Success(categories);
+        }
+
+        public async Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct)
+        {
+            if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return GeneratePdfExport(data);
+            }
+            else
+            {
+                return GenerateExcelExport(data);
+            }
+        }
+
+        private byte[] GenerateExcelExport(List<CategoryResponse> data)
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Categories");
+
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Name";
+            worksheet.Cell(1, 3).Value = "Slug";
+            worksheet.Cell(1, 4).Value = "Parent Category ID";
+            worksheet.Cell(1, 5).Value = "Sort Order";
+            worksheet.Cell(1, 6).Value = "Status";
+
+            var headerRange = worksheet.Range(1, 1, 1, 6);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4F46E5"); // Indigo-600
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            int row = 2;
+            foreach (var item in data)
+            {
+                worksheet.Cell(row, 1).Value = item.Id;
+                worksheet.Cell(row, 2).Value = item.Name;
+                worksheet.Cell(row, 3).Value = item.Slug;
+                worksheet.Cell(row, 4).Value = item.ParentId.HasValue ? item.ParentId.Value.ToString() : "Root";
+                worksheet.Cell(row, 5).Value = item.SortOrder;
+                worksheet.Cell(row, 6).Value = item.IsActive ? "Active" : "Inactive";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        private byte[] GeneratePdfExport(List<CategoryResponse> data)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(1.5f, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(9).FontFamily("Helvetica"));
+
+                    page.Header()
+                        .PaddingBottom(10)
+                        .Text("Product Categories Report")
+                        .SemiBold().FontSize(16).FontColor(Colors.Indigo.Medium);
+
+                    page.Content()
+                        .Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(40); // ID
+                                columns.RelativeColumn(3f); // Name
+                                columns.RelativeColumn(3f); // Slug
+                                columns.RelativeColumn(2f); // Parent Category ID
+                                columns.RelativeColumn(1.5f); // Sort Order
+                                columns.RelativeColumn(1.5f); // Status
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(HeaderStyle).Text("ID").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Name").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Slug").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Parent ID").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Sort Order").SemiBold().FontColor(Colors.White);
+                                header.Cell().Element(HeaderStyle).Text("Status").SemiBold().FontColor(Colors.White);
+
+                                static IContainer HeaderStyle(IContainer container)
+                                {
+                                    return container
+                                        .Background(Colors.Indigo.Medium)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            });
+
+                            foreach (var item in data)
+                            {
+                                table.Cell().Element(CellStyle).Text(item.Id.ToString());
+                                table.Cell().Element(CellStyle).Text(item.Name);
+                                table.Cell().Element(CellStyle).Text(item.Slug);
+                                table.Cell().Element(CellStyle).Text(item.ParentId.HasValue ? item.ParentId.Value.ToString() : "None");
+                                table.Cell().Element(CellStyle).Text(item.SortOrder.ToString());
+                                table.Cell().Element(CellStyle).Text(item.IsActive ? "Active" : "Inactive");
+
+                                static IContainer CellStyle(IContainer container)
+                                {
+                                    return container
+                                        .BorderBottom(0.5f)
+                                        .BorderColor(Colors.Grey.Lighten3)
+                                        .Padding(6)
+                                        .AlignMiddle();
+                                }
+                            }
+                        });
+
+                    page.Footer()
+                        .PaddingTop(10)
+                        .AlignCenter()
+                        .Text(x =>
+                        {
+                            x.Span("Page ");
+                            x.CurrentPageNumber();
+                            x.Span(" of ");
+                            x.TotalPages();
+                        });
+                });
+            });
+
+            using var stream = new MemoryStream();
+            document.GeneratePdf(stream);
+            return stream.ToArray();
         }
     }
 }
@@ -29982,6 +33574,7 @@ namespace UMS.Infrastructure.Services
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="FluentEmail.Core" Version="3.0.2" />
 		<PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
@@ -29994,6 +33587,7 @@ namespace UMS.Infrastructure.Services
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.6" />
+		<PackageReference Include="QuestPDF" Version="2026.5.0" />
 	</ItemGroup>
 	
   <ItemGroup>
@@ -30026,6 +33620,24 @@ namespace UMS.Infrastructure.Services
     Write-Host "Restoring and building solution..."
     Invoke-Step 'restore' @()
     Invoke-Step 'build' @()
+
+    Write-Host "Checking for dotnet-ef tool..."
+    $efInstalled = $false
+    try {
+        $efCheck = & dotnet ef --version 2>&1
+        if ($LASTEXITCODE -eq 0) { $efInstalled = $true }
+    } catch {}
+    if (-not $efInstalled) {
+        Write-Host "Installing dotnet-ef tool globally..."
+        & dotnet tool install -g dotnet-ef
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Failed to install dotnet-ef tool globally."
+        }
+    }
+
+    Write-Host "Applying EF Core Migrations..." -ForegroundColor Cyan
+    & dotnet ef database update --project "$Root\$ProjectName.Infrastructure" --startup-project "$Root\$ProjectName.API"
+    if ($LASTEXITCODE -ne 0) { throw "EF Core Migration failed." }
 
     Write-Host "Scaffold complete: $Root"
 }
