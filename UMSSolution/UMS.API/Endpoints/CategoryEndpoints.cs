@@ -6,6 +6,7 @@ using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories.Commands.Create;
 using UMS.Application.Features.Categories.Commands.Delete;
 using UMS.Application.Features.Categories.Commands.Update;
+using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
 using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
@@ -121,6 +122,16 @@ namespace UMS.API.Endpoints
             })
             .Produces<IResponseWrapper>()
             .WithName("UpdateCategory")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
+
+            group.MapPut("/{id:int}/status", async (int id, bool isActive, ISender sender, CancellationToken ct) =>
+            {
+                var command = new ChangeCategoryStatusCommand(id, isActive);
+                var response = await sender.Send(command, ct);
+                return response.ToApiResult();
+            })
+            .Produces<IResponseWrapper<int>>()
+            .WithName("ChangeCategoryStatus")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
 
             group.MapDelete("/{categoryId:int}", async (ISender sender, int categoryId, CancellationToken ct) =>

@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/ui/toast';
 import DataTableExport from '../components/ui/DataTableExport';
+import { StatusSwitch } from '../components/shared/StatusSwitch';
+import { StatusConfirmationDialog } from '../components/shared/StatusConfirmationDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 import { 
   useReactTable, 
   getCoreRowModel, 
@@ -419,7 +422,8 @@ export default function UsersManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -662,81 +666,80 @@ export default function UsersManagement() {
                             {/* Lock / Unlock Toggle buttons */}
                             {usr.isLocked ? (
                               hasPermission('Permission.Identity.Users.Unlock') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('unlock', usr)}
-                                  className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
-                                  title="Unlock User Account"
-                                >
-                                  <Unlock className="w-3.5 h-3.5" />
-                                </Button>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestConfirm('unlock', usr)}
+                                      className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                                    >
+                                      <Unlock className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Unlock User Account</TooltipContent>
+                                </Tooltip>
                               )
                             ) : (
                               hasPermission('Permission.Identity.Users.Lock') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('lock', usr)}
-                                  className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg"
-                                  title="Lock User Account"
-                                >
-                                  <Lock className="w-3.5 h-3.5" />
-                                </Button>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestConfirm('lock', usr)}
+                                      className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg"
+                                    >
+                                      <Lock className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Lock User Account</TooltipContent>
+                                </Tooltip>
                               )
                             )}
 
                             {/* Active / Inactive Status Toggle buttons */}
-                            {usr.isActive ? (
-                              hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('deactivate', usr)}
-                                  className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
-                                  title="Deactivate User Account"
-                                >
-                                  <UserCheck className="w-3.5 h-3.5 text-neutral-400" />
-                                </Button>
-                              )
-                            ) : (
-                              hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('activate', usr)}
-                                  className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
-                                  title="Activate User Account"
-                                >
-                                  <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
-                                </Button>
-                              )
+                            {hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
+                              <StatusSwitch
+                                isActive={usr.isActive}
+                                onToggle={() => requestConfirm(usr.isActive ? 'deactivate' : 'activate', usr)}
+                                entityName={usr.fullName}
+                                isLoading={changeStatusMutation.isPending && targetUser?.id === usr.id}
+                              />
                             )}
 
                             {/* Edit User Button - Guarded */}
                             {hasPermission('Permission.Identity.Users.Update') && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => openEditSheet(usr)}
-                                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
-                                title="Edit Details & Roles"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => openEditSheet(usr)}
+                                    className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit Details & Roles</TooltipContent>
+                              </Tooltip>
                             )}
 
                             {/* Delete User Button - Guarded */}
                             {hasPermission('Permission.Identity.Users.Delete') && !isUserAdmin && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => requestConfirm('delete', usr)}
-                                className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
-                                title="Delete User"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => requestConfirm('delete', usr)}
+                                    className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete User</TooltipContent>
+                              </Tooltip>
                             )}
 
                             {!hasPermission('Permission.Identity.Users.Update') && 
@@ -933,17 +936,26 @@ export default function UsersManagement() {
         </form>
       </Sheet>
 
+      {/* STATUS CONFIRMATION DIALOG */}
+      <StatusConfirmationDialog
+        isOpen={isConfirmDialogOpen && (confirmAction === 'activate' || confirmAction === 'deactivate')}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={executeConfirmAction}
+        entityName={targetUser?.fullName || ''}
+        entityType="user"
+        action={(confirmAction === 'activate' || confirmAction === 'deactivate') ? confirmAction : 'activate'}
+        isLoading={confirmPending}
+      />
+
       {/* CONFIRMATION DIALOG */}
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        {targetUser && confirmAction && (
+      <Dialog open={isConfirmDialogOpen && confirmAction !== 'activate' && confirmAction !== 'deactivate'} onOpenChange={setIsConfirmDialogOpen}>
+        {targetUser && confirmAction && confirmAction !== 'activate' && confirmAction !== 'deactivate' && (
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="capitalize">{confirmAction} Account</DialogTitle>
               <DialogDescription>
                 {confirmAction === 'lock' && `Are you sure you want to lock the account of ${targetUser.fullName}? They will be blocked from logging into the application.`}
                 {confirmAction === 'unlock' && `Are you sure you want to unlock the account of ${targetUser.fullName}?`}
-                {confirmAction === 'activate' && `Are you sure you want to activate the account of ${targetUser.fullName}?`}
-                {confirmAction === 'deactivate' && `Are you sure you want to deactivate the account of ${targetUser.fullName}? They will no longer be able to perform operations.`}
                 {confirmAction === 'delete' && `Are you sure you want to delete ${targetUser.fullName}? This operation will delete their account data.`}
               </DialogDescription>
             </DialogHeader>
@@ -965,5 +977,6 @@ export default function UsersManagement() {
         )}
       </Dialog>
     </div>
+    </TooltipProvider>
   );
 }
