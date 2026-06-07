@@ -3,7 +3,9 @@ import { categoriesApi } from '../lib/categories-api';
 import type { 
   PagedFilterRequest, 
   CreateCategoryRequest, 
-  UpdateCategoryRequest 
+  UpdateCategoryRequest,
+  CategoryResponse,
+  PagedResult
 } from '../lib/categories-api';
 import { useToast } from '../components/ui/toast';
 
@@ -99,6 +101,57 @@ export function useDeleteCategory() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'An error occurred during deletion.');
+    },
+  });
+}
+
+export function useChangeCategoryStatus() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: { id: number; isActive: boolean }) =>
+      categoriesApi.changeStatus(data.id, data.isActive),
+    onMutate: async ({ id, isActive }) => {
+      await queryClient.cancelQueries({ queryKey: ['categories'] });
+
+      const previousQueries = queryClient.getQueriesData<PagedResult<CategoryResponse>>({
+        queryKey: ['categories', 'list']
+      });
+
+      previousQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData<PagedResult<CategoryResponse>>(queryKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((cat) =>
+              cat.id === id ? { ...cat, isActive } : cat
+            )
+          };
+        });
+      });
+
+      return { previousQueries };
+    },
+    onError: (err: Error, _variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, queryData]) => {
+          queryClient.setQueryData(queryKey, queryData);
+        });
+      }
+      toast.error(err.message || 'Failed to update category status.');
+    },
+    onSuccess: (response, variables) => {
+      if (response.isSuccessful) {
+        toast.success(
+          `Category ${variables.isActive ? 'activated' : 'deactivated'} successfully.`
+        );
+      } else {
+        toast.error(response.messages[0] || 'Failed to update category status.');
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
   });
 }

@@ -22,11 +22,15 @@ import {
   useCategoryLookups, 
   useCreateCategory, 
   useUpdateCategory, 
-  useDeleteCategory 
+  useDeleteCategory,
+  useChangeCategoryStatus
 } from '../hooks/useCategories';
 import { DataTablePagination } from '../components/ui/DataTablePagination';
 import { useToast } from '../components/ui/toast';
 import DataTableExport from '../components/ui/DataTableExport';
+import { StatusSwitch } from '../components/shared/StatusSwitch';
+import { StatusConfirmationDialog } from '../components/shared/StatusConfirmationDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 
 const columns: ColumnDef<CategoryResponse>[] = [
   { accessorKey: 'id', header: 'ID' },
@@ -79,6 +83,8 @@ export default function CategoriesManagement() {
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [statusAction, setStatusAction] = useState<'activate' | 'deactivate' | null>(null);
   const [targetCategory, setTargetCategory] = useState<CategoryResponse | null>(null);
 
   // Form States
@@ -108,6 +114,7 @@ export default function CategoriesManagement() {
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
+  const changeStatusMutation = useChangeCategoryStatus();
 
   const categories = pagedData?.data || [];
   const totalCount = pagedData?.totalCount || 0;
@@ -315,6 +322,26 @@ export default function CategoriesManagement() {
     });
   };
 
+  const requestChangeStatus = (action: 'activate' | 'deactivate', cat: CategoryResponse) => {
+    setStatusAction(action);
+    setTargetCategory(cat);
+    setIsStatusDialogOpen(true);
+  };
+
+  const executeChangeStatus = async () => {
+    if (!targetCategory || !statusAction) return;
+    changeStatusMutation.mutate({
+      id: targetCategory.id,
+      isActive: statusAction === 'activate'
+    }, {
+      onSuccess: (response) => {
+        if (response.isSuccessful) {
+          setIsStatusDialogOpen(false);
+        }
+      }
+    });
+  };
+
   // Find parent category name from lists
   const getParentCategoryName = (parentId: number | null) => {
     if (parentId === null) return 'None (Root)';
@@ -323,7 +350,8 @@ export default function CategoriesManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -473,41 +501,58 @@ export default function CategoriesManagement() {
                         {cat.sortOrder}
                       </td>
                       <td className="px-6 py-4">
-                        <Badge 
-                           variant="outline" 
-                           className={
-                             cat.isActive 
-                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
-                               : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
-                           }
-                        >
-                          {cat.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
+                        {hasPermission('Permission.Product.Categories.Update') ? (
+                          <StatusSwitch
+                            isActive={cat.isActive}
+                            onToggle={() => requestChangeStatus(cat.isActive ? 'deactivate' : 'activate', cat)}
+                            entityName={cat.name}
+                            isLoading={changeStatusMutation.isPending && targetCategory?.id === cat.id}
+                          />
+                        ) : (
+                          <Badge 
+                             variant="outline" 
+                             className={
+                               cat.isActive 
+                                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
+                                 : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
+                             }
+                          >
+                            {cat.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {hasPermission('Permission.Product.Categories.Update') && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => openEditSheet(cat)}
-                              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
-                              title="Edit Details"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => openEditSheet(cat)}
+                                  className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit Details</TooltipContent>
+                            </Tooltip>
                           )}
 
                           {hasPermission('Permission.Product.Categories.Delete') && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => requestDelete(cat)}
-                              className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
-                              title="Delete Category"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => requestDelete(cat)}
+                                  className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete Category</TooltipContent>
+                            </Tooltip>
                           )}
 
                           {!hasPermission('Permission.Product.Categories.Update') && 
@@ -671,6 +716,18 @@ export default function CategoriesManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* STATUS CONFIRMATION DIALOG */}
+      <StatusConfirmationDialog
+        isOpen={isStatusDialogOpen}
+        onClose={() => setIsStatusDialogOpen(false)}
+        onConfirm={executeChangeStatus}
+        entityName={targetCategory?.name || ''}
+        entityType="category"
+        action={statusAction || 'activate'}
+        isLoading={changeStatusMutation.isPending}
+      />
     </div>
+    </TooltipProvider>
   );
 }

@@ -85,6 +85,10 @@ export const categoriesApi = {
     return api.put('api/v1/categories', data);
   },
 
+  changeStatus: (id: number, isActive: boolean): Promise<ApiResponse<number>> => {
+    return api.put(`api/v1/categories/${id}/status?isActive=${isActive}`);
+  },
+
   delete: (id: number): Promise<ApiResponse> => {
     return api.delete(`api/v1/categories/${id}`);
   },

@@ -3,6 +3,7 @@ using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Commands.Create;
 using UMS.Application.Features.Categories.Commands.Delete;
 using UMS.Application.Features.Categories.Commands.Update;
+using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
 using UMS.Application.Features.Categories.Events;
 using UMS.Application.Tests.Support.Categories;
 
@@ -137,5 +138,43 @@ public class DeleteCategoryCommandHandlerTests
         var outbox = await scope.DbContext.OutboxMessages.SingleAsync();
         outbox.Type.Should().Contain(nameof(CategoryDeletedEvent));
         outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
+    }
+}
+
+public class ChangeCategoryStatusCommandHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_update_status_add_outbox_message_and_clear_category_caches()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var category = await scope.SeedCategoryAsync("Existing", "existing", 1);
+        var handler = new ChangeCategoryStatusHandler(scope.DbContext, scope.Cache);
+        var command = new ChangeCategoryStatusCommand(category.Id, false);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().Be(category.Id);
+        var updated = await scope.DbContext.Categories.SingleAsync(x => x.Id == category.Id);
+        updated.IsActive.Should().BeFalse();
+        scope.Cache.RemovedKeys.Should().BeEquivalentTo(CategoryCacheKeys.All);
+        var outbox = await scope.DbContext.OutboxMessages.SingleAsync();
+        outbox.Type.Should().Contain(nameof(CategoryUpdatedEvent));
+        outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_category_does_not_exist()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var handler = new ChangeCategoryStatusHandler(scope.DbContext, scope.Cache);
+
+        var result = await handler.Handle(
+            new ChangeCategoryStatusCommand(404, false),
+            CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(404);
+        result.Messages.Should().Contain("Category not found.");
     }
 }
