@@ -59,11 +59,11 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
 
 - **Prefixing:** Custom hooks must start with the `use` prefix (e.g., `useAuth`).
 - **Object Reference Preservation:** Hooks must avoid returning raw, complex objects that change references on every render.
-- **Enforced Memoization:** Use `useMemo` and `useCallback` to wrap objects and callback functions returned by hooks or passed as dependencies to prevent unnecessary re-renders:
-  ```typescript
-  const values = useMemo(() => ({ user, hasPermission }), [user, hasPermission]);
-  const handleToggle = useCallback(() => setIsOpen(prev => !prev), []);
-  ```
+- **Compiler-First Memoization:** React 19's compiler handles most memoization automatically. Do NOT add `useMemo` or `useCallback` by default.
+- **Manual Memoization Exceptions:** Only add manual memoization when:
+  - The React Compiler is confirmed disabled for the file, OR
+  - A React DevTools Profiler trace proves a specific re-render is caused by reference instability AND the compiler failed to optimize it, OR
+  - You are passing callbacks to a heavily rendered list item (e.g., 100+ rows) where the child does not use React.memo (and cannot be compiler-optimized).
 - **Synchronous Route Guards:** Avoid using `useEffect` for synchronous authorization checks in route guards; evaluate permissions synchronously during render.
 
 ---
@@ -89,6 +89,25 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
 
 - **Controlled Inputs:** Map form elements to React states using controlled value variables (e.g. `<input value={name} onChange={...} />`).
 - **Input Sanitization:** Sanitize user inputs dynamically (e.g. automatically trimming inputs on changes).
+- **RULE: Auto-Slugification Utility:** Forms that capture names and dynamic slugs (such as create category dialogs) must auto-slugify the user-typed name dynamically during input typing (only in create mode) using a custom slug generator:
+  ```typescript
+  const generateSlug = (val: string) => {
+    let slug = val
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '') // remove invalid characters
+      .replace(/[\s-]+/g, '-')     // replace spaces or multiple hyphens with a single hyphen
+      .replace(/^-+|-+$/g, '');    // strip leading/trailing hyphens
+      
+    // Non-ASCII Fallback (e.g., Arabic, Chinese):
+    if (!slug && val.trim().length > 0) {
+      // Add transliteration or fall back to GUID-based slug rather than an empty string
+      slug = crypto.randomUUID();
+    }
+    return slug;
+  };
+  ```
+- **Navigation Guard:** Forms with unsaved changes must use `useBlocker` (React Router) or `beforeunload` to prevent accidental data loss.
 - **Validation Timing:** Validate forms on input blur (ONLY after the field has been touched/submitted) AND on form submission. Avoid validating while the user is actively typing in the field. Display clear, inline validation error messages.
 
 ---
@@ -100,11 +119,75 @@ To ensure clean separation of concerns, the API consumption pipeline must strict
 - **Error Boundaries:** Every major page entry point must be wrapped within or near a React Error Boundary to catch and handle rendering crashes gracefully.
 - **ESLint Conformance:** The codebase maintains zero warnings. All ESLint rules must be strictly adhered to during development.
 
+### Error Boundary Strategy
+- Follow the Error Boundary Strategy defined in [05-frontend-architecture.md](05-frontend-architecture.md#error-boundary-strategy) §6.
+
 ---
 
 ## 7. Date Handling Standards
 
 - **Forbidden Native Inputs:** Basic HTML `<input type="date">` inputs are strictly forbidden due to browser locale and formatting inconsistencies.
 - **DatePicker Component:** All date input and selection fields must use the custom `<DatePicker>` component (located at `src/components/ui/date-picker.tsx` which wraps `react-day-picker` and uses `date-fns` for internal date operations).
-- **Date Format Standard:** Both user-facing displays and API-transmitted/URL date query parameters must strictly enforce the `yyyy/MM/dd` format (e.g. `2026/06/05` instead of `2026-06-05`).
-- **Backend Date Parsing:** The backend must safely parse date filters passed from the client using `DateTime.TryParseExact` with `"yyyy/MM/dd"` format and `CultureInfo.InvariantCulture` to prevent locale-specific server culture parsing issues.
+- **Date Format Standard:** API-transmitted and URL date query parameters must strictly enforce ISO 8601 `yyyy-MM-dd` format. User-facing display formats may use `yyyy/MM/dd` if desired.
+- **Backend Date Parsing:** The backend must safely parse date filters passed from the client using `DateTime.TryParseExact` with `"yyyy-MM-dd"` format and `CultureInfo.InvariantCulture` to prevent locale-specific server culture parsing issues.
+
+---
+
+## 8. Query Cache Invalidation and Optimistic Updates
+
+To maintain clean and responsive cache state via `TanStack Query`, developers must follow these patterns:
+- **RULE: Cache Invalidation on Mutation:** Successful write operations (mutations) must invalidate the corresponding feature's query keys globally to trigger automatic refetches:
+  ```typescript
+  onSuccess: (response) => {
+    if (response.isSuccessful) {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    }
+  }
+  ```
+- **RULE: Optimistic Updates with Rollback:** Quick presentation-level status toggles (e.g., activating or deactivating a category directly from a directory list switch) must implement optimistic query updates. In the hook definition:
+  1. Cancel active outgoing queries using `queryClient.cancelQueries`.
+  2. Cache the current state via `queryClient.getQueriesData`.
+  3. Mutate the cache locally using `queryClient.setQueryData`.
+  4. Implement `onError` to restore the previous cache state from context if the API call fails.
+  5. Invalidate the query key inside `onSettled` to guarantee UI correctness.
+  
+  *Example (Optimistic Switch Hook):*
+  ```typescript
+  export function useChangeStatus() {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (data: { id: number; isActive: boolean }) => api.changeStatus(data.id, data.isActive),
+      onMutate: async ({ id, isActive }) => {
+        await queryClient.cancelQueries({ queryKey: ['feature'] });
+        const previousQueries = queryClient.getQueriesData<PagedResult<FeatureResponse>>({ queryKey: ['feature', 'list'] });
+        previousQueries.forEach(([queryKey]) => {
+          queryClient.setQueryData<PagedResult<FeatureResponse>>(queryKey, (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              data: old.data.map((item) => item.id === id ? { ...item, isActive } : item)
+            };
+          });
+        });
+        return { previousQueries };
+      },
+      onError: (err, variables, context) => {
+        if (context?.previousQueries) {
+          context.previousQueries.forEach(([queryKey, queryData]) => {
+            queryClient.setQueryData(queryKey, queryData);
+          });
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['feature'] });
+      }
+    });
+  }
+  ```
+
+---
+
+## 9. Frontend Security
+
+- **Token Refresh:** Implement silent token refresh using interceptors. Handle concurrent requests during token refresh by queuing them and replaying once the new token is acquired.
+- **XSS Prevention:** Never use `dangerouslySetInnerHTML`. Sanitize any user input rendered to the DOM.

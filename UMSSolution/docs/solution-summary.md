@@ -4,7 +4,7 @@ UMSSolution is a layered user management platform built mainly with .NET. The ba
 
 The API project exposes endpoints for accounts, users, roles, categories, and audit trails. Startup wiring shows support for OpenAPI documentation, bearer authentication, CORS, rate limiting for auth-related traffic, centralized error handling, static files, and API versioning.
 
-The Application layer contains the use-case logic and cross-cutting behaviors. It is wired with Mediator, FluentValidation, and Mapster, which suggests a CQRS-style flow where requests are validated and mapped before reaching handlers and services.
+The Application layer contains the use-case logic and cross-cutting behaviors. It is wired with Mediator and FluentValidation, which suggests a CQRS-style flow where requests are validated and mapped before reaching handlers and services.
 
 The Domain layer holds the core business model, including entities, enums, common types, and interfaces. The Infrastructure layer provides technical implementations such as database access, identity/authentication services, permissions, JWT setup, caching, email delivery, file storage, current-user access, and database seeding.
 
@@ -15,7 +15,7 @@ At a high level, the solution appears designed for secure user and access manage
 - Backend: .NET 10 and ASP.NET Core Web API
 - Architecture: layered API, Application, Domain, and Infrastructure projects
 - API tooling: ASP.NET OpenAPI, Scalar, and API versioning
-- Application patterns: Mediator, FluentValidation, and Mapster
+- Application patterns: Mediator and FluentValidation
 - Data access: Entity Framework Core 10
 - Databases: SQL Server, SQLite, and InMemory
 - Security: ASP.NET Core Identity, JWT bearer authentication, CORS, and rate limiting
