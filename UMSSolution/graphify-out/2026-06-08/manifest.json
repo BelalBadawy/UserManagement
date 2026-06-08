@@ -5795,8 +5795,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\solution-summary.md": {
-    "mtime": 1780949108.4293742,
-    "ast_hash": "8226743c43253678ff18f4dcd950e8dd",
+    "mtime": 1780417941.3539145,
+    "ast_hash": "df542fda3fe361dd65e9e513062dcf8d",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template\\how to use this template.md": {
@@ -5825,28 +5825,28 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\00-INDEX.md": {
-    "mtime": 1780949116.9853654,
-    "ast_hash": "74acd0945132404ab7b493d6d3e6d56b",
+    "mtime": 1780669311.4832106,
+    "ast_hash": "5439c71308efb02ca70a3103511c9dac",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\01-backend-architecture.md": {
-    "mtime": 1780949124.7304966,
-    "ast_hash": "fac7f5163b24a21e75deecfd80f0f853",
+    "mtime": 1780947361.751568,
+    "ast_hash": "3e60fd26ba977e7a0755e10b52579289",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\02-backend-coding-standards.md": {
-    "mtime": 1780949131.2138753,
-    "ast_hash": "3c9649bdf223b7d4a8d1c15ed110a3b7",
+    "mtime": 1780947420.4024167,
+    "ast_hash": "5421ffe9afe199b8a797dfed1b0a95c5",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\03-backend-data-and-infrastructure.md": {
-    "mtime": 1780949139.2863362,
-    "ast_hash": "f6c3c97b31b920d594e07778ef59e762",
+    "mtime": 1780947376.5217369,
+    "ast_hash": "5c060d71934a196a51e6ee93f2835094",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\04-backend-security.md": {
-    "mtime": 1780949146.1717055,
-    "ast_hash": "cf9c9d3d1314abd8aff51e816ee0d186",
+    "mtime": 1780947406.654657,
+    "ast_hash": "e29fcfce8c6fe62df164753557698632",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\05-frontend-architecture.md": {
@@ -5855,18 +5855,18 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\06-frontend-coding-standards.md": {
-    "mtime": 1780949160.1772711,
-    "ast_hash": "7b4c7613ed790fe099f5bf8c8ecaa6ed",
+    "mtime": 1780947391.6436434,
+    "ast_hash": "748ddb1951a25684db2072f25da75ba8",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\07-testing-standards.md": {
-    "mtime": 1780949165.14659,
-    "ast_hash": "f2841640dbfe6ee404d103d1c36f9414",
+    "mtime": 1780947412.3305063,
+    "ast_hash": "3197bc258a87019dbe39ce5729dc0604",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\08-project-conventions.md": {
-    "mtime": 1780949172.79556,
-    "ast_hash": "b5e3d99fa61d8f2b89e5fbaff5f94702",
+    "mtime": 1780947370.6203885,
+    "ast_hash": "a8fd06aa7f8d4a51b9ec2f6124543277",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-auth-flow.md": {

@@ -23,6 +23,13 @@
       }
   }
   ```
+- **Index Conventions:** Explicitly define indexes in `IEntityTypeConfiguration` for foreign keys, frequently queried/sorted columns, and unique constraints. Do not rely on EF Core's default index creation for foreign keys if the column will be heavily filtered or sorted.
+- **Concurrency Tokens:** Entities that support optimistic concurrency control (implementing `IDataConcurrency`) must map their `RowVersion` field to the SQL Server native `rowversion` type and flag it as a concurrency token using:
+  ```csharp
+  builder.Property(c => c.RowVersion)
+      .IsConcurrencyToken()
+      .HasColumnType("rowversion"); // SQL Server native type; SQLite ignores the type constraint
+  ```
 
 ---
 
@@ -67,6 +74,12 @@
 - **Development Secrets:** In the development environment, bind configurations to User Secrets (`dotnet user-secrets`).
 - **Production Environment:** Bind configurations directly to secure environment variables.
 
+### Options Pattern Validation
+All strongly-typed configuration classes (e.g., `JwtSettings`, `DatabaseSettings`) must:
+- Use data annotations for required fields and ranges.
+- Call `.ValidateDataAnnotations().ValidateOnStart()` during service registration.
+- Fail fast at application startup if configuration is missing or invalid, preventing runtime discovery of config errors.
+
 ---
 
 ## 6. Core Identity Integration
@@ -79,4 +92,30 @@
 ## 7. Data Seeding Services
 
 - **Idempotent Execution:** Baseline categories, roles, and default permissions seeding are handled by the database seeding pipeline (`ApiTestDatabaseInitializer` for tests, baseline infrastructure seeders for production).
-- Seeding routines must be idempotent, checking for object existence (e.g., `SingleOrDefaultAsync`) before attempting to write record duplicates.
+- Seeding routines must be idempotent, checking for object existence (e.g. using `!_dbContext.Categories.Any()`) before attempting to write records.
+- **Indexed Column Normalization:** When seeding lookup fields (such as Category name or slug) that have unique indexes, always manually apply uppercase normalization matching write rules (e.g., using `category.NormalizedName = name.ToUpperInvariant()`).
+
+---
+
+## 8. Global Model Creation Hooks
+
+The `ApplicationDbContext` class must enforce global conventions dynamically in its `OnModelCreating` override:
+- **Decimal Precision:** Intercept all decimal properties and configure their precision to 18 and scale to 6 globally:
+  ```csharp
+  var decimalProperties = entityType.GetProperties()
+      .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?));
+  foreach (var property in decimalProperties)
+  {
+      property.SetPrecision(18);
+      property.SetScale(6);
+  }
+  ```
+  *Note: Specific entities requiring different precision may override this global convention explicitly in their individual `IEntityTypeConfiguration<T>` class.*
+- **Identity Table & Schema Configuration:** Strip the default ASP.NET Core `AspNet` prefix from Identity tables (e.g., `tableName.Substring(6)`), and assign them to the `Identity` schema (only when running on SQL Server).
+- **Global Soft Delete Filters:** Iterate through all entity types and dynamically apply global soft-delete query filters on types implementing `ISoftDelete`:
+  ```csharp
+  if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+  {
+      entityType.AddSoftDeleteQueryFilter();
+  }
+  ```

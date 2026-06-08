@@ -15,6 +15,8 @@
   public async Task CreateUser_WithDuplicateEmail_ReturnsConflict() { ... }
   ```
 - **Structure Pattern:** Always structure tests using the Arrange-Act-Assert (AAA) pattern. Use empty lines to separate these sections for readability.
+- **Test Execution Budgets:** Unit tests must complete in < 500ms. Integration tests must complete in < 10s.
+- **Coverage Thresholds:** Target &ge; 80% line coverage for `UMS.Application` and `UMS.Domain` projects.
 
 ---
 
@@ -27,11 +29,27 @@
 ### Application Handler Unit Tests
 - **Target:** Mediator CQRS handler pipelines.
 - **Rules:** Tests must mock all external services (e.g. Email services, token systems).
-- **Database Simulation:** Use SQLite in-memory provider wrapped within a test scope setup (similar to `CategoryHandlerTestSupport.cs`) to check database operations and outbox messages:
+- **RULE: SQLite Test DB Scope Setup:** Handlers executing database reads or writes must run within an isolated test scope (typically implementing `IAsyncDisposable` and utilizing a nested SQLite in-memory DB configuration).
+  - Use `new SqliteConnection("Data Source=:memory:")` opened once per scope.
+  - Set up `DbContext` options using `.UseSqlite(connection)`.
+  - Enforce database schema creation via `await dbContext.Database.EnsureCreatedAsync()`.
+  - Simulate cache interactions using a light recorder class (e.g., `RecordingCacheService` implementing `ICacheService`).
+  - Test optimistic concurrency exceptions by configuring save overrides that throw `DbUpdateConcurrencyException` when a flag (e.g. `ThrowConcurrencyOnSave`) is set.
+  - Verify domain event dispatching by checking the count and content of `OutboxMessages` seeded/saved to the context.
+
+  *Example:*
   ```csharp
   await using var scope = await CategoryHandlerTestScope.CreateAsync();
   var handler = new CreateCategoryCommandHandler(scope.DbContext, scope.Cache);
   ```
+
+### SQLite In-Memory Caveats
+Be aware of behavioral differences between SQLite and SQL Server when writing handler tests:
+- Enable foreign keys explicitly in your scope setup: `connection.Execute("PRAGMA foreign_keys = ON;")`
+- String comparison is case-insensitive by default in SQLite, which may mask case-sensitivity bugs.
+- Schema-qualified table names (like the Identity schema) are ignored by SQLite.
+- SQL Server-specific functions (e.g., `STRING_AGG`, `TRY_CONVERT`) will not work in SQLite tests.
+- Always validate critical query logic and concurrency handling against SQL Server integration tests.
 
 ---
 
@@ -58,7 +76,11 @@
 - **Component Tests:** Verify visual components using React Testing Library (`RTL`) and Jest/Vitest.
 - **User Interactions:** Assert user-facing text and behaviors (using user interactions like clicking buttons or typing text) rather than verifying component internals.
 - **Accessible Queries:** Select elements using accessible properties (`screen.getByRole`, `screen.getByText`) rather than selecting using arbitrary `data-testid` attributes.
-- **Service Layer Mocking:** Intercept API interactions by mocking feature service calls (e.g., mocking `categoriesApi.getPagedList`) at the service layer boundary rather than mocking Axios or Fetch globally.
+- **RULE: Service Hook Mocking:** Intercept API interactions in page tests by mocking React custom hooks (e.g., `vi.mock('../hooks/useCategories')` returning mocked `useCategoryList` hooks) rather than mocking fetch or Axios globally.
+- **RULE: URL Parameter Update Assertions:** For all filters and search input controls on paged directory views:
+  - Assert that changing input fields or dropdown options updates their local DOM value immediately, but does NOT mutate URL query parameters.
+  - Assert that URL search parameters are updated ONLY after clicking the "Apply Filters" submit button.
+  - Assert that clicking "Reset Filters" immediately resets both the local input values and clears the URL query parameters.
 
 ---
 

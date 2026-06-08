@@ -8,6 +8,7 @@ This index maps the development standards and procedural workflows established f
 
 | File Name | Type | Applies To | Summary |
 | :--- | :--- | :--- | :--- |
+| **Last Updated: 2026-06-08** | - | - | Playbook last revised date. |
 | [00-INDEX.md](00-INDEX.md) | Rule | All | A master index serving as the table of contents for all architectural rules and skill workflows. |
 | [01-backend-architecture.md](01-backend-architecture.md) | Rule | Backend | Enforces project dependency directions, layer boundaries, CQRS layouts, and Martinothamar's Mediator. |
 | [02-backend-coding-standards.md](02-backend-coding-standards.md) | Rule | Backend | Defines C# syntax styles, Minimal API extensions, pipeline validation, Mapster mappings, and ResponseWrapper contracts. |

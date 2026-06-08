@@ -9,7 +9,7 @@
 ## 1. Authentication and JWT Setup
 
 - **JWT Parameters:** Bearer tokens must be configured using secure parameters retrieved from the application settings:
-  - `JwtSettings:SecretKey` (minimum 256-bit entropy).
+  - `JwtSettings:SecretKey` (Minimum 32 characters / 256 bits. Generate using `openssl rand -base64 32`).
   - `JwtSettings:Issuer`.
   - `JwtSettings:Audience`.
   - Token expiration limits must be strictly set (e.g., Access token: 15 mins, Refresh token: 7 days).
@@ -24,16 +24,25 @@
   group.RequireRateLimiting("auth");
   ```
 
+### CSRF Protection
+- Because refresh tokens are stored in `httpOnly` cookies, the API is vulnerable to CSRF. Mitigate this by configuring the cookie with `SameSite=Strict` (or `Lax` where necessary).
+- For API mutation requests, require either an anti-forgery token via `builder.Services.AddAntiforgery()` and `RequireAntiforgery()`, or enforce a custom header requirement (e.g., `X-Requested-With: XMLHttpRequest`) which browsers automatically prevent cross-origin.
+- *Note: Short-lived access tokens kept purely in memory and sent via `Authorization: Bearer` headers are inherently CSRF-resistant.*
+
+### Identity & Password Policies
+- Enforce ASP.NET Identity's lockout settings (e.g., `DefaultLockoutTimeSpan`, `MaxFailedAccessAttempts`) and password complexity requirements (`RequiredLength`, `RequireDigit`, etc.) in the Infrastructure identity configuration.
+
 ---
 
 ## 2. Permission Authorization Architecture (`AppPermission`)
 
 - **Banned Custom Verification:** Handlers must never perform custom security role or claim evaluations inline.
-- **Strongly Typed Constants:** Permissions must be defined as static constants representing structured paths (e.g. `Permission.Identity.Users.Read` mapped inside `AppPermissions`).
-- **Enforcing Policy Checks:** Secure Minimal API endpoints at the routing boundary using:
+- **Strongly Typed Constants:** Permissions must be defined using static constants representing structured paths mapped inside `AppPermissions` (e.g., using `AppService`, `AppFeature`, and `AppAction`).
+- **RULE: Enforcing Policy Checks:** All mutating endpoints (Create, Update, Delete, status change, lock/unlock, etc.) and restricted query/export endpoints must be explicitly guarded at the routing boundary using strongly typed authorization policies derived from `AppPermission.NameFor(...)`:
   ```csharp
   .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Create))
   ```
+- Anonymous access should only be allowed where explicitly specified (e.g., public read queries/lists using `.AllowAnonymous()`).
 
 ---
 
@@ -68,3 +77,13 @@ When implementing a feature that requires access control, developers must strict
   - Validate file extension against a clean whitelist (e.g., `.jpg`, `.png`, `.pdf`).
   - Enforce strict size limits (e.g., maximum 5MB).
   - Clean and rename filenames (e.g., convert to GUIDs) to prevent path traversal attacks.
+
+---
+
+## 7. Production Security Hardening
+
+- **CORS Policy:** Define explicit origin allowlists. Never use `AllowAnyOrigin` in production environments.
+- **HTTPS Enforcement:** Mandate `app.UseHttpsRedirection()` and `app.UseHsts()` in production pipeline configuration.
+- **Security Headers:** Add middleware to inject `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and appropriate Content-Security-Policy headers.
+- **Token Storage on Client:** Mandate `httpOnly` cookies for refresh tokens. Short-lived access tokens may be kept in memory only; never store tokens in `localStorage`.
+- **Input Size Limits:** Enforce `maxRequestBodySize` and `KestrelServerLimits.MaxRequestLength` to prevent DoS via oversized payloads.

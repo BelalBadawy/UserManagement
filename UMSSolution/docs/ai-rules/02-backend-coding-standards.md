@@ -15,9 +15,16 @@
 - **Use Primary Constructors:** Utilize primary constructor syntax for dependency injection when defining handlers and service classes:
   ```csharp
   public class GetCategoryByIdQueryHandler(IApplicationDbContext applicationDbContext)
-      : IQueryHandler<GetCategoryByIdQuery, IResponseWrapper<CategoryDto>>
+      : IRequestHandler<GetCategoryByIdQuery, IResponseWrapper<CategoryDto>>
   {
       private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+
+      public async ValueTask<IResponseWrapper<CategoryDto>> Handle(
+          GetCategoryByIdQuery request,
+          CancellationToken cancellationToken)
+      {
+          // Handler logic returning ValueTask
+      }
   }
   ```
 
@@ -29,6 +36,7 @@ Do NOT use controller attributes like `[ProducesResponseType]`, `[Authorize]`, o
 - **OpenAPI Documentation:** Use `.WithName("EndpointName")` and `.Produces<IResponseWrapper<T>>()` to document metadata and returns. Do not use `.WithOpenApi()` directly unless customizing properties.
 - **Security Guarding:** Use `.RequireAuthorization("PolicyName")` or `.RequireAuthorization(AppPermission.NameFor(...))` to enforce access rules. Use `.AllowAnonymous()` where security is bypassed.
 - **Api Versioning:** Set the endpoint's version parameters on the group router using `.WithApiVersionSet(...)` or path variable mapping (`api/v{version:apiVersion}`).
+- **Mediator Injection:** Inject `ISender` (the verified interface alias from the source-generated `Mediator` namespace) into endpoint handlers via DI parameter binding. Do NOT use MediatR's `ISender` interface.
 
 Example of compliant route definition:
 ```csharp
@@ -48,20 +56,20 @@ group.MapPost("/", async (ISender sender, CreateCategoryRequest request, Cancell
 ## 3. Validation Pipeline Flow (`IValidateMe`)
 
 The application intercepts validation requests and handles errors prior to handler execution.
-- **Request Marker:** Any `ICommand` or `IQuery` requiring validation must implement the `IValidateMe` marker interface.
-- **AbstractValidator:** Define a companion validator extending FluentValidation's `AbstractValidator<TCommand>` in the same folder.
-- **Validation interceptor:** The source-generated `ValidationPipelineBehavior<TRequest, TResponse>` intercepts commands/queries that implement `IValidateMe`.
-  - It runs the registered validator(s).
-  - If validation fails, it short-circuits execution and returns a wrapped failure `ResponseWrapper` with status code 400.
-  - Handlers must NEVER run manual validation logic.
+- **Request Marker:** Any Query or Command requiring validation must implement the `IValidateMe` marker interface.
+- **AbstractValidator:** Define a companion validator extending FluentValidation's `AbstractValidator<T>` in the same folder.
+- **Validation interceptor:** The source-generated `ValidationPipelineBehavior<TRequest, TResponse>` intercepts queries/commands that implement `IValidateMe`.
+  - It runs the registered validator(s) in parallel.
+  - If validation fails, it short-circuits execution and returns a wrapped failure `ResponseWrapper` with status code 400 containing validation messages.
+  - Handlers must NEVER run manual input format validation (handled by FluentValidation). However, business rule validation (e.g., verifying a category name is unique, checking hierarchical constraints) is permitted and expected inside handlers.
 
 ---
 
-## 4. Mapster Mapping Guidelines
+## 4. Mapping Guidelines (Writes vs Reads)
 
+- **Mapster Explicit Ban:** Mapster `.Adapt()` is strictly forbidden throughout the codebase. The project relies on manual LINQ projections for reads and explicit property assignment for writes to ensure full control, prevent N+1 queries, and guarantee input sanitization.
 - **Query Projections (Reads):** For database queries, ALWAYS use manual LINQ projections `.Select(x => new Dto(...))` to ensure optimal SQL generation and prevent N+1 issues. Do NOT use `.Adapt()` on `IQueryable`.
-- **Command Mappings (Writes):** For mapping incoming requests to Domain entities inside Command handlers, use Mapster's `.Adapt<TDestination>()` method.
-- Handlers must never perform verbose assignments or custom mapping code loops.
+- **Command Mappings (Writes):** For mapping incoming requests to Domain entities inside Command handlers, do NOT use Mapster's `.Adapt()`. Perform explicit manual property assignments instead to ensure full control over input sanitization (e.g. `.Trim()`), case-insensitive string normalization (e.g. `NormalizedName = CategoryWriteGuards.NormalizeKey(request.Name)`), hierarchical parent validations, and concurrency parameters.
 
 ---
 
@@ -108,4 +116,23 @@ Every API endpoint must return a standardized JSON response envelope. Direct ent
   ```csharp
   _logger.LogInformation("Category {CategoryId} deleted by user {UserId}", categoryId, userId);
   ```
+- **Correlation Scopes:** For multi-step operations (such as outbox saves or complex command handlers), wrap the logic in a logging scope using `_logger.BeginScope("Feature: {FeatureName}, EntityId: {EntityId}", "Category", id)` to ensure all logs within the operation share contextual identifiers for log aggregation systems.
 - **Async Execution:** All disk and network I/O operations must be fully async. NEVER call `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()`. Use `ValueTask` or `Task` along with `await` and forward `CancellationToken` params down the line.
+
+---
+
+## 8. Concurrency Control Checks
+
+- **Row Version Setting:** In update command handlers, always call `_applicationDbContext.SetOriginalRowVersion(entity, request.RowVersion)` before applying changes.
+- **Concurrency Exception Handling:** Wrap database save operations (`SaveChangesAsync`) in a try-catch block catching `DbUpdateConcurrencyException`. If caught, return a failed response envelope with a 409 status code and a user-friendly concurrency error message:
+  ```csharp
+  try
+  {
+      _applicationDbContext.Categories.Update(category);
+      await _applicationDbContext.SaveChangesAsync(ct);
+  }
+  catch (DbUpdateConcurrencyException)
+  {
+      return ResponseWrapper.Fail("Concurrency conflict: this record was modified by another user. Refresh and try again.", 409);
+  }
+  ```
