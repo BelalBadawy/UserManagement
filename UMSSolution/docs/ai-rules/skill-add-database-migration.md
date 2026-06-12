@@ -12,12 +12,33 @@
 
 ---
 
+## Real Example Reference
+- **Entity configuration mapping**: [CategoryConfiguration.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
+- **Actual migration code files**: [20260424070230_AddCategoryNormalizationAndConcurrency.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Migrations/20260424070230_AddCategoryNormalizationAndConcurrency.cs)
+
+---
+
 ## Procedural Workflow
 
 ### Step 1: Implement Entity and Mapping Changes
 1. Modify or create target domain model classes under `UMS.Domain/Entities/`.
 2. Add or update companion `IEntityTypeConfiguration<T>` files under `UMS.Infrastructure/Persistence/DbConfigurations/`.
-3. If introducing new tables, register their corresponding `DbSet<T>` properties inside `UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs`.
+   - **Unique Index Convention**: Unique indexes must be prefixed with `UX_` (e.g. `UX_Categories_NormalizedName`), mapped explicitly using `.HasDatabaseName(...)`:
+     ```csharp
+     builder.HasIndex(x => x.NormalizedName)
+         .IsUnique()
+         .HasDatabaseName("UX_Categories_NormalizedName");
+     ```
+   - **Optimistic Concurrency Column**: Ensure concurrency columns (`RowVersion`) are mapped with `.HasColumnType("rowversion")` (not `varbinary(max)`):
+     ```csharp
+     builder.Property(x => x.RowVersion)
+         .IsConcurrencyToken()
+         .ValueGeneratedOnAddOrUpdate()
+         .HasColumnType("rowversion");
+     ```
+3. If introducing new tables, register their corresponding `DbSet<T>` properties inside:
+   - Interface: [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
+   - Concrete Context: [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
 4. Build the solution and verify that it compiles.
 
 ### Step 2: Generate Migration Script
@@ -30,8 +51,12 @@
 ### Step 3: Review Generated Migration Codes
 1. Open the newly created migration file under `UMS.Infrastructure/Migrations/`.
 2. Inspect both `Up` and `Down` methods:
-   - Ensure columns types, lengths, and constraints match your configurations.
-   - Verify indices are named properly (`UX_TableName_FieldName` pattern).
+   - Ensure column types, lengths, and constraints match configurations.
+   - Verify that unique indices are correctly named `UX_TableName_FieldName`.
+   - Check that `RowVersion` columns are mapped to `rowversion` type in SQL Server:
+     ```csharp
+     table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+     ```
    - If migrating schema changes on populated tables, add default value settings to avoid constraint violations.
    - Verify the `Down` method cleanly undoes all actions created in the `Up` method.
 
@@ -44,13 +69,18 @@
 
 ### Step 5: Verify Seeding and Integration Tests
 1. Run local integration tests to verify database initialization.
-2. Confirm the test environment initializes cleanly: running `EnsureDeletedAsync()` and `MigrateAsync()` successfully.
+2. Confirm the test environment initializes cleanly. The test database setup utilizes [ApiTestDatabaseInitializer.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API.Tests/Support/ApiTestDatabaseInitializer.cs) which runs:
+   ```csharp
+   await dbContext.Database.EnsureDeletedAsync();
+   await dbContext.Database.MigrateAsync();
+   ```
+   This drops and migrates the SQL Server database specifically for integration testing.
 
 ---
 
 ## Expected Outcome (Definition of Done)
 - Compilation succeeds.
-- Migration files (both designer and code files) generated under `UMS.Infrastructure/Migrations/`.
+- Migration files (designer and code) are generated under `UMS.Infrastructure/Migrations/` with correct `rowversion` column mapping and `UX_` prefixed index configurations.
 - Local development database successfully updated to the latest migration.
 - Test suites run and pass.
 

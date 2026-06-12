@@ -13,6 +13,12 @@
 
 ---
 
+## Real Example Reference
+- **Global Exception Middleware**: [ErrorHandlingMiddleware.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API/Middlewares/ErrorHandlingMiddleware.cs)
+- **Middleware Integration Regression Test**: [UserEndpointsTests.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API.Tests/Endpoints/UserEndpointsTests.cs)
+
+---
+
 ## Procedural Workflow
 
 ### Step 1: Reproduce the Issue
@@ -23,13 +29,19 @@
    - For frontend rendering or state bugs, add an RTL component test.
 3. Verify that the newly written test fails under the expected conditions.
 
-### Step 2: Localize the Layer
-Trace the execution path to isolate the bug to its target layer:
-- **Presentation Layer (UMS.API):** If the routing is wrong, HTTP parameters are ignored, authentication blocks fail, or endpoints throw serialization errors.
-- **Application Layer (UMS.Application):** If commands validation fails to run, CQRS routing fails, or business calculations return bad DTO properties.
-- **Domain Layer (UMS.Domain):** If entities initialize with invalid states, or core entity validation methods fail to block operations.
-- **Infrastructure Layer (UMS.Infrastructure):** If database queries time out, mapping configs are incomplete, SMTP email dispatch fails, or token generation throws exceptions.
-- **Frontend client (UMS.Client):** If page layouts fail to render, validation errors are hidden, TanStack Query keys are stale, or page actions fail to dispatch calls.
+### Step 2: Localize the Layer & Inspect Global Mappings
+Trace the execution path to isolate the bug to its target layer.
+1. **Backend Layer Exceptions**:
+   Identify if the error is unhandled. The backend uses [ErrorHandlingMiddleware.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API/Middlewares/ErrorHandlingMiddleware.cs) to catch exceptions globally and map them to HTTP status codes, wrapping responses in `ResponseWrapper.Fail(message)`:
+   - `UnauthorizedAccessException` -> **401 Unauthorized**
+   - `KeyNotFoundException` -> **404 Not Found**
+   - `InvalidOperationException` -> **400 Bad Request**
+   - `ValidationException` (FluentValidation) -> **400 Bad Request**
+   - `DbUpdateConcurrencyException` -> **409 Conflict** (e.g. database row version updates conflicts)
+   - *Any other generic exception* -> **500 Internal Server Error**
+2. **Frontend client (UMS.Client)**:
+   - **`PageErrorBoundary`**: Currently `[AWAITING IMPLEMENTATION — No codebase example yet]`.
+   - Identify if the issue lies in query hooks, search parameters serialization, or TanStack Query state caches.
 
 ### Step 3: Implement Fix at the Correct Layer
 - Do not patch issues in the wrong project. If a domain model validation logic is buggy, update the Domain class itself. Do not patch it in the API endpoints mapping code or write validation checks inside the client UI pages.

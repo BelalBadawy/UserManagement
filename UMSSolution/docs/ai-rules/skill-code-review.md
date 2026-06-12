@@ -17,46 +17,62 @@
 1. Read the Pull Request description, associated tickets, and spec updates.
 2. Confirm you understand the functional goals, user flows, and affected subsystems before reviewing any file changes.
 
-### Step 2: Verify Architecture & Layering Rules
-Verify references and folder layout configurations match [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md):
-- **References Check:** Ensure `Domain` and `Application` contain no references to concrete layers (such as `Infrastructure` or `API`).
-- **Framework Banishments:** Confirm no `MediatR` dependencies or `ControllerBase` inheritances were introduced.
-- **CQRS Layout:** Ensure features are organized under `Features/{FeatureName}/Commands/` or `Features/{FeatureName}/Queries/` directories.
+### Step 2: Verify Backend Clean Architecture (Rule 01)
+Verify references and folder layouts follow [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md):
+- **Layer References Check:** Ensure `Domain` and `Application` projects contain no references to concrete layers (such as `Infrastructure` or `API`).
+- **Framework Ban:** Confirm no direct MediatR dependencies (`MediatR` namespace reference) or `ControllerBase` inheritances were introduced. Verify Martinothamar's `Mediator` is used instead.
+- **CQRS Layout:** Ensure features are organized under `Features/{FeatureName}s/Commands/` or `Features/{FeatureName}s/Queries/` directories.
 
-### Step 3: Verify Backend Coding and Validation Standards
+### Step 3: Verify C# Backend Coding Standards (Rule 02)
 Verify implementation logic follows [02-backend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/02-backend-coding-standards.md):
-- **Naming Style:** Verify PascalCase and async suffixes are used correctly.
-- **Endpoint Definitions:** Ensure no `[Route]` or `[Authorize]` attributes exist. Check that routing uses Minimal API extension maps.
+- **Naming Conventions:** Verify PascalCase for classes/methods and async suffixes are used correctly.
+- **Endpoint Definitions:** Ensure no `[Route]` or `[Authorize]` attributes exist. Check that routing uses Minimal API extension maps and response wrapper bridges (.ToApiResult()).
 - **Validation Pipeline:** Check that commands and queries requiring validation implement `IValidateMe`, and validation logic is encapsulated in FluentValidation validator classes (no validation in handlers).
-- **Response Wrapper:** Verify that all routes return wrapped payload envelopes (`ResponseWrapper<T>`).
+- **Response Wrapper:** Verify that all routes return wrapped payload envelopes (`ResponseWrapper<T>` / `IResponseWrapper<T>`). Check that handlers return `ValueTask<IResponseWrapper<T>>`.
 
-### Step 4: Verify Database & Infrastructure Implementations
+### Step 4: Verify Database, Migrations & Infrastructure (Rule 03)
 Verify database mappings match [03-backend-data-and-infrastructure.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/03-backend-data-and-infrastructure.md):
-- **EF Configurations:** Ensure entity mappings are defined in separate configuration classes (not inline inside `ApplicationDbContext.OnModelCreating`).
+- **EF Configurations:** Ensure entity mappings are defined in separate configuration classes. Concurrency tokens (`RowVersion`) must be mapped to type `rowversion` in SQL Server, and unique indexes must use the `UX_` prefix.
 - **Context Access:** Confirm handlers use `IApplicationDbContext` for database queries (not direct `ApplicationDbContext` injections).
-- **Multi-DB Safety:** Check for raw SQL queries. Ensure queries are compatible with SQL Server, SQLite, and InMemory.
+- **Two-Phase Transactions**: Validate that write handlers manage transactional blocks safely using `StartTransaction`, `CommitTransaction`, and `RollbackTransaction`, returning failed wrappers instead of throwing unhandled exceptions.
+- **Auditing Backing Fields**: Verify `IFullEntity` implements backing properties concretely inside the entity class.
 
-### Step 5: Verify Security Constraints
+### Step 5: Verify Backend Security & Claims (Rule 04)
 Verify access guards match [04-backend-security.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/04-backend-security.md):
 - **Endpoint Authorization:** Confirm routes require authorization policies (`.RequireAuthorization(AppPermission.NameFor(...))`).
-- **Data Protection:** Verify user parameters and PII are excluded from audit logging outputs.
+- **Constants Mapping**: Check that permissions use constants defined inside [AppPermissions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Authorization/AppPermissions.cs).
 - **Safe Storage:** Ensure uploaded files are validated and stored using `IFileStorageService`.
 
-### Step 6: Verify Frontend Architecture & State Conventions
+### Step 6: Verify React Client Architecture & Routing (Rule 05)
 Verify React client components follow [05-frontend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/05-frontend-architecture.md):
 - **State Separation:** Ensure server state uses TanStack Query, grid rendering uses TanStack Table, and local view state uses `useState`.
 - **API client layering:** Confirm components NEVER invoke the base client (`api-client.ts`) directly. They must use custom hooks wrapping feature API modules.
 - **Radix UI Accessibility:** Verify components use Radix primitives and provide descriptive ARIA tags.
 
-### Step 7: Verify Testing Implementations
+### Step 7: Verify Frontend Coding Standards & ESLint (Rule 06)
+Verify components follow [06-frontend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/06-frontend-coding-standards.md):
+- **Conventions & Lints**: Check that the ESLint rules in `eslint.config.js` cover Rule 06 guidelines.
+- **DatePicker & Forms**: Verify native date inputs are not used. Dates sent to APIs must be formatted as ISO `yyyy-MM-dd`.
+- **Validation timing**: Form validation must run on `onBlur` or form submission, never on `onChange` keystroke.
+- **Auto-slugification fallbacks**: Confirm slugs generate automatically with non-ASCII random UUID fallbacks.
+- **Navigation Guard**: Ensure warnings prevent data losses on dirty forms.
+
+### Step 8: Verify Testing Standards & Mocking (Rule 07)
 Verify test coverage matches [07-testing-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/07-testing-standards.md):
-- **Independent Context:** Ensure tests run in isolation and do not share mutating data.
-- **Test Helpers:** Confirm handler unit tests use SQLite test scopes and API tests use `CustomWebApplicationFactory`.
+- **Test Scope Isolation**: Confirm handler unit tests use dedicated SQLite test scopes and integration tests run against SQL Server test instances via `ApiTestDatabaseInitializer.cs`.
+- **Co-locating Page Tests**: Page unit tests must be co-located with their target pages (e.g. `src/pages/CategoriesManagement.test.tsx` next to `CategoriesManagement.tsx`).
+- **Assertions**: Assert that OutboxMessages are enqueued inside write handler tests, and verify concurrency conflict handling maps correctly.
+
+### Step 9: Verify Project Conventions & Logging (Rule 08)
+Verify styling and version sets follow [08-project-conventions.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/08-project-conventions.md):
+- **Git Commit Convention**: Check that commits are structured properly using conventional labels (e.g. `feat:`, `fix:`).
+- **Api Version Sets**: Verify endpoints are mapped inside group maps using `.WithApiVersionSet(...)` or configured group prefixes.
+- **Audit Logging**: Verify modifications trigger audit logging and that PII fields are sanitized.
 
 ---
 
 ## Expected Outcome (Definition of Done)
-- Pull Request audited against the structural checklists.
+- Pull Request audited against steps 2 to 9 checklists.
 - Feedback generated detailing rule violations.
 - Code conforms to all guidelines.
 
