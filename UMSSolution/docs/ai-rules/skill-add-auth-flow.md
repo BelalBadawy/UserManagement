@@ -13,41 +13,76 @@
 
 ---
 
+## Real Example Reference
+- **System Permissions Constants**: [AppPermissions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Authorization/AppPermissions.cs)
+- **Runtime Policy Provider Registration**: [IdentityServiceExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/IdentityServiceExtensions.cs)
+- **Runtime Policy Interception**: [PermissionPolicyProvider.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Permissions/PermissionPolicyProvider.cs)
+- **Runtime Permission Handler**: [PermissionAuthorizationHandler.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Permissions/PermissionAuthorizationHandler.cs)
+- **Frontend Protected Guard Component**: [ProtectedRoute.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/ProtectedRoute.tsx)
+- **Frontend Authentication Context**: [AuthContext.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/AuthContext.tsx)
+
+---
+
 ## Procedural Workflow
 
 ### Step 1: Define Permission Constants
-1. Open the file containing authorization constants (e.g. `AppPermission.cs` or `AppPermissions.cs` in the backend project).
-2. Declare the new permission constants defining Service, Feature, and Action paths:
+1. Open the system permissions configuration file: [AppPermissions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Authorization/AppPermissions.cs).
+2. Check if the target Service, Feature, or Action is already declared. If not, add them as `public const string` values inside the static classes:
    ```csharp
-   public static class AppPermissions
+   public static class AppService
    {
-       public static class Categories
-       {
-           public const string Read = "Permission.Product.Categories.Read";
-           public const string Create = "Permission.Product.Categories.Create";
-       }
+       public const string Product = nameof(Product);
+   }
+
+   public static class AppFeature
+   {
+       public const string Categories = nameof(Categories);
+   }
+
+   public static class AppAction
+   {
+       public const string Create = nameof(Create);
+       public const string Read = nameof(Read);
    }
    ```
+3. Add a new `AppPermission` record instance to the private `All` array inside the static class `AppPermissions`:
+   ```csharp
+   private static readonly AppPermission[] All =
+   [
+       // ... existing permissions ...
+       new(AppService.Product, AppFeature.Categories, AppAction.Create, "Create Categories"),
+       new(AppService.Product, AppFeature.Categories, AppAction.Read, "Read Categories", IsBasic: true),
+   ];
+   ```
+   *Note: Set `IsBasic: true` only if the permission belongs to standard authenticated users. Otherwise, omit it (meaning it belongs to Admin users).*
 
-### Step 2: Seed Baseline Claims
-1. Open `ApiTestDatabaseInitializer.cs` (or production database seed configuration).
-2. Verify that the new permissions are added to the list of baseline claims (e.g., `AppPermissions.AllPermissions`) assigned to the `Admin` role by default during environment setup.
+### Step 2: Runtime Authorization Resolution Mechanics
+Developers must understand how policy strings are parsed at runtime by ASP.NET Core:
+1. When `.RequireAuthorization(AppPermission.NameFor(service, feature, action))` is appended to an endpoint, it generates the policy string name (e.g. `Permission.Product.Categories.Read`).
+2. The dynamic resolution mechanism consists of:
+   - **`PermissionPolicyProvider`**: Registered as `IAuthorizationPolicyProvider` (Singleton). It intercepts policy names starting with `"Permission."` and dynamically constructs an `AuthorizationPolicy` containing a `PermissionRequirement` instance mapped to that string.
+   - **`PermissionAuthorizationHandler`**: Registered as `IAuthorizationHandler` (Scoped). It checks user context claims for claim types of `AppClaim.Permission` where the value matches the requirement and the issuer matches the JWT configurations.
+3. Seeding is executed automatically in the testing environment via `ApiTestDatabaseInitializer.cs` and in development environments via `ApplicationDbSeeder.cs`, which query `AppPermissions.AllPermissions` and add claims to baseline roles.
 
 ### Step 3: Guard Backend Minimal API Endpoint
-1. Navigate to the endpoint map definition under `UMS.API/Endpoints/`.
-2. Append `.RequireAuthorization(AppPermission.NameFor(...))` to the route:
+1. Open the Minimal API routing class under `UMS.API/Endpoints/`.
+2. Apply the `.RequireAuthorization(...)` configuration using `AppPermission.NameFor(...)`:
    ```csharp
    group.MapPost("/", async (ISender sender, CreateCategoryRequest request) => { ... })
        .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Create));
    ```
 
-### Step 4: Handle Claims on Frontend Client
-1. The frontend checks auth claims based on JWT payload decodings. Verify token decoders (`lib/jwt.ts`) parse permission fields correctly.
-2. The user profile response from the API must return the array of user claims/permissions.
+### Step 4: Handle Claims & Silent Refresh on Frontend
+1. **Claims Decoding**: The client application decodes the JWT access token using `decodeToken(storedToken)` inside `jwt.ts` and loads permission lists into the `user` state inside `AuthContext.tsx`.
+2. **Silent Token Refresh**:
+   To prevent concurrent API requests from failing during token refreshes, the refresh sequence is handled at the routing level in [ProtectedRoute.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/ProtectedRoute.tsx):
+   - The route guard `ProtectedRoute` checks token expiration using `isTokenExpired(storedToken)` inside a React `useEffect` callback before rendering route contents.
+   - If the token is expired, it runs `await refreshAccessToken()`.
+   - The route displays a loading spinner and blocks child page components from mounting or making API requests until the refresh completes.
 
 ### Step 5: Update Frontend Route Guards
-1. Open `src/App.tsx`.
-2. Wrap the feature page route within the `<ProtectedRoute>` component. Supply the required permission strings to the guard parameters:
+1. Open the routing configuration file `src/App.tsx` (or target navigation routing file).
+2. Protect child routes by wrapping them in `<ProtectedRoute>` and passing the target permission string:
    ```typescript
    <Route element={<ProtectedRoute allowedPermissions={['Permission.Product.Categories.Read']} />}>
      <Route path="/admin/categories" element={<CategoriesManagement />} />
@@ -55,31 +90,32 @@
    ```
 
 ### Step 6: Test Security Boundaries
-1. In `UMS.API.Tests/Endpoints/`, append endpoint access validation tests.
-2. Confirm the route returns:
-   - `401 Unauthorized` for anonymous calls.
-   - `403 Forbidden` for low-privilege sessions lacking claims.
-   - `200 OK` (or appropriate 2xx status) for sessions having the correct claims.
+1. In `UMS.API.Tests/Endpoints/`, append integration tests targeting role authorization scopes.
+2. Verify:
+   - `401 Unauthorized` for anonymous requests.
+   - `403 Forbidden` for authenticated requests lacking permission claims.
+   - `200 OK` (or appropriate response) when matching claims are present.
 
 ---
 
 ## Expected Outcome (Definition of Done)
-- Permission constant declared in C# backend classes.
-- Claims seeding configurations updated to include the new permissions.
-- Backend Minimal API endpoint protected with the required authorization policies.
-- Frontend React route wrapped inside a `<ProtectedRoute>` with matching permission parameters.
-- Tests written verifying `401`, `403`, and `200` behaviors under different authorization scenarios.
+- Permission constants declared in `AppService`, `AppFeature`, and `AppAction` inside `AppPermissions.cs`.
+- Seeding registers the claim automatically for baseline roles.
+- Dynamic runtime provider `PermissionPolicyProvider` maps endpoint policies to matching claims validation handlers.
+- Minimal API endpoints mapped and protected with matching `AppPermission.NameFor(...)` policy rules.
+- Frontend routing wrapped inside `<ProtectedRoute>` which performs route-blocking silent token refresh when token expiration is detected.
+- Endpoint validation tests pass, confirming 401, 403, and 2xx responses.
 
 ---
 
 ## Troubleshooting & Rollback
 
 ### If auth fails on all requests in tests:
-- Verify that testing tokens are signed with the same keys, issuer, and audience details mapped within `appsettings.Testing.json`.
-- Ensure baseline DB seeding is executed on startup prior to running test calls.
+- Verify testing tokens are signed using keys, issuer, and audience matching `appsettings.Testing.json`.
+- Ensure baseline DB seeding is executed prior to running testing calls.
 
 ### Rollback Strategy
-1. Remove the permission string mapping from database seeding services.
-2. Revert the route parameters: remove `.RequireAuthorization(...)` from the backend route.
-3. Clean up the page guards in the client's routing setup (remove permission parameters from `<ProtectedRoute>`).
-4. Delete permission check test suites.
+1. Delete the `AppPermission` record from `AppPermissions.cs`.
+2. Revert route bindings: remove `.RequireAuthorization(...)` from Minimal API endpoints.
+3. Remove permission constraints from the React route definitions in `src/App.tsx`.
+4. Delete permission check test cases.

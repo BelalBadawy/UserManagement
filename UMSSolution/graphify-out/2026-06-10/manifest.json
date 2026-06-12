@@ -5825,8 +5825,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\00-INDEX.md": {
-    "mtime": 1781124654.2126615,
-    "ast_hash": "01c11196f3621ef066190557204e0a33",
+    "mtime": 1780949116.9853654,
+    "ast_hash": "74acd0945132404ab7b493d6d3e6d56b",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\01-backend-architecture.md": {
@@ -5870,43 +5870,43 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-auth-flow.md": {
-    "mtime": 1781124570.2322462,
-    "ast_hash": "7d50f7abe6e26830f7781df1bc9570fd",
+    "mtime": 1780659878.0362868,
+    "ast_hash": "0bd293e0ac0a338b68d4c44d5c9e3d91",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-database-migration.md": {
-    "mtime": 1781124498.7865405,
-    "ast_hash": "912bdd4a913793460f6f78d31471a15a",
+    "mtime": 1780659883.2455213,
+    "ast_hash": "9db34bafef4e02bd593d5a501624624e",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-api-endpoint.md": {
-    "mtime": 1781124553.1076941,
-    "ast_hash": "59dd0541a6c70fd3d6b44cff6a24c1d9",
+    "mtime": 1780669346.8426676,
+    "ast_hash": "a408c686d41ff61f833d0b4afda9720d",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-entity.md": {
-    "mtime": 1781124525.3191037,
-    "ast_hash": "7b171e3ae290b107e7d842649f7fbc8b",
+    "mtime": 1780728283.365281,
+    "ast_hash": "f197523a19ed4251145a219468549a75",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-frontend-feature.md": {
-    "mtime": 1781124612.4724152,
-    "ast_hash": "bde2c026ca92b819f09d8c9dfd1f7985",
+    "mtime": 1780659871.7970133,
+    "ast_hash": "f13a9f9fdb8b7b2e1bdbb295c6beecd4",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-code-review.md": {
-    "mtime": 1781124644.3335595,
-    "ast_hash": "e1075c04605a3e54809ccfe4e40ff7ea",
+    "mtime": 1780659901.80227,
+    "ast_hash": "68f6b0922746d2ec4b6db955d9913647",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-debug-and-fix.md": {
-    "mtime": 1781124627.5127368,
-    "ast_hash": "05755c3914a3cc54b84bde6cb65555e1",
+    "mtime": 1780659889.910117,
+    "ast_hash": "cf632abaa59e6fb24ed6f67f700f2810",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-testing-workflow.md": {
-    "mtime": 1781124595.18846,
-    "ast_hash": "a7507a384cf3d482882df44de3a45c0a",
+    "mtime": 1780659895.702521,
+    "ast_hash": "549f6b412830e796c66e210e2dadfab1",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\generate_NewProject_From_Script\\prompt-for-creating-the-files.txt": {

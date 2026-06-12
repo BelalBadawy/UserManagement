@@ -13,103 +13,207 @@
 
 ---
 
+## Real Example Reference
+- **C# Entity Domain Model**: [Category.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Domain/Entities/Category.cs)
+- **Database Mapping Configuration**: [CategoryConfiguration.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
+- **DbContext Interfaces**: [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
+- **Concrete Context**: [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
+- **Dependency Registration Extension**: [ServiceCollectionExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/ServiceCollectionExtensions.cs)
+- **Domain Event & Handler**: [CategoryCreatedEvent.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Features/Categories/Events/CategoryCreatedEvent.cs)
+
+---
+
 ## Procedural Workflow
 
 ### Step 1: Define Domain Entity
-1. In `UMS.Domain/Entities/`, create the entity file `{EntityName}.cs` extending `BaseEntity` or implementing relevant interfaces (`IAuditable`, `ISoftDelete`, `IDataConcurrency`):
+1. In `UMS.Domain/Entities/`, create the entity class `{EntityName}.cs` extending `BaseEntity<int>` (which only defines `Id`) and implementing `IFullEntity`:
    ```csharp
    namespace UMS.Domain.Entities
    {
-       public class Category : BaseEntity, IAuditable, ISoftDelete, IDataConcurrency
+       public class Category : BaseEntity<int>, IFullEntity, IDataConcurrency
        {
            public string Name { get; set; } = string.Empty;
            public string Slug { get; set; } = string.Empty;
+           public string NormalizedName { get; set; } = string.Empty;
+           public string NormalizedSlug { get; set; } = string.Empty;
+           public bool IsActive { get; set; } = true;
+           public int SortOrder { get; set; }
+
+           // IAuditable properties must be manually declared on the class
+           public int? CreatedBy { get; set; }
+           public DateTime CreatedAt { get; set; }
+           public int? LastModifiedBy { get; set; }
+           public DateTime? LastModifiedAt { get; set; }
+
+           // ISoftDelete properties must be manually declared on the class
            public bool SoftDeleted { get; set; }
-           public byte[] RowVersion { get; set; } = [];
+           public int? DeletedBy { get; set; }
+           public DateTime? DeletedAt { get; set; }
+
+           // IDataConcurrency property must be manually declared on the class
+           public byte[] RowVersion { get; set; } = Array.Empty<byte>();
        }
    }
    ```
-2. Verify that there are **NO database framework imports** (e.g. EF Core namespace references) inside this file.
+2. **Inheritance Decision Guideline**:
+   - Use `IFullEntity` for standard primary business records needing audit trails, soft deletes, and optimistic concurrency.
+   - For read-only reference data or configuration lookups, omit `ISoftDelete` and `IDataConcurrency` (and their respective auto-properties), implementing only `IAuditable` or no tracking interfaces.
+3. Ensure there are no database framework namespace imports (e.g. `Microsoft.EntityFrameworkCore`) inside domain model files.
 
 ### Step 2: Configure EF Core Mapping
-1. Under `UMS.Infrastructure/Persistence/DbConfigurations/`, create the mapping file `{EntityName}Configuration.cs` implementing `IEntityTypeConfiguration<T>`:
+1. Under `UMS.Infrastructure/Persistence/DbConfigurations/`, create the configuration file `{EntityName}Configuration.cs` implementing `IEntityTypeConfiguration<T>`:
    ```csharp
-   public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+   using Microsoft.EntityFrameworkCore;
+   using Microsoft.EntityFrameworkCore.Metadata.Builders;
+   using UMS.Domain.Entities;
+
+   namespace UMS.Infrastructure.Persistence.DbConfigurations
    {
-       public void Configure(EntityTypeBuilder<Category> builder)
+       public class CategoryConfiguration : IEntityTypeConfiguration<Category>
        {
-           builder.ToTable("Categories");
-           builder.HasKey(x => x.Id);
-           builder.Property(x => x.Name).IsRequired().HasMaxLength(150);
+           public void Configure(EntityTypeBuilder<Category> builder)
+           {
+               builder.ToTable("Categories");
+               builder.HasKey(x => x.Id);
+               builder.Property(x => x.Id).ValueGeneratedOnAdd();
+               
+               builder.Property(x => x.Name).IsRequired().HasMaxLength(150);
+               builder.Property(x => x.Slug).IsRequired().HasMaxLength(250);
+
+               // Unique Index naming convention (UX_)
+               builder.HasIndex(x => x.NormalizedName)
+                   .IsUnique()
+                   .HasDatabaseName("UX_Categories_NormalizedName");
+
+               // Concurrency mapping mapping (rowversion type)
+               builder.Property(x => x.RowVersion)
+                   .IsConcurrencyToken()
+                   .ValueGeneratedOnAddOrUpdate()
+                   .HasColumnType("rowversion");
+
+               // Query filter is dynamically applied in ApplicationDbContext for ISoftDelete, 
+               // but it can be specified here if custom behaviors are needed.
+           }
        }
    }
    ```
 
 ### Step 3: Register in DbContext
-1. Open `UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs`.
-2. Declare the `DbSet<T>` property:
+1. Register the entity DbSet property on the interface [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs):
+   ```csharp
+   DbSet<Category> Categories { get; }
+   ```
+2. Register the concrete DbSet property on [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs):
    ```csharp
    public DbSet<Category> Categories => Set<Category>();
    ```
 
-### Step 4: Create Database Migration
-1. Open a terminal and generate the migration from the repository root:
-   ```powershell
-   dotnet ef migrations add Add{EntityName}Table --project UMS.Infrastructure --startup-project UMS.API --context ApplicationDbContext
-   ```
-2. Review the generated migration file. Run validation commands and check that `Up` and `Down` are correctly mapped.
-3. Update the dev database:
-   ```powershell
-   dotnet ef database update --project UMS.Infrastructure --startup-project UMS.API --context ApplicationDbContext
-   ```
-
-### Step 5: Implement Application Logic & Endpoints
-1. Create the feature directory: `UMS.Application/Features/{FeatureName}s/`.
-2. Implement Mediator Commands (Create, Update, Delete) and Queries (GetById, GetPaged) under the feature directory.
-3. Wire FluentValidation validations for all commands.
-4. For mutating commands, ensure outbox notifications and audit trails are logged:
+### Step 4: Register Feature Service in DI
+1. If the entity requires query/export service operations (e.g. `ICategoryService` / `CategoryService`), register it as scoped inside [ServiceCollectionExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/ServiceCollectionExtensions.cs):
    ```csharp
-   _applicationDbContext.AddOutboxMessage(new CategoryCreatedEvent(category.Id));
+   services.AddScoped<ICategoryService, CategoryService>();
    ```
-5. Map Minimal API endpoints under `UMS.API/Endpoints/`. Protect endpoints with `.RequireAuthorization(AppPermission.NameFor(...))`.
 
-### Step 6: Implement Export Functionality
-1. Add non-paged list and export methods to the entity service interface and implementation.
-2. Create the Mediator `Export{EntityName}Query` and its handler under queries feature folder.
-3. Map the `/export` endpoint in the API endpoints group, returning a binary file via `Results.File()`.
-4. Integrate the `<DataTableExport />` dropdown component and `isExporting` state in the frontend management page.
+### Step 5: Implement Application Logic & Handlers
+1. Create the feature directory: `UMS.Application/Features/{FeatureName}s/`.
+2. Implement Mediator commands and queries under feature directories:
+   - **Queries and Reports**: Inject the feature service interface (e.g. `ICategoryService`) and delegate read calls to it.
+   - **Mutations (Commands)**: Inject `IApplicationDbContext` and `ICacheService` directly into the Command Handlers to handle transaction logic and cache eviction.
+3. **Cache Invalidation Ownership**: Command handlers own cache invalidation. On success, call `_cacheService.Remove(key)` for all cached keys in the handler, NOT inside notification handlers.
+4. **Two-Phase Save Transaction Sequence**:
+   Implement commands using the standard try-catch transaction pattern. Catch database exceptions, execute rollbacks, and return wrapping failures:
+   ```csharp
+   public class CreateCategoryCommandHandler(
+       IApplicationDbContext applicationDbContext,
+       ICacheService cacheService)
+      : IRequestHandler<CreateCategoryCommand, IResponseWrapper<int>>
+   {
+       private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+       private readonly ICacheService _cacheService = cacheService;
 
-### Step 7: Create Baseline Tests
-1. Write unit tests for the command and query handlers (including the export query) under `UMS.Application.Tests/Handlers/`.
-2. Write integration tests under `UMS.API.Tests/Endpoints/` to verify endpoint routing, schema returns, and role matrices.
+       public async ValueTask<IResponseWrapper<int>> Handle(CreateCategoryCommand request, CancellationToken ct)
+       {
+           // ... Validation and Guard logic ...
+
+           var category = new Category { Name = request.Name, Slug = request.Slug };
+
+           try
+           {
+               await _applicationDbContext.StartTransaction(ct);
+
+               // Step 1: Save Entity State changes
+               await _applicationDbContext.Categories.AddAsync(category, ct);
+               await _applicationDbContext.SaveChangesAsync(ct); // Generates category.Id
+
+               // Step 2: Enqueue Domain Event Outbox message with generated ID
+               _applicationDbContext.AddOutboxMessage(new CategoryCreatedEvent(category.Id));
+               await _applicationDbContext.SaveChangesAsync(ct);
+
+               // Step 3: Commit transaction
+               await _applicationDbContext.CommitTransaction(ct);
+           }
+           catch (Exception ex)
+           {
+               try
+               {
+                   await _applicationDbContext.RollbackTransaction(ct);
+               }
+               catch (Exception rollbackEx)
+               {
+                   // Log rollback failure
+               }
+
+               return ResponseWrapper<int>.Fail($"Database transaction failed: {ex.Message}");
+           }
+
+           // Step 4: Invalidate cache (Command Handler responsibility)
+           foreach (var key in CategoryCacheKeys.All)
+           {
+               _cacheService.Remove(key);
+           }
+
+           return ResponseWrapper<int>.Success(category.Id, "Category created successfully.");
+       }
+   }
+   ```
+
+### Step 6: Implement Domain Events & Notification Handlers
+1. Create the domain event record under `UMS.Application/Features/{FeatureName}s/Events/` implementing `INotification` (from the `Mediator` namespace):
+   ```csharp
+   public class CategoryCreatedEvent : INotification
+   {
+       public CategoryCreatedEvent(int id) => CategoryId = id;
+       public int CategoryId { get; }
+   }
+   ```
+2. Create the event handler implementing `INotificationHandler<T>` in the same folder.
+   - **Eventual Consistency Side-effects**: Use notification handlers for asynchronous activities (sending confirmation emails, publishing integration events to external brokers, logging analytics). Do NOT put synchronous cache invalidations here.
+   - **Outbox Processor**: The runtime background processing worker is currently `[AWAITING IMPLEMENTATION — No codebase example yet]`. Verify event dispatch logic using unit tests against `OutboxMessages` DB entries.
+
+### Step 7: Implement Soft-Delete Restore Workflow
+If an administrative command needs to restore a soft-deleted record:
+1. Retrieve the deleted record by using `.IgnoreQueryFilters()` to bypass the global EF Core filter:
+   ```csharp
+   var entity = await _applicationDbContext.Categories
+       .IgnoreQueryFilters()
+       .FirstOrDefaultAsync(x => x.Id == request.Id, ct);
+   ```
+2. Manually restore properties and save:
+   ```csharp
+   entity.SoftDeleted = false;
+   entity.DeletedAt = null;
+   entity.DeletedBy = null;
+   await _applicationDbContext.SaveChangesAsync(ct);
+   ```
+   *Note: Because the entity state is Modified, not Deleted, the ApplicationDbContext save interceptor ignores it, updating database fields cleanly.*
 
 ---
 
 ## Expected Outcome (Definition of Done)
-- Domain Entity class defined under `UMS.Domain/Entities/`.
-- Mapping class defined under `UMS.Infrastructure/Persistence/DbConfigurations/`.
-- DbSet registered in `ApplicationDbContext.cs`.
-- EF migration successfully generated, applied, and verified against SQL Server.
-- Mediator CRUD logic, command validators, and handlers implemented in UMS.Application.
-- Minimal API routes mapped and authorized in UMS.API.
-- Excel and PDF export functionality implemented (service methods, export query, `/export` route, and UI integration).
-- Full test coverage (handler unit tests and API integration tests) passes.
-
----
-
-## Troubleshooting & Rollback
-
-### Migration Failures:
-- If `migrations add` fails: Verify syntax, entity configuration logic, and database properties. Delete any partially generated migration classes and try again.
-- If `database update` fails: Verify connection strings in `appsettings.Testing.json` or `appsettings.json`, and verify SQL Server is running.
-
-### Rollback Strategy
-1. Revert DB schema changes:
-   ```powershell
-   dotnet ef database update <PreviousMigrationName> --project UMS.Infrastructure --startup-project UMS.API
-   ```
-2. Remove the migration using:
-   ```powershell
-   dotnet ef migrations remove --project UMS.Infrastructure --startup-project UMS.API --context ApplicationDbContext
-   ```
-3. Remove the added entity class, entity configuration file, DbSet declaration, and delete application handler files.
+- Domain Entity class defined under `UMS.Domain/Entities/` implementing required interface auto-properties.
+- Mapping class defined under `UMS.Infrastructure/Persistence/DbConfigurations/` using `UX_` index prefix and `rowversion` database mapping type.
+- DbSet registered in both `IApplicationDbContext.cs` and `ApplicationDbContext.cs`.
+- Feature services registered as scoped dependencies under `ServiceCollectionExtensions.cs`.
+- Handlers implementing the two-phase try-catch transaction sequences returning `ResponseWrapper.Fail()` on catch.
+- Asynchronous side-effects configured inside `INotificationHandler<T>` events.
+- Unit and integration tests compile, asserting Outbox enqueuing states.
