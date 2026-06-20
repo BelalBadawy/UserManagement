@@ -7,17 +7,17 @@
 ---
 
 ## Related Rules
-- [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md) (Clean architecture references, Mediator commands/queries boundaries)
-- [02-backend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/02-backend-coding-standards.md) (Minimal API extensions, ResponseWrapper, Validation behaviors)
-- [04-backend-security.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/04-backend-security.md) (Endpoint security guards and AppPermission constants)
+- [01-backend-architecture.md](docs/ai-rules/01-backend-architecture.md) (Clean architecture references, Mediator commands/queries boundaries)
+- [02-backend-coding-standards.md](docs/ai-rules/02-backend-coding-standards.md) (Minimal API extensions, ResponseWrapper, Validation behaviors)
+- [04-backend-security.md](docs/ai-rules/04-backend-security.md) (Endpoint security guards and AppPermission constants)
 
 ---
 
 ## Real Example Reference
-- **API Endpoint Routing Map**: [CategoryEndpoints.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API/Endpoints/CategoryEndpoints.cs)
-- **Mediator Query Handler**: [GetCategoriesPagedQuery.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Features/Categories/Queries/GetCategoriesPaged/GetCategoriesPagedQuery.cs)
-- **Mediator Export Query & Handler**: [ExportCategoriesQuery.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Features/Categories/Queries/ExportCategories/ExportCategoriesQuery.cs)
-- **Pagination Result Envelope**: [PagedResult.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Dtos/Pagination/PagedResult.cs)
+- **API Endpoint Routing Map**: [UMS.API/Endpoints/CategoryEndpoints.cs](UMS.API/Endpoints/CategoryEndpoints.cs)
+- **Mediator Query Handler**: [UMS.Application/Features/Categories/Queries/GetCategoriesPaged/GetCategoriesPagedQuery.cs](UMS.Application/Features/Categories/Queries/GetCategoriesPaged/GetCategoriesPagedQuery.cs)
+- **Mediator Export Query & Handler**: [UMS.Application/Features/Categories/Queries/ExportCategories/ExportCategoriesQuery.cs](UMS.Application/Features/Categories/Queries/ExportCategories/ExportCategoriesQuery.cs)
+- **Pagination Result Envelope**: [UMS.Application/Dtos/Pagination/PagedResult.cs](UMS.Application/Dtos/Pagination/PagedResult.cs)
 
 ---
 
@@ -36,15 +36,15 @@
          int? ParentId, 
          bool IsActive, 
          int SortOrder
-     ) : ICommand<IResponseWrapper<int>>, IValidateMe;
+     ) : IRequest<IResponseWrapper<int>>, IValidateMe;
      ```
 4. If it's a Query:
    - Under `/Queries/{ActionName}/`, create `{ActionName}Query.cs` declaring the query record:
      ```csharp
-     public record GetCategoryByIdQuery(int Id) : IQuery<IResponseWrapper<CategoryResponse>>;
+     public record GetCategoryByIdQuery(int Id) : IRequest<IResponseWrapper<CategoryResponse>>;
      ```
 5. **PagedResult<T> Data Structure**:
-   When implementing a paginated query, the response wrapper should contain a `PagedResult<T>` object (located at [PagedResult.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Dtos/Pagination/PagedResult.cs)):
+   When implementing a paginated query, the response wrapper should contain a `PagedResult<T>` object (located at [UMS.Application/Dtos/Pagination/PagedResult.cs](UMS.Application/Dtos/Pagination/PagedResult.cs)):
    - `List<T> Data`: The items contained in the current page.
    - `int CurrentPage`: 1-based current page number.
    - `int PageSize`: Number of items per page.
@@ -67,55 +67,64 @@
    ```
 
 ### Step 3: Implement CQRS Handler
-1. Inside the command or query file, create the handler class implementing `ICommandHandler` or `IQueryHandler`.
+1. Inside the command or query file, create the handler class implementing `IRequestHandler<TRequest, TResponse>`.
 2. Handlers must return `ValueTask<IResponseWrapper<T>>` to match Mediator requirements.
-3. **For Commands (Mutations):** Inject `IApplicationDbContext` and execute transactional saves returning wrap failures on catch (see [Skill: Add New Entity](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/skill-add-new-entity.md)).
-4. **For Queries:** Inject the feature service interface (e.g. `ICategoryService`) and delegate logic:
+3. **For Commands (Mutations):** Inject `IApplicationDbContext` and execute transactional saves returning wrap failures on catch (see [Skill: Add New Entity](docs/ai-rules/skill-add-new-entity.md)).
+4. **For Queries:** Inject `IApplicationDbContext` and perform the database query directly, using query extensions to apply filters and sorting:
    ```csharp
-   public class GetCategoriesPagedQueryHandler(ICategoryService categoryService)
+   public class GetCategoriesPagedQueryHandler(IApplicationDbContext applicationDbContext)
        : IRequestHandler<GetCategoriesPagedQuery, IResponseWrapper<PagedResult<CategoryResponse>>>
    {
-       private readonly ICategoryService _categoryService = categoryService;
+       private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
 
        public async ValueTask<IResponseWrapper<PagedResult<CategoryResponse>>> Handle(
            GetCategoriesPagedQuery request, 
            CancellationToken ct)
        {
-           return await _categoryService.GetCategoriesPagedQueryAsync(request.PagedFilterRequest, ct);
+           var query = _applicationDbContext.Categories.AsNoTracking();
+
+           // Apply shared query extensions (filtering and sorting)
+           query = query.ApplyCategoryFilters(request.PagedFilterRequest.SearchTerm, request.PagedFilterRequest.IsActive);
+           query = query.ApplyCategorySorting(request.PagedFilterRequest.SortBy, request.PagedFilterRequest.SortDirection);
+
+           var totalCount = await query.CountAsync(ct);
+           var items = await query
+               .Skip((request.PagedFilterRequest.PageNumber - 1) * request.PagedFilterRequest.PageSize)
+               .Take(request.PagedFilterRequest.PageSize)
+               .Select(c => new CategoryResponse { Id = c.Id, Name = c.Name, Slug = c.Slug, IsActive = c.IsActive })
+               .ToListAsync(ct);
+
+           var pagedResult = new PagedResult<CategoryResponse>(items, request.PagedFilterRequest.PageNumber, request.PagedFilterRequest.PageSize, totalCount);
+           return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
        }
    }
    ```
 
 ### Step 4: Implement Export Query Handler Pattern
 To support spreadsheet (Excel) and report (PDF) generation:
-1. Create `Export{EntityName}Query.cs` implementing `IQuery<IResponseWrapper<byte[]>>`.
+1. Create `Export{EntityName}Query.cs` implementing `IRequest<IResponseWrapper<byte[]>>`.
 2. Define fields for filtering and sorting parameters (`SearchTerm`, `IsActive`, `SortBy`, `SortDirection`, `ExportFormat`).
-3. Inside the query handler, execute the shared query and build the binary byte array using ClosedXML or QuestPDF:
+3. Inside the query handler, execute the query against `IApplicationDbContext` using the shared query extensions, and delegate the binary generation to the technical export service (e.g., `ICategoryExportService`):
    ```csharp
-   public class ExportCategoriesQueryHandler(ICategoryService categoryService)
-       : IQueryHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
+   public class ExportCategoriesQueryHandler(IApplicationDbContext applicationDbContext, ICategoryExportService exportService)
+       : IRequestHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
    {
-       private readonly ICategoryService _categoryService = categoryService;
+       private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+       private readonly ICategoryExportService _exportService = exportService;
 
        public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportCategoriesQuery request, CancellationToken ct)
        {
-           // 1. Fetch full unpaginated list using the same query building filters
-           var listResponse = await _categoryService.GetCategoriesListAsync(
-               request.SearchTerm,
-               request.IsActive,
-               request.SortBy,
-               request.SortDirection,
-               ct);
+           // 1. Fetch full unpaginated list directly from DbContext
+           var query = _applicationDbContext.Categories.AsNoTracking()
+               .ApplyCategoryFilters(request.SearchTerm, request.IsActive)
+               .ApplyCategorySorting(request.SortBy, request.SortDirection);
 
-           if (!listResponse.IsSuccessful || listResponse.Data == null)
-           {
-               return ResponseWrapper<byte[]>.Fail(
-                   listResponse.Messages ?? new List<string> { "Failed to retrieve data for export." },
-                   listResponse.StatusCode);
-           }
+           var categories = await query
+               .Select(c => new CategoryResponse { Id = c.Id, Name = c.Name, Slug = c.Slug, IsActive = c.IsActive })
+               .ToListAsync(ct);
 
-           // 2. Delegate binary generation to the feature service
-           var fileBytes = await _categoryService.ExportCategoriesAsync(listResponse.Data, request.ExportFormat, ct);
+           // 2. Delegate binary generation to the technical infrastructure service
+           var fileBytes = await _exportService.ExportCategoriesAsync(categories, request.ExportFormat, ct);
 
            return ResponseWrapper<byte[]>.Success(fileBytes);
        }
@@ -197,7 +206,7 @@ To support spreadsheet (Excel) and report (PDF) generation:
 
 ### If compilation fails due to missing references:
 - Verify that `global using Mediator;` is available.
-- Ensure the Command implements `ICommand<T>` and the handler class implements `ICommandHandler<TRequest, TResponse>` (not `IRequest`/`IRequestHandler`).
+- Ensure the Command or Query implements `IRequest<TResponse>` and the handler class implements `IRequestHandler<TRequest, TResponse>` (not `ICommand/IQuery/ICommandHandler/IQueryHandler`).
 - Ensure the project builds. The Mediator source generator compiles routing types at build time.
 
 ### Rollback Strategy

@@ -8,6 +8,7 @@ export interface CategoryResponse {
   parentId: number | null;
   sortOrder: number;
   isActive: boolean;
+  softDeleted: boolean;
   rowVersion: string;
 }
 
@@ -25,6 +26,7 @@ export interface PagedFilterRequest {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   isActive?: boolean | null;
+  includeDeleted?: boolean;
 }
 
 export interface CreateCategoryRequest {
@@ -60,6 +62,7 @@ export const categoriesApi = {
       ...(params.sortBy && { sortBy: params.sortBy }),
       ...(params.sortDirection && { sortDirection: params.sortDirection }),
       ...(params.isActive !== undefined && params.isActive !== null && { isActive: String(params.isActive) }),
+      ...(params.includeDeleted !== undefined && { includeDeleted: String(params.includeDeleted) }),
     });
     return api.get(`api/v1/categories/paged?${query.toString()}`);
   },
@@ -87,6 +90,10 @@ export const categoriesApi = {
 
   changeStatus: (id: number, isActive: boolean): Promise<ApiResponse<number>> => {
     return api.put(`api/v1/categories/${id}/status?isActive=${isActive}`);
+  },
+
+  restore: (id: number): Promise<ApiResponse<number>> => {
+    return api.post(`api/v1/categories/${id}/restore`);
   },
 
   delete: (id: number): Promise<ApiResponse> => {

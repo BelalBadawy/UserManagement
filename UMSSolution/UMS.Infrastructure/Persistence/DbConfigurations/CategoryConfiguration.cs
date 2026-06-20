@@ -53,11 +53,13 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
 
             builder.HasIndex(c => c.NormalizedName)
                 .IsUnique()
-                .HasDatabaseName("UX_Categories_NormalizedName");
+                .HasDatabaseName("UX_Categories_NormalizedName")
+                .HasFilter("[SoftDeleted] = 0");
 
             builder.HasIndex(c => c.NormalizedSlug)
                 .IsUnique()
-                .HasDatabaseName("UX_Categories_NormalizedSlug");
+                .HasDatabaseName("UX_Categories_NormalizedSlug")
+                .HasFilter("[SoftDeleted] = 0");
 
             builder.HasOne(c => c.Parent)
                 .WithMany(c => c.Children)

@@ -323,34 +323,45 @@ namespace UMS.Infrastructure.Identity.Services
 
         public async Task<IResponseWrapper<TokenResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
-            var userPrincipal = GetClaimPrincipalFromExpiredToken(refreshTokenRequest.Token);
-            var userEmail = userPrincipal.FindFirstValue(ClaimTypes.Email);
-
-            var userInDb = await _userManager.FindByEmailAsync(userEmail);
-            if (userInDb is not null)
+            try
             {
-                if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
-                    || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
+                var userPrincipal = GetClaimPrincipalFromExpiredToken(refreshTokenRequest.Token);
+                var userEmail = userPrincipal.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(userEmail))
                 {
                     return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
                 }
 
-                var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
-                userInDb.RefreshToken = GenerateRefreshToken();
-                userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
-
-                await _userManager.UpdateAsync(userInDb);
-
-                var tokenResponse = new TokenResponse
+                var userInDb = await _userManager.FindByEmailAsync(userEmail);
+                if (userInDb is not null)
                 {
-                    Token = token,
-                    RefreshToken = userInDb.RefreshToken,
-                    RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
-                };
+                    if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
+                        || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
+                    {
+                        return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
+                    }
 
-                return ResponseWrapper<TokenResponse>.Success(tokenResponse);
+                    var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
+                    userInDb.RefreshToken = GenerateRefreshToken();
+                    userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+
+                    await _userManager.UpdateAsync(userInDb);
+
+                    var tokenResponse = new TokenResponse
+                    {
+                        Token = token,
+                        RefreshToken = userInDb.RefreshToken,
+                        RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
+                    };
+
+                    return ResponseWrapper<TokenResponse>.Success(tokenResponse);
+                }
+                return ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
             }
-            return ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
+            catch (Exception)
+            {
+                return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
+            }
         }
 
         private ClaimsPrincipal GetClaimPrincipalFromExpiredToken(string expiredToken)

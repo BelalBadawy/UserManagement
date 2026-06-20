@@ -191,3 +191,10 @@ To maintain clean and responsive cache state via `TanStack Query`, developers mu
 
 - **Token Refresh:** Implement silent token refresh using interceptors. Handle concurrent requests during token refresh by queuing them and replaying once the new token is acquired.
 - **XSS Prevention:** Never use `dangerouslySetInnerHTML`. Sanitize any user input rendered to the DOM.
+
+---
+
+## 10. Concurrency Control and Serialization
+
+- **RowVersion Representation:** The frontend must represent concurrency tokens as `rowVersion: string;` in TypeScript interfaces.
+- **Serialization Note:** Backend `byte[]` RowVersion properties serialize as base64 strings via System.Text.Json. The frontend must treat and send `rowVersion` as a base64 string.

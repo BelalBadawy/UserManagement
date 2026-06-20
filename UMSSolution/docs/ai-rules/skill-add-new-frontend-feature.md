@@ -7,17 +7,17 @@
 ---
 
 ## Related Rules
-- [05-frontend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/05-frontend-architecture.md) (Frontend folder layout, state boundaries, routing setup)
-- [06-frontend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/06-frontend-coding-standards.md) (Prop rules, form validation hooks, API layering, accessibility)
-- [07-testing-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/07-testing-standards.md) (RTL component tests, user action assertions)
+- [05-frontend-architecture.md](docs/ai-rules/05-frontend-architecture.md) (Frontend folder layout, state boundaries, routing setup)
+- [06-frontend-coding-standards.md](docs/ai-rules/06-frontend-coding-standards.md) (Prop rules, form validation hooks, API layering, accessibility)
+- [07-testing-standards.md](docs/ai-rules/07-testing-standards.md) (RTL component tests, user action assertions)
 
 ---
 
 ## Real Example Reference
-- **Frontend Page Component**: [CategoriesManagement.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/pages/CategoriesManagement.tsx)
-- **Base Client API Configuration**: [api-client.ts](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/lib/api-client.ts)
-- **Feature API Services**: [categories-api.ts](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/lib/categories-api.ts)
-- **TanStack Query custom Hooks**: [useCategories.ts](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/hooks/useCategories.ts)
+- **Frontend Page Component**: [UMS.Client/src/pages/CategoriesManagement.tsx](UMS.Client/src/pages/CategoriesManagement.tsx)
+- **Base Client API Configuration**: [UMS.Client/src/lib/api-client.ts](UMS.Client/src/lib/api-client.ts)
+- **Feature API Services**: [UMS.Client/src/lib/categories-api.ts](UMS.Client/src/lib/categories-api.ts)
+- **TanStack Query custom Hooks**: [UMS.Client/src/hooks/useCategories.ts](UMS.Client/src/hooks/useCategories.ts)
 
 ---
 
@@ -42,9 +42,11 @@
      parentId?: number;
      sortOrder: number;
      isActive: boolean;
-     rowVersion: number[];
+     rowVersion: string;
    }
    ```
+   *Note: Backend `byte[]` RowVersion properties serialize as base64 strings via System.Text.Json. The frontend must treat and send `rowVersion` as a base64 string.*
+
 4. **Base Client Configuration Details (`src/lib/api-client.ts`)**:
    - The base client prepends base URL configurations (`import.meta.env.VITE_API_BASE_URL` or default `https://localhost:7122`).
    - It automatically extracts JWT tokens from `localStorage.getItem('token')` and appends them as a `Bearer` token inside the `Authorization` header.

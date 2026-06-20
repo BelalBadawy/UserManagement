@@ -7,14 +7,14 @@
 ---
 
 ## Related Rules
-- [07-testing-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/07-testing-standards.md) (Test namespaces, project mapping rules, test boundary conditions)
+- [07-testing-standards.md](docs/ai-rules/07-testing-standards.md) (Test namespaces, project mapping rules, test boundary conditions)
 
 ---
 
 ## Real Example Reference
-- **Category Unit Testing support**: [CategoryHandlerTestSupport.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application.Tests/Support/Categories/CategoryHandlerTestSupport.cs)
-- **Category Handler Unit Tests**: [CategoryCommandHandlerTests.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs)
-- **API Endpoint Integration Tests**: [CategoryEndpointsTests.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API.Tests/Endpoints/CategoryEndpointsTests.cs)
+- **Category Unit Testing support**: [UMS.Application.Tests/Support/Categories/CategoryHandlerTestSupport.cs](UMS.Application.Tests/Support/Categories/CategoryHandlerTestSupport.cs)
+- **Category Handler Unit Tests**: [UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs](UMS.Application.Tests/Handlers/Categories/CategoryCommandHandlerTests.cs)
+- **API Endpoint Integration Tests**: [UMS.API.Tests/Endpoints/CategoryEndpointsTests.cs](UMS.API.Tests/Endpoints/CategoryEndpointsTests.cs)
 
 ---
 

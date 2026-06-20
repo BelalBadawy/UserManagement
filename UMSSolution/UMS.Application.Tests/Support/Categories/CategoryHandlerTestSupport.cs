@@ -55,6 +55,7 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
     public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
     public DbSet<LogUserActivity> LogUserActivities => Set<LogUserActivity>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<User> Users => Set<User>();
 
     public Task StartTransaction(CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task CommitTransaction(CancellationToken cancellationToken = default) => Task.CompletedTask;
@@ -90,6 +91,13 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(builder =>
+        {
+            builder.ToTable("Users");
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        });
+
         modelBuilder.Entity<Category>(builder =>
         {
             builder.ToTable("Categories");
@@ -100,8 +108,8 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
             builder.Property(x => x.Slug).IsRequired().HasMaxLength(250);
             builder.Property(x => x.NormalizedSlug).IsRequired().HasMaxLength(256);
             builder.Property(x => x.RowVersion).IsConcurrencyToken();
-            builder.HasIndex(x => x.NormalizedName).IsUnique().HasDatabaseName("UX_Categories_NormalizedName");
-            builder.HasIndex(x => x.NormalizedSlug).IsUnique().HasDatabaseName("UX_Categories_NormalizedSlug");
+            builder.HasIndex(x => x.NormalizedName).HasFilter("SoftDeleted = 0").IsUnique().HasDatabaseName("UX_Categories_NormalizedName");
+            builder.HasIndex(x => x.NormalizedSlug).HasFilter("SoftDeleted = 0").IsUnique().HasDatabaseName("UX_Categories_NormalizedSlug");
             builder.HasOne(x => x.Parent)
                 .WithMany(x => x.Children)
                 .HasForeignKey(x => x.ParentId)

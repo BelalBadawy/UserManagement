@@ -7,19 +7,19 @@
 ---
 
 ## Related Rules
-- [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md) (Layer boundaries, Mediator configurations)
-- [03-backend-data-and-infrastructure.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/03-backend-data-and-infrastructure.md) (EF configurations, context parameters, migrations naming)
-- [08-project-conventions.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/08-project-conventions.md) (Audit logging, version variables)
+- [01-backend-architecture.md](docs/ai-rules/01-backend-architecture.md) (Layer boundaries, Mediator configurations)
+- [03-backend-data-and-infrastructure.md](docs/ai-rules/03-backend-data-and-infrastructure.md) (EF configurations, context parameters, migrations naming)
+- [08-project-conventions.md](docs/ai-rules/08-project-conventions.md) (Audit logging, version variables)
 
 ---
 
 ## Real Example Reference
-- **C# Entity Domain Model**: [Category.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Domain/Entities/Category.cs)
-- **Database Mapping Configuration**: [CategoryConfiguration.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
-- **DbContext Interfaces**: [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
-- **Concrete Context**: [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
-- **Dependency Registration Extension**: [ServiceCollectionExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/ServiceCollectionExtensions.cs)
-- **Domain Event & Handler**: [CategoryCreatedEvent.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Features/Categories/Events/CategoryCreatedEvent.cs)
+- **C# Entity Domain Model**: [UMS.Domain/Entities/Category.cs](UMS.Domain/Entities/Category.cs)
+- **Database Mapping Configuration**: [UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs](UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
+- **DbContext Interfaces**: [UMS.Application/Interfaces/Common/IApplicationDbContext.cs](UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
+- **Concrete Context**: [UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs](UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
+- **Dependency Registration Extension**: [UMS.Infrastructure/ServiceCollectionExtensions.cs](UMS.Infrastructure/ServiceCollectionExtensions.cs)
+- **Domain Event & Handler**: [UMS.Application/Features/Categories/Events/CategoryCreatedEvent.cs](UMS.Application/Features/Categories/Events/CategoryCreatedEvent.cs)
 
 ---
 
@@ -99,25 +99,25 @@
    ```
 
 ### Step 3: Register in DbContext
-1. Register the entity DbSet property on the interface [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs):
+1. Register the entity DbSet property on the interface [UMS.Application/Interfaces/Common/IApplicationDbContext.cs](UMS.Application/Interfaces/Common/IApplicationDbContext.cs):
    ```csharp
    DbSet<Category> Categories { get; }
    ```
-2. Register the concrete DbSet property on [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs):
+2. Register the concrete DbSet property on [UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs](UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs):
    ```csharp
    public DbSet<Category> Categories => Set<Category>();
    ```
 
-### Step 4: Register Feature Service in DI
-1. If the entity requires query/export service operations (e.g. `ICategoryService` / `CategoryService`), register it as scoped inside [ServiceCollectionExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/ServiceCollectionExtensions.cs):
+### Step 4: Register Technical Services in DI
+1. If the entity requires technical infrastructure services (such as generating reports/exports e.g. `ICategoryExportService` / `CategoryExportService`), register it as scoped inside [UMS.Infrastructure/ServiceCollectionExtensions.cs](UMS.Infrastructure/ServiceCollectionExtensions.cs):
    ```csharp
-   services.AddScoped<ICategoryService, CategoryService>();
+   services.AddScoped<ICategoryExportService, CategoryExportService>();
    ```
 
 ### Step 5: Implement Application Logic & Handlers
 1. Create the feature directory: `UMS.Application/Features/{FeatureName}s/`.
 2. Implement Mediator commands and queries under feature directories:
-   - **Queries and Reports**: Inject the feature service interface (e.g. `ICategoryService`) and delegate read calls to it.
+   - **Queries and Reports**: Inject `IApplicationDbContext` directly. Perform querying, filtering, and joining inside the Query Handlers. If multiple handlers share identical filtering/sorting logic, extract it into a static query extension method on `IQueryable` (e.g. `CategoryQueryExtensions.cs`). If formatting or exporting is required, delegate that technical aspect to an infrastructure service interface like `ICategoryExportService`.
    - **Mutations (Commands)**: Inject `IApplicationDbContext` and `ICacheService` directly into the Command Handlers to handle transaction logic and cache eviction.
 3. **Cache Invalidation Ownership**: Command handlers own cache invalidation. On success, call `_cacheService.Remove(key)` for all cached keys in the handler, NOT inside notification handlers.
 4. **Two-Phase Save Transaction Sequence**:
@@ -213,7 +213,7 @@ If an administrative command needs to restore a soft-deleted record:
 - Domain Entity class defined under `UMS.Domain/Entities/` implementing required interface auto-properties.
 - Mapping class defined under `UMS.Infrastructure/Persistence/DbConfigurations/` using `UX_` index prefix and `rowversion` database mapping type.
 - DbSet registered in both `IApplicationDbContext.cs` and `ApplicationDbContext.cs`.
-- Feature services registered as scoped dependencies under `ServiceCollectionExtensions.cs`.
+- Technical infrastructure services (like export services) registered as scoped dependencies under `ServiceCollectionExtensions.cs`.
 - Handlers implementing the two-phase try-catch transaction sequences returning `ResponseWrapper.Fail()` on catch.
 - Asynchronous side-effects configured inside `INotificationHandler<T>` events.
 - Unit and integration tests compile, asserting Outbox enqueuing states.

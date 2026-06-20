@@ -313,4 +313,60 @@ public class CategoryEndpointsTests : ApiTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/pdf");
     }
+
+    [Fact]
+    public async Task Create_category_should_generate_audit_log_with_correct_id_not_zero()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Create));
+
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var request = new
+        {
+            Name = $"AuditTest {suffix}",
+            Slug = $"audit-test-{suffix}",
+            ParentId = (int?)null,
+            IsActive = true,
+            SortOrder = 1
+        };
+
+        var response = await Client.PostAsJsonAsync("/api/v1/categories", request);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<int>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
+        var categoryId = payload.Data;
+        categoryId.Should().BeGreaterThan(0);
+
+        // Fetch the generated audit trail from database using the Verifier
+        var auditTrail = await Verifier.GetLastAuditTrailForTableAsync("Category");
+        auditTrail.Should().NotBeNull();
+        auditTrail!.PrimaryKey.Should().Be($"{{\"Id\":{categoryId}}}");
+    }
+
+    [Fact]
+    public async Task Restore_category_should_restore_soft_deleted_category()
+    {
+        var name = $"RestoreTest-{Guid.NewGuid():N}";
+        var slug = $"restore-test-{Guid.NewGuid():N}";
+        var category = await Seeder.SeedCategoryAsync(name, slug, isActive: true, sortOrder: 8, softDeleted: true);
+        Seeder.ClearCategoryCaches();
+
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
+
+        var response = await Client.PostAsync($"/api/v1/categories/{category.Id}/restore", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<int>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
+        payload.Data.Should().Be(category.Id);
+
+        var restoredCategory = await Verifier.GetCategoryByIdIncludingSoftDeletedAsync(category.Id);
+        restoredCategory.Should().NotBeNull();
+        restoredCategory!.SoftDeleted.Should().BeFalse();
+        restoredCategory.DeletedAt.Should().BeNull();
+        restoredCategory.DeletedBy.Should().BeNull();
+    }
 }

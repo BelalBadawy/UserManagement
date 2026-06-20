@@ -20,11 +20,11 @@ namespace UMS.Infrastructure.Tests.Services
         {
             var data = new List<CategoryResponse>
             {
-                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
-                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+                new(1, "Test 1", "test-1", null, 1, true, false, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, false, System.Array.Empty<byte>())
             };
 
-            var service = new CategoryService(null!, null!);
+            var service = new CategoryExportService();
             
             var bytes = await service.ExportCategoriesAsync(data, "excel", CancellationToken.None);
             bytes.Should().NotBeNull();
@@ -36,11 +36,11 @@ namespace UMS.Infrastructure.Tests.Services
         {
             var data = new List<CategoryResponse>
             {
-                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
-                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+                new(1, "Test 1", "test-1", null, 1, true, false, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, false, System.Array.Empty<byte>())
             };
 
-            var service = new CategoryService(null!, null!);
+            var service = new CategoryExportService();
             
             var bytes = await service.ExportCategoriesAsync(data, "pdf", CancellationToken.None);
             bytes.Should().NotBeNull();

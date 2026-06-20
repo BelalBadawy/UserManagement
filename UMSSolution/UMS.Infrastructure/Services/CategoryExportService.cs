@@ -1,142 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
-using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using UMS.Application.Dtos.Pagination;
-using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Interfaces.Common;
-using UMS.Domain.Entities;
 
 namespace UMS.Infrastructure.Services
 {
-    public class CategoryService(
-        IApplicationDbContext applicationDbContext,
-        ICurrentUserService currentUserService)
-        : ICategoryService
+    public class CategoryExportService : ICategoryExportService
     {
-        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
-        private readonly ICurrentUserService _currentUserService = currentUserService;
-
-        private IQueryable<Category> BuildCategoryQuery(GetCategoriesPagedQuery query)
-        {
-            var request = query.PagedFilterRequest;
-            var categoriesQuery = _applicationDbContext.Categories.AsNoTracking();
-
-            // Status Filtering
-            if (request.IsActive.HasValue)
-            {
-                categoriesQuery = categoriesQuery.Where(c => c.IsActive == request.IsActive.Value);
-            }
-            else
-            {
-                // For anonymous or non-privileged requests, show only active categories.
-                if (!_currentUserService.IsAuthenticated() || !_currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
-                {
-                    categoriesQuery = categoriesQuery.Where(c => c.IsActive);
-                }
-            }
-
-            // Search Term Filtering
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
-                var term = request.SearchTerm.Trim();
-                var pattern = $"%{term}%";
-                categoriesQuery = categoriesQuery.Where(c =>
-                    EF.Functions.Like(c.Name, pattern) ||
-                    EF.Functions.Like(c.Slug, pattern));
-            }
-
-            return categoriesQuery;
-        }
-
-        private IQueryable<Category> ApplySorting(IQueryable<Category> query, string? sortBy, string? sortDirection)
-        {
-            return sortBy?.ToLower() switch
-            {
-                "name" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Name)
-                    : query.OrderBy(c => c.Name),
-                "slug" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Slug)
-                    : query.OrderBy(c => c.Slug),
-                "sortorder" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.SortOrder)
-                    : query.OrderBy(c => c.SortOrder),
-                "id" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Id)
-                    : query.OrderBy(c => c.Id),
-                _ => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.SortOrder).ThenBy(c => c.Name)
-                    : query.OrderBy(c => c.SortOrder).ThenBy(c => c.Name)
-            };
-        }
-
-        public async Task<IResponseWrapper<PagedResult<CategoryResponse>>> GetCategoriesPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct)
-        {
-            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = pagedFilterRequest });
-            query = ApplySorting(query, pagedFilterRequest.SortBy, pagedFilterRequest.SortDirection);
-
-            var totalCount = await query.CountAsync(ct);
-
-            var categories = await query
-                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
-                .Take(pagedFilterRequest.PageSize)
-                .Select(c => new CategoryResponse(
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.ParentId,
-                    c.SortOrder,
-                    c.IsActive,
-                    c.RowVersion
-                ))
-                .ToListAsync(ct);
-
-            var pagedResult = PagedResult<CategoryResponse>.Create(
-                categories,
-                totalCount,
-                pagedFilterRequest.PageNumber,
-                pagedFilterRequest.PageSize);
-
-            return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
-        }
-
-        public async Task<IResponseWrapper<List<CategoryResponse>>> GetCategoriesListAsync(
-            string? searchTerm,
-            bool? isActive,
-            string? sortBy,
-            string? sortDirection,
-            CancellationToken ct)
-        {
-            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = new PagedFilterRequest { SearchTerm = searchTerm, IsActive = isActive } });
-            query = ApplySorting(query, sortBy, sortDirection);
-
-            var categories = await query
-                .Select(c => new CategoryResponse(
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.ParentId,
-                    c.SortOrder,
-                    c.IsActive,
-                    c.RowVersion
-                ))
-                .ToListAsync(ct);
-
-            return ResponseWrapper<List<CategoryResponse>>.Success(categories);
-        }
-
         public async Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct)
         {
             if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))

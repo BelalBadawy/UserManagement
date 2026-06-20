@@ -18,7 +18,9 @@ public sealed record CategoryResponseContract(
     string Name,
     string Slug,
     int? ParentId,
-    int SortOrder);
+    int SortOrder,
+    bool IsActive,
+    bool SoftDeleted);
 
 public sealed record CategoryDetailsResponseContract(
     int Id,

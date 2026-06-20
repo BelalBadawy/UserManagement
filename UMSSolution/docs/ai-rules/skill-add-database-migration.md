@@ -7,14 +7,14 @@
 ---
 
 ## Related Rules
-- [03-backend-data-and-infrastructure.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/03-backend-data-and-infrastructure.md) (EF configurations, context boundaries, migrations conventions)
-- [08-project-conventions.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/08-project-conventions.md) (Performance, N+1 query rules)
+- [03-backend-data-and-infrastructure.md](docs/ai-rules/03-backend-data-and-infrastructure.md) (EF configurations, context boundaries, migrations conventions)
+- [08-project-conventions.md](docs/ai-rules/08-project-conventions.md) (Performance, N+1 query rules)
 
 ---
 
 ## Real Example Reference
-- **Entity configuration mapping**: [CategoryConfiguration.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
-- **Actual migration code files**: [20260424070230_AddCategoryNormalizationAndConcurrency.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Migrations/20260424070230_AddCategoryNormalizationAndConcurrency.cs)
+- **Entity configuration mapping**: [UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs](UMS.Infrastructure/Persistence/DbConfigurations/CategoryConfiguration.cs)
+- **Actual migration code files**: [UMS.Infrastructure/Migrations/20260424070230_AddCategoryNormalizationAndConcurrency.cs](UMS.Infrastructure/Migrations/20260424070230_AddCategoryNormalizationAndConcurrency.cs)
 
 ---
 
@@ -37,8 +37,8 @@
          .HasColumnType("rowversion");
      ```
 3. If introducing new tables, register their corresponding `DbSet<T>` properties inside:
-   - Interface: [IApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
-   - Concrete Context: [ApplicationDbContext.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
+   - Interface: [UMS.Application/Interfaces/Common/IApplicationDbContext.cs](UMS.Application/Interfaces/Common/IApplicationDbContext.cs)
+   - Concrete Context: [UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs](UMS.Infrastructure/Persistence/Contexts/ApplicationDbContext.cs)
 4. Build the solution and verify that it compiles.
 
 ### Step 2: Generate Migration Script
@@ -69,7 +69,7 @@
 
 ### Step 5: Verify Seeding and Integration Tests
 1. Run local integration tests to verify database initialization.
-2. Confirm the test environment initializes cleanly. The test database setup utilizes [ApiTestDatabaseInitializer.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API.Tests/Support/ApiTestDatabaseInitializer.cs) which runs:
+2. Confirm the test environment initializes cleanly. The test database setup utilizes [UMS.API.Tests/Support/ApiTestDatabaseInitializer.cs](UMS.API.Tests/Support/ApiTestDatabaseInitializer.cs) which runs:
    ```csharp
    await dbContext.Database.EnsureDeletedAsync();
    await dbContext.Database.MigrateAsync();

@@ -7,15 +7,15 @@
 ---
 
 ## Related Rules
-- [02-backend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/02-backend-coding-standards.md) (Standard errors response envelopes, logging conventions)
-- [06-frontend-coding-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/06-frontend-coding-standards.md) (Client boundary error boundaries, form handling)
-- [07-testing-standards.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/07-testing-standards.md) (Test mapping rules, mock scopes, RTL conventions)
+- [02-backend-coding-standards.md](docs/ai-rules/02-backend-coding-standards.md) (Standard errors response envelopes, logging conventions)
+- [06-frontend-coding-standards.md](docs/ai-rules/06-frontend-coding-standards.md) (Client boundary error boundaries, form handling)
+- [07-testing-standards.md](docs/ai-rules/07-testing-standards.md) (Test mapping rules, mock scopes, RTL conventions)
 
 ---
 
 ## Real Example Reference
-- **Global Exception Middleware**: [ErrorHandlingMiddleware.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API/Middlewares/ErrorHandlingMiddleware.cs)
-- **Middleware Integration Regression Test**: [UserEndpointsTests.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API.Tests/Endpoints/UserEndpointsTests.cs)
+- **Global Exception Middleware**: [UMS.API/Middlewares/ErrorHandlingMiddleware.cs](UMS.API/Middlewares/ErrorHandlingMiddleware.cs)
+- **Middleware Integration Regression Test**: [UMS.API.Tests/Endpoints/UserEndpointsTests.cs](UMS.API.Tests/Endpoints/UserEndpointsTests.cs)
 
 ---
 
@@ -32,7 +32,7 @@
 ### Step 2: Localize the Layer & Inspect Global Mappings
 Trace the execution path to isolate the bug to its target layer.
 1. **Backend Layer Exceptions**:
-   Identify if the error is unhandled. The backend uses [ErrorHandlingMiddleware.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.API/Middlewares/ErrorHandlingMiddleware.cs) to catch exceptions globally and map them to HTTP status codes, wrapping responses in `ResponseWrapper.Fail(message)`:
+   Identify if the error is unhandled. The backend uses [UMS.API/Middlewares/ErrorHandlingMiddleware.cs](UMS.API/Middlewares/ErrorHandlingMiddleware.cs) to catch exceptions globally and map them to HTTP status codes, wrapping responses in `ResponseWrapper.Fail(message)`:
    - `UnauthorizedAccessException` -> **401 Unauthorized**
    - `KeyNotFoundException` -> **404 Not Found**
    - `InvalidOperationException` -> **400 Bad Request**

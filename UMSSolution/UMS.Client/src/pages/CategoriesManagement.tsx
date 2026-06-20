@@ -23,7 +23,8 @@ import {
   useCreateCategory, 
   useUpdateCategory, 
   useDeleteCategory,
-  useChangeCategoryStatus
+  useChangeCategoryStatus,
+  useRestoreCategory
 } from '../hooks/useCategories';
 import { DataTablePagination } from '../components/ui/DataTablePagination';
 import { useToast } from '../components/ui/toast';
@@ -53,32 +54,39 @@ export default function CategoriesManagement() {
   const sortBy = searchParams.get('sortBy') || 'sortorder';
   const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
   const statusFilter = (searchParams.get('status') || 'all') as 'all' | 'active' | 'inactive';
+  const includeDeletedParam = searchParams.get('includeDeleted') === 'true';
 
   // Local filter states
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const [localStatus, setLocalStatus] = useState(statusFilter);
+  const [localIncludeDeleted, setLocalIncludeDeleted] = useState(includeDeletedParam);
 
   // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
   const [prevParams, setPrevParams] = useState({
     search: searchTerm,
     status: statusFilter,
+    includeDeleted: includeDeletedParam,
   });
 
   if (
     searchTerm !== prevParams.search ||
-    statusFilter !== prevParams.status
+    statusFilter !== prevParams.status ||
+    includeDeletedParam !== prevParams.includeDeleted
   ) {
     setPrevParams({
       search: searchTerm,
       status: statusFilter,
+      includeDeleted: includeDeletedParam,
     });
     setLocalSearch(searchTerm);
     setLocalStatus(statusFilter);
+    setLocalIncludeDeleted(includeDeletedParam);
   }
 
   const isDirty =
     localSearch.trim() !== searchTerm ||
-    localStatus !== statusFilter;
+    localStatus !== statusFilter ||
+    localIncludeDeleted !== includeDeletedParam;
 
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
@@ -107,6 +115,7 @@ export default function CategoriesManagement() {
     sortBy,
     sortDirection,
     isActive: isActiveParam,
+    includeDeleted: includeDeletedParam,
   });
 
   const { data: parentLookups = [] } = useCategoryLookups();
@@ -115,6 +124,7 @@ export default function CategoriesManagement() {
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
   const changeStatusMutation = useChangeCategoryStatus();
+  const restoreMutation = useRestoreCategory();
 
   const categories = pagedData?.data || [];
   const totalCount = pagedData?.totalCount || 0;
@@ -194,6 +204,13 @@ export default function CategoriesManagement() {
       } else {
         next.delete('status');
       }
+
+      if (localIncludeDeleted) {
+        next.set('includeDeleted', 'true');
+      } else {
+        next.delete('includeDeleted');
+      }
+
       next.set('page', '1');
       return next;
     });
@@ -202,6 +219,7 @@ export default function CategoriesManagement() {
   const handleResetFilters = () => {
     setLocalSearch('');
     setLocalStatus('all');
+    setLocalIncludeDeleted(false);
     setSearchParams(new URLSearchParams());
   };
 
@@ -399,6 +417,16 @@ export default function CategoriesManagement() {
                 <option value="inactive">Inactive Only</option>
               </select>
 
+              <label className="flex items-center gap-2 border border-neutral-200 rounded-xl px-3 py-2 text-sm bg-white cursor-pointer select-none font-medium text-neutral-700">
+                <input
+                  type="checkbox"
+                  checked={localIncludeDeleted}
+                  onChange={(e) => setLocalIncludeDeleted(e.target.checked)}
+                  className="w-4 h-4 text-[#4285F4] border-neutral-300 rounded focus:ring-[#4285F4]"
+                />
+                Include Deleted
+              </label>
+
               <Button type="submit" variant="default" disabled={!isDirty} className="rounded-xl px-5 disabled:opacity-50 disabled:pointer-events-none">
                 Apply Filters
               </Button>
@@ -501,7 +529,11 @@ export default function CategoriesManagement() {
                         {cat.sortOrder}
                       </td>
                       <td className="px-6 py-4">
-                        {hasPermission('Permission.Product.Categories.Update') ? (
+                        {cat.softDeleted ? (
+                          <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 font-bold">
+                            Deleted
+                          </Badge>
+                        ) : hasPermission('Permission.Product.Categories.Update') ? (
                           <StatusSwitch
                             isActive={cat.isActive}
                             onToggle={() => requestChangeStatus(cat.isActive ? 'deactivate' : 'activate', cat)}
@@ -523,36 +555,61 @@ export default function CategoriesManagement() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {hasPermission('Permission.Product.Categories.Update') && (
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => openEditSheet(cat)}
-                                  className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Edit Details</TooltipContent>
-                            </Tooltip>
-                          )}
+                          {cat.softDeleted ? (
+                            hasPermission('Permission.Product.Categories.Update') && (
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => restoreMutation.mutate(cat.id)}
+                                    disabled={restoreMutation.isPending}
+                                    className="h-8 w-8 text-emerald-600 hover:text-emerald-900 hover:bg-emerald-50 rounded-lg"
+                                  >
+                                    {restoreMutation.isPending && targetCategory?.id === cat.id ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Restore Category</TooltipContent>
+                              </Tooltip>
+                            )
+                          ) : (
+                            <>
+                              {hasPermission('Permission.Product.Categories.Update') && (
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => openEditSheet(cat)}
+                                      className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Edit Details</TooltipContent>
+                                </Tooltip>
+                              )}
 
-                          {hasPermission('Permission.Product.Categories.Delete') && (
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestDelete(cat)}
-                                  className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Delete Category</TooltipContent>
-                            </Tooltip>
+                              {hasPermission('Permission.Product.Categories.Delete') && (
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestDelete(cat)}
+                                      className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Delete Category</TooltipContent>
+                                </Tooltip>
+                              )}
+                            </>
                           )}
 
                           {!hasPermission('Permission.Product.Categories.Update') && 

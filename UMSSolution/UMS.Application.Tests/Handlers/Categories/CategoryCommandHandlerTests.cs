@@ -4,6 +4,7 @@ using UMS.Application.Features.Categories.Commands.Create;
 using UMS.Application.Features.Categories.Commands.Delete;
 using UMS.Application.Features.Categories.Commands.Update;
 using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+using UMS.Application.Features.Categories.Commands.RestoreCategory;
 using UMS.Application.Features.Categories.Events;
 using UMS.Application.Tests.Support.Categories;
 
@@ -45,6 +46,26 @@ public class CreateCategoryCommandHandlerTests
         result.IsSuccessful.Should().BeFalse();
         result.Messages.Should().Contain("Category with this name already exists.");
         scope.Cache.RemovedKeys.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_should_create_category_when_same_name_and_slug_only_exists_as_soft_deleted()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        await scope.SeedCategoryAsync("Electronics", "electronics", 1, softDeleted: true);
+        
+        var handler = new CreateCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new CreateCategoryCommand("Electronics", "electronics", null, true, 5);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().BeGreaterThan(0);
+
+        var activeCategory = await scope.DbContext.Categories.SingleAsync(c => c.Id == result.Data);
+        activeCategory.Name.Should().Be("Electronics");
+        activeCategory.Slug.Should().Be("electronics");
+        activeCategory.SoftDeleted.Should().BeFalse();
     }
 }
 
@@ -176,5 +197,64 @@ public class ChangeCategoryStatusCommandHandlerTests
         result.IsSuccessful.Should().BeFalse();
         result.StatusCode.Should().Be(404);
         result.Messages.Should().Contain("Category not found.");
+    }
+}
+
+public class RestoreCategoryCommandHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_restore_deleted_category_add_outbox_message_and_clear_caches()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var category = await scope.SeedCategoryAsync("Deleted Category", "deleted-category", 1, softDeleted: true);
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(category.Id);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().Be(category.Id);
+
+        var restored = await scope.DbContext.Categories.FirstOrDefaultAsync(c => c.Id == category.Id);
+        restored.Should().NotBeNull();
+        restored!.SoftDeleted.Should().BeFalse();
+        restored.DeletedAt.Should().BeNull();
+        restored.DeletedBy.Should().BeNull();
+
+        scope.Cache.RemovedKeys.Should().BeEquivalentTo(CategoryCacheKeys.All);
+        var outbox = await scope.DbContext.OutboxMessages.SingleAsync();
+        outbox.Type.Should().Contain(nameof(CategoryRestoredEvent));
+        outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_category_not_found()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(999);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(404);
+        result.Messages.Should().Contain("Category not found.");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_active_category_with_same_name_or_slug_exists()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        await scope.SeedCategoryAsync("Conflict Name", "unique-slug", 1, softDeleted: false);
+        var deletedCategory = await scope.SeedCategoryAsync("Conflict Name", "deleted-slug", 2, softDeleted: true);
+        
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(deletedCategory.Id);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(409);
+        result.Messages.Should().Contain("Cannot restore: An active category with the same name or slug already exists.");
     }
 }
