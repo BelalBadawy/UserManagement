@@ -1,47 +1,69 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Mediator;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
 {
-    public class ExportAuditTrailsQuery : IQuery<IResponseWrapper<byte[]>>
+    public sealed record ExportAuditTrailsQuery : IRequest<IResponseWrapper<byte[]>>
     {
-        public string? TableName { get; set; }
-        public string? EntityId { get; set; }
-        public string? ActionTypes { get; set; }
-        public string? FromDate { get; set; }
-        public string? ToDate { get; set; }
-        public int? UserId { get; set; }
-        public string ExportFormat { get; set; } = "excel";
+        public string? TableName { get; init; }
+        public string? EntityId { get; init; }
+        public string? ActionTypes { get; init; }
+        public string? FromDate { get; init; }
+        public string? ToDate { get; init; }
+        public int? UserId { get; init; }
+        public string ExportFormat { get; init; } = "excel";
     }
 
-    public class ExportAuditTrailsQueryHandler(IAuditTrailService auditTrailService)
-        : IQueryHandler<ExportAuditTrailsQuery, IResponseWrapper<byte[]>>
+    public sealed class ExportAuditTrailsQueryHandler(
+        IApplicationDbContext context,
+        IAuditTrailExportService auditTrailExportService)
+        : IRequestHandler<ExportAuditTrailsQuery, IResponseWrapper<byte[]>>
     {
-        private readonly IAuditTrailService _auditTrailService = auditTrailService;
+        private readonly IApplicationDbContext _context = context;
+        private readonly IAuditTrailExportService _auditTrailExportService = auditTrailExportService;
 
         public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportAuditTrailsQuery request, CancellationToken ct)
         {
-            var listResponse = await _auditTrailService.GetAuditTrailsListAsync(
-                request.TableName,
-                request.EntityId,
-                request.ActionTypes,
-                request.FromDate,
-                request.ToDate,
-                request.UserId,
-                ct);
+            var auditQuery = from audit in _context.AuditTrails.AsNoTracking()
+                             join user in _context.Users.AsNoTracking() on audit.UserId equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new AuditTrailQueryModel { Audit = audit, UserEmail = user != null ? user.Email : null };
 
-            if (!listResponse.IsSuccessful || listResponse.Data == null)
-            {
-                return ResponseWrapper<byte[]>.Fail(
-                    listResponse.Messages ?? new List<string> { "Failed to retrieve audit trails for export." },
-                    listResponse.StatusCode);
-            }
+            auditQuery = auditQuery
+                .ApplyAuditTrailFilters(
+                    request.UserId,
+                    request.TableName,
+                    request.EntityId,
+                    request.ActionTypes,
+                    request.FromDate,
+                    request.ToDate)
+                .ApplyAuditTrailSorting(null, null);
 
-            var fileBytes = await _auditTrailService.ExportAuditTrailsAsync(listResponse.Data, request.ExportFormat, ct);
+            var auditTrails = await auditQuery
+                .Select(a => new AuditTrailResponse(
+                    a.Audit.Id,
+                    a.Audit.UserId,
+                    a.UserEmail,
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
+                ))
+                .ToListAsync(ct);
+
+            var fileBytes = await _auditTrailExportService.ExportAuditTrailsAsync(auditTrails, request.ExportFormat, ct);
 
             return ResponseWrapper<byte[]>.Success(fileBytes);
         }

@@ -105,6 +105,26 @@ export function useDeleteCategory() {
   });
 }
 
+export function useRestoreCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (id: number) => categoriesApi.restore(id),
+    onSuccess: (response) => {
+      if (response.isSuccessful) {
+        toast.success('Category restored successfully!');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+      } else {
+        toast.error(response.messages[0] || 'Failed to restore category.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during restoration.');
+    },
+  });
+}
+
 export function useChangeCategoryStatus() {
   const queryClient = useQueryClient();
   const toast = useToast();

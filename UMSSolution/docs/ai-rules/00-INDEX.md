@@ -11,7 +11,7 @@ This index maps the development standards and procedural workflows established f
 | **Last Updated: 2026-06-10** | - | - | Playbook last revised date. |
 | [00-INDEX.md](00-INDEX.md) | Rule | All | A master index serving as the table of contents for all architectural rules and skill workflows. |
 | [01-backend-architecture.md](01-backend-architecture.md) | Rule | Backend | Enforces project dependency directions, layer boundaries, CQRS layouts, and Martinothamar's Mediator. |
-| [02-backend-coding-standards.md](02-backend-coding-standards.md) | Rule | Backend | Defines C# syntax styles, Minimal API extensions, pipeline validation, Mapster mappings, and ResponseWrapper contracts. |
+| [02-backend-coding-standards.md](02-backend-coding-standards.md) | Rule | Backend | Defines C# syntax styles, Minimal API extensions, pipeline validation, and ResponseWrapper contracts. |
 | [03-backend-data-and-infrastructure.md](03-backend-data-and-infrastructure.md) | Rule | Backend | Dictates EF Core configurations, migration workflows, DbContext abstraction, Identity services, and database providers. |
 | [04-backend-security.md](04-backend-security.md) | Rule | Backend | Outlines auth rate-limiting, JWT parameters, the AppPermission model, file uploads, and PII protection. |
 | [05-frontend-architecture.md](05-frontend-architecture.md) | Rule | Frontend | Specifies Vite/React folder structures, TypeScript interfaces, router configs, and state separation rules. |

@@ -1,43 +1,56 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Mediator;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
 
 namespace UMS.Application.Features.Categories.Queries.ExportCategories
 {
-    public class ExportCategoriesQuery : IQuery<IResponseWrapper<byte[]>>
+    public sealed record ExportCategoriesQuery : IRequest<IResponseWrapper<byte[]>>
     {
-        public string? SearchTerm { get; set; }
-        public bool? IsActive { get; set; }
-        public string? SortBy { get; set; }
-        public string? SortDirection { get; set; }
-        public string ExportFormat { get; set; } = "excel";
+        public string? SearchTerm { get; init; }
+        public bool? IsActive { get; init; }
+        public string? SortBy { get; init; }
+        public string? SortDirection { get; init; }
+        public string ExportFormat { get; init; } = "excel";
+        public bool IncludeDeleted { get; init; } = false;
     }
 
-    public class ExportCategoriesQueryHandler(ICategoryService categoryService)
-        : IQueryHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
+    public sealed class ExportCategoriesQueryHandler(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService,
+        ICategoryExportService categoryExportService)
+        : IRequestHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
     {
-        private readonly ICategoryService _categoryService = categoryService;
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly ICategoryExportService _categoryExportService = categoryExportService;
 
         public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportCategoriesQuery request, CancellationToken ct)
         {
-            var listResponse = await _categoryService.GetCategoriesListAsync(
-                request.SearchTerm,
-                request.IsActive,
-                request.SortBy,
-                request.SortDirection,
-                ct);
+            var categories = await _applicationDbContext.Categories
+                .AsNoTracking()
+                .ApplyCategoryFilters(_currentUserService, request.SearchTerm, request.IsActive, request.IncludeDeleted)
+                .ApplyCategorySorting(request.SortBy, request.SortDirection)
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.SoftDeleted,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
 
-            if (!listResponse.IsSuccessful || listResponse.Data == null)
-            {
-                return ResponseWrapper<byte[]>.Fail(
-                    listResponse.Messages ?? new List<string> { "Failed to retrieve categories for export." },
-                    listResponse.StatusCode);
-            }
-
-            var fileBytes = await _categoryService.ExportCategoriesAsync(listResponse.Data, request.ExportFormat, ct);
+            var fileBytes = await _categoryExportService.ExportCategoriesAsync(categories, request.ExportFormat, ct);
 
             return ResponseWrapper<byte[]>.Success(fileBytes);
         }

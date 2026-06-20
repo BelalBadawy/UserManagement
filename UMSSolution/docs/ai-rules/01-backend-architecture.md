@@ -52,6 +52,8 @@ The solution follows Clean Architecture dependency flow:
 - **What belongs here:** CQRS commands, queries, command/query handlers, validation rules, input DTOs, response models, mapping profiles, and Mediator pipeline behaviors.
 - **Rules:** Must depend only on Domain abstractions. Must not reference concrete infrastructure implementations (such as database context classes, email dispatch configurations, or filesystem writers).
   - *Note: `IApplicationDbContext` is defined in `UMS.Application.Interfaces.Common`, not Domain, because it represents an application-level persistence contract. Domain entities remain completely persistence-ignorant.*
+  - **CRUD Service Ban:** Business-feature service interfaces (e.g., `ICategoryService`, `IAuditTrailService`) are strictly forbidden. All data retrieval (reads) and mutations (writes) must flow exclusively through Mediator Commands and Queries handled by `IRequestHandler` implementations. Do not create service facades to orchestrate database queries, filtering, sorting, or pagination.
+  - **Infrastructure Abstractions:** Interfaces defined in `UMS.Application.Interfaces.Common` (e.g., `IFileStorageService`, `ICacheService`, `ICategoryExportService`) are permitted *only* for abstracting external libraries or strict technical infrastructure concerns, never for encapsulating business logic or CRUD operations.
 
 ### UMS.Domain (Core Business Model & Abstractions)
 - **What belongs here:** Entities, Value Objects, Domain Events, Enums, Custom Exceptions, and core infrastructure interfaces (such as repository or DB context interfaces).
@@ -60,7 +62,7 @@ The solution follows Clean Architecture dependency flow:
 
 ### UMS.Infrastructure (External Concerns)
 - **What belongs here:** Entity Framework DB context, migrations, database configurations, ASP.NET Core Identity store implementations, JWT generation, file storage, email providers, and caching implementations.
-- **Rules:** Details of connection strings, external APIs, and infrastructure wiring are encapsulated here and exposed to the Application layer via interfaces defined in Domain or Application.
+- **Rules:** Infrastructure services may only implement technical abstractions defined in the Application layer (e.g., generating PDFs via QuestPDF, Excel via ClosedXML, SMTP via FluentEmail). Infrastructure services must NEVER contain business logic, LINQ queries for CRUD operations, or Domain orchestration. Database querying must be handled exclusively by Mediator Handlers in the Application layer via `IApplicationDbContext`.
 
 ---
 
@@ -70,7 +72,7 @@ The solution follows Clean Architecture dependency flow:
 - **MediatR is strictly forbidden.** Do not register or use MediatR assemblies or namespaces.
 - **Mediator is required.** The project uses Martinothamar's `Mediator` which relies on source generators.
 - **Command and Query definition rules:**
-  - Every Query or Command must implement `IRequest<IResponseWrapper<T>>` or `IRequest<IResponseWrapper>`.
+  - Every Query or Command must implement `IRequest<TResponse>` (typically `IRequest<IResponseWrapper<T>>` or `IRequest<IResponseWrapper<T>>`). Do not use `ICommand` or `IQuery`.
   - Every Handler must implement `IRequestHandler<TRequest, TResponse>`, where the `Handle` method signature MUST return `ValueTask<TResponse>` (NOT `Task<TResponse>`).
 - **`IValidateMe` Pipeline Rule:**
   - Every Query or Command that requires validation must also implement the `IValidateMe` marker interface (defined in `UMS.Application.Interfaces.Common`).
@@ -103,12 +105,15 @@ Feature logic must be organized under `UMS.Application/Features/{FeatureName}/` 
 - **`Features/{FeatureName}/Events/`**
   - Contains feature-related events (e.g., `CategoryCreatedEvent.cs`, `CategoryUpdatedEvent.cs`).
 - **`Features/{FeatureName}/`**
-  - Contains feature service interface `I{FeatureName}Service.cs` (e.g., `ICategoryService.cs` defining paged listing, lookup listing, and report exports), helper classes (e.g. `CategoryWriteGuards.cs` for unique verification, `CategoryCacheKeys.cs` for cache management).
+  - Contains shared query extensions (e.g., `CategoryQueryExtensions.cs` for `IQueryable` filtering/sorting to prevent DRY violations across handlers), helper classes (e.g. `CategoryWriteGuards.cs`), and cache key constants. **Do not place `I{FeatureName}Service.cs` here.**
 
 ### Naming Conventions
 - Commands: `{Verb}{Noun}Command` (e.g., `CreateCategoryCommand`, `DeleteCategoryCommand`).
 - Queries: `{Verb}{Noun}Query` (e.g., `GetCategoryByIdQuery`, `GetCategoriesPagedQuery`).
 - Handlers: `{CommandOrQueryName}Handler` (e.g., `CreateCategoryCommandHandler`, `GetCategoriesPagedQueryHandler`).
+
+### Strict Ban on Application Service Facades
+Never create an `I[Entity]Service` interface and implementation to handle database reads, writes, or business logic. This violates CQRS. Querying logic (filtering, joining, pagination) must live inside `IRequestHandler` Query handlers. Write logic must live inside `IRequestHandler` Command handlers. If multiple handlers need the same filtering logic, extract it into a static `IQueryable<T>` extension method (e.g., `ApplyCategoryFilters`) in the feature folder.
 
 ---
 

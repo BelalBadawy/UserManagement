@@ -15,6 +15,7 @@ namespace UMS.Application.Interfaces.Common
         DbSet<AuditTrail> AuditTrails { get; }
         DbSet<LogUserActivity> LogUserActivities { get; }
         DbSet<OutboxMessage> OutboxMessages { get; }
+        DbSet<User> Users { get; }
      
 
         void AddOutboxMessage<TNotification>(TNotification notification) where TNotification : class;

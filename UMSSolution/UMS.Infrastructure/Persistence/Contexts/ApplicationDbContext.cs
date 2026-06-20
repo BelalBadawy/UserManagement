@@ -46,6 +46,7 @@ namespace UMS.Infrastructure.Persistence.Contexts
         public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
         public DbSet<LogUserActivity> LogUserActivities => Set<LogUserActivity>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        DbSet<User> IApplicationDbContext.Users => Set<User>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -158,14 +159,31 @@ namespace UMS.Infrastructure.Persistence.Contexts
 
             if (property.Metadata.IsPrimaryKey())
             {
-                auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                if (property.IsTemporary)
+                {
+                    // It's a DB-generated key (e.g., auto-increment int). 
+                    // Defer it to OnAfterSaveChanges.
+                    auditEntry.TemporaryProperties.Add(property);
+                }
+                else
+                {
+                    auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                }
                 continue;
             }
 
             switch (entry.State)
             {
                 case EntityState.Added:
-                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    if (property.IsTemporary)
+                    {
+                        // Defer other DB-generated values (like defaults/computed columns)
+                        auditEntry.TemporaryProperties.Add(property);
+                    }
+                    else
+                    {
+                        auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    }
                     break;
                 case EntityState.Deleted:
                     auditEntry.OldValues[propertyName] = property.OriginalValue!;
@@ -243,6 +261,12 @@ namespace UMS.Infrastructure.Persistence.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>(builder =>
+            {
+                builder.ToView("Users", "Identity");
+                builder.HasKey(u => u.Id);
+            });
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 

@@ -12,6 +12,7 @@ using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
 using UMS.Application.Features.Categories.Queries.ExportCategories;
+using UMS.Application.Features.Categories.Commands.RestoreCategory;
 using UMS.Application.Authorization;
 
 namespace UMS.API.Endpoints
@@ -33,10 +34,10 @@ namespace UMS.API.Endpoints
             .WithName("GetAllCategories")
             .AllowAnonymous();
 
-            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter, CancellationToken ct) =>
+            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter, bool includeDeleted = false, CancellationToken ct = default) =>
             {
                 // Use object initializer syntax instead of a constructor
-                var query = new GetCategoriesPagedQuery { PagedFilterRequest = filter };
+                var query = new GetCategoriesPagedQuery { PagedFilterRequest = filter, IncludeDeleted = includeDeleted };
                 var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
@@ -143,6 +144,16 @@ namespace UMS.API.Endpoints
             .Produces<IResponseWrapper>()
             .WithName("DeleteCategory")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Delete));
+
+            group.MapPost("/{id:int}/restore", async (int id, ISender sender, CancellationToken ct) =>
+            {
+                var command = new RestoreCategoryCommand(id);
+                var response = await sender.Send(command, ct);
+                return response.ToApiResult();
+            })
+            .Produces<IResponseWrapper<int>>()
+            .WithName("RestoreCategory")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
 
             return app;
         }

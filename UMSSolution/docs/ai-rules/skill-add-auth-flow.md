@@ -7,26 +7,26 @@
 ---
 
 ## Related Rules
-- [01-backend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/01-backend-architecture.md) (Dependency boundaries, endpoint layouts)
-- [04-backend-security.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/04-backend-security.md) (JWT authentication parameters, rate limit bounds, AppPermission architecture)
-- [05-frontend-architecture.md](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/docs/ai-rules/05-frontend-architecture.md) (Route guards, protected routes components)
+- [01-backend-architecture.md](docs/ai-rules/01-backend-architecture.md) (Dependency boundaries, endpoint layouts)
+- [04-backend-security.md](docs/ai-rules/04-backend-security.md) (JWT authentication parameters, rate limit bounds, AppPermission architecture)
+- [05-frontend-architecture.md](docs/ai-rules/05-frontend-architecture.md) (Route guards, protected routes components)
 
 ---
 
 ## Real Example Reference
-- **System Permissions Constants**: [AppPermissions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Authorization/AppPermissions.cs)
-- **Runtime Policy Provider Registration**: [IdentityServiceExtensions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/IdentityServiceExtensions.cs)
-- **Runtime Policy Interception**: [PermissionPolicyProvider.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Permissions/PermissionPolicyProvider.cs)
-- **Runtime Permission Handler**: [PermissionAuthorizationHandler.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Infrastructure/Identity/Permissions/PermissionAuthorizationHandler.cs)
-- **Frontend Protected Guard Component**: [ProtectedRoute.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/ProtectedRoute.tsx)
-- **Frontend Authentication Context**: [AuthContext.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/AuthContext.tsx)
+- **System Permissions Constants**: [UMS.Application/Authorization/AppPermissions.cs](UMS.Application/Authorization/AppPermissions.cs)
+- **Runtime Policy Provider Registration**: [UMS.Infrastructure/Identity/IdentityServiceExtensions.cs](UMS.Infrastructure/Identity/IdentityServiceExtensions.cs)
+- **Runtime Policy Interception**: [UMS.Infrastructure/Identity/Permissions/PermissionPolicyProvider.cs](UMS.Infrastructure/Identity/Permissions/PermissionPolicyProvider.cs)
+- **Runtime Permission Handler**: [UMS.Infrastructure/Identity/Permissions/PermissionAuthorizationHandler.cs](UMS.Infrastructure/Identity/Permissions/PermissionAuthorizationHandler.cs)
+- **Frontend Protected Guard Component**: [UMS.Client/src/components/ProtectedRoute.tsx](UMS.Client/src/components/ProtectedRoute.tsx)
+- **Frontend Authentication Context**: [UMS.Client/src/components/AuthContext.tsx](UMS.Client/src/components/AuthContext.tsx)
 
 ---
 
 ## Procedural Workflow
 
 ### Step 1: Define Permission Constants
-1. Open the system permissions configuration file: [AppPermissions.cs](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Application/Authorization/AppPermissions.cs).
+1. Open the system permissions configuration file: [UMS.Application/Authorization/AppPermissions.cs](UMS.Application/Authorization/AppPermissions.cs).
 2. Check if the target Service, Feature, or Action is already declared. If not, add them as `public const string` values inside the static classes:
    ```csharp
    public static class AppService
@@ -75,7 +75,7 @@ Developers must understand how policy strings are parsed at runtime by ASP.NET C
 ### Step 4: Handle Claims & Silent Refresh on Frontend
 1. **Claims Decoding**: The client application decodes the JWT access token using `decodeToken(storedToken)` inside `jwt.ts` and loads permission lists into the `user` state inside `AuthContext.tsx`.
 2. **Silent Token Refresh**:
-   To prevent concurrent API requests from failing during token refreshes, the refresh sequence is handled at the routing level in [ProtectedRoute.tsx](file:///d:/_MyFolder/MyWorkSpace/UserManagement/UMSSolution/UMS.Client/src/components/ProtectedRoute.tsx):
+    To prevent concurrent API requests from failing during token refreshes, the refresh sequence is handled at the routing level in [UMS.Client/src/components/ProtectedRoute.tsx](UMS.Client/src/components/ProtectedRoute.tsx):
    - The route guard `ProtectedRoute` checks token expiration using `isTokenExpired(storedToken)` inside a React `useEffect` callback before rendering route contents.
    - If the token is expired, it runs `await refreshAccessToken()`.
    - The route displays a loading spinner and blocks child page components from mounting or making API requests until the refresh completes.

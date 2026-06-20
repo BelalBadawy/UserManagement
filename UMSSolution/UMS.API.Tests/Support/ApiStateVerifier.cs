@@ -80,4 +80,16 @@ public sealed class ApiStateVerifier
                       select role.Name!)
             .ToListAsync(ct);
     }
+
+    public async Task<AuditTrail?> GetLastAuditTrailForTableAsync(string tableName, CancellationToken ct = default)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await dbContext.AuditTrails
+            .AsNoTracking()
+            .Where(x => x.TableName == tableName)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync(ct);
+    }
 }

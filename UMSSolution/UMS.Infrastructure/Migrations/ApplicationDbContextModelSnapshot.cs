@@ -133,11 +133,13 @@ namespace UMS.Infrastructure.Migrations
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("UX_Categories_NormalizedName");
+                        .HasDatabaseName("UX_Categories_NormalizedName")
+                        .HasFilter("[SoftDeleted] = 0");
 
                     b.HasIndex("NormalizedSlug")
                         .IsUnique()
-                        .HasDatabaseName("UX_Categories_NormalizedSlug");
+                        .HasDatabaseName("UX_Categories_NormalizedSlug")
+                        .HasFilter("[SoftDeleted] = 0");
 
                     b.HasIndex("ParentId");
 
@@ -222,6 +224,29 @@ namespace UMS.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("OutboxMessages");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("Users", "Identity");
                 });
 
             modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>

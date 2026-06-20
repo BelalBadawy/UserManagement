@@ -12,6 +12,7 @@ using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
 using Moq;
 using UMS.Application.Interfaces.Common;
 using UMS.Application.Tests.Support.Categories;
+using UMS.Application.Features.Categories.Queries.GetCategoriesList;
 
 namespace UMS.Application.Tests.Handlers.Categories;
 
@@ -123,12 +124,18 @@ public class GetCategoriesPagedQueryHandlerTests
     [Fact]
     public async Task Handle_should_filter_sort_and_page_active_categories()
     {
-        var mockCategoryService = new Mock<ICategoryService>();
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+
+        await scope.SeedCategoryAsync("Alpha", "alpha", 1, isActive: false);
+        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
+        await scope.SeedCategoryAsync("Gamma", "gamma", 3, isActive: true);
+
         var query = new GetCategoriesPagedQuery
         {
             PagedFilterRequest = new()
             {
                 SearchTerm = "a",
+                IsActive = true,
                 SortBy = "name",
                 SortDirection = "desc",
                 PageNumber = 1,
@@ -136,27 +143,44 @@ public class GetCategoriesPagedQueryHandlerTests
             }
         };
 
-        var mockPagedResult = PagedResult<CategoryResponse>.Create(
-            new List<CategoryResponse>
-            {
-                new(3, "Gamma", "gamma", null, 1, true, Array.Empty<byte>()),
-                new(2, "Beta", "beta", null, 2, true, Array.Empty<byte>())
-            },
-            3,
-            1,
-            2);
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(u => u.IsAuthenticated()).Returns(true);
+        mockCurrentUserService.Setup(u => u.HasClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
 
-        mockCategoryService
-            .Setup(s => s.GetCategoriesPagedQueryAsync(query.PagedFilterRequest, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ResponseWrapper<PagedResult<CategoryResponse>>.Success(mockPagedResult));
-
-        var handler = new GetCategoriesPagedQueryHandler(mockCategoryService.Object);
+        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext, mockCurrentUserService.Object);
 
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.IsSuccessful.Should().BeTrue();
-        result.Data!.TotalCount.Should().Be(3);
+        result.Data!.TotalCount.Should().Be(2);
         result.Data.Data.Select(x => x.Name).Should().Equal("Gamma", "Beta");
+    }
+}
+
+public class GetCategoriesListQueryHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_filter_and_sort_categories()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+
+        await scope.SeedCategoryAsync("Alpha", "alpha", 1, isActive: false);
+        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
+        await scope.SeedCategoryAsync("Gamma", "gamma", 3, isActive: true);
+
+        var query = new GetCategoriesListQuery("a", true, "name", "desc");
+
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(u => u.IsAuthenticated()).Returns(true);
+        mockCurrentUserService.Setup(u => u.HasClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+
+        var handler = new GetCategoriesListQueryHandler(scope.DbContext, mockCurrentUserService.Object);
+
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Count.Should().Be(2);
+        result.Data.Select(x => x.Name).Should().Equal("Gamma", "Beta");
     }
 }
 

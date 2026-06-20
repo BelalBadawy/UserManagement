@@ -1,4 +1,4 @@
-﻿
+
 using System.Net;
 using System.Text.Json;
 using UMS.Application.Dtos.Wrappers;
@@ -39,7 +39,7 @@ namespace UMS.API
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception ex, bool isDevelopment)
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex, bool isDevelopment)
         {
             context.Response.Clear();
 

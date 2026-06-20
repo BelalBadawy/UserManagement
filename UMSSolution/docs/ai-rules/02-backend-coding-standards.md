@@ -67,9 +67,7 @@ The application intercepts validation requests and handles errors prior to handl
 
 ## 4. Mapping Guidelines (Writes vs Reads)
 
-- **Mapster Explicit Ban:** Mapster `.Adapt()` is strictly forbidden throughout the codebase. The project relies on manual LINQ projections for reads and explicit property assignment for writes to ensure full control, prevent N+1 queries, and guarantee input sanitization.
-- **Query Projections (Reads):** For database queries, ALWAYS use manual LINQ projections `.Select(x => new Dto(...))` to ensure optimal SQL generation and prevent N+1 issues. Do NOT use `.Adapt()` on `IQueryable`.
-- **Command Mappings (Writes):** For mapping incoming requests to Domain entities inside Command handlers, do NOT use Mapster's `.Adapt()`. Perform explicit manual property assignments instead to ensure full control over input sanitization (e.g. `.Trim()`), case-insensitive string normalization (e.g. `NormalizedName = CategoryWriteGuards.NormalizeKey(request.Name)`), hierarchical parent validations, and concurrency parameters.
+Mapping Strategy: Manual LINQ projections + explicit mapping only. `.Adapt()` or any third-party object mapping libraries are forbidden. For reads, use manual LINQ projections `.Select(x => new Dto(...))`. For writes, use explicit manual property assignments to ensure full control over input sanitization and normalization.
 
 ---
 

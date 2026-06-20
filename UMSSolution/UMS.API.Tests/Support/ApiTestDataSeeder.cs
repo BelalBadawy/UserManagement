@@ -27,6 +27,7 @@ public sealed class ApiTestDataSeeder
         bool isActive = true,
         int sortOrder = 1,
         int? parentId = null,
+        bool softDeleted = false,
         CancellationToken ct = default)
     {
         using var scope = _factory.Services.CreateScope();
@@ -43,9 +44,19 @@ public sealed class ApiTestDataSeeder
                 $"Failed to seed category '{name}': {string.Join("; ", response.Messages)}");
         }
 
-        return await dbContext.Categories
-            .AsNoTracking()
-            .SingleAsync(category => category.Id == response.Data, ct);
+        var category = await dbContext.Categories
+            .IgnoreQueryFilters()
+            .SingleAsync(c => c.Id == response.Data, ct);
+
+        if (softDeleted)
+        {
+            category.SoftDeleted = true;
+            category.DeletedAt = DateTime.UtcNow;
+            category.DeletedBy = 1;
+            await dbContext.SaveChangesAsync(ct);
+        }
+
+        return category;
     }
 
     public void ClearCategoryCaches()

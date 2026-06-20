@@ -12,8 +12,6 @@ using UMS.Infrastructure.Persistence.DbInitializers;
 using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
 using UMS.Infrastructure.Services.Common;
-using UMS.Application.Features.AuditTrails;
-using UMS.Application.Features.Categories;
 using QuestPDF.Infrastructure;
 
 namespace UMS.Infrastructure
@@ -53,8 +51,8 @@ namespace UMS.Infrastructure
                 .AddScoped<IEmailService, MailSenderService>()
                 .AddScoped<IDateTimeService, DateTimeService>()
                 .AddScoped<IFileStorageService, LocalFileStorageService>()
-                .AddScoped<IAuditTrailService, AuditTrailService>()
-                .AddScoped<ICategoryService, CategoryService>()
+                .AddScoped<IAuditTrailExportService, AuditTrailExportService>()
+                .AddScoped<ICategoryExportService, CategoryExportService>()
                 .AddFeatures();
         }
 
