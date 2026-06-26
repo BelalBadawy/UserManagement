@@ -1,0 +1,11 @@
+using SampleApp.Application.Dtos.Common;
+
+namespace SampleApp.Application.Interfaces.Common
+{
+    public interface IFileStorageService
+    {
+        Task<string> SaveFileAsync(FileData file, string folderName, CancellationToken ct = default);
+
+        void DeleteFile(string fileName, string folderName);
+    }
+}

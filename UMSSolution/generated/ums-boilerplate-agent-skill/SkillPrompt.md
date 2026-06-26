@@ -64,6 +64,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - Entities\Category.cs
   - Entities\LogUserActivity.cs
   - Entities\OutboxMessage.cs
+  - Entities\User.cs
   - Enums\DomainEnums.cs
   - GlobalUsings.cs
   - Interfaces\IAuditable.cs
@@ -102,27 +103,33 @@ If script execution is not possible, reproduce the same workflow manually:
   - Dtos\Wrappers\ResponseWrapper.cs
   - Dtos\Wrappers\ResponseWrapperExtension.cs
   - Enums\AppEnums.cs
-  - Features\AuditTrails\IAuditTrailService.cs
+  - Features\AuditTrails\Queries\AuditTrailQueryExtensions.cs
   - Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs
+  - Features\AuditTrails\Queries\GetAuditTrailsList\GetAuditTrailsListQuery.cs
   - Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs
   - Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs
   - Features\Categories\CategoryCacheKeys.cs
   - Features\Categories\Commands\CategoryWriteGuards.cs
+  - Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs
   - Features\Categories\Commands\Create\CreateCategoryCommand.cs
   - Features\Categories\Commands\Create\CreateCategoryCommandValidator.cs
   - Features\Categories\Commands\Delete\DeleteCategoryCommand.cs
   - Features\Categories\Commands\Delete\DeleteCategoryCommandValidator.cs
+  - Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs
+  - Features\Categories\Commands\RestoreCategory\RestoreCategoryCommandValidator.cs
   - Features\Categories\Commands\Update\UpdateCategoryCommand.cs
   - Features\Categories\Commands\Update\UpdateCategoryCommandValidator.cs
   - Features\Categories\Events\CategoryCreatedEvent.cs
   - Features\Categories\Events\CategoryDeletedEvent.cs
+  - Features\Categories\Events\CategoryRestoredEvent.cs
   - Features\Categories\Events\CategoryUpdatedEvent.cs
-  - Features\Categories\ICategoryService.cs
+  - Features\Categories\Queries\CategoryQueryExtensions.cs
   - Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs
   - Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs
   - Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs
   - Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs
   - Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs
+  - Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs
   - Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs
   - Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs
   - Features\Categories\Queries\GetCategoriesPagedAdmin\GetCategoriesPagedAdminQuery.cs
@@ -229,8 +236,10 @@ If script execution is not possible, reproduce the same workflow manually:
   - GlobalUsings.cs
   - Interfaces\Common\IApiRequest.cs
   - Interfaces\Common\IApplicationDbContext.cs
+  - Interfaces\Common\IAuditTrailExportService.cs
   - Interfaces\Common\ICacheAbleMediatorQuery.cs
   - Interfaces\Common\ICacheService.cs
+  - Interfaces\Common\ICategoryExportService.cs
   - Interfaces\Common\ICurrentUserService.cs
   - Interfaces\Common\IDateTimeService.cs
   - Interfaces\Common\IEmailService.cs
@@ -278,6 +287,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - Handlers\Users\UserRegistrationCommandHandlerTests.cs
   - Support\Categories\CategoryHandlerTestSupport.cs
   - UMS.Application.Tests.csproj
+  - Validation\AuditTrails\GetAuditTrailsPagedQueryValidatorTests.cs
+  - Validation\Categories\ChangeCategoryStatusCommandValidatorTests.cs
   - Validation\Categories\CreateCategoryCommandValidatorTests.cs
   - Validation\Categories\DeleteCategoryCommandValidatorTests.cs
   - Validation\Categories\GetCategoriesPagedAdminQueryValidatorTests.cs
@@ -349,6 +360,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - Migrations\20260425071933_RemoveRefreshTokenTable.Designer.cs
   - Migrations\20260601174237_AddAuditTrailIpAddress.cs
   - Migrations\20260601174237_AddAuditTrailIpAddress.Designer.cs
+  - Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.cs
+  - Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs
   - Migrations\ApplicationDbContextModelSnapshot.cs
   - Persistence\Audit\AuditEntry.cs
   - Persistence\Constants\SchemaNames.cs
@@ -357,8 +370,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - Persistence\Interceptors\TrimStringInterceptor.cs
   - Persistence\Seeds\ApplicationDbSeeder.cs
   - ServiceCollectionExtensions.cs
-  - Services\AuditTrailService.cs
-  - Services\CategoryService.cs
+  - Services\AuditTrailExportService.cs
+  - Services\CategoryExportService.cs
   - Services\Common\CurrentUserService.cs
   - Services\Common\DateTimeService.cs
   - Services\Common\DistributedCacheService.cs
@@ -410,6 +423,7 @@ If script execution is not possible, reproduce the same workflow manually:
   - .graphifyignore
   - Contracts\ResponseContract.cs
   - Endpoints\AccountEndpointsTests.cs
+  - Endpoints\AuditTrailEndpointsTests.cs
   - Endpoints\CategoryEndpointsTests.cs
   - Endpoints\ConfirmTwoFactorAuthEndpointTests.cs
   - Endpoints\DisableTwoFactorAuthEndpointTests.cs
@@ -452,6 +466,8 @@ If script execution is not possible, reproduce the same workflow manually:
   - src\components\EntityDiffViewer.tsx
   - src\components\PasswordStrengthMeter.tsx
   - src\components\ProtectedRoute.tsx
+  - src\components\shared\StatusConfirmationDialog.tsx
+  - src\components\shared\StatusSwitch.tsx
   - src\components\ui\badge.tsx
   - src\components\ui\button.tsx
   - src\components\ui\calendar.tsx
@@ -465,7 +481,9 @@ If script execution is not possible, reproduce the same workflow manually:
   - src\components\ui\popover.tsx
   - src\components\ui\select.tsx
   - src\components\ui\sheet.tsx
+  - src\components\ui\switch.tsx
   - src\components\ui\toast.tsx
+  - src\components\ui\tooltip.tsx
   - src\hooks\useAuditLogs.ts
   - src\hooks\useCategories.ts
   - src\hooks\useUsers.test.tsx
@@ -600,6 +618,11 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:4:using UMS.API.Tests.Fixtures;
 - UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:5:using UMS.API.Tests.Support;
 - UMS.API.Tests\Endpoints\AccountEndpointsTests.cs:7:namespace UMS.API.Tests.Endpoints;
+- UMS.API.Tests\Endpoints\AuditTrailEndpointsTests.cs:3:using UMS.Application.Authorization;
+- UMS.API.Tests\Endpoints\AuditTrailEndpointsTests.cs:4:using UMS.API.Tests.Contracts;
+- UMS.API.Tests\Endpoints\AuditTrailEndpointsTests.cs:5:using UMS.API.Tests.Fixtures;
+- UMS.API.Tests\Endpoints\AuditTrailEndpointsTests.cs:6:using UMS.API.Tests.Support;
+- UMS.API.Tests\Endpoints\AuditTrailEndpointsTests.cs:8:namespace UMS.API.Tests.Endpoints;
 - UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:3:using UMS.Application.Authorization;
 - UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:4:using UMS.API.Tests.Contracts;
 - UMS.API.Tests\Endpoints\CategoryEndpointsTests.cs:5:using UMS.API.Tests.Fixtures;
@@ -696,13 +719,15 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.API\Endpoints\CategoryEndpoints.cs:6:using UMS.Application.Features.Categories.Commands.Create;
 - UMS.API\Endpoints\CategoryEndpoints.cs:7:using UMS.Application.Features.Categories.Commands.Delete;
 - UMS.API\Endpoints\CategoryEndpoints.cs:8:using UMS.Application.Features.Categories.Commands.Update;
-- UMS.API\Endpoints\CategoryEndpoints.cs:9:using UMS.Application.Features.Categories.Queries.GetAllCategories;
-- UMS.API\Endpoints\CategoryEndpoints.cs:10:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
-- UMS.API\Endpoints\CategoryEndpoints.cs:11:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.API\Endpoints\CategoryEndpoints.cs:12:using UMS.Application.Features.Categories.Queries.GetCategoryById;
-- UMS.API\Endpoints\CategoryEndpoints.cs:13:using UMS.Application.Features.Categories.Queries.ExportCategories;
-- UMS.API\Endpoints\CategoryEndpoints.cs:14:using UMS.Application.Authorization;
-- UMS.API\Endpoints\CategoryEndpoints.cs:16:namespace UMS.API.Endpoints
+- UMS.API\Endpoints\CategoryEndpoints.cs:9:using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+- UMS.API\Endpoints\CategoryEndpoints.cs:10:using UMS.Application.Features.Categories.Queries.GetAllCategories;
+- UMS.API\Endpoints\CategoryEndpoints.cs:11:using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
+- UMS.API\Endpoints\CategoryEndpoints.cs:12:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.API\Endpoints\CategoryEndpoints.cs:13:using UMS.Application.Features.Categories.Queries.GetCategoryById;
+- UMS.API\Endpoints\CategoryEndpoints.cs:14:using UMS.Application.Features.Categories.Queries.ExportCategories;
+- UMS.API\Endpoints\CategoryEndpoints.cs:15:using UMS.Application.Features.Categories.Commands.RestoreCategory;
+- UMS.API\Endpoints\CategoryEndpoints.cs:16:using UMS.Application.Authorization;
+- UMS.API\Endpoints\CategoryEndpoints.cs:18:namespace UMS.API.Endpoints
 - UMS.API\Endpoints\RoleEndpoints.cs:2:using UMS.API.Extensions;
 - UMS.API\Endpoints\RoleEndpoints.cs:3:using UMS.Application.Dtos.Wrappers;
 - UMS.API\Endpoints\RoleEndpoints.cs:4:using UMS.Application.Features.Roles;
@@ -758,9 +783,11 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:3:using UMS.Application.Features.Categories.Commands.Create;
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:4:using UMS.Application.Features.Categories.Commands.Delete;
 - UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:5:using UMS.Application.Features.Categories.Commands.Update;
-- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:6:using UMS.Application.Features.Categories.Events;
-- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:7:using UMS.Application.Tests.Support.Categories;
-- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:9:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:6:using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:7:using UMS.Application.Features.Categories.Commands.RestoreCategory;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:8:using UMS.Application.Features.Categories.Events;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:9:using UMS.Application.Tests.Support.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryCommandHandlerTests.cs:11:namespace UMS.Application.Tests.Handlers.Categories;
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:2:using UMS.Application.Dtos.Pagination;
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:3:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:4:using UMS.Application.Features.Categories;
@@ -773,12 +800,14 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:11:using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:13:using UMS.Application.Interfaces.Common;
 - UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:14:using UMS.Application.Tests.Support.Categories;
-- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:16:namespace UMS.Application.Tests.Handlers.Categories;
-- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:7:using UMS.Application.Dtos.Wrappers;
-- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:8:using UMS.Application.Features.Categories;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:15:using UMS.Application.Features.Categories.Queries.GetCategoriesList;
+- UMS.Application.Tests\Handlers\Categories\CategoryQueryHandlerTests.cs:17:namespace UMS.Application.Tests.Handlers.Categories;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:8:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:9:using UMS.Application.Features.Categories.Queries.ExportCategories;
 - UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:10:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:13:namespace UMS.Application.Tests.Handlers.Categories
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:11:using UMS.Application.Interfaces.Common;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:12:using UMS.Application.Tests.Support.Categories;
+- UMS.Application.Tests\Handlers\Categories\ExportCategoriesQueryHandlerTests.cs:15:namespace UMS.Application.Tests.Handlers.Categories
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:1:using UMS.Application.Dtos.Wrappers;
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:2:using UMS.Application.Features.Roles;
 - UMS.Application.Tests\Handlers\Roles\RoleHandlerTests.cs:3:using UMS.Application.Features.Roles.Commands;
@@ -927,6 +956,12 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application.Tests\Support\Categories\CategoryHandlerTestSupport.cs:8:namespace UMS.Application.Tests.Support.Categories;
 - UMS.Application.Tests\UMS.Application.Tests.csproj:39:<ProjectReference Include="..\UMS.Application\UMS.Application.csproj" />
 - UMS.Application.Tests\UMS.Application.Tests.csproj:40:<ProjectReference Include="..\UMS.Domain\UMS.Domain.csproj" />
+- UMS.Application.Tests\Validation\AuditTrails\GetAuditTrailsPagedQueryValidatorTests.cs:3:using UMS.Application.Dtos.Pagination;
+- UMS.Application.Tests\Validation\AuditTrails\GetAuditTrailsPagedQueryValidatorTests.cs:4:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Application.Tests\Validation\AuditTrails\GetAuditTrailsPagedQueryValidatorTests.cs:5:using UMS.Application.Tests.Fixtures;
+- UMS.Application.Tests\Validation\AuditTrails\GetAuditTrailsPagedQueryValidatorTests.cs:7:namespace UMS.Application.Tests.Validation.AuditTrails;
+- UMS.Application.Tests\Validation\Categories\ChangeCategoryStatusCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+- UMS.Application.Tests\Validation\Categories\ChangeCategoryStatusCommandValidatorTests.cs:4:namespace UMS.Application.Tests.Validation.Categories;
 - UMS.Application.Tests\Validation\Categories\CreateCategoryCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.Create;
 - UMS.Application.Tests\Validation\Categories\CreateCategoryCommandValidatorTests.cs:3:namespace UMS.Application.Tests.Validation.Categories;
 - UMS.Application.Tests\Validation\Categories\DeleteCategoryCommandValidatorTests.cs:1:using UMS.Application.Features.Categories.Commands.Delete;
@@ -1053,21 +1088,30 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Dtos\Wrappers\ResponseWrapper.cs:1:namespace UMS.Application.Dtos.Wrappers
 - UMS.Application\Dtos\Wrappers\ResponseWrapperExtension.cs:3:namespace UMS.Application.Dtos.Wrappers
 - UMS.Application\Enums\AppEnums.cs:1:namespace UMS.Application.Enums
-- UMS.Application\Features\AuditTrails\IAuditTrailService.cs:1:using UMS.Application.Dtos.Pagination;
-- UMS.Application\Features\AuditTrails\IAuditTrailService.cs:2:using UMS.Application.Dtos.Wrappers;
-- UMS.Application\Features\AuditTrails\IAuditTrailService.cs:3:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
-- UMS.Application\Features\AuditTrails\IAuditTrailService.cs:5:namespace UMS.Application.Features.AuditTrails
-- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:5:using UMS.Application.Dtos.Wrappers;
-- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:6:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
-- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:8:namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
-- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:2:using UMS.Application.Dtos.Pagination;
-- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:3:using UMS.Application.Dtos.Wrappers;
-- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:4:using UMS.Application.Interfaces.Common;
-- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:6:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
+- UMS.Application\Features\AuditTrails\Queries\AuditTrailQueryExtensions.cs:4:using UMS.Domain.Entities;
+- UMS.Application\Features\AuditTrails\Queries\AuditTrailQueryExtensions.cs:5:using UMS.Domain.Enums;
+- UMS.Application\Features\AuditTrails\Queries\AuditTrailQueryExtensions.cs:7:namespace UMS.Application.Features.AuditTrails.Queries
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:9:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:10:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\AuditTrails\Queries\ExportAuditTrails\ExportAuditTrailsQuery.cs:12:namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsList\GetAuditTrailsListQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsList\GetAuditTrailsListQuery.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsList\GetAuditTrailsListQuery.cs:10:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsList\GetAuditTrailsListQuery.cs:12:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsList
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:7:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQuery.cs:11:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs:2:using UMS.Application.Dtos.Pagination;
 - UMS.Application\Features\AuditTrails\Queries\GetAuditTrailsPaged\GetAuditTrailsPagedQueryValidator.cs:5:namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
 - UMS.Application\Features\Categories\CategoryCacheKeys.cs:1:namespace UMS.Application.Features.Categories
 - UMS.Application\Features\Categories\Commands\CategoryWriteGuards.cs:1:namespace UMS.Application.Features.Categories.Commands;
+- UMS.Application\Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs:4:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs:5:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs:6:using UMS.Application.Features.Categories.Events;
+- UMS.Application\Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Commands\ChangeCategoryStatus\ChangeCategoryStatusCommand.cs:9:namespace UMS.Application.Features.Categories.Commands.ChangeCategoryStatus
 - UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:1:using UMS.Application.Features.Categories.Commands;
 - UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:2:using UMS.Application.Features.Categories.Events;
 - UMS.Application\Features\Categories\Commands\Create\CreateCategoryCommand.cs:3:using UMS.Application.Interfaces.Common;
@@ -1077,6 +1121,12 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs:2:using UMS.Application.Interfaces.Common;
 - UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommand.cs:4:namespace UMS.Application.Features.Categories.Commands.Delete
 - UMS.Application\Features\Categories\Commands\Delete\DeleteCategoryCommandValidator.cs:3:namespace UMS.Application.Features.Categories.Commands.Delete
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs:7:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs:8:using UMS.Application.Features.Categories.Events;
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs:10:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommand.cs:12:namespace UMS.Application.Features.Categories.Commands.RestoreCategory
+- UMS.Application\Features\Categories\Commands\RestoreCategory\RestoreCategoryCommandValidator.cs:3:namespace UMS.Application.Features.Categories.Commands.RestoreCategory
 - UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:1:using UMS.Application.Features.Categories.Commands;
 - UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:2:using UMS.Application.Features.Categories.Events;
 - UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommand.cs:3:using UMS.Application.Interfaces.Common;
@@ -1084,14 +1134,16 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Categories\Commands\Update\UpdateCategoryCommandValidator.cs:2:namespace UMS.Application.Features.Categories.Commands.Update
 - UMS.Application\Features\Categories\Events\CategoryCreatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
 - UMS.Application\Features\Categories\Events\CategoryDeletedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
+- UMS.Application\Features\Categories\Events\CategoryRestoredEvent.cs:4:namespace UMS.Application.Features.Categories.Events
 - UMS.Application\Features\Categories\Events\CategoryUpdatedEvent.cs:3:namespace UMS.Application.Features.Categories.Events
-- UMS.Application\Features\Categories\ICategoryService.cs:1:using UMS.Application.Dtos.Pagination;
-- UMS.Application\Features\Categories\ICategoryService.cs:2:using UMS.Application.Dtos.Wrappers;
-- UMS.Application\Features\Categories\ICategoryService.cs:3:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.Application\Features\Categories\ICategoryService.cs:5:namespace UMS.Application.Features.Categories
-- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:5:using UMS.Application.Dtos.Wrappers;
-- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:6:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:8:namespace UMS.Application.Features.Categories.Queries.ExportCategories
+- UMS.Application\Features\Categories\Queries\CategoryQueryExtensions.cs:4:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\CategoryQueryExtensions.cs:5:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Queries\CategoryQueryExtensions.cs:7:namespace UMS.Application.Features.Categories.Queries
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:9:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:10:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:11:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Queries\ExportCategories\ExportCategoriesQuery.cs:13:namespace UMS.Application.Features.Categories.Queries.ExportCategories
 - UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:1:using UMS.Application.Interfaces.Common;
 - UMS.Application\Features\Categories\Queries\GetAllCategories\GetAllCategoriesQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetAllCategories
 - UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\CategoryLookupDto.cs:1:namespace UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
@@ -1099,9 +1151,16 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Features\Categories\Queries\GetAllCategoriesForList\GetAllCategoriesForListQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetAllCategoriesForList
 - UMS.Application\Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs:1:using UMS.Application.Interfaces.Common;
 - UMS.Application\Features\Categories\Queries\GetCategoriesAdmin\GetAllCategoriesAdminQuery.cs:3:namespace UMS.Application.Features.Categories.Queries.GetCategoriesAdmin
-- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:1:using UMS.Application.Dtos.Pagination;
-- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:2:using UMS.Application.Interfaces.Common;
-- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:4:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
+- UMS.Application\Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs:10:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs:11:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Queries\GetCategoriesList\GetCategoriesListQuery.cs:13:namespace UMS.Application.Features.Categories.Queries.GetCategoriesList
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:7:using UMS.Application.Dtos.Pagination;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:8:using UMS.Application.Dtos.Wrappers;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:9:using UMS.Application.Interfaces.Common;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:10:using UMS.Domain.Entities;
+- UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQuery.cs:12:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
 - UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:1:using UMS.Application.Dtos.Pagination;
 - UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:2:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 - UMS.Application\Features\Categories\Queries\GetCategoriesPaged\GetCategoriesPagedQueryValidator.cs:4:namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
@@ -1242,8 +1301,12 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Application\Interfaces\Common\IApplicationDbContext.cs:2:using UMS.Domain.Entities;
 - UMS.Application\Interfaces\Common\IApplicationDbContext.cs:3:using UMS.Domain.Interfaces;
 - UMS.Application\Interfaces\Common\IApplicationDbContext.cs:5:namespace UMS.Application.Interfaces.Common
+- UMS.Application\Interfaces\Common\IAuditTrailExportService.cs:4:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Application\Interfaces\Common\IAuditTrailExportService.cs:6:namespace UMS.Application.Interfaces.Common
 - UMS.Application\Interfaces\Common\ICacheAbleMediatorQuery.cs:2:namespace UMS.Application.Interfaces.Common
 - UMS.Application\Interfaces\Common\ICacheService.cs:1:namespace UMS.Application.Interfaces.Common
+- UMS.Application\Interfaces\Common\ICategoryExportService.cs:4:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Application\Interfaces\Common\ICategoryExportService.cs:6:namespace UMS.Application.Interfaces.Common
 - UMS.Application\Interfaces\Common\ICurrentUserService.cs:1:namespace UMS.Application.Interfaces.Common
 - UMS.Application\Interfaces\Common\IDateTimeService.cs:1:namespace UMS.Application.Interfaces.Common
 - UMS.Application\Interfaces\Common\IEmailService.cs:1:namespace UMS.Application.Interfaces.Common
@@ -1270,6 +1333,8 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Domain\Entities\Category.cs:1:namespace UMS.Domain.Entities
 - UMS.Domain\Entities\LogUserActivity.cs:1:namespace UMS.Domain.Entities;
 - UMS.Domain\Entities\OutboxMessage.cs:1:namespace UMS.Domain.Entities
+- UMS.Domain\Entities\User.cs:1:using UMS.Domain.Common;
+- UMS.Domain\Entities\User.cs:3:namespace UMS.Domain.Entities
 - UMS.Domain\Enums\DomainEnums.cs:1:namespace UMS.Domain.Enums;
 - UMS.Domain\GlobalUsings.cs:5:global using UMS.Domain.Common;
 - UMS.Domain\GlobalUsings.cs:6:global using UMS.Domain.Interfaces;
@@ -1547,33 +1612,63 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure\Migrations\20260601174237_AddAuditTrailIpAddress.Designer.cs:512:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
 - UMS.Infrastructure\Migrations\20260601174237_AddAuditTrailIpAddress.Designer.cs:514:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
 - UMS.Infrastructure\Migrations\20260601174237_AddAuditTrailIpAddress.Designer.cs:521:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.cs:5:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:8:using UMS.Infrastructure.Persistence.Contexts;
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:12:namespace UMS.Infrastructure.Migrations
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:28:modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:68:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:154:modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:196:modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:232:modelBuilder.Entity("UMS.Domain.Entities.User", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:255:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:290:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:319:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:406:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:430:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:451:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:466:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:485:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:487:b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:495:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:497:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:504:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:506:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:513:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:515:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:522:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:524:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:530:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:537:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:539:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs:546:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
 - UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:7:using UMS.Infrastructure.Persistence.Contexts;
 - UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:11:namespace UMS.Infrastructure.Migrations
 - UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:25:modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
 - UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:65:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:149:modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:191:modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:227:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:262:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:291:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:378:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:402:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:423:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:438:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:457:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:459:b.HasOne("UMS.Domain.Entities.Category", "Parent")
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:467:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:469:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:476:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:478:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:485:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:487:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:494:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:496:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:502:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:509:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:511:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
-- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:518:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:151:modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:193:modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:229:modelBuilder.Entity("UMS.Domain.Entities.User", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:252:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:287:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:316:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:403:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:427:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:448:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:463:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:482:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:484:b.HasOne("UMS.Domain.Entities.Category", "Parent")
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:492:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:494:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:501:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:503:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:510:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:512:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:519:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:521:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:527:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:534:modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:536:b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+- UMS.Infrastructure\Migrations\ApplicationDbContextModelSnapshot.cs:543:modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
 - UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:3:using UMS.Domain.Enums;
 - UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:4:using static UMS.Application.Enums.AppEnums;
 - UMS.Infrastructure\Persistence\Audit\AuditEntry.cs:6:namespace UMS.Infrastructure.Persistence.Audit
@@ -1601,24 +1696,13 @@ If script execution is not possible, reproduce the same workflow manually:
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:12:using UMS.Infrastructure.Persistence.Interceptors;
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:13:using UMS.Infrastructure.Services;
 - UMS.Infrastructure\ServiceCollectionExtensions.cs:14:using UMS.Infrastructure.Services.Common;
-- UMS.Infrastructure\ServiceCollectionExtensions.cs:15:using UMS.Application.Features.AuditTrails;
-- UMS.Infrastructure\ServiceCollectionExtensions.cs:16:using UMS.Application.Features.Categories;
-- UMS.Infrastructure\ServiceCollectionExtensions.cs:19:namespace UMS.Infrastructure
-- UMS.Infrastructure\Services\AuditTrailService.cs:13:using UMS.Application.Dtos.Pagination;
-- UMS.Infrastructure\Services\AuditTrailService.cs:14:using UMS.Application.Dtos.Wrappers;
-- UMS.Infrastructure\Services\AuditTrailService.cs:15:using UMS.Application.Features.AuditTrails;
-- UMS.Infrastructure\Services\AuditTrailService.cs:16:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
-- UMS.Infrastructure\Services\AuditTrailService.cs:17:using UMS.Application.Interfaces.Common;
-- UMS.Infrastructure\Services\AuditTrailService.cs:18:using UMS.Domain.Enums;
-- UMS.Infrastructure\Services\AuditTrailService.cs:19:using UMS.Infrastructure.Persistence.Contexts;
-- UMS.Infrastructure\Services\AuditTrailService.cs:21:namespace UMS.Infrastructure.Services
-- UMS.Infrastructure\Services\CategoryService.cs:12:using UMS.Application.Dtos.Pagination;
-- UMS.Infrastructure\Services\CategoryService.cs:13:using UMS.Application.Dtos.Wrappers;
-- UMS.Infrastructure\Services\CategoryService.cs:14:using UMS.Application.Features.Categories;
-- UMS.Infrastructure\Services\CategoryService.cs:15:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
-- UMS.Infrastructure\Services\CategoryService.cs:16:using UMS.Application.Interfaces.Common;
-- UMS.Infrastructure\Services\CategoryService.cs:17:using UMS.Domain.Entities;
-- UMS.Infrastructure\Services\CategoryService.cs:19:namespace UMS.Infrastructure.Services
+- UMS.Infrastructure\ServiceCollectionExtensions.cs:17:namespace UMS.Infrastructure
+- UMS.Infrastructure\Services\AuditTrailExportService.cs:10:using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+- UMS.Infrastructure\Services\AuditTrailExportService.cs:11:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\AuditTrailExportService.cs:13:namespace UMS.Infrastructure.Services
+- UMS.Infrastructure\Services\CategoryExportService.cs:10:using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+- UMS.Infrastructure\Services\CategoryExportService.cs:11:using UMS.Application.Interfaces.Common;
+- UMS.Infrastructure\Services\CategoryExportService.cs:13:namespace UMS.Infrastructure.Services
 - UMS.Infrastructure\Services\Common\CurrentUserService.cs:1:using UMS.Application.Interfaces.Common;
 - UMS.Infrastructure\Services\Common\CurrentUserService.cs:5:namespace UMS.Infrastructure.Services.Common;
 - UMS.Infrastructure\Services\Common\DateTimeService.cs:1:using UMS.Application.Interfaces.Common;

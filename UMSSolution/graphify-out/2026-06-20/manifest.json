@@ -5815,18 +5815,18 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\00-INDEX.md": {
-    "mtime": 1781124654.2126615,
-    "ast_hash": "01c11196f3621ef066190557204e0a33",
+    "mtime": 1781957758.9488282,
+    "ast_hash": "af247b546ade11dda31ec1ae6b4ba59f",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\01-backend-architecture.md": {
-    "mtime": 1781886424.79287,
-    "ast_hash": "4996ef467f2ce8cab5637ece3c78a2ae",
+    "mtime": 1781957780.9939828,
+    "ast_hash": "6498c04ce06026211b255b1fac87af0b",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\02-backend-coding-standards.md": {
-    "mtime": 1780949131.2138753,
-    "ast_hash": "3c9649bdf223b7d4a8d1c15ed110a3b7",
+    "mtime": 1781957772.659145,
+    "ast_hash": "2290fc8cb07c2e8c7dd915f70dfd460f",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\03-backend-data-and-infrastructure.md": {
@@ -5845,8 +5845,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\06-frontend-coding-standards.md": {
-    "mtime": 1780949160.1772711,
-    "ast_hash": "7b4c7613ed790fe099f5bf8c8ecaa6ed",
+    "mtime": 1781957812.968899,
+    "ast_hash": "0d63fd9d7a55b392e5fc8f216ffb4b10",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\07-testing-standards.md": {
@@ -5860,43 +5860,43 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-auth-flow.md": {
-    "mtime": 1781124570.2322462,
-    "ast_hash": "7d50f7abe6e26830f7781df1bc9570fd",
+    "mtime": 1781957864.0937948,
+    "ast_hash": "c7dd78f8efb9a5e2937e2eeb4bb83954",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-database-migration.md": {
-    "mtime": 1781124498.7865405,
-    "ast_hash": "912bdd4a913793460f6f78d31471a15a",
+    "mtime": 1781957884.3968384,
+    "ast_hash": "ccb75333612aef1653c635e5a525f4f7",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-api-endpoint.md": {
-    "mtime": 1781886443.2754803,
-    "ast_hash": "7e7fc351570e7b8343f4251dd61e10d0",
+    "mtime": 1781957900.9528248,
+    "ast_hash": "62fc284662752cf64d880aeb673542ae",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-entity.md": {
-    "mtime": 1781886435.1473436,
-    "ast_hash": "c9f66638683027a02fff4f5c341628ae",
+    "mtime": 1781957909.19096,
+    "ast_hash": "4ac8ed2b4e27d223b7968c1e57b078f8",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-add-new-frontend-feature.md": {
-    "mtime": 1781124612.4724152,
-    "ast_hash": "bde2c026ca92b819f09d8c9dfd1f7985",
+    "mtime": 1781957923.6192777,
+    "ast_hash": "403d65a6ef7638b8a686ac66cbdfc433",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-code-review.md": {
-    "mtime": 1781124644.3335595,
-    "ast_hash": "e1075c04605a3e54809ccfe4e40ff7ea",
+    "mtime": 1781957848.0353236,
+    "ast_hash": "033c377ffbf7f1498b6f349387ae7f46",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-debug-and-fix.md": {
-    "mtime": 1781124627.5127368,
-    "ast_hash": "05755c3914a3cc54b84bde6cb65555e1",
+    "mtime": 1781957944.2608812,
+    "ast_hash": "9ba91c9afe8cbce1881338359c34f2ce",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\ai-rules\\skill-testing-workflow.md": {
-    "mtime": 1781124595.18846,
-    "ast_hash": "a7507a384cf3d482882df44de3a45c0a",
+    "mtime": 1781957962.5802593,
+    "ast_hash": "67fd1c071c4ffa55bed235eaad6233c2",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\generate_NewProject_From_Script\\prompt-for-creating-the-files.txt": {

@@ -173,7 +173,9 @@ public sealed record CategoryResponseContract(
     string Name,
     string Slug,
     int? ParentId,
-    int SortOrder);
+    int SortOrder,
+    bool IsActive,
+    bool SoftDeleted);
 
 public sealed record CategoryDetailsResponseContract(
     int Id,
@@ -572,6 +574,37 @@ public class AccountEndpointsTests : ApiTestBase
     }
 }
 HEREDOC_9E7933DD9DC75E9DC9694ADA1A696555
+write_template_file 'UMS.API.Tests/Endpoints/AuditTrailEndpointsTests.cs' << 'HEREDOC_60FCCF2E0BD959C1C4FE736CB4DF9DD2'
+using System.Net;
+using System.Net.Http.Json;
+using UMS.Application.Authorization;
+using UMS.API.Tests.Contracts;
+using UMS.API.Tests.Fixtures;
+using UMS.API.Tests.Support;
+
+namespace UMS.API.Tests.Endpoints;
+
+[Collection("API collection")]
+public class AuditTrailEndpointsTests : ApiTestBase
+{
+    public AuditTrailEndpointsTests(CustomWebApplicationFactory factory) : base(factory)
+    {
+    }
+
+    [Fact]
+    public async Task GetAuditLogsPaged_DefaultRequest_ReturnsSuccessfulOrDebugs400()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Identity, AppFeature.AuditTrails, AppAction.Read));
+
+        const string route = "/api/v1/audit-logs/paged?pageNumber=1&pageSize=10&sortBy=datetime&sortDirection=desc";
+
+        var response = await Client.GetAsync(route);
+        var content = await response.Content.ReadAsStringAsync();
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"API returned status {response.StatusCode} with content: {content}");
+    }
+}
+HEREDOC_60FCCF2E0BD959C1C4FE736CB4DF9DD2
 write_template_file 'UMS.API.Tests/Endpoints/CategoryEndpointsTests.cs' << 'HEREDOC_C4455680DE57AEBD05EA64827D4A5071'
 using System.Net;
 using System.Net.Http.Json;
@@ -887,6 +920,62 @@ public class CategoryEndpointsTests : ApiTestBase
         
         response.StatusCode.Should().Be(HttpStatusCode.OK, because: $"Error content was: {errorContent}");
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/pdf");
+    }
+
+    [Fact]
+    public async Task Create_category_should_generate_audit_log_with_correct_id_not_zero()
+    {
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Create));
+
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var request = new
+        {
+            Name = $"AuditTest {suffix}",
+            Slug = $"audit-test-{suffix}",
+            ParentId = (int?)null,
+            IsActive = true,
+            SortOrder = 1
+        };
+
+        var response = await Client.PostAsJsonAsync("/api/v1/categories", request);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<int>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
+        var categoryId = payload.Data;
+        categoryId.Should().BeGreaterThan(0);
+
+        // Fetch the generated audit trail from database using the Verifier
+        var auditTrail = await Verifier.GetLastAuditTrailForTableAsync("Category");
+        auditTrail.Should().NotBeNull();
+        auditTrail!.PrimaryKey.Should().Be($"{{\"Id\":{categoryId}}}");
+    }
+
+    [Fact]
+    public async Task Restore_category_should_restore_soft_deleted_category()
+    {
+        var name = $"RestoreTest-{Guid.NewGuid():N}";
+        var slug = $"restore-test-{Guid.NewGuid():N}";
+        var category = await Seeder.SeedCategoryAsync(name, slug, isActive: true, sortOrder: 8, softDeleted: true);
+        Seeder.ClearCategoryCaches();
+
+        UsePrivilegedClient(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
+
+        var response = await Client.PostAsync($"/api/v1/categories/{category.Id}/restore", null);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var payload = await response.Content.ReadFromJsonAsync<ResponseContract<int>>();
+        payload.Should().NotBeNull();
+        payload!.IsSuccessful.Should().BeTrue();
+        payload.Data.Should().Be(category.Id);
+
+        var restoredCategory = await Verifier.GetCategoryByIdIncludingSoftDeletedAsync(category.Id);
+        restoredCategory.Should().NotBeNull();
+        restoredCategory!.SoftDeleted.Should().BeFalse();
+        restoredCategory.DeletedAt.Should().BeNull();
+        restoredCategory.DeletedBy.Should().BeNull();
     }
 }
 HEREDOC_C4455680DE57AEBD05EA64827D4A5071
@@ -2222,6 +2311,18 @@ public sealed class ApiStateVerifier
                       select role.Name!)
             .ToListAsync(ct);
     }
+
+    public async Task<AuditTrail?> GetLastAuditTrailForTableAsync(string tableName, CancellationToken ct = default)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await dbContext.AuditTrails
+            .AsNoTracking()
+            .Where(x => x.TableName == tableName)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync(ct);
+    }
 }
 HEREDOC_955E5B379466D454567070E449A6D04F
 write_template_file 'UMS.API.Tests/Support/ApiTestAuthenticationHandler.cs' << 'HEREDOC_F6F90BDE152CB27237695374F33F02DE'
@@ -2498,6 +2599,7 @@ public sealed class ApiTestDataSeeder
         bool isActive = true,
         int sortOrder = 1,
         int? parentId = null,
+        bool softDeleted = false,
         CancellationToken ct = default)
     {
         using var scope = _factory.Services.CreateScope();
@@ -2514,9 +2616,19 @@ public sealed class ApiTestDataSeeder
                 $"Failed to seed category '{name}': {string.Join("; ", response.Messages)}");
         }
 
-        return await dbContext.Categories
-            .AsNoTracking()
-            .SingleAsync(category => category.Id == response.Data, ct);
+        var category = await dbContext.Categories
+            .IgnoreQueryFilters()
+            .SingleAsync(c => c.Id == response.Data, ct);
+
+        if (softDeleted)
+        {
+            category.SoftDeleted = true;
+            category.DeletedAt = DateTime.UtcNow;
+            category.DeletedBy = 1;
+            await dbContext.SaveChangesAsync(ct);
+        }
+
+        return category;
     }
 
     public void ClearCategoryCaches()
@@ -2887,7 +2999,7 @@ write_template_file 'UMS.API/appsettings.Testing.json' << 'HEREDOC_2312FFB6D893B
     "TestConnection": "Server=localhost;Database=UMSDbTest;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;"
   },
   "DbProvider": "SqlServer",
-  "EnableAuditLog": false,
+  "EnableAuditLog": true,
   "RunApplicationSeeder": false
 }
 HEREDOC_2312FFB6D893BEA873F1A894F5EF1873
@@ -3121,11 +3233,13 @@ using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories.Commands.Create;
 using UMS.Application.Features.Categories.Commands.Delete;
 using UMS.Application.Features.Categories.Commands.Update;
+using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
 using UMS.Application.Features.Categories.Queries.GetAllCategories;
 using UMS.Application.Features.Categories.Queries.GetAllCategoriesForList;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Features.Categories.Queries.GetCategoryById;
 using UMS.Application.Features.Categories.Queries.ExportCategories;
+using UMS.Application.Features.Categories.Commands.RestoreCategory;
 using UMS.Application.Authorization;
 
 namespace UMS.API.Endpoints
@@ -3147,10 +3261,10 @@ namespace UMS.API.Endpoints
             .WithName("GetAllCategories")
             .AllowAnonymous();
 
-            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter, CancellationToken ct) =>
+            group.MapGet("/paged", async (ISender sender, [AsParameters] PagedFilterRequest filter, bool includeDeleted = false, CancellationToken ct = default) =>
             {
                 // Use object initializer syntax instead of a constructor
-                var query = new GetCategoriesPagedQuery { PagedFilterRequest = filter };
+                var query = new GetCategoriesPagedQuery { PagedFilterRequest = filter, IncludeDeleted = includeDeleted };
                 var response = await sender.Send(query, ct);
                 return response.ToApiResult();
             })
@@ -3238,6 +3352,16 @@ namespace UMS.API.Endpoints
             .WithName("UpdateCategory")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
 
+            group.MapPut("/{id:int}/status", async (int id, bool isActive, ISender sender, CancellationToken ct) =>
+            {
+                var command = new ChangeCategoryStatusCommand(id, isActive);
+                var response = await sender.Send(command, ct);
+                return response.ToApiResult();
+            })
+            .Produces<IResponseWrapper<int>>()
+            .WithName("ChangeCategoryStatus")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
+
             group.MapDelete("/{categoryId:int}", async (ISender sender, int categoryId, CancellationToken ct) =>
             {
                 var command = new DeleteCategoryCommand(categoryId);
@@ -3247,6 +3371,16 @@ namespace UMS.API.Endpoints
             .Produces<IResponseWrapper>()
             .WithName("DeleteCategory")
             .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Delete));
+
+            group.MapPost("/{id:int}/restore", async (int id, ISender sender, CancellationToken ct) =>
+            {
+                var command = new RestoreCategoryCommand(id);
+                var response = await sender.Send(command, ct);
+                return response.ToApiResult();
+            })
+            .Produces<IResponseWrapper<int>>()
+            .WithName("RestoreCategory")
+            .RequireAuthorization(AppPermission.NameFor(AppService.Product, AppFeature.Categories, AppAction.Update));
 
             return app;
         }
@@ -3685,7 +3819,7 @@ namespace UMS.API
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception ex, bool isDevelopment)
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex, bool isDevelopment)
         {
             context.Response.Clear();
 
@@ -4190,6 +4324,8 @@ using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Commands.Create;
 using UMS.Application.Features.Categories.Commands.Delete;
 using UMS.Application.Features.Categories.Commands.Update;
+using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+using UMS.Application.Features.Categories.Commands.RestoreCategory;
 using UMS.Application.Features.Categories.Events;
 using UMS.Application.Tests.Support.Categories;
 
@@ -4231,6 +4367,26 @@ public class CreateCategoryCommandHandlerTests
         result.IsSuccessful.Should().BeFalse();
         result.Messages.Should().Contain("Category with this name already exists.");
         scope.Cache.RemovedKeys.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_should_create_category_when_same_name_and_slug_only_exists_as_soft_deleted()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        await scope.SeedCategoryAsync("Electronics", "electronics", 1, softDeleted: true);
+        
+        var handler = new CreateCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new CreateCategoryCommand("Electronics", "electronics", null, true, 5);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().BeGreaterThan(0);
+
+        var activeCategory = await scope.DbContext.Categories.SingleAsync(c => c.Id == result.Data);
+        activeCategory.Name.Should().Be("Electronics");
+        activeCategory.Slug.Should().Be("electronics");
+        activeCategory.SoftDeleted.Should().BeFalse();
     }
 }
 
@@ -4326,6 +4482,103 @@ public class DeleteCategoryCommandHandlerTests
         outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
     }
 }
+
+public class ChangeCategoryStatusCommandHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_update_status_add_outbox_message_and_clear_category_caches()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var category = await scope.SeedCategoryAsync("Existing", "existing", 1);
+        var handler = new ChangeCategoryStatusHandler(scope.DbContext, scope.Cache);
+        var command = new ChangeCategoryStatusCommand(category.Id, false);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().Be(category.Id);
+        var updated = await scope.DbContext.Categories.SingleAsync(x => x.Id == category.Id);
+        updated.IsActive.Should().BeFalse();
+        scope.Cache.RemovedKeys.Should().BeEquivalentTo(CategoryCacheKeys.All);
+        var outbox = await scope.DbContext.OutboxMessages.SingleAsync();
+        outbox.Type.Should().Contain(nameof(CategoryUpdatedEvent));
+        outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_category_does_not_exist()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var handler = new ChangeCategoryStatusHandler(scope.DbContext, scope.Cache);
+
+        var result = await handler.Handle(
+            new ChangeCategoryStatusCommand(404, false),
+            CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(404);
+        result.Messages.Should().Contain("Category not found.");
+    }
+}
+
+public class RestoreCategoryCommandHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_restore_deleted_category_add_outbox_message_and_clear_caches()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var category = await scope.SeedCategoryAsync("Deleted Category", "deleted-category", 1, softDeleted: true);
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(category.Id);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Should().Be(category.Id);
+
+        var restored = await scope.DbContext.Categories.FirstOrDefaultAsync(c => c.Id == category.Id);
+        restored.Should().NotBeNull();
+        restored!.SoftDeleted.Should().BeFalse();
+        restored.DeletedAt.Should().BeNull();
+        restored.DeletedBy.Should().BeNull();
+
+        scope.Cache.RemovedKeys.Should().BeEquivalentTo(CategoryCacheKeys.All);
+        var outbox = await scope.DbContext.OutboxMessages.SingleAsync();
+        outbox.Type.Should().Contain(nameof(CategoryRestoredEvent));
+        outbox.Payload.Should().Contain($"\"categoryId\":{category.Id}");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_category_not_found()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(999);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(404);
+        result.Messages.Should().Contain("Category not found.");
+    }
+
+    [Fact]
+    public async Task Handle_should_fail_when_active_category_with_same_name_or_slug_exists()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+        await scope.SeedCategoryAsync("Conflict Name", "unique-slug", 1, softDeleted: false);
+        var deletedCategory = await scope.SeedCategoryAsync("Conflict Name", "deleted-slug", 2, softDeleted: true);
+        
+        var handler = new RestoreCategoryCommandHandler(scope.DbContext, scope.Cache);
+        var command = new RestoreCategoryCommand(deletedCategory.Id);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeFalse();
+        result.StatusCode.Should().Be(409);
+        result.Messages.Should().Contain("Cannot restore: An active category with the same name or slug already exists.");
+    }
+}
 HEREDOC_136EA1C71DE69983F626A1F27A3F8315
 write_template_file 'UMS.Application.Tests/Handlers/Categories/CategoryQueryHandlerTests.cs' << 'HEREDOC_314186814558009CCB202062DCBFF319'
 using Microsoft.EntityFrameworkCore;
@@ -4342,6 +4595,7 @@ using UMS.Application.Features.Categories.Queries.GetCategoryByIdAdmin;
 using Moq;
 using UMS.Application.Interfaces.Common;
 using UMS.Application.Tests.Support.Categories;
+using UMS.Application.Features.Categories.Queries.GetCategoriesList;
 
 namespace UMS.Application.Tests.Handlers.Categories;
 
@@ -4453,12 +4707,18 @@ public class GetCategoriesPagedQueryHandlerTests
     [Fact]
     public async Task Handle_should_filter_sort_and_page_active_categories()
     {
-        var mockCategoryService = new Mock<ICategoryService>();
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+
+        await scope.SeedCategoryAsync("Alpha", "alpha", 1, isActive: false);
+        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
+        await scope.SeedCategoryAsync("Gamma", "gamma", 3, isActive: true);
+
         var query = new GetCategoriesPagedQuery
         {
             PagedFilterRequest = new()
             {
                 SearchTerm = "a",
+                IsActive = true,
                 SortBy = "name",
                 SortDirection = "desc",
                 PageNumber = 1,
@@ -4466,27 +4726,44 @@ public class GetCategoriesPagedQueryHandlerTests
             }
         };
 
-        var mockPagedResult = PagedResult<CategoryResponse>.Create(
-            new List<CategoryResponse>
-            {
-                new(3, "Gamma", "gamma", null, 1, true, Array.Empty<byte>()),
-                new(2, "Beta", "beta", null, 2, true, Array.Empty<byte>())
-            },
-            3,
-            1,
-            2);
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(u => u.IsAuthenticated()).Returns(true);
+        mockCurrentUserService.Setup(u => u.HasClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
 
-        mockCategoryService
-            .Setup(s => s.GetCategoriesPagedQueryAsync(query.PagedFilterRequest, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ResponseWrapper<PagedResult<CategoryResponse>>.Success(mockPagedResult));
-
-        var handler = new GetCategoriesPagedQueryHandler(mockCategoryService.Object);
+        var handler = new GetCategoriesPagedQueryHandler(scope.DbContext, mockCurrentUserService.Object);
 
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.IsSuccessful.Should().BeTrue();
-        result.Data!.TotalCount.Should().Be(3);
+        result.Data!.TotalCount.Should().Be(2);
         result.Data.Data.Select(x => x.Name).Should().Equal("Gamma", "Beta");
+    }
+}
+
+public class GetCategoriesListQueryHandlerTests
+{
+    [Fact]
+    public async Task Handle_should_filter_and_sort_categories()
+    {
+        await using var scope = await CategoryHandlerTestScope.CreateAsync();
+
+        await scope.SeedCategoryAsync("Alpha", "alpha", 1, isActive: false);
+        await scope.SeedCategoryAsync("Beta", "beta", 2, isActive: true);
+        await scope.SeedCategoryAsync("Gamma", "gamma", 3, isActive: true);
+
+        var query = new GetCategoriesListQuery("a", true, "name", "desc");
+
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(u => u.IsAuthenticated()).Returns(true);
+        mockCurrentUserService.Setup(u => u.HasClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+
+        var handler = new GetCategoriesListQueryHandler(scope.DbContext, mockCurrentUserService.Object);
+
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Data.Count.Should().Be(2);
+        result.Data.Select(x => x.Name).Should().Equal("Gamma", "Beta");
     }
 }
 
@@ -4590,6 +4867,7 @@ public class GetCategoriesPagedAdminQueryHandlerTests
 }
 HEREDOC_314186814558009CCB202062DCBFF319
 write_template_file 'UMS.Application.Tests/Handlers/Categories/ExportCategoriesQueryHandlerTests.cs' << 'HEREDOC_EA5A80D428FCD7BBB1396AD86F209522'
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -4597,20 +4875,33 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Queries.ExportCategories;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Application.Interfaces.Common;
+using UMS.Application.Tests.Support.Categories;
 using Xunit;
 
 namespace UMS.Application.Tests.Handlers.Categories
 {
     public class ExportCategoriesQueryHandlerTests
     {
-        private readonly Mock<ICategoryService> _categoryService = new();
+        private readonly Mock<ICurrentUserService> _currentUserService = new();
+        private readonly Mock<ICategoryExportService> _categoryExportService = new();
+
+        public ExportCategoriesQueryHandlerTests()
+        {
+            _currentUserService.Setup(u => u.IsAuthenticated()).Returns(true);
+            _currentUserService.Setup(u => u.HasClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+        }
 
         [Fact]
         public async Task Handle_should_return_file_bytes_when_successful()
         {
+            await using var scope = await CategoryHandlerTestScope.CreateAsync();
+
+            await scope.SeedCategoryAsync("Test 1", "test-1", 1, isActive: true);
+            await scope.SeedCategoryAsync("Test 2", "test-2", 2, isActive: true);
+
             var query = new ExportCategoriesQuery
             {
                 SearchTerm = "test",
@@ -4620,53 +4911,25 @@ namespace UMS.Application.Tests.Handlers.Categories
                 ExportFormat = "excel"
             };
 
-            var categories = new List<CategoryResponse>
-            {
-                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
-                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
-            };
-
             var fileBytes = new byte[] { 1, 2, 3 };
 
-            _categoryService
-                .Setup(s => s.GetCategoriesListAsync("test", true, "name", "asc", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(ResponseWrapper<List<CategoryResponse>>.Success(categories));
-
-            _categoryService
-                .Setup(s => s.ExportCategoriesAsync(categories, "excel", It.IsAny<CancellationToken>()))
+            _categoryExportService
+                .Setup(s => s.ExportCategoriesAsync(
+                    It.Is<List<CategoryResponse>>(list => list.Count == 2 && list.Any(c => c.Name == "Test 1") && list.Any(c => c.Name == "Test 2")),
+                    "excel",
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(fileBytes);
 
-            var handler = new ExportCategoriesQueryHandler(_categoryService.Object);
+            var handler = new ExportCategoriesQueryHandler(scope.DbContext, _currentUserService.Object, _categoryExportService.Object);
 
             var result = await handler.Handle(query, CancellationToken.None);
 
             result.IsSuccessful.Should().BeTrue();
             result.Data.Should().BeEquivalentTo(fileBytes);
-            _categoryService.Verify(s => s.GetCategoriesListAsync("test", true, "name", "asc", CancellationToken.None), Times.Once);
-            _categoryService.Verify(s => s.ExportCategoriesAsync(categories, "excel", CancellationToken.None), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_should_return_failure_when_list_retrieval_fails()
-        {
-            var query = new ExportCategoriesQuery
-            {
-                SearchTerm = "test",
-                ExportFormat = "pdf"
-            };
-
-            _categoryService
-                .Setup(s => s.GetCategoriesListAsync("test", null, null, null, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(ResponseWrapper<List<CategoryResponse>>.Fail("Failed", 400));
-
-            var handler = new ExportCategoriesQueryHandler(_categoryService.Object);
-
-            var result = await handler.Handle(query, CancellationToken.None);
-
-            result.IsSuccessful.Should().BeFalse();
-            result.Messages.Should().Contain("Failed");
-            _categoryService.Verify(s => s.GetCategoriesListAsync("test", null, null, null, CancellationToken.None), Times.Once);
-            _categoryService.Verify(s => s.ExportCategoriesAsync(It.IsAny<List<CategoryResponse>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _categoryExportService.Verify(s => s.ExportCategoriesAsync(
+                It.Is<List<CategoryResponse>>(list => list.Count == 2),
+                "excel",
+                CancellationToken.None), Times.Once);
         }
     }
 }
@@ -6309,6 +6572,7 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
     public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
     public DbSet<LogUserActivity> LogUserActivities => Set<LogUserActivity>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<User> Users => Set<User>();
 
     public Task StartTransaction(CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task CommitTransaction(CancellationToken cancellationToken = default) => Task.CompletedTask;
@@ -6344,6 +6608,13 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(builder =>
+        {
+            builder.ToTable("Users");
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        });
+
         modelBuilder.Entity<Category>(builder =>
         {
             builder.ToTable("Categories");
@@ -6354,8 +6625,8 @@ internal sealed class CategoryHandlerTestDbContext : DbContext, IApplicationDbCo
             builder.Property(x => x.Slug).IsRequired().HasMaxLength(250);
             builder.Property(x => x.NormalizedSlug).IsRequired().HasMaxLength(256);
             builder.Property(x => x.RowVersion).IsConcurrencyToken();
-            builder.HasIndex(x => x.NormalizedName).IsUnique().HasDatabaseName("UX_Categories_NormalizedName");
-            builder.HasIndex(x => x.NormalizedSlug).IsUnique().HasDatabaseName("UX_Categories_NormalizedSlug");
+            builder.HasIndex(x => x.NormalizedName).HasFilter("SoftDeleted = 0").IsUnique().HasDatabaseName("UX_Categories_NormalizedName");
+            builder.HasIndex(x => x.NormalizedSlug).HasFilter("SoftDeleted = 0").IsUnique().HasDatabaseName("UX_Categories_NormalizedSlug");
             builder.HasOne(x => x.Parent)
                 .WithMany(x => x.Children)
                 .HasForeignKey(x => x.ParentId)
@@ -6481,6 +6752,110 @@ write_template_file 'UMS.Application.Tests/UMS.Application.Tests.csproj' << 'HER
 
 </Project>
 HEREDOC_FEC1F5A826FD0151ECB0222576CFB9D1
+write_template_file 'UMS.Application.Tests/Validation/AuditTrails/GetAuditTrailsPagedQueryValidatorTests.cs' << 'HEREDOC_FA848F91028FF1325C968E704A2F0B7D'
+using FluentAssertions;
+using Xunit;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+using UMS.Application.Tests.Fixtures;
+
+namespace UMS.Application.Tests.Validation.AuditTrails;
+
+public class GetAuditTrailsPagedQueryValidatorTests
+{
+    private readonly GetAuditTrailsPagedQueryValidator _validator = new();
+
+    [Fact]
+    public void Validate_should_pass_for_well_formed_request_with_datetime()
+    {
+        var query = new GetAuditTrailsPagedQuery
+        {
+            PagedFilterRequest = new PagedFilterRequest
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SortBy = "datetime",
+                SortDirection = "desc"
+            }
+        };
+
+        var result = _validator.Validate(query);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_should_pass_for_empty_sortby()
+    {
+        var query = new GetAuditTrailsPagedQuery
+        {
+            PagedFilterRequest = new PagedFilterRequest
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SortBy = "",
+                SortDirection = "desc"
+            }
+        };
+
+        var result = _validator.Validate(query);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_should_fail_for_invalid_sortby()
+    {
+        var query = new GetAuditTrailsPagedQuery
+        {
+            PagedFilterRequest = new PagedFilterRequest
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SortBy = "invalidField",
+                SortDirection = "desc"
+            }
+        };
+
+        var result = _validator.Validate(query);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.PropertyName == "PagedFilterRequest.SortBy");
+    }
+}
+HEREDOC_FA848F91028FF1325C968E704A2F0B7D
+write_template_file 'UMS.Application.Tests/Validation/Categories/ChangeCategoryStatusCommandValidatorTests.cs' << 'HEREDOC_352AAA69CED0A934B5EDA2018E4BDDA3'
+using UMS.Application.Features.Categories.Commands.ChangeCategoryStatus;
+using FluentAssertions;
+
+namespace UMS.Application.Tests.Validation.Categories;
+
+public class ChangeCategoryStatusCommandValidatorTests
+{
+    private readonly ChangeCategoryStatusCommandValidator _validator = new();
+
+    [Fact]
+    public void Validate_should_pass_for_well_formed_request()
+    {
+        var command = new ChangeCategoryStatusCommand(1, true);
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_should_fail_when_id_is_zero_or_negative()
+    {
+        var command = new ChangeCategoryStatusCommand(0, true);
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.PropertyName == nameof(ChangeCategoryStatusCommand.Id));
+    }
+}
+HEREDOC_352AAA69CED0A934B5EDA2018E4BDDA3
 write_template_file 'UMS.Application.Tests/Validation/Categories/CreateCategoryCommandValidatorTests.cs' << 'HEREDOC_E71F5FB941EE203EAB46F7B9B2C9512E'
 using UMS.Application.Features.Categories.Commands.Create;
 
@@ -9028,90 +9403,254 @@ namespace UMS.Application.Enums
     }
 }
 HEREDOC_99CEE4B63D757592071132E19144F045
-write_template_file 'UMS.Application/Features/AuditTrails/IAuditTrailService.cs' << 'HEREDOC_9382BA659F108057E9A4FBFFC9DE9D02'
-using UMS.Application.Dtos.Pagination;
-using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+write_template_file 'UMS.Application/Features/AuditTrails/Queries/AuditTrailQueryExtensions.cs' << 'HEREDOC_C5EDB4DA6F4B436ED5464F0D0019EC9F'
+using System;
+using System.Globalization;
+using System.Linq;
+using UMS.Domain.Entities;
+using UMS.Domain.Enums;
 
-namespace UMS.Application.Features.AuditTrails
+namespace UMS.Application.Features.AuditTrails.Queries
 {
-    public interface IAuditTrailService
+    public class AuditTrailQueryModel
     {
-        Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
+        public AuditTrail Audit { get; set; } = null!;
+        public string? UserEmail { get; set; }
+    }
+
+    public static class AuditTrailQueryExtensions
+    {
+        public static IQueryable<AuditTrailQueryModel> ApplyAuditTrailFilters(
+            this IQueryable<AuditTrailQueryModel> query,
+            int? userId,
             string? tableName,
             string? entityId,
             string? actionTypes,
             string? fromDate,
-            string? toDate,
-            int? userId,
-            CancellationToken ct);
+            string? toDate)
+        {
+            // Conditionally filter by UserId (exact match)
+            if (userId.HasValue)
+            {
+                query = query.Where(a => a.Audit.UserId == userId.Value);
+            }
 
-        Task<IResponseWrapper<List<AuditTrailResponse>>> GetAuditTrailsListAsync(
-            string? tableName,
-            string? entityId,
-            string? actionTypes,
-            string? fromDate,
-            string? toDate,
-            int? userId,
-            CancellationToken ct);
+            // Conditionally filter by TableName (exact match)
+            if (!string.IsNullOrWhiteSpace(tableName))
+            {
+                query = query.Where(a => a.Audit.TableName == tableName.Trim());
+            }
 
-        Task<byte[]> ExportAuditTrailsAsync(List<AuditTrailResponse> data, string format, CancellationToken ct);
+            // Conditionally filter by EntityId (PrimaryKey substring search)
+            if (!string.IsNullOrWhiteSpace(entityId))
+            {
+                var idTrimmed = entityId.Trim();
+                query = query.Where(a => a.Audit.PrimaryKey != null && a.Audit.PrimaryKey.Contains(idTrimmed));
+            }
+
+            // Conditionally filter by ActionTypes list
+            if (!string.IsNullOrWhiteSpace(actionTypes))
+            {
+                var typesList = actionTypes.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => Enum.TryParse<AuditType>(t.Trim(), true, out var result) ? result : (AuditType?)null)
+                    .Where(t => t.HasValue)
+                    .Select(t => t!.Value)
+                    .ToList();
+
+                if (typesList.Count > 0)
+                {
+                    query = query.Where(a => typesList.Contains(a.Audit.Type));
+                }
+            }
+
+            // Conditionally filter by FromDate (inclusive)
+            if (!string.IsNullOrWhiteSpace(fromDate) && DateTime.TryParseExact(fromDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedFromDate))
+            {
+                query = query.Where(a => a.Audit.DateTime >= parsedFromDate);
+            }
+
+            // Conditionally filter by ToDate (inclusive, adjusted to end of day)
+            if (!string.IsNullOrWhiteSpace(toDate) && DateTime.TryParseExact(toDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedToDate))
+            {
+                var adjustedToDate = parsedToDate.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(a => a.Audit.DateTime <= adjustedToDate);
+            }
+
+            return query;
+        }
+
+        public static IQueryable<AuditTrailQueryModel> ApplyAuditTrailSorting(
+            this IQueryable<AuditTrailQueryModel> query,
+            string? sortBy,
+            string? sortDirection)
+        {
+            return sortBy?.ToLower() switch
+            {
+                "tablename" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(a => a.Audit.TableName)
+                    : query.OrderBy(a => a.Audit.TableName),
+                "type" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(a => a.Audit.Type)
+                    : query.OrderBy(a => a.Audit.Type),
+                "datetime" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(a => a.Audit.DateTime)
+                    : query.OrderBy(a => a.Audit.DateTime),
+                "id" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(a => a.Audit.Id)
+                    : query.OrderBy(a => a.Audit.Id),
+                _ => (sortDirection ?? "desc").Equals("asc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderBy(a => a.Audit.DateTime).ThenBy(a => a.Audit.Id)
+                    : query.OrderByDescending(a => a.Audit.DateTime).ThenByDescending(a => a.Audit.Id)
+            };
+        }
     }
 }
-HEREDOC_9382BA659F108057E9A4FBFFC9DE9D02
+HEREDOC_C5EDB4DA6F4B436ED5464F0D0019EC9F
 write_template_file 'UMS.Application/Features/AuditTrails/Queries/ExportAuditTrails/ExportAuditTrailsQuery.cs' << 'HEREDOC_499FC85D95A0B1946DAA8BD9FEA699FF'
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Mediator;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+using UMS.Application.Interfaces.Common;
 
 namespace UMS.Application.Features.AuditTrails.Queries.ExportAuditTrails
 {
-    public class ExportAuditTrailsQuery : IQuery<IResponseWrapper<byte[]>>
+    public sealed record ExportAuditTrailsQuery : IRequest<IResponseWrapper<byte[]>>
     {
-        public string? TableName { get; set; }
-        public string? EntityId { get; set; }
-        public string? ActionTypes { get; set; }
-        public string? FromDate { get; set; }
-        public string? ToDate { get; set; }
-        public int? UserId { get; set; }
-        public string ExportFormat { get; set; } = "excel";
+        public string? TableName { get; init; }
+        public string? EntityId { get; init; }
+        public string? ActionTypes { get; init; }
+        public string? FromDate { get; init; }
+        public string? ToDate { get; init; }
+        public int? UserId { get; init; }
+        public string ExportFormat { get; init; } = "excel";
     }
 
-    public class ExportAuditTrailsQueryHandler(IAuditTrailService auditTrailService)
-        : IQueryHandler<ExportAuditTrailsQuery, IResponseWrapper<byte[]>>
+    public sealed class ExportAuditTrailsQueryHandler(
+        IApplicationDbContext context,
+        IAuditTrailExportService auditTrailExportService)
+        : IRequestHandler<ExportAuditTrailsQuery, IResponseWrapper<byte[]>>
     {
-        private readonly IAuditTrailService _auditTrailService = auditTrailService;
+        private readonly IApplicationDbContext _context = context;
+        private readonly IAuditTrailExportService _auditTrailExportService = auditTrailExportService;
 
         public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportAuditTrailsQuery request, CancellationToken ct)
         {
-            var listResponse = await _auditTrailService.GetAuditTrailsListAsync(
-                request.TableName,
-                request.EntityId,
-                request.ActionTypes,
-                request.FromDate,
-                request.ToDate,
-                request.UserId,
-                ct);
+            var auditQuery = from audit in _context.AuditTrails.AsNoTracking()
+                             join user in _context.Users.AsNoTracking() on audit.UserId equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new AuditTrailQueryModel { Audit = audit, UserEmail = user != null ? user.Email : null };
 
-            if (!listResponse.IsSuccessful || listResponse.Data == null)
-            {
-                return ResponseWrapper<byte[]>.Fail(
-                    listResponse.Messages ?? new List<string> { "Failed to retrieve audit trails for export." },
-                    listResponse.StatusCode);
-            }
+            auditQuery = auditQuery
+                .ApplyAuditTrailFilters(
+                    request.UserId,
+                    request.TableName,
+                    request.EntityId,
+                    request.ActionTypes,
+                    request.FromDate,
+                    request.ToDate)
+                .ApplyAuditTrailSorting(null, null);
 
-            var fileBytes = await _auditTrailService.ExportAuditTrailsAsync(listResponse.Data, request.ExportFormat, ct);
+            var auditTrails = await auditQuery
+                .Select(a => new AuditTrailResponse(
+                    a.Audit.Id,
+                    a.Audit.UserId,
+                    a.UserEmail,
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
+                ))
+                .ToListAsync(ct);
+
+            var fileBytes = await _auditTrailExportService.ExportAuditTrailsAsync(auditTrails, request.ExportFormat, ct);
 
             return ResponseWrapper<byte[]>.Success(fileBytes);
         }
     }
 }
 HEREDOC_499FC85D95A0B1946DAA8BD9FEA699FF
+write_template_file 'UMS.Application/Features/AuditTrails/Queries/GetAuditTrailsList/GetAuditTrailsListQuery.cs' << 'HEREDOC_15B39AE0F32B24CB272A279FC1CFB942'
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Mediator;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Interfaces.Common;
+using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+
+namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsList
+{
+    public sealed record GetAuditTrailsListQuery(
+        string? TableName,
+        string? EntityId,
+        string? ActionTypes,
+        string? FromDate,
+        string? ToDate,
+        int? UserId
+    ) : IRequest<IResponseWrapper<List<AuditTrailResponse>>>;
+
+    public sealed class GetAuditTrailsListQueryHandler(IApplicationDbContext context)
+        : IRequestHandler<GetAuditTrailsListQuery, IResponseWrapper<List<AuditTrailResponse>>>
+    {
+        private readonly IApplicationDbContext _context = context;
+
+        public async ValueTask<IResponseWrapper<List<AuditTrailResponse>>> Handle(GetAuditTrailsListQuery request, CancellationToken ct)
+        {
+            var auditQuery = from audit in _context.AuditTrails.AsNoTracking()
+                             join user in _context.Users.AsNoTracking() on audit.UserId equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new AuditTrailQueryModel { Audit = audit, UserEmail = user != null ? user.Email : null };
+
+            auditQuery = auditQuery
+                .ApplyAuditTrailFilters(
+                    request.UserId,
+                    request.TableName,
+                    request.EntityId,
+                    request.ActionTypes,
+                    request.FromDate,
+                    request.ToDate)
+                .ApplyAuditTrailSorting(null, null);
+
+            var auditTrails = await auditQuery
+                .Select(a => new AuditTrailResponse(
+                    a.Audit.Id,
+                    a.Audit.UserId,
+                    a.UserEmail,
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
+                ))
+                .ToListAsync(ct);
+
+            return ResponseWrapper<List<AuditTrailResponse>>.Success(auditTrails);
+        }
+    }
+}
+HEREDOC_15B39AE0F32B24CB272A279FC1CFB942
 write_template_file 'UMS.Application/Features/AuditTrails/Queries/GetAuditTrailsPaged/GetAuditTrailsPagedQuery.cs' << 'HEREDOC_F390A5725E668E33F37B4F174A0FB049'
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Mediator;
 using UMS.Application.Dtos.Pagination;
 using UMS.Application.Dtos.Wrappers;
@@ -9133,33 +9672,81 @@ namespace UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged
         string? PrimaryKey
     );
 
-    public class GetAuditTrailsPagedQuery : IRequest<IResponseWrapper<PagedResult<AuditTrailResponse>>>, IValidateMe
+    public sealed record GetAuditTrailsPagedQuery : IRequest<IResponseWrapper<PagedResult<AuditTrailResponse>>>, IValidateMe
     {
-        public PagedFilterRequest PagedFilterRequest { get; set; } = new();
-        public string? TableName { get; set; }
-        public string? EntityId { get; set; }
-        public string? ActionTypes { get; set; }
-        public string? FromDate { get; set; }
-        public string? ToDate { get; set; }
-        public int? UserId { get; set; }
+        public PagedFilterRequest PagedFilterRequest { get; init; } = new();
+        public string? TableName { get; init; }
+        public string? EntityId { get; init; }
+        public string? ActionTypes { get; init; }
+        public string? FromDate { get; init; }
+        public string? ToDate { get; init; }
+        public int? UserId { get; init; }
     }
 
-    public class GetAuditTrailsPagedQueryHandler(IAuditTrailService auditTrailService)
+    public sealed class GetAuditTrailsPagedQueryHandler(IApplicationDbContext context)
         : IRequestHandler<GetAuditTrailsPagedQuery, IResponseWrapper<PagedResult<AuditTrailResponse>>>
     {
-        private readonly IAuditTrailService _auditTrailService = auditTrailService;
+        private readonly IApplicationDbContext _context = context;
 
         public async ValueTask<IResponseWrapper<PagedResult<AuditTrailResponse>>> Handle(GetAuditTrailsPagedQuery request, CancellationToken ct)
         {
-            return await _auditTrailService.GetAuditTrailsPagedQueryAsync(
-                request.PagedFilterRequest,
+            var pagedFilterRequest = request.PagedFilterRequest;
+
+            var auditQuery = from audit in _context.AuditTrails.AsNoTracking()
+                             join user in _context.Users.AsNoTracking() on audit.UserId equals user.Id into userGroup
+                             from user in userGroup.DefaultIfEmpty()
+                             select new AuditTrailQueryModel { Audit = audit, UserEmail = user != null ? user.Email : null };
+
+            auditQuery = auditQuery.ApplyAuditTrailFilters(
+                request.UserId,
                 request.TableName,
                 request.EntityId,
                 request.ActionTypes,
                 request.FromDate,
-                request.ToDate,
-                request.UserId,
-                ct);
+                request.ToDate);
+
+            // Apply SearchTerm filter
+            if (!string.IsNullOrWhiteSpace(pagedFilterRequest.SearchTerm))
+            {
+                var term = pagedFilterRequest.SearchTerm.Trim();
+                var pattern = $"%{term}%";
+
+                auditQuery = auditQuery.Where(a =>
+                    EF.Functions.Like(a.Audit.TableName ?? "", pattern) ||
+                    EF.Functions.Like(a.Audit.IpAddress ?? "", pattern) ||
+                    EF.Functions.Like(a.UserEmail ?? "", pattern)
+                );
+            }
+
+            auditQuery = auditQuery.ApplyAuditTrailSorting(pagedFilterRequest.SortBy, pagedFilterRequest.SortDirection);
+
+            var totalCount = await auditQuery.CountAsync(ct);
+
+            var auditTrails = await auditQuery
+                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
+                .Take(pagedFilterRequest.PageSize)
+                .Select(a => new AuditTrailResponse(
+                    a.Audit.Id,
+                    a.Audit.UserId,
+                    a.UserEmail,
+                    a.Audit.IpAddress,
+                    a.Audit.Type.ToString(),
+                    a.Audit.TableName,
+                    a.Audit.DateTime,
+                    a.Audit.OldValues,
+                    a.Audit.NewValues,
+                    a.Audit.AffectedColumns,
+                    a.Audit.PrimaryKey
+                ))
+                .ToListAsync(ct);
+
+            var pagedResult = PagedResult<AuditTrailResponse>.Create(
+                auditTrails,
+                totalCount,
+                pagedFilterRequest.PageNumber,
+                pagedFilterRequest.PageSize);
+
+            return ResponseWrapper<PagedResult<AuditTrailResponse>>.Success(pagedResult);
         }
     }
 }
@@ -9290,6 +9877,61 @@ internal static class CategoryWriteGuards
     }
 }
 HEREDOC_086B94CD4B9C0E1B56A30142C214E904
+write_template_file 'UMS.Application/Features/Categories/Commands/ChangeCategoryStatus/ChangeCategoryStatusCommand.cs' << 'HEREDOC_F2EBF1B8B2EDD15C9159C0F9AC391D18'
+using Mediator;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
+using UMS.Application.Features.Categories.Events;
+using UMS.Application.Dtos.Wrappers;
+
+namespace UMS.Application.Features.Categories.Commands.ChangeCategoryStatus
+{
+    public record ChangeCategoryStatusCommand(int Id, bool IsActive) : ICommand<IResponseWrapper<int>>, IValidateMe;
+
+    public class ChangeCategoryStatusCommandValidator : AbstractValidator<ChangeCategoryStatusCommand>
+    {
+        public ChangeCategoryStatusCommandValidator()
+        {
+            RuleFor(x => x.Id).GreaterThan(0);
+        }
+    }
+
+    public class ChangeCategoryStatusHandler(
+        IApplicationDbContext applicationDbContext,
+        ICacheService cacheService)
+        : ICommandHandler<ChangeCategoryStatusCommand, IResponseWrapper<int>>
+    {
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICacheService _cacheService = cacheService;
+
+        public async ValueTask<IResponseWrapper<int>> Handle(ChangeCategoryStatusCommand request, CancellationToken ct)
+        {
+            var category = await _applicationDbContext.Categories.FirstOrDefaultAsync(c => c.Id == request.Id, ct);
+            if (category == null)
+            {
+                return ResponseWrapper<int>.Fail("Category not found.", 404);
+            }
+
+            category.IsActive = request.IsActive;
+
+            _applicationDbContext.Categories.Update(category);
+            _applicationDbContext.AddOutboxMessage(new CategoryUpdatedEvent(category.Id));
+            await _applicationDbContext.SaveChangesAsync(ct);
+
+            foreach (var key in CategoryCacheKeys.All)
+            {
+                _cacheService.Remove(key);
+            }
+
+            return ResponseWrapper<int>.Success(category.Id, request.IsActive 
+                ? "Category activated successfully." 
+                : "Category deactivated successfully.");
+        }
+    }
+}
+HEREDOC_F2EBF1B8B2EDD15C9159C0F9AC391D18
 write_template_file 'UMS.Application/Features/Categories/Commands/Create/CreateCategoryCommand.cs' << 'HEREDOC_689F8C113FEED69749A4CFC7B3F36296'
 using UMS.Application.Features.Categories.Commands;
 using UMS.Application.Features.Categories.Events;
@@ -9484,6 +10126,86 @@ namespace UMS.Application.Features.Categories.Commands.Delete
     }
 }
 HEREDOC_2158A70B8B375AB2D20A7C0B1A9472D9
+write_template_file 'UMS.Application/Features/Categories/Commands/RestoreCategory/RestoreCategoryCommand.cs' << 'HEREDOC_C3AD0F8FE4B84E12137A83733912FD19'
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Mediator;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Features.Categories.Events;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
+
+namespace UMS.Application.Features.Categories.Commands.RestoreCategory
+{
+    public sealed record RestoreCategoryCommand(int Id) : IRequest<IResponseWrapper<int>>, IValidateMe;
+
+    public sealed class RestoreCategoryCommandHandler(
+        IApplicationDbContext applicationDbContext,
+        ICacheService cacheService)
+        : IRequestHandler<RestoreCategoryCommand, IResponseWrapper<int>>
+    {
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICacheService _cacheService = cacheService;
+
+        public async ValueTask<IResponseWrapper<int>> Handle(RestoreCategoryCommand request, CancellationToken ct)
+        {
+            var category = await _applicationDbContext.Categories
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.Id == request.Id, ct);
+
+            if (category == null)
+            {
+                return ResponseWrapper<int>.Fail("Category not found.", 404);
+            }
+
+            // Check if there is an active (non-deleted) category that has the same Name or Slug as the deleted category being restored.
+            var conflictExists = await _applicationDbContext.Categories
+                .AnyAsync(c => !c.SoftDeleted && (c.NormalizedName == category.NormalizedName || c.NormalizedSlug == category.NormalizedSlug), ct);
+
+            if (conflictExists)
+            {
+                return ResponseWrapper<int>.Fail("Cannot restore: An active category with the same name or slug already exists.", 409);
+            }
+
+            if (category.SoftDeleted)
+            {
+                category.SoftDeleted = false;
+                category.DeletedAt = null;
+                category.DeletedBy = null;
+
+                _applicationDbContext.AddOutboxMessage(new CategoryRestoredEvent(category.Id));
+                await _applicationDbContext.SaveChangesAsync(ct);
+
+                foreach (var key in CategoryCacheKeys.All)
+                {
+                    _cacheService.Remove(key);
+                }
+            }
+
+            return ResponseWrapper<int>.Success(category.Id, "Category restored successfully.");
+        }
+    }
+}
+HEREDOC_C3AD0F8FE4B84E12137A83733912FD19
+write_template_file 'UMS.Application/Features/Categories/Commands/RestoreCategory/RestoreCategoryCommandValidator.cs' << 'HEREDOC_5A7D6CFB9506AE53E9367456C2E35CF5'
+using FluentValidation;
+
+namespace UMS.Application.Features.Categories.Commands.RestoreCategory
+{
+    public class RestoreCategoryCommandValidator : AbstractValidator<RestoreCategoryCommand>
+    {
+        public RestoreCategoryCommandValidator()
+        {
+            RuleFor(x => x.Id)
+                .GreaterThan(0)
+                .WithMessage("Id must be greater than 0.");
+        }
+    }
+}
+HEREDOC_5A7D6CFB9506AE53E9367456C2E35CF5
 write_template_file 'UMS.Application/Features/Categories/Commands/Update/UpdateCategoryCommand.cs' << 'HEREDOC_09C9F1A60B1FFEEC64B7993C04245279'
 using UMS.Application.Features.Categories.Commands;
 using UMS.Application.Features.Categories.Events;
@@ -9686,6 +10408,34 @@ namespace UMS.Application.Features.Categories.Events
     }
 }
 HEREDOC_FFB999E88BC17E1002B7442E8B1BA2CB
+write_template_file 'UMS.Application/Features/Categories/Events/CategoryRestoredEvent.cs' << 'HEREDOC_3041CBA7783A7B1A2C034C7648AC29A0'
+using Mediator;
+using Microsoft.Extensions.Logging;
+
+namespace UMS.Application.Features.Categories.Events
+{
+    public class CategoryRestoredEvent : INotification
+    {
+        public CategoryRestoredEvent(int id)
+        {
+            CategoryId = id;
+        }
+
+        public int CategoryId { get; }
+    }
+
+    public class CategoryRestoredEventHandler(ILogger<CategoryRestoredEventHandler> logger) : INotificationHandler<CategoryRestoredEvent>
+    {
+        private readonly ILogger<CategoryRestoredEventHandler> _logger = logger;
+
+        public async ValueTask Handle(CategoryRestoredEvent notification, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("CategoryRestoredEvent received for CategoryId {CategoryId}", notification.CategoryId);
+            await Task.CompletedTask;
+        }
+    }
+}
+HEREDOC_3041CBA7783A7B1A2C034C7648AC29A0
 write_template_file 'UMS.Application/Features/Categories/Events/CategoryUpdatedEvent.cs' << 'HEREDOC_7BBFAD3CC5073649F825120F79A9654D'
 using Microsoft.Extensions.Logging;
 
@@ -9711,71 +10461,137 @@ namespace UMS.Application.Features.Categories.Events
     }
 }
 HEREDOC_7BBFAD3CC5073649F825120F79A9654D
-write_template_file 'UMS.Application/Features/Categories/ICategoryService.cs' << 'HEREDOC_E9DA70B586AB65F2617B1BA448F54CDA'
-using UMS.Application.Dtos.Pagination;
-using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+write_template_file 'UMS.Application/Features/Categories/Queries/CategoryQueryExtensions.cs' << 'HEREDOC_921B233AD3CDCC33C400DCDCE2C6D85E'
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
 
-namespace UMS.Application.Features.Categories
+namespace UMS.Application.Features.Categories.Queries
 {
-    public interface ICategoryService
+    public static class CategoryQueryExtensions
     {
-        Task<IResponseWrapper<PagedResult<CategoryResponse>>> GetCategoriesPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct);
-
-        Task<IResponseWrapper<List<CategoryResponse>>> GetCategoriesListAsync(
+        public static IQueryable<Category> ApplyCategoryFilters(
+            this IQueryable<Category> query,
+            ICurrentUserService currentUserService,
             string? searchTerm,
             bool? isActive,
-            string? sortBy,
-            string? sortDirection,
-            CancellationToken ct);
+            bool includeDeleted = false)
+        {
+            if (includeDeleted)
+            {
+                query = query.IgnoreQueryFilters();
+            }
 
-        Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct);
+            // Status Filtering
+            if (isActive.HasValue)
+            {
+                query = query.Where(c => c.IsActive == isActive.Value);
+            }
+            else
+            {
+                // For anonymous or non-privileged requests, show only active categories.
+                if (!currentUserService.IsAuthenticated() || !currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
+                {
+                    query = query.Where(c => c.IsActive);
+                }
+            }
+
+            // Search Term Filtering
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim();
+                var pattern = $"%{term}%";
+                query = query.Where(c =>
+                    EF.Functions.Like(c.Name, pattern) ||
+                    EF.Functions.Like(c.Slug, pattern));
+            }
+
+            return query;
+        }
+
+        public static IQueryable<Category> ApplyCategorySorting(
+            this IQueryable<Category> query,
+            string? sortBy,
+            string? sortDirection)
+        {
+            return sortBy?.ToLower() switch
+            {
+                "name" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Name)
+                    : query.OrderBy(c => c.Name),
+                "slug" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Slug)
+                    : query.OrderBy(c => c.Slug),
+                "sortorder" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.SortOrder)
+                    : query.OrderBy(c => c.SortOrder),
+                "id" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.Id)
+                    : query.OrderBy(c => c.Id),
+                _ => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? query.OrderByDescending(c => c.SortOrder).ThenBy(c => c.Name)
+                    : query.OrderBy(c => c.SortOrder).ThenBy(c => c.Name)
+            };
+        }
     }
 }
-HEREDOC_E9DA70B586AB65F2617B1BA448F54CDA
+HEREDOC_921B233AD3CDCC33C400DCDCE2C6D85E
 write_template_file 'UMS.Application/Features/Categories/Queries/ExportCategories/ExportCategoriesQuery.cs' << 'HEREDOC_3CF6A37DFDDECE55433E525682CB898F'
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Mediator;
 using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
 
 namespace UMS.Application.Features.Categories.Queries.ExportCategories
 {
-    public class ExportCategoriesQuery : IQuery<IResponseWrapper<byte[]>>
+    public sealed record ExportCategoriesQuery : IRequest<IResponseWrapper<byte[]>>
     {
-        public string? SearchTerm { get; set; }
-        public bool? IsActive { get; set; }
-        public string? SortBy { get; set; }
-        public string? SortDirection { get; set; }
-        public string ExportFormat { get; set; } = "excel";
+        public string? SearchTerm { get; init; }
+        public bool? IsActive { get; init; }
+        public string? SortBy { get; init; }
+        public string? SortDirection { get; init; }
+        public string ExportFormat { get; init; } = "excel";
+        public bool IncludeDeleted { get; init; } = false;
     }
 
-    public class ExportCategoriesQueryHandler(ICategoryService categoryService)
-        : IQueryHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
+    public sealed class ExportCategoriesQueryHandler(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService,
+        ICategoryExportService categoryExportService)
+        : IRequestHandler<ExportCategoriesQuery, IResponseWrapper<byte[]>>
     {
-        private readonly ICategoryService _categoryService = categoryService;
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly ICategoryExportService _categoryExportService = categoryExportService;
 
         public async ValueTask<IResponseWrapper<byte[]>> Handle(ExportCategoriesQuery request, CancellationToken ct)
         {
-            var listResponse = await _categoryService.GetCategoriesListAsync(
-                request.SearchTerm,
-                request.IsActive,
-                request.SortBy,
-                request.SortDirection,
-                ct);
+            var categories = await _applicationDbContext.Categories
+                .AsNoTracking()
+                .ApplyCategoryFilters(_currentUserService, request.SearchTerm, request.IsActive, request.IncludeDeleted)
+                .ApplyCategorySorting(request.SortBy, request.SortDirection)
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.SoftDeleted,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
 
-            if (!listResponse.IsSuccessful || listResponse.Data == null)
-            {
-                return ResponseWrapper<byte[]>.Fail(
-                    listResponse.Messages ?? new List<string> { "Failed to retrieve categories for export." },
-                    listResponse.StatusCode);
-            }
-
-            var fileBytes = await _categoryService.ExportCategoriesAsync(listResponse.Data, request.ExportFormat, ct);
+            var fileBytes = await _categoryExportService.ExportCategoriesAsync(categories, request.ExportFormat, ct);
 
             return ResponseWrapper<byte[]>.Success(fileBytes);
         }
@@ -9926,9 +10742,71 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesAdmin
     }
 }
 HEREDOC_AD85D0FC92FDA2E8AC036410340038B4
-write_template_file 'UMS.Application/Features/Categories/Queries/GetCategoriesPaged/GetCategoriesPagedQuery.cs' << 'HEREDOC_9B6D35582A623024AAF025796A9A6C63'
-using UMS.Application.Dtos.Pagination;
+write_template_file 'UMS.Application/Features/Categories/Queries/GetCategoriesList/GetCategoriesListQuery.cs' << 'HEREDOC_7E7AB4EC08008B7A45DE2B5E4E283382'
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Mediator;
+using UMS.Application.Dtos.Wrappers;
 using UMS.Application.Interfaces.Common;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+using UMS.Domain.Entities;
+
+namespace UMS.Application.Features.Categories.Queries.GetCategoriesList
+{
+    public sealed record GetCategoriesListQuery(
+        string? SearchTerm,
+        bool? IsActive,
+        string? SortBy,
+        string? SortDirection,
+        bool IncludeDeleted = false
+    ) : IRequest<IResponseWrapper<List<CategoryResponse>>>;
+
+    public sealed class GetCategoriesListQueryHandler(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService)
+        : IRequestHandler<GetCategoriesListQuery, IResponseWrapper<List<CategoryResponse>>>
+    {
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
+
+        public async ValueTask<IResponseWrapper<List<CategoryResponse>>> Handle(GetCategoriesListQuery request, CancellationToken ct)
+        {
+            var categories = await _applicationDbContext.Categories
+                .AsNoTracking()
+                .ApplyCategoryFilters(_currentUserService, request.SearchTerm, request.IsActive, request.IncludeDeleted)
+                .ApplyCategorySorting(request.SortBy, request.SortDirection)
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.SoftDeleted,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
+
+            return ResponseWrapper<List<CategoryResponse>>.Success(categories);
+        }
+    }
+}
+HEREDOC_7E7AB4EC08008B7A45DE2B5E4E283382
+write_template_file 'UMS.Application/Features/Categories/Queries/GetCategoriesPaged/GetCategoriesPagedQuery.cs' << 'HEREDOC_9B6D35582A623024AAF025796A9A6C63'
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Mediator;
+using UMS.Application.Dtos.Pagination;
+using UMS.Application.Dtos.Wrappers;
+using UMS.Application.Interfaces.Common;
+using UMS.Domain.Entities;
 
 namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
 {
@@ -9939,22 +10817,56 @@ namespace UMS.Application.Features.Categories.Queries.GetCategoriesPaged
         int? ParentId,
         int SortOrder,
         bool IsActive,
+        bool SoftDeleted,
         byte[] RowVersion
     );
 
-    public class GetCategoriesPagedQuery : IRequest<IResponseWrapper<PagedResult<CategoryResponse>>>, IValidateMe
+    public sealed record GetCategoriesPagedQuery : IRequest<IResponseWrapper<PagedResult<CategoryResponse>>>, IValidateMe
     {
-        public PagedFilterRequest PagedFilterRequest { get; set; } = new();
+        public PagedFilterRequest PagedFilterRequest { get; init; } = new();
+        public bool IncludeDeleted { get; init; } = false;
     }
 
-    public class GetCategoriesPagedQueryHandler(ICategoryService categoryService)
+    public sealed class GetCategoriesPagedQueryHandler(
+        IApplicationDbContext applicationDbContext,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetCategoriesPagedQuery, IResponseWrapper<PagedResult<CategoryResponse>>>
     {
-        private readonly ICategoryService _categoryService = categoryService;
+        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
+        private readonly ICurrentUserService _currentUserService = currentUserService;
 
         public async ValueTask<IResponseWrapper<PagedResult<CategoryResponse>>> Handle(GetCategoriesPagedQuery request, CancellationToken ct)
         {
-            return await _categoryService.GetCategoriesPagedQueryAsync(request.PagedFilterRequest, ct);
+            var pagedFilterRequest = request.PagedFilterRequest;
+            var query = _applicationDbContext.Categories
+                .AsNoTracking()
+                .ApplyCategoryFilters(_currentUserService, pagedFilterRequest.SearchTerm, pagedFilterRequest.IsActive, request.IncludeDeleted)
+                .ApplyCategorySorting(pagedFilterRequest.SortBy, pagedFilterRequest.SortDirection);
+
+            var totalCount = await query.CountAsync(ct);
+
+            var categories = await query
+                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
+                .Take(pagedFilterRequest.PageSize)
+                .Select(c => new CategoryResponse(
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.ParentId,
+                    c.SortOrder,
+                    c.IsActive,
+                    c.SoftDeleted,
+                    c.RowVersion
+                ))
+                .ToListAsync(ct);
+
+            var pagedResult = PagedResult<CategoryResponse>.Create(
+                categories,
+                totalCount,
+                pagedFilterRequest.PageNumber,
+                pagedFilterRequest.PageSize);
+
+            return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
         }
     }
 }
@@ -12082,6 +12994,7 @@ namespace UMS.Application.Interfaces.Common
         DbSet<AuditTrail> AuditTrails { get; }
         DbSet<LogUserActivity> LogUserActivities { get; }
         DbSet<OutboxMessage> OutboxMessages { get; }
+        DbSet<User> Users { get; }
      
 
         void AddOutboxMessage<TNotification>(TNotification notification) where TNotification : class;
@@ -12089,6 +13002,20 @@ namespace UMS.Application.Interfaces.Common
     }
 }
 HEREDOC_92AD0234EAFFE5E88D2B5A88A0958FB5
+write_template_file 'UMS.Application/Interfaces/Common/IAuditTrailExportService.cs' << 'HEREDOC_7881F5298ED83EDB7308A50FEFB822A5'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
+
+namespace UMS.Application.Interfaces.Common
+{
+    public interface IAuditTrailExportService
+    {
+        Task<byte[]> ExportAuditTrailsAsync(List<AuditTrailResponse> data, string format, CancellationToken ct);
+    }
+}
+HEREDOC_7881F5298ED83EDB7308A50FEFB822A5
 write_template_file 'UMS.Application/Interfaces/Common/ICacheAbleMediatorQuery.cs' << 'HEREDOC_EA69F49798955C979F6BFE842CBE22A9'
 
 namespace UMS.Application.Interfaces.Common
@@ -12112,6 +13039,20 @@ namespace UMS.Application.Interfaces.Common
     }
 }
 HEREDOC_A5DC367E80B27025D078202168B07C7D
+write_template_file 'UMS.Application/Interfaces/Common/ICategoryExportService.cs' << 'HEREDOC_63E6927EB3266CDA697B0B6CB585AF17'
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
+
+namespace UMS.Application.Interfaces.Common
+{
+    public interface ICategoryExportService
+    {
+        Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct);
+    }
+}
+HEREDOC_63E6927EB3266CDA697B0B6CB585AF17
 write_template_file 'UMS.Application/Interfaces/Common/ICurrentUserService.cs' << 'HEREDOC_BB1753E6F64FA1E9C2721647857EB908'
 namespace UMS.Application.Interfaces.Common
 {
@@ -13268,6 +14209,127 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, al
   return <Outlet />;
 };
 HEREDOC_D8E10D1D4EFB4B71A10148601D5C1C1F
+write_template_file 'UMS.Client/src/components/shared/StatusConfirmationDialog.tsx' << 'HEREDOC_84136B2B30F648C40EDC1769EE1C2385'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "../ui/dialog"
+import { Button } from "../ui/button"
+import { AlertTriangle, Loader2 } from "lucide-react"
+
+interface StatusConfirmationDialogProps {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly entityName: string;
+  readonly entityType: string; // "user" or "category"
+  readonly action: 'activate' | 'deactivate';
+  readonly isLoading?: boolean;
+}
+
+export function StatusConfirmationDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  entityName,
+  entityType,
+  action,
+  isLoading = false,
+}: StatusConfirmationDialogProps) {
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const actionText = capitalize(action);
+  const entityTypeText = capitalize(entityType);
+
+  const getConsequenceText = () => {
+    if (entityType.toLowerCase() === 'user') {
+      return action === 'deactivate' 
+        ? "They will no longer be able to perform operations."
+        : "";
+    }
+    if (entityType.toLowerCase() === 'category') {
+      return action === 'deactivate'
+        ? "Products mapped to this category may hide or lose visibility in catalogs."
+        : "It will become visible in product catalogs.";
+    }
+    return "";
+  };
+
+  const confirmButtonClass = action === 'activate'
+    ? "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl border-transparent"
+    : "bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl border-transparent";
+
+  const consequence = getConsequenceText();
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-md bg-white p-6 rounded-2xl border border-neutral-200 shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-neutral-900 font-extrabold flex items-center gap-2 capitalize">
+            <AlertTriangle className="w-5 h-5 text-amber-500" /> {actionText} {entityTypeText}
+          </DialogTitle>
+          <DialogDescription className="text-neutral-500 text-sm mt-2">
+            Are you sure you want to {action} the {entityType} '{entityName}'?{consequence ? ` ${consequence}` : ""}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="flex justify-end gap-2 mt-6">
+          <DialogClose onClick={onClose} className="border-neutral-200 text-neutral-600 hover:bg-neutral-100 font-bold">
+            Cancel
+          </DialogClose>
+          <Button
+            type="button"
+            disabled={isLoading}
+            onClick={onConfirm}
+            className={confirmButtonClass}
+          >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-1.5 inline" />}
+            {actionText} {entityTypeText}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+HEREDOC_84136B2B30F648C40EDC1769EE1C2385
+write_template_file 'UMS.Client/src/components/shared/StatusSwitch.tsx' << 'HEREDOC_FDD0A6358CCB6F6E9262B04CEA0E28D5'
+import { Switch } from "../ui/switch"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
+
+interface StatusSwitchProps {
+  readonly isActive: boolean;
+  readonly onToggle: () => void;
+  readonly entityName: string;
+  readonly isLoading?: boolean;
+  readonly disabled?: boolean;
+}
+
+export function StatusSwitch({
+  isActive,
+  onToggle,
+  entityName,
+  isLoading = false,
+  disabled = false,
+}: StatusSwitchProps) {
+  const tooltipText = isActive ? "Click to deactivate" : "Click to activate";
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Switch
+              checked={isActive}
+              onCheckedChange={onToggle}
+              disabled={isLoading || disabled}
+              aria-label={`${tooltipText} ${entityName}`}
+            />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+HEREDOC_FDD0A6358CCB6F6E9262B04CEA0E28D5
 write_template_file 'UMS.Client/src/components/ui/badge.tsx' << 'HEREDOC_D971A321D67109C630B368D35982F34B'
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -14423,6 +15485,36 @@ export function SheetFooter({ children, className }: { children: React.ReactNode
   return <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 mt-6", className)}>{children}</div>
 }
 HEREDOC_7B356354E578CB59D2C13474BFAA20C0
+write_template_file 'UMS.Client/src/components/ui/switch.tsx' << 'HEREDOC_D4AE57819996BAD6410B92ACD5DDD686'
+import * as React from "react"
+import { Switch as SwitchPrimitive } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+
+function Switch({
+  className,
+  ...props
+}: React.ComponentProps<typeof SwitchPrimitive.Root>) {
+  return (
+    <SwitchPrimitive.Root
+      data-slot="switch"
+      className={cn(
+        "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-[#4285F4] data-[state=unchecked]:bg-neutral-200 dark:data-[state=unchecked]:bg-neutral-800",
+        className
+      )}
+      {...props}
+    >
+      <SwitchPrimitive.Thumb
+        className={cn(
+          "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+        )}
+      />
+    </SwitchPrimitive.Root>
+  )
+}
+
+export { Switch }
+HEREDOC_D4AE57819996BAD6410B92ACD5DDD686
 write_template_file 'UMS.Client/src/components/ui/toast.tsx' << 'HEREDOC_87091C9A6C46242C39BA874508D7760F'
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react'
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
@@ -14547,6 +15639,40 @@ const ToastItem: React.FC<{ toast: ToastMessage; onClose: (id: string) => void }
   )
 }
 HEREDOC_87091C9A6C46242C39BA874508D7760F
+write_template_file 'UMS.Client/src/components/ui/tooltip.tsx' << 'HEREDOC_A86FF90491820FF7AE3C7A3ACE2F23A5'
+import * as React from "react"
+import { Tooltip as TooltipPrimitive } from "radix-ui"
+
+import { cn } from "@/lib/utils"
+
+const TooltipProvider = TooltipPrimitive.Provider
+
+const Tooltip = TooltipPrimitive.Root
+
+const TooltipTrigger = TooltipPrimitive.Trigger
+
+function TooltipContent({
+  className,
+  sideOffset = 4,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  return (
+    <TooltipPrimitive.Portal>
+      <TooltipPrimitive.Content
+        data-slot="tooltip-content"
+        sideOffset={sideOffset}
+        className={cn(
+          "z-50 overflow-hidden rounded-md bg-neutral-900 px-3 py-1.5 text-xs text-neutral-50 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:bg-neutral-50 dark:text-neutral-900",
+          className
+        )}
+        {...props}
+      />
+    </TooltipPrimitive.Portal>
+  )
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+HEREDOC_A86FF90491820FF7AE3C7A3ACE2F23A5
 write_template_file 'UMS.Client/src/hooks/useAuditLogs.ts' << 'HEREDOC_420149D900F08E9E4B6B40C33D640D7D'
 import { useQuery } from '@tanstack/react-query';
 import { auditLogsApi } from '../lib/audit-logs-api';
@@ -14586,7 +15712,9 @@ import { categoriesApi } from '../lib/categories-api';
 import type { 
   PagedFilterRequest, 
   CreateCategoryRequest, 
-  UpdateCategoryRequest 
+  UpdateCategoryRequest,
+  CategoryResponse,
+  PagedResult
 } from '../lib/categories-api';
 import { useToast } from '../components/ui/toast';
 
@@ -14682,6 +15810,77 @@ export function useDeleteCategory() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'An error occurred during deletion.');
+    },
+  });
+}
+
+export function useRestoreCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (id: number) => categoriesApi.restore(id),
+    onSuccess: (response) => {
+      if (response.isSuccessful) {
+        toast.success('Category restored successfully!');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
+      } else {
+        toast.error(response.messages[0] || 'Failed to restore category.');
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'An error occurred during restoration.');
+    },
+  });
+}
+
+export function useChangeCategoryStatus() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (data: { id: number; isActive: boolean }) =>
+      categoriesApi.changeStatus(data.id, data.isActive),
+    onMutate: async ({ id, isActive }) => {
+      await queryClient.cancelQueries({ queryKey: ['categories'] });
+
+      const previousQueries = queryClient.getQueriesData<PagedResult<CategoryResponse>>({
+        queryKey: ['categories', 'list']
+      });
+
+      previousQueries.forEach(([queryKey]) => {
+        queryClient.setQueryData<PagedResult<CategoryResponse>>(queryKey, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((cat) =>
+              cat.id === id ? { ...cat, isActive } : cat
+            )
+          };
+        });
+      });
+
+      return { previousQueries };
+    },
+    onError: (err: Error, _variables, context) => {
+      if (context?.previousQueries) {
+        context.previousQueries.forEach(([queryKey, queryData]) => {
+          queryClient.setQueryData(queryKey, queryData);
+        });
+      }
+      toast.error(err.message || 'Failed to update category status.');
+    },
+    onSuccess: (response, variables) => {
+      if (response.isSuccessful) {
+        toast.success(
+          `Category ${variables.isActive ? 'activated' : 'deactivated'} successfully.`
+        );
+      } else {
+        toast.error(response.messages[0] || 'Failed to update category status.');
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
   });
 }
@@ -15745,6 +16944,7 @@ export interface CategoryResponse {
   parentId: number | null;
   sortOrder: number;
   isActive: boolean;
+  softDeleted: boolean;
   rowVersion: string;
 }
 
@@ -15762,6 +16962,7 @@ export interface PagedFilterRequest {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   isActive?: boolean | null;
+  includeDeleted?: boolean;
 }
 
 export interface CreateCategoryRequest {
@@ -15797,6 +16998,7 @@ export const categoriesApi = {
       ...(params.sortBy && { sortBy: params.sortBy }),
       ...(params.sortDirection && { sortDirection: params.sortDirection }),
       ...(params.isActive !== undefined && params.isActive !== null && { isActive: String(params.isActive) }),
+      ...(params.includeDeleted !== undefined && { includeDeleted: String(params.includeDeleted) }),
     });
     return api.get(`api/v1/categories/paged?${query.toString()}`);
   },
@@ -15820,6 +17022,14 @@ export const categoriesApi = {
 
   update: (data: UpdateCategoryRequest): Promise<ApiResponse> => {
     return api.put('api/v1/categories', data);
+  },
+
+  changeStatus: (id: number, isActive: boolean): Promise<ApiResponse<number>> => {
+    return api.put(`api/v1/categories/${id}/status?isActive=${isActive}`);
+  },
+
+  restore: (id: number): Promise<ApiResponse<number>> => {
+    return api.post(`api/v1/categories/${id}/restore`);
   },
 
   delete: (id: number): Promise<ApiResponse> => {
@@ -17519,11 +18729,16 @@ import {
   useCategoryLookups, 
   useCreateCategory, 
   useUpdateCategory, 
-  useDeleteCategory 
+  useDeleteCategory,
+  useChangeCategoryStatus,
+  useRestoreCategory
 } from '../hooks/useCategories';
 import { DataTablePagination } from '../components/ui/DataTablePagination';
 import { useToast } from '../components/ui/toast';
 import DataTableExport from '../components/ui/DataTableExport';
+import { StatusSwitch } from '../components/shared/StatusSwitch';
+import { StatusConfirmationDialog } from '../components/shared/StatusConfirmationDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 
 const columns: ColumnDef<CategoryResponse>[] = [
   { accessorKey: 'id', header: 'ID' },
@@ -17546,36 +18761,45 @@ export default function CategoriesManagement() {
   const sortBy = searchParams.get('sortBy') || 'sortorder';
   const sortDirection = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
   const statusFilter = (searchParams.get('status') || 'all') as 'all' | 'active' | 'inactive';
+  const includeDeletedParam = searchParams.get('includeDeleted') === 'true';
 
   // Local filter states
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const [localStatus, setLocalStatus] = useState(statusFilter);
+  const [localIncludeDeleted, setLocalIncludeDeleted] = useState(includeDeletedParam);
 
   // Synchronize local states with URL search params (supporting Back/Forward navigation & hydration)
   const [prevParams, setPrevParams] = useState({
     search: searchTerm,
     status: statusFilter,
+    includeDeleted: includeDeletedParam,
   });
 
   if (
     searchTerm !== prevParams.search ||
-    statusFilter !== prevParams.status
+    statusFilter !== prevParams.status ||
+    includeDeletedParam !== prevParams.includeDeleted
   ) {
     setPrevParams({
       search: searchTerm,
       status: statusFilter,
+      includeDeleted: includeDeletedParam,
     });
     setLocalSearch(searchTerm);
     setLocalStatus(statusFilter);
+    setLocalIncludeDeleted(includeDeletedParam);
   }
 
   const isDirty =
     localSearch.trim() !== searchTerm ||
-    localStatus !== statusFilter;
+    localStatus !== statusFilter ||
+    localIncludeDeleted !== includeDeletedParam;
 
   // Dialog & Sheet States
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [statusAction, setStatusAction] = useState<'activate' | 'deactivate' | null>(null);
   const [targetCategory, setTargetCategory] = useState<CategoryResponse | null>(null);
 
   // Form States
@@ -17598,6 +18822,7 @@ export default function CategoriesManagement() {
     sortBy,
     sortDirection,
     isActive: isActiveParam,
+    includeDeleted: includeDeletedParam,
   });
 
   const { data: parentLookups = [] } = useCategoryLookups();
@@ -17605,6 +18830,8 @@ export default function CategoriesManagement() {
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
+  const changeStatusMutation = useChangeCategoryStatus();
+  const restoreMutation = useRestoreCategory();
 
   const categories = pagedData?.data || [];
   const totalCount = pagedData?.totalCount || 0;
@@ -17684,6 +18911,13 @@ export default function CategoriesManagement() {
       } else {
         next.delete('status');
       }
+
+      if (localIncludeDeleted) {
+        next.set('includeDeleted', 'true');
+      } else {
+        next.delete('includeDeleted');
+      }
+
       next.set('page', '1');
       return next;
     });
@@ -17692,6 +18926,7 @@ export default function CategoriesManagement() {
   const handleResetFilters = () => {
     setLocalSearch('');
     setLocalStatus('all');
+    setLocalIncludeDeleted(false);
     setSearchParams(new URLSearchParams());
   };
 
@@ -17812,6 +19047,26 @@ export default function CategoriesManagement() {
     });
   };
 
+  const requestChangeStatus = (action: 'activate' | 'deactivate', cat: CategoryResponse) => {
+    setStatusAction(action);
+    setTargetCategory(cat);
+    setIsStatusDialogOpen(true);
+  };
+
+  const executeChangeStatus = async () => {
+    if (!targetCategory || !statusAction) return;
+    changeStatusMutation.mutate({
+      id: targetCategory.id,
+      isActive: statusAction === 'activate'
+    }, {
+      onSuccess: (response) => {
+        if (response.isSuccessful) {
+          setIsStatusDialogOpen(false);
+        }
+      }
+    });
+  };
+
   // Find parent category name from lists
   const getParentCategoryName = (parentId: number | null) => {
     if (parentId === null) return 'None (Root)';
@@ -17820,7 +19075,8 @@ export default function CategoriesManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -17867,6 +19123,16 @@ export default function CategoriesManagement() {
                 <option value="active">Active Only</option>
                 <option value="inactive">Inactive Only</option>
               </select>
+
+              <label className="flex items-center gap-2 border border-neutral-200 rounded-xl px-3 py-2 text-sm bg-white cursor-pointer select-none font-medium text-neutral-700">
+                <input
+                  type="checkbox"
+                  checked={localIncludeDeleted}
+                  onChange={(e) => setLocalIncludeDeleted(e.target.checked)}
+                  className="w-4 h-4 text-[#4285F4] border-neutral-300 rounded focus:ring-[#4285F4]"
+                />
+                Include Deleted
+              </label>
 
               <Button type="submit" variant="default" disabled={!isDirty} className="rounded-xl px-5 disabled:opacity-50 disabled:pointer-events-none">
                 Apply Filters
@@ -17970,41 +19236,87 @@ export default function CategoriesManagement() {
                         {cat.sortOrder}
                       </td>
                       <td className="px-6 py-4">
-                        <Badge 
-                           variant="outline" 
-                           className={
-                             cat.isActive 
-                               ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
-                               : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
-                           }
-                        >
-                          {cat.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
+                        {cat.softDeleted ? (
+                          <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700 font-bold">
+                            Deleted
+                          </Badge>
+                        ) : hasPermission('Permission.Product.Categories.Update') ? (
+                          <StatusSwitch
+                            isActive={cat.isActive}
+                            onToggle={() => requestChangeStatus(cat.isActive ? 'deactivate' : 'activate', cat)}
+                            entityName={cat.name}
+                            isLoading={changeStatusMutation.isPending && targetCategory?.id === cat.id}
+                          />
+                        ) : (
+                          <Badge 
+                             variant="outline" 
+                             className={
+                               cat.isActive 
+                                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' 
+                                 : 'border-neutral-200 bg-neutral-50 text-neutral-600 font-bold'
+                             }
+                          >
+                            {cat.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {hasPermission('Permission.Product.Categories.Update') && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => openEditSheet(cat)}
-                              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
-                              title="Edit Details"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
+                          {cat.softDeleted ? (
+                            hasPermission('Permission.Product.Categories.Update') && (
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => restoreMutation.mutate(cat.id)}
+                                    disabled={restoreMutation.isPending}
+                                    className="h-8 w-8 text-emerald-600 hover:text-emerald-900 hover:bg-emerald-50 rounded-lg"
+                                  >
+                                    {restoreMutation.isPending && targetCategory?.id === cat.id ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Restore Category</TooltipContent>
+                              </Tooltip>
+                            )
+                          ) : (
+                            <>
+                              {hasPermission('Permission.Product.Categories.Update') && (
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => openEditSheet(cat)}
+                                      className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Edit Details</TooltipContent>
+                                </Tooltip>
+                              )}
 
-                          {hasPermission('Permission.Product.Categories.Delete') && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => requestDelete(cat)}
-                              className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
-                              title="Delete Category"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                              {hasPermission('Permission.Product.Categories.Delete') && (
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestDelete(cat)}
+                                      className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Delete Category</TooltipContent>
+                                </Tooltip>
+                              )}
+                            </>
                           )}
 
                           {!hasPermission('Permission.Product.Categories.Update') && 
@@ -18168,7 +19480,19 @@ export default function CategoriesManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* STATUS CONFIRMATION DIALOG */}
+      <StatusConfirmationDialog
+        isOpen={isStatusDialogOpen}
+        onClose={() => setIsStatusDialogOpen(false)}
+        onConfirm={executeChangeStatus}
+        entityName={targetCategory?.name || ''}
+        entityType="category"
+        action={statusAction || 'activate'}
+        isLoading={changeStatusMutation.isPending}
+      />
     </div>
+    </TooltipProvider>
   );
 }
 HEREDOC_3CB668B7CEC5CCFC044318FEE2D04D65
@@ -21112,6 +22436,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/ui/toast';
 import DataTableExport from '../components/ui/DataTableExport';
+import { StatusSwitch } from '../components/shared/StatusSwitch';
+import { StatusConfirmationDialog } from '../components/shared/StatusConfirmationDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 import { 
   useReactTable, 
   getCoreRowModel, 
@@ -21513,7 +22840,8 @@ export default function UsersManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -21756,81 +23084,80 @@ export default function UsersManagement() {
                             {/* Lock / Unlock Toggle buttons */}
                             {usr.isLocked ? (
                               hasPermission('Permission.Identity.Users.Unlock') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('unlock', usr)}
-                                  className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
-                                  title="Unlock User Account"
-                                >
-                                  <Unlock className="w-3.5 h-3.5" />
-                                </Button>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestConfirm('unlock', usr)}
+                                      className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                                    >
+                                      <Unlock className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Unlock User Account</TooltipContent>
+                                </Tooltip>
                               )
                             ) : (
                               hasPermission('Permission.Identity.Users.Lock') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('lock', usr)}
-                                  className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg"
-                                  title="Lock User Account"
-                                >
-                                  <Lock className="w-3.5 h-3.5" />
-                                </Button>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => requestConfirm('lock', usr)}
+                                      className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg"
+                                    >
+                                      <Lock className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Lock User Account</TooltipContent>
+                                </Tooltip>
                               )
                             )}
 
                             {/* Active / Inactive Status Toggle buttons */}
-                            {usr.isActive ? (
-                              hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('deactivate', usr)}
-                                  className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
-                                  title="Deactivate User Account"
-                                >
-                                  <UserCheck className="w-3.5 h-3.5 text-neutral-400" />
-                                </Button>
-                              )
-                            ) : (
-                              hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => requestConfirm('activate', usr)}
-                                  className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
-                                  title="Activate User Account"
-                                >
-                                  <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
-                                </Button>
-                              )
+                            {hasPermission('Permission.Identity.Users.Update') && !isUserAdmin && (
+                              <StatusSwitch
+                                isActive={usr.isActive}
+                                onToggle={() => requestConfirm(usr.isActive ? 'deactivate' : 'activate', usr)}
+                                entityName={usr.fullName}
+                                isLoading={changeStatusMutation.isPending && targetUser?.id === usr.id}
+                              />
                             )}
 
                             {/* Edit User Button - Guarded */}
                             {hasPermission('Permission.Identity.Users.Update') && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => openEditSheet(usr)}
-                                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
-                                title="Edit Details & Roles"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => openEditSheet(usr)}
+                                    className="h-8 w-8 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit Details & Roles</TooltipContent>
+                              </Tooltip>
                             )}
 
                             {/* Delete User Button - Guarded */}
                             {hasPermission('Permission.Identity.Users.Delete') && !isUserAdmin && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => requestConfirm('delete', usr)}
-                                className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
-                                title="Delete User"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => requestConfirm('delete', usr)}
+                                    className="h-8 w-8 text-rose-500 hover:text-rose-900 hover:bg-rose-50 rounded-lg"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete User</TooltipContent>
+                              </Tooltip>
                             )}
 
                             {!hasPermission('Permission.Identity.Users.Update') && 
@@ -22027,17 +23354,26 @@ export default function UsersManagement() {
         </form>
       </Sheet>
 
+      {/* STATUS CONFIRMATION DIALOG */}
+      <StatusConfirmationDialog
+        isOpen={isConfirmDialogOpen && (confirmAction === 'activate' || confirmAction === 'deactivate')}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={executeConfirmAction}
+        entityName={targetUser?.fullName || ''}
+        entityType="user"
+        action={(confirmAction === 'activate' || confirmAction === 'deactivate') ? confirmAction : 'activate'}
+        isLoading={confirmPending}
+      />
+
       {/* CONFIRMATION DIALOG */}
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        {targetUser && confirmAction && (
+      <Dialog open={isConfirmDialogOpen && confirmAction !== 'activate' && confirmAction !== 'deactivate'} onOpenChange={setIsConfirmDialogOpen}>
+        {targetUser && confirmAction && confirmAction !== 'activate' && confirmAction !== 'deactivate' && (
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="capitalize">{confirmAction} Account</DialogTitle>
               <DialogDescription>
                 {confirmAction === 'lock' && `Are you sure you want to lock the account of ${targetUser.fullName}? They will be blocked from logging into the application.`}
                 {confirmAction === 'unlock' && `Are you sure you want to unlock the account of ${targetUser.fullName}?`}
-                {confirmAction === 'activate' && `Are you sure you want to activate the account of ${targetUser.fullName}?`}
-                {confirmAction === 'deactivate' && `Are you sure you want to deactivate the account of ${targetUser.fullName}? They will no longer be able to perform operations.`}
                 {confirmAction === 'delete' && `Are you sure you want to delete ${targetUser.fullName}? This operation will delete their account data.`}
               </DialogDescription>
             </DialogHeader>
@@ -22059,6 +23395,7 @@ export default function UsersManagement() {
         )}
       </Dialog>
     </div>
+    </TooltipProvider>
   );
 }
 HEREDOC_108022099943D2FE8BA1C5D756690931
@@ -22522,6 +23859,19 @@ namespace UMS.Domain.Entities
     }
 }
 HEREDOC_CC2775228E2C589EE9EE9B8F8972EC91
+write_template_file 'UMS.Domain/Entities/User.cs' << 'HEREDOC_CBCEC85A5CB941A4E8BF4E0B87690418'
+using UMS.Domain.Common;
+
+namespace UMS.Domain.Entities
+{
+    public class User : BaseEntity<int>
+    {
+        public string Email { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+}
+HEREDOC_CBCEC85A5CB941A4E8BF4E0B87690418
 write_template_file 'UMS.Domain/Enums/DomainEnums.cs' << 'HEREDOC_2311DA680B2D392EA38D36DB5B2865F1'
 namespace UMS.Domain.Enums;
 
@@ -25458,11 +26808,11 @@ namespace UMS.Infrastructure.Tests.Services
         {
             var data = new List<CategoryResponse>
             {
-                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
-                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+                new(1, "Test 1", "test-1", null, 1, true, false, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, false, System.Array.Empty<byte>())
             };
 
-            var service = new CategoryService(null!, null!);
+            var service = new CategoryExportService();
             
             var bytes = await service.ExportCategoriesAsync(data, "excel", CancellationToken.None);
             bytes.Should().NotBeNull();
@@ -25474,11 +26824,11 @@ namespace UMS.Infrastructure.Tests.Services
         {
             var data = new List<CategoryResponse>
             {
-                new(1, "Test 1", "test-1", null, 1, true, System.Array.Empty<byte>()),
-                new(2, "Test 2", "test-2", null, 2, true, System.Array.Empty<byte>())
+                new(1, "Test 1", "test-1", null, 1, true, false, System.Array.Empty<byte>()),
+                new(2, "Test 2", "test-2", null, 2, true, false, System.Array.Empty<byte>())
             };
 
-            var service = new CategoryService(null!, null!);
+            var service = new CategoryExportService();
             
             var bytes = await service.ExportCategoriesAsync(data, "pdf", CancellationToken.None);
             bytes.Should().NotBeNull();
@@ -27561,34 +28911,45 @@ namespace UMS.Infrastructure.Identity.Services
 
         public async Task<IResponseWrapper<TokenResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
-            var userPrincipal = GetClaimPrincipalFromExpiredToken(refreshTokenRequest.Token);
-            var userEmail = userPrincipal.FindFirstValue(ClaimTypes.Email);
-
-            var userInDb = await _userManager.FindByEmailAsync(userEmail);
-            if (userInDb is not null)
+            try
             {
-                if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
-                    || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
+                var userPrincipal = GetClaimPrincipalFromExpiredToken(refreshTokenRequest.Token);
+                var userEmail = userPrincipal.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(userEmail))
                 {
                     return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
                 }
 
-                var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
-                userInDb.RefreshToken = GenerateRefreshToken();
-                userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
-
-                await _userManager.UpdateAsync(userInDb);
-
-                var tokenResponse = new TokenResponse
+                var userInDb = await _userManager.FindByEmailAsync(userEmail);
+                if (userInDb is not null)
                 {
-                    Token = token,
-                    RefreshToken = userInDb.RefreshToken,
-                    RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
-                };
+                    if (userInDb.RefreshToken != refreshTokenRequest.RefreshToken
+                        || userInDb.RefreshTokenExpiryDate <= _dateTimeService.NowUtc)
+                    {
+                        return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
+                    }
 
-                return ResponseWrapper<TokenResponse>.Success(tokenResponse);
+                    var token = GenerateEncryptedToken(GetSigningCredentials(), await GetClaimsAsync(userInDb));
+                    userInDb.RefreshToken = GenerateRefreshToken();
+                    userInDb.RefreshTokenExpiryDate = _dateTimeService.NowUtc.AddDays(_tokenSettings.RefreshTokenExpiryInDays);
+
+                    await _userManager.UpdateAsync(userInDb);
+
+                    var tokenResponse = new TokenResponse
+                    {
+                        Token = token,
+                        RefreshToken = userInDb.RefreshToken,
+                        RefreshTokenExpiryTime = userInDb.RefreshTokenExpiryDate
+                    };
+
+                    return ResponseWrapper<TokenResponse>.Success(tokenResponse);
+                }
+                return ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
             }
-            return ResponseWrapper<TokenResponse>.Fail(message: "User does not exist.");
+            catch (Exception)
+            {
+                return ResponseWrapper<TokenResponse>.Fail(message: "Invalid token provided.");
+            }
         }
 
         private ClaimsPrincipal GetClaimPrincipalFromExpiredToken(string expiredToken)
@@ -31321,6 +32682,623 @@ namespace UMS.Infrastructure.Migrations
     }
 }
 HEREDOC_7A5CB3182836D17681A9857F7E629FD0
+write_template_file 'UMS.Infrastructure/Migrations/20260619190420_AddFilteredUniqueIndexesForCategories.cs' << 'HEREDOC_08101768A826560500D62C2BABD0C10E'
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace UMS.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddFilteredUniqueIndexesForCategories : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "UX_Categories_NormalizedName",
+                table: "Categories");
+
+            migrationBuilder.DropIndex(
+                name: "UX_Categories_NormalizedSlug",
+                table: "Categories");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Categories_NormalizedName",
+                table: "Categories",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[SoftDeleted] = 0");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Categories_NormalizedSlug",
+                table: "Categories",
+                column: "NormalizedSlug",
+                unique: true,
+                filter: "[SoftDeleted] = 0");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "UX_Categories_NormalizedName",
+                table: "Categories");
+
+            migrationBuilder.DropIndex(
+                name: "UX_Categories_NormalizedSlug",
+                table: "Categories");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Categories_NormalizedName",
+                table: "Categories",
+                column: "NormalizedName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UX_Categories_NormalizedSlug",
+                table: "Categories",
+                column: "NormalizedSlug",
+                unique: true);
+        }
+    }
+}
+HEREDOC_08101768A826560500D62C2BABD0C10E
+write_template_file 'UMS.Infrastructure/Migrations/20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs' << 'HEREDOC_FFA07621F672284B2E973F781CBD3CB5'
+// <auto-generated />
+using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using UMS.Infrastructure.Persistence.Contexts;
+
+#nullable disable
+
+namespace UMS.Infrastructure.Migrations
+{
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260619190420_AddFilteredUniqueIndexesForCategories")]
+    partial class AddFilteredUniqueIndexesForCategories
+    {
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.6")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("UMS.Domain.Entities.AuditTrail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AffectedColumns")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PrimaryKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditTrails");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedSlug")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("SoftDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Categories_NormalizedName")
+                        .HasFilter("[SoftDeleted] = 0");
+
+                    b.HasIndex("NormalizedSlug")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Categories_NormalizedSlug")
+                        .HasFilter("[SoftDeleted] = 0");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("SoftDeleted");
+
+                    b.ToTable("Categories", (string)null);
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.LogUserActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Browser")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HttpMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IPAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ImpersonatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UrlData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LogUserActivities");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.OutboxMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Error")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NextRetryOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("OccurredOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ProcessedOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OutboxMessages");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("Users", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("Roles", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RoleClaims", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("Users", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserClaims", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLogins", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("UserTokens", "Identity");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+                {
+                    b.HasOne("UMS.Domain.Entities.Category", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRoleClaim", b =>
+                {
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserClaim", b =>
+                {
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserLogin", b =>
+                {
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserRole", b =>
+                {
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationUserToken", b =>
+                {
+                    b.HasOne("UMS.Infrastructure.Identity.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Children");
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+HEREDOC_FFA07621F672284B2E973F781CBD3CB5
 write_template_file 'UMS.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs' << 'HEREDOC_B6C0DB53E09E9AA2A7A3744DE0570C55'
 // <auto-generated />
 using System;
@@ -31457,11 +33435,13 @@ namespace UMS.Infrastructure.Migrations
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("UX_Categories_NormalizedName");
+                        .HasDatabaseName("UX_Categories_NormalizedName")
+                        .HasFilter("[SoftDeleted] = 0");
 
                     b.HasIndex("NormalizedSlug")
                         .IsUnique()
-                        .HasDatabaseName("UX_Categories_NormalizedSlug");
+                        .HasDatabaseName("UX_Categories_NormalizedSlug")
+                        .HasFilter("[SoftDeleted] = 0");
 
                     b.HasIndex("ParentId");
 
@@ -31546,6 +33526,29 @@ namespace UMS.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("OutboxMessages");
+                });
+
+            modelBuilder.Entity("UMS.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("Users", "Identity");
                 });
 
             modelBuilder.Entity("UMS.Infrastructure.Identity.Models.ApplicationRole", b =>
@@ -31955,6 +33958,7 @@ namespace UMS.Infrastructure.Persistence.Contexts
         public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
         public DbSet<LogUserActivity> LogUserActivities => Set<LogUserActivity>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        DbSet<User> IApplicationDbContext.Users => Set<User>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -32067,14 +34071,31 @@ namespace UMS.Infrastructure.Persistence.Contexts
 
             if (property.Metadata.IsPrimaryKey())
             {
-                auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                if (property.IsTemporary)
+                {
+                    // It's a DB-generated key (e.g., auto-increment int). 
+                    // Defer it to OnAfterSaveChanges.
+                    auditEntry.TemporaryProperties.Add(property);
+                }
+                else
+                {
+                    auditEntry.KeyValues[propertyName] = property.CurrentValue!;
+                }
                 continue;
             }
 
             switch (entry.State)
             {
                 case EntityState.Added:
-                    auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    if (property.IsTemporary)
+                    {
+                        // Defer other DB-generated values (like defaults/computed columns)
+                        auditEntry.TemporaryProperties.Add(property);
+                    }
+                    else
+                    {
+                        auditEntry.NewValues[propertyName] = property.CurrentValue!;
+                    }
                     break;
                 case EntityState.Deleted:
                     auditEntry.OldValues[propertyName] = property.OriginalValue!;
@@ -32152,6 +34173,12 @@ namespace UMS.Infrastructure.Persistence.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>(builder =>
+            {
+                builder.ToView("Users", "Identity");
+                builder.HasKey(u => u.Id);
+            });
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -32300,11 +34327,13 @@ namespace UMS.Infrastructure.Persistence.DbConfigurations
 
             builder.HasIndex(c => c.NormalizedName)
                 .IsUnique()
-                .HasDatabaseName("UX_Categories_NormalizedName");
+                .HasDatabaseName("UX_Categories_NormalizedName")
+                .HasFilter("[SoftDeleted] = 0");
 
             builder.HasIndex(c => c.NormalizedSlug)
                 .IsUnique()
-                .HasDatabaseName("UX_Categories_NormalizedSlug");
+                .HasDatabaseName("UX_Categories_NormalizedSlug")
+                .HasFilter("[SoftDeleted] = 0");
 
             builder.HasOne(c => c.Parent)
                 .WithMany(c => c.Children)
@@ -32424,8 +34453,6 @@ using UMS.Infrastructure.Persistence.DbInitializers;
 using UMS.Infrastructure.Persistence.Interceptors;
 using UMS.Infrastructure.Services;
 using UMS.Infrastructure.Services.Common;
-using UMS.Application.Features.AuditTrails;
-using UMS.Application.Features.Categories;
 using QuestPDF.Infrastructure;
 
 namespace UMS.Infrastructure
@@ -32465,8 +34492,8 @@ namespace UMS.Infrastructure
                 .AddScoped<IEmailService, MailSenderService>()
                 .AddScoped<IDateTimeService, DateTimeService>()
                 .AddScoped<IFileStorageService, LocalFileStorageService>()
-                .AddScoped<IAuditTrailService, AuditTrailService>()
-                .AddScoped<ICategoryService, CategoryService>()
+                .AddScoped<IAuditTrailExportService, AuditTrailExportService>()
+                .AddScoped<ICategoryExportService, CategoryExportService>()
                 .AddFeatures();
         }
 
@@ -32542,229 +34569,23 @@ namespace UMS.Infrastructure
     }
 }
 HEREDOC_8BB93707BD28014E64652F9FC74A1F74
-write_template_file 'UMS.Infrastructure/Services/AuditTrailService.cs' << 'HEREDOC_057443E980FA4E5437D360336125C1B1'
+write_template_file 'UMS.Infrastructure/Services/AuditTrailExportService.cs' << 'HEREDOC_2BBC7F6A14F250A9710DE43D3A269824'
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
-using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using UMS.Application.Dtos.Pagination;
-using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.AuditTrails;
 using UMS.Application.Features.AuditTrails.Queries.GetAuditTrailsPaged;
 using UMS.Application.Interfaces.Common;
-using UMS.Domain.Enums;
-using UMS.Infrastructure.Persistence.Contexts;
 
 namespace UMS.Infrastructure.Services
 {
-    internal class AuditTrailQueryModel
+    public class AuditTrailExportService : IAuditTrailExportService
     {
-        public Domain.Entities.AuditTrail Audit { get; set; } = null!;
-        public string? UserEmail { get; set; }
-    }
-
-    public class AuditTrailService(IApplicationDbContext context) : IAuditTrailService
-    {
-        private readonly IApplicationDbContext _context = context;
-
-        private IQueryable<AuditTrailQueryModel> BuildAuditTrailQuery(GetAuditTrailsPagedQuery request)
-        {
-            var dbContext = _context as ApplicationDbContext;
-            if (dbContext == null)
-            {
-                throw new InvalidOperationException("Invalid database context.");
-            }
-
-            var auditQuery = from audit in dbContext.AuditTrails
-                             join user in dbContext.Users on audit.UserId equals user.Id into userGroup
-                             from user in userGroup.DefaultIfEmpty()
-                             select new AuditTrailQueryModel
-                             {
-                                 Audit = audit,
-                                 UserEmail = user != null ? user.Email : null
-                             };
-
-            // Conditionally filter by UserId (exact match)
-            if (request.UserId.HasValue)
-            {
-                auditQuery = auditQuery.Where(a => a.Audit.UserId == request.UserId.Value);
-            }
-
-            // Conditionally filter by TableName (exact match)
-            if (!string.IsNullOrWhiteSpace(request.TableName))
-            {
-                auditQuery = auditQuery.Where(a => a.Audit.TableName == request.TableName.Trim());
-            }
-
-            // Conditionally filter by EntityId (PrimaryKey substring search)
-            if (!string.IsNullOrWhiteSpace(request.EntityId))
-            {
-                var idTrimmed = request.EntityId.Trim();
-                auditQuery = auditQuery.Where(a => a.Audit.PrimaryKey != null && a.Audit.PrimaryKey.Contains(idTrimmed));
-            }
-
-            // Conditionally filter by ActionTypes list
-            if (!string.IsNullOrWhiteSpace(request.ActionTypes))
-            {
-                var typesList = request.ActionTypes.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(t => Enum.TryParse<AuditType>(t.Trim(), true, out var result) ? result : (AuditType?)null)
-                    .Where(t => t.HasValue)
-                    .Select(t => t!.Value)
-                    .ToList();
-
-                if (typesList.Count > 0)
-                {
-                    auditQuery = auditQuery.Where(a => typesList.Contains(a.Audit.Type));
-                }
-            }
-
-            // Conditionally filter by FromDate (inclusive)
-            if (!string.IsNullOrWhiteSpace(request.FromDate) && DateTime.TryParseExact(request.FromDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedFromDate))
-            {
-                auditQuery = auditQuery.Where(a => a.Audit.DateTime >= parsedFromDate);
-            }
-
-            // Conditionally filter by ToDate (inclusive, adjusted to end of day)
-            if (!string.IsNullOrWhiteSpace(request.ToDate) && DateTime.TryParseExact(request.ToDate.Trim(), "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedToDate))
-            {
-                var adjustedToDate = parsedToDate.Date.AddDays(1).AddTicks(-1);
-                auditQuery = auditQuery.Where(a => a.Audit.DateTime <= adjustedToDate);
-            }
-
-            return auditQuery;
-        }
-
-        public async Task<IResponseWrapper<PagedResult<AuditTrailResponse>>> GetAuditTrailsPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            string? tableName,
-            string? entityId,
-            string? actionTypes,
-            string? fromDate,
-            string? toDate,
-            int? userId,
-            CancellationToken ct)
-        {
-            var auditQuery = BuildAuditTrailQuery(new GetAuditTrailsPagedQuery
-                {
-                    TableName = tableName,
-                    EntityId = entityId,
-                    ActionTypes = actionTypes,
-                    FromDate = fromDate,
-                    ToDate = toDate,
-                    UserId = userId
-                });
-
-            // Apply SearchTerm filter
-            if (!string.IsNullOrWhiteSpace(pagedFilterRequest.SearchTerm))
-            {
-                var term = pagedFilterRequest.SearchTerm.Trim();
-                var pattern = $"%{term}%";
-
-                auditQuery = auditQuery.Where(a =>
-                    EF.Functions.Like(a.Audit.TableName ?? "", pattern) ||
-                    EF.Functions.Like(a.Audit.IpAddress ?? "", pattern) ||
-                    EF.Functions.Like(a.UserEmail ?? "", pattern)
-                );
-            }
-
-            // Sorting
-            auditQuery = pagedFilterRequest.SortBy?.ToLower() switch
-            {
-                "tablename" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.Audit.TableName)
-                    : auditQuery.OrderBy(a => a.Audit.TableName),
-                "type" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.Audit.Type)
-                    : auditQuery.OrderBy(a => a.Audit.Type),
-                "datetime" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.Audit.DateTime)
-                    : auditQuery.OrderBy(a => a.Audit.DateTime),
-                "id" => pagedFilterRequest.SortDirection == "desc"
-                    ? auditQuery.OrderByDescending(a => a.Audit.Id)
-                    : auditQuery.OrderBy(a => a.Audit.Id),
-                _ => pagedFilterRequest.SortDirection == "asc"
-                    ? auditQuery.OrderBy(a => a.Audit.DateTime).ThenBy(a => a.Audit.Id)
-                    : auditQuery.OrderByDescending(a => a.Audit.DateTime).ThenByDescending(a => a.Audit.Id)
-            };
-
-            var totalCount = await auditQuery.CountAsync(ct);
-
-            var auditTrails = await auditQuery
-                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
-                .Take(pagedFilterRequest.PageSize)
-                .Select(a => new AuditTrailResponse(
-                    a.Audit.Id,
-                    a.Audit.UserId,
-                    a.UserEmail,
-                    a.Audit.IpAddress,
-                    a.Audit.Type.ToString(),
-                    a.Audit.TableName,
-                    a.Audit.DateTime,
-                    a.Audit.OldValues,
-                    a.Audit.NewValues,
-                    a.Audit.AffectedColumns,
-                    a.Audit.PrimaryKey
-                ))
-                .ToListAsync(ct);
-
-            var pagedResult = PagedResult<AuditTrailResponse>.Create(
-                auditTrails,
-                totalCount,
-                pagedFilterRequest.PageNumber,
-                pagedFilterRequest.PageSize);
-
-            return ResponseWrapper<PagedResult<AuditTrailResponse>>.Success(pagedResult);
-        }
-
-        public async Task<IResponseWrapper<List<AuditTrailResponse>>> GetAuditTrailsListAsync(
-            string? tableName,
-            string? entityId,
-            string? actionTypes,
-            string? fromDate,
-            string? toDate,
-            int? userId,
-            CancellationToken ct)
-        {
-            var auditQuery = BuildAuditTrailQuery(new GetAuditTrailsPagedQuery
-                {
-                    TableName = tableName,
-                    EntityId = entityId,
-                    ActionTypes = actionTypes,
-                    FromDate = fromDate,
-                    ToDate = toDate,
-                    UserId = userId
-                });
-
-            // Default sort descending by DateTime, then Id
-            auditQuery = auditQuery.OrderByDescending(a => a.Audit.DateTime).ThenByDescending(a => a.Audit.Id);
-
-            var auditTrails = await auditQuery
-                .Select(a => new AuditTrailResponse(
-                    a.Audit.Id,
-                    a.Audit.UserId,
-                    a.UserEmail,
-                    a.Audit.IpAddress,
-                    a.Audit.Type.ToString(),
-                    a.Audit.TableName,
-                    a.Audit.DateTime,
-                    a.Audit.OldValues,
-                    a.Audit.NewValues,
-                    a.Audit.AffectedColumns,
-                    a.Audit.PrimaryKey
-                ))
-                .ToListAsync(ct);
-
-            return ResponseWrapper<List<AuditTrailResponse>>.Success(auditTrails);
-        }
-
         public async Task<byte[]> ExportAuditTrailsAsync(List<AuditTrailResponse> data, string format, CancellationToken ct)
         {
             if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
@@ -32922,147 +34743,24 @@ namespace UMS.Infrastructure.Services
         }
     }
 }
-HEREDOC_057443E980FA4E5437D360336125C1B1
-write_template_file 'UMS.Infrastructure/Services/CategoryService.cs' << 'HEREDOC_51B92ECD0ACB6459897EF2610B3C211A'
+HEREDOC_2BBC7F6A14F250A9710DE43D3A269824
+write_template_file 'UMS.Infrastructure/Services/CategoryExportService.cs' << 'HEREDOC_A27EB0214A76F9601BCF4C0DFEA48766'
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
-using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using UMS.Application.Dtos.Pagination;
-using UMS.Application.Dtos.Wrappers;
-using UMS.Application.Features.Categories;
 using UMS.Application.Features.Categories.Queries.GetCategoriesPaged;
 using UMS.Application.Interfaces.Common;
-using UMS.Domain.Entities;
 
 namespace UMS.Infrastructure.Services
 {
-    public class CategoryService(
-        IApplicationDbContext applicationDbContext,
-        ICurrentUserService currentUserService)
-        : ICategoryService
+    public class CategoryExportService : ICategoryExportService
     {
-        private readonly IApplicationDbContext _applicationDbContext = applicationDbContext;
-        private readonly ICurrentUserService _currentUserService = currentUserService;
-
-        private IQueryable<Category> BuildCategoryQuery(GetCategoriesPagedQuery query)
-        {
-            var request = query.PagedFilterRequest;
-            var categoriesQuery = _applicationDbContext.Categories.AsNoTracking();
-
-            // Status Filtering
-            if (request.IsActive.HasValue)
-            {
-                categoriesQuery = categoriesQuery.Where(c => c.IsActive == request.IsActive.Value);
-            }
-            else
-            {
-                // For anonymous or non-privileged requests, show only active categories.
-                if (!_currentUserService.IsAuthenticated() || !_currentUserService.HasClaim("permission", "Permission.Product.Categories.Read"))
-                {
-                    categoriesQuery = categoriesQuery.Where(c => c.IsActive);
-                }
-            }
-
-            // Search Term Filtering
-            if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
-                var term = request.SearchTerm.Trim();
-                var pattern = $"%{term}%";
-                categoriesQuery = categoriesQuery.Where(c =>
-                    EF.Functions.Like(c.Name, pattern) ||
-                    EF.Functions.Like(c.Slug, pattern));
-            }
-
-            return categoriesQuery;
-        }
-
-        private IQueryable<Category> ApplySorting(IQueryable<Category> query, string? sortBy, string? sortDirection)
-        {
-            return sortBy?.ToLower() switch
-            {
-                "name" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Name)
-                    : query.OrderBy(c => c.Name),
-                "slug" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Slug)
-                    : query.OrderBy(c => c.Slug),
-                "sortorder" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.SortOrder)
-                    : query.OrderBy(c => c.SortOrder),
-                "id" => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.Id)
-                    : query.OrderBy(c => c.Id),
-                _ => (sortDirection ?? "asc").Equals("desc", StringComparison.OrdinalIgnoreCase)
-                    ? query.OrderByDescending(c => c.SortOrder).ThenBy(c => c.Name)
-                    : query.OrderBy(c => c.SortOrder).ThenBy(c => c.Name)
-            };
-        }
-
-        public async Task<IResponseWrapper<PagedResult<CategoryResponse>>> GetCategoriesPagedQueryAsync(
-            PagedFilterRequest pagedFilterRequest,
-            CancellationToken ct)
-        {
-            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = pagedFilterRequest });
-            query = ApplySorting(query, pagedFilterRequest.SortBy, pagedFilterRequest.SortDirection);
-
-            var totalCount = await query.CountAsync(ct);
-
-            var categories = await query
-                .Skip((pagedFilterRequest.PageNumber - 1) * pagedFilterRequest.PageSize)
-                .Take(pagedFilterRequest.PageSize)
-                .Select(c => new CategoryResponse(
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.ParentId,
-                    c.SortOrder,
-                    c.IsActive,
-                    c.RowVersion
-                ))
-                .ToListAsync(ct);
-
-            var pagedResult = PagedResult<CategoryResponse>.Create(
-                categories,
-                totalCount,
-                pagedFilterRequest.PageNumber,
-                pagedFilterRequest.PageSize);
-
-            return ResponseWrapper<PagedResult<CategoryResponse>>.Success(pagedResult);
-        }
-
-        public async Task<IResponseWrapper<List<CategoryResponse>>> GetCategoriesListAsync(
-            string? searchTerm,
-            bool? isActive,
-            string? sortBy,
-            string? sortDirection,
-            CancellationToken ct)
-        {
-            var query = BuildCategoryQuery(new GetCategoriesPagedQuery { PagedFilterRequest = new PagedFilterRequest { SearchTerm = searchTerm, IsActive = isActive } });
-            query = ApplySorting(query, sortBy, sortDirection);
-
-            var categories = await query
-                .Select(c => new CategoryResponse(
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.ParentId,
-                    c.SortOrder,
-                    c.IsActive,
-                    c.RowVersion
-                ))
-                .ToListAsync(ct);
-
-            return ResponseWrapper<List<CategoryResponse>>.Success(categories);
-        }
-
         public async Task<byte[]> ExportCategoriesAsync(List<CategoryResponse> data, string format, CancellationToken ct)
         {
             if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
@@ -33198,7 +34896,7 @@ namespace UMS.Infrastructure.Services
         }
     }
 }
-HEREDOC_51B92ECD0ACB6459897EF2610B3C211A
+HEREDOC_A27EB0214A76F9601BCF4C0DFEA48766
 write_template_file 'UMS.Infrastructure/Services/Common/CurrentUserService.cs' << 'HEREDOC_7F684AD6236F4C748A60BD4183B4DC2A'
 using UMS.Application.Interfaces.Common;
 using Microsoft.AspNetCore.Http;
