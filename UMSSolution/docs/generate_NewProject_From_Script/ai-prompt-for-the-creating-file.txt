@@ -1,0 +1,68 @@
+Act as an expert .NET Software Architect and DevOps Scripting Specialist. 
+
+Your mission is to analyze the .NET 10 + React 19 Clean Architecture boilerplate solution in my currently open IDE workspace and generate a Reusable Agent Skill (comprising an AI Prompt definition and execution scripts) that can dynamically replicate this exact solution from scratch.
+
+### CRITICAL CONSTRAINT: Token Limits & Self-Contained Scripts
+Because this boilerplate contains ~24,000 lines of code (~1.3MB), outputting the final `Scaffold.ps1` and `Scaffold.sh` scripts directly in this chat is impossible due to LLM token limits. 
+
+To solve this, you must:
+1. Scan my current workspace to read all files.
+2. Create or modify a local generator script at `tools/generate-scaffold-artifacts.ps1`.
+3. Execute that generator script locally to write the final deliverables to the `docs/template2/` directory.
+
+The final generated `Scaffold.ps1` and `Scaffold.sh` MUST be 100% self-contained. They MUST NOT rely on reading any external template files. All file contents must be embedded directly into the scripts.
+
+### Step 1: Analyze My Current Workspace
+Scan the currently open workspace and silently map out the following:
+1. **Backend (8 Projects)**: `{ProjectName}.Domain`, `.Application`, `.Infrastructure`, `.API`, and their `.Tests` counterparts.
+2. **Frontend (1 Client)**: The `UMS.Client` React 19 project.
+3. **NuGet & References**: Every package and project reference chain.
+4. **Namespace Usage**: Note exactly where the root namespace `UMS` is used.
+
+### Step 2: Client Inclusion & Exclusion Rules
+When mapping the `UMS.Client` directory, strictly adhere to these rules:
+- **Include**: `package.json`, Vite/TS configs, Tailwind/PostCSS configs, `index.html`, `components.json`, and the entire `src/` directory. Include `public/` EXCEPT heavy image assets.
+- **Exclude**: `node_modules/`, `dist/`, `package-lock.json`, and `public/assets/img/`.
+
+### Step 3: Generate the Local Generator Script (`tools/generate-scaffold-artifacts.ps1`)
+Create a PowerShell script that scans the workspace and builds the final deliverables. This generator script must implement the following strict architectural decisions:
+
+**1. File Content Escaping & Interpolation Strategy**
+- **PowerShell (`Scaffold.ps1`)**: Use single-quoted here-strings (`@' ... '@`). If a file contains the literal sequence `'@` on a line by itself, fall back to Base64 encoding for that file.
+- **Bash (`Scaffold.sh`)**: Use heredocs with a quoted, unique delimiter per file (e.g., `cat << 'HEREDOC_[HASH]' > "$filepath"`). 
+- **Double-Quoting Restriction**: NEVER use double-quoted here-strings to prevent shell interpolation of `$` in C#/JS code.
+
+**2. .slnx Handling**
+- Do NOT embed the `.slnx` file as a string. The final scripts must run `dotnet new sln -n $ProjectName` and `dotnet sln add` to construct it dynamically.
+
+**3. Package and Reference Strategy**
+- The embedded `.csproj` files written via here-strings must contain the complete `<PackageReference>` and `<ProjectReference>` elements. 
+- The final `Scaffold.ps1` and `Scaffold.sh` scripts do NOT run `dotnet add package` or `dotnet add reference`. They only run `dotnet new`, `dotnet sln add`, cleanup, file writes, and `npm install`.
+
+**4. Namespace Replacement Boundary Rules**
+- Avoid blind `.Replace("UMS", $ProjectName)`. Use regex replacements:
+  1. `namespace UMS\b` -> `namespace $NewNamespace`
+  2. `using UMS\b` -> `using $NewNamespace`
+  3. `<RootNamespace>UMS\b` -> `<RootNamespace>$NewNamespace`
+  4. `<ProjectReference Include="([^"]*UMS\.[^"]*)"` -> substitute `UMS.` occurrences.
+  5. Import statements matching `'UMS.Client/...` -> substitute with `'$NewNamespace.Client/...`.
+- **Timing Pattern**: Write raw here-strings first, then apply `sed` (Bash) or `-replace` (PowerShell) on the written files.
+
+**5. Auto-Generated File Cleanup**
+- The final scripts must delete `Class1.cs`, `WeatherForecast.cs`, `Controllers/`, `UnitTest1.cs`, and default `.http` files immediately after `dotnet new` and before writing embedded content.
+
+**6. Encoding Strategy**
+- Strictly enforce UTF-8 without BOM at all stages using `[System.IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))` in PowerShell and standard `cat` in Bash.
+
+### Step 4: Execute the Generator
+Run `tools/generate-scaffold-artifacts.ps1` to output the following three files into `docs/template2/`:
+1. `SkillPrompt.md` (The AI Agent Skill definition detailing how to run the scripts, validate the build, and report success).
+2. `Scaffold.ps1` (The self-contained PowerShell scaffolder).
+3. `Scaffold.sh` (The self-contained Bash scaffolder).
+
+### Execution Instructions for You (The AI)
+1. Acknowledge this mission.
+2. Scan the workspace.
+3. Write the `tools/generate-scaffold-artifacts.ps1` script.
+4. Execute the generator script in the VS Code terminal.
+5. Confirm the files were created in `docs/template3/` and report back to me.

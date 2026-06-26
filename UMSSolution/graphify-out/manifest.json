@@ -35,13 +35,13 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\Scaffold.ps1": {
-    "mtime": 1780745246.799827,
-    "ast_hash": "b030e00fbe91295566883294c6c4dfd9",
+    "mtime": 1781982402.996066,
+    "ast_hash": "ccc1ca54933293fe77aefcd2aa09709b",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\Scaffold.sh": {
-    "mtime": 1780745246.9209373,
-    "ast_hash": "7154ed767e8015a51250be8756403b5a",
+    "mtime": 1781982403.2606692,
+    "ast_hash": "7d2e8952b0c6562e78be81d6942e6ad5",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\reference-bootstrap\\assets\\js\\comming-soon.js": {
@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\tools\\generate-scaffold-artifacts.ps1": {
-    "mtime": 1780745240.38794,
-    "ast_hash": "b20b4fa87cba345cb8e62f344ccc5ae9",
+    "mtime": 1781982389.2718985,
+    "ast_hash": "fbd3737112c5c2dc324517cc24b1b52c",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.API\\appsettings.Development.json": {
@@ -2725,8 +2725,8 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\generated\\ums-boilerplate-agent-skill\\SkillPrompt.md": {
-    "mtime": 1780745246.7000575,
-    "ast_hash": "9b242e61df3148bbd609dd31150d0b60",
+    "mtime": 1781982402.7537792,
+    "ast_hash": "6fe89669e53dcee6bb701c493b2a5846",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\openspec\\config.yaml": {
@@ -6045,18 +6045,18 @@
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\Scaffold.ps1": {
-    "mtime": 1780745246.8088508,
-    "ast_hash": "b030e00fbe91295566883294c6c4dfd9",
+    "mtime": 1781982403.0116198,
+    "ast_hash": "ccc1ca54933293fe77aefcd2aa09709b",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\Scaffold.sh": {
-    "mtime": 1780745246.9269452,
-    "ast_hash": "7154ed767e8015a51250be8756403b5a",
+    "mtime": 1781982403.267191,
+    "ast_hash": "7d2e8952b0c6562e78be81d6942e6ad5",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template2\\SkillPrompt.md": {
-    "mtime": 1780745246.70165,
-    "ast_hash": "9b242e61df3148bbd609dd31150d0b60",
+    "mtime": 1781982402.7547805,
+    "ast_hash": "6fe89669e53dcee6bb701c493b2a5846",
     "semantic_hash": ""
   },
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Application\\Features\\Categories\\Commands\\ChangeCategoryStatus\\ChangeCategoryStatusCommand.cs": {
@@ -6167,6 +6167,2241 @@
   "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\UMS.Infrastructure\\Migrations\\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs": {
     "mtime": 1781895860.7362635,
     "ast_hash": "d5ec751eb23467e4df031a3666d8f6c7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template3\\Scaffold.ps1": {
+    "mtime": 1781982403.0171828,
+    "ast_hash": "ccc1ca54933293fe77aefcd2aa09709b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template3\\Scaffold.sh": {
+    "mtime": 1781982403.284999,
+    "ast_hash": "7d2e8952b0c6562e78be81d6942e6ad5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\appsettings.Development.json": {
+    "mtime": 1781982429.7495282,
+    "ast_hash": "788a4d8d6535640b4938a7a8ddc142f5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\appsettings.json": {
+    "mtime": 1781982429.760965,
+    "ast_hash": "9232dc4eaa838d2149a2696f7de25127",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\appsettings.Testing.json": {
+    "mtime": 1781982429.771329,
+    "ast_hash": "2b13785fbfaa7eb140bca8e81133aab7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Program.cs": {
+    "mtime": 1781982429.9166603,
+    "ast_hash": "9c2322bc2b7feebb1c92f05353f53e87",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\SampleApp.API.csproj": {
+    "mtime": 1781982429.9699502,
+    "ast_hash": "410d76fe28963cf8dc24016a08c3f4f9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\ServiceCollectionExtensions.cs": {
+    "mtime": 1781982429.94248,
+    "ast_hash": "090fd3f0222434ccde9fbac7c98b8ace",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Endpoints\\AccountEndpoints.cs": {
+    "mtime": 1781982429.786345,
+    "ast_hash": "fdb268b7374c6c4a821768e9a23dbb56",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Endpoints\\AuditTrailEndpoints.cs": {
+    "mtime": 1781982429.801315,
+    "ast_hash": "4cdccd5cc7d282546606498734a33dab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Endpoints\\CategoryEndpoints.cs": {
+    "mtime": 1781982429.8174446,
+    "ast_hash": "c92aef9ccbc56d3350013ca144087165",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Endpoints\\RoleEndpoints.cs": {
+    "mtime": 1781982429.8323855,
+    "ast_hash": "dea374e501326ff6d0d1b12ed8f00dcd",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Endpoints\\UserEndpoints.cs": {
+    "mtime": 1781982429.8495257,
+    "ast_hash": "1f78c452631d08ccbd6f29c41199320b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Extensions\\ResponseResultExtensions.cs": {
+    "mtime": 1781982429.863043,
+    "ast_hash": "72271c0690e23b7a75d6f97e11f20581",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Helpers\\BearerSchemeTransformer.cs": {
+    "mtime": 1781982429.8779783,
+    "ast_hash": "1095759a9e8d40683f90bfabe48b7004",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Helpers\\SD.cs": {
+    "mtime": 1781982429.8875823,
+    "ast_hash": "94bebe8708ac445f571179dd185e3987",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Middlewares\\ErrorHandlingMiddleware.cs": {
+    "mtime": 1781982429.902524,
+    "ast_hash": "7dc67b3b43bb78a4fb76873a2206530d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\Properties\\launchSettings.json": {
+    "mtime": 1781982429.9283926,
+    "ast_hash": "57edf5073b199be39680a526fb0f7e6b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\GlobalUsings.cs": {
+    "mtime": 1781982429.5926876,
+    "ast_hash": "dbacf452b5d2ba6002770d71033c6f79",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\SampleApp.API.Tests.csproj": {
+    "mtime": 1781982429.734999,
+    "ast_hash": "deccf7aaed3df565cf73ddbcec894e6c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Contracts\\ResponseContract.cs": {
+    "mtime": 1781982429.348487,
+    "ast_hash": "6cd2e801a68244350a052420db0d178f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\AccountEndpointsTests.cs": {
+    "mtime": 1781982429.387899,
+    "ast_hash": "e4a170fb59ddacf3810ed4912c20cfba",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\AuditTrailEndpointsTests.cs": {
+    "mtime": 1781982429.4016109,
+    "ast_hash": "c428b2156c19ebd5aeb591dab1293759",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\CategoryEndpointsTests.cs": {
+    "mtime": 1781982429.418656,
+    "ast_hash": "d24e13edd53207e0c0ca1dd1c627deb4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\ConfirmTwoFactorAuthEndpointTests.cs": {
+    "mtime": 1781982429.433811,
+    "ast_hash": "40fb7219fbaaad4664d3109c582e960d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\DisableTwoFactorAuthEndpointTests.cs": {
+    "mtime": 1781982429.4483914,
+    "ast_hash": "c3fd93300f906a3039135368ac3f2987",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\EnableTwoFactorAuthEndpointTests.cs": {
+    "mtime": 1781982429.4634,
+    "ast_hash": "2d8c7ffa1430939a122fd99a72b05b4d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\LoginWith2FAEndpointTests.cs": {
+    "mtime": 1781982429.4776568,
+    "ast_hash": "f5d6900bc7fd9b7b37eea1e1957960ef",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\LogoutEndpointTests.cs": {
+    "mtime": 1781982429.4910955,
+    "ast_hash": "398816ab1264c1c4c7c350008b964869",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\ProfileEndpointTests.cs": {
+    "mtime": 1781982429.5053196,
+    "ast_hash": "b417b0bd50a72b337a653fa92d591192",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\RoleEndpointsTests.cs": {
+    "mtime": 1781982429.5227509,
+    "ast_hash": "2cac792539a16f1c4f1c63cf4fe2fadb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\SetupTwoFactorAuthEndpointTests.cs": {
+    "mtime": 1781982429.5367472,
+    "ast_hash": "ff48f0a0c722c23f17915febb62c576d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Endpoints\\UserEndpointsTests.cs": {
+    "mtime": 1781982429.5552006,
+    "ast_hash": "a6b36e2fcd3c648fdbc3e5016a337c10",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Fixtures\\ApiTestBase.cs": {
+    "mtime": 1781982429.568483,
+    "ast_hash": "02e0004449233977c37c9f2629f04a96",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Fixtures\\CustomWebApplicationFactory.cs": {
+    "mtime": 1781982429.5825539,
+    "ast_hash": "007d86187e8a5b9ebfed8bee70f6d7fb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiPermissionHelper.cs": {
+    "mtime": 1781982429.6047988,
+    "ast_hash": "4cc6814fcde1efb6014822341ee8ebad",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiStateVerifier.cs": {
+    "mtime": 1781982429.6194272,
+    "ast_hash": "f4cef3e67e79f219ac7e0bafdc9eb13e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestAuthenticationHandler.cs": {
+    "mtime": 1781982429.6359944,
+    "ast_hash": "c19358cce3752e701b9e817d7462260e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestAuthenticationHeaderHelper.cs": {
+    "mtime": 1781982429.6476636,
+    "ast_hash": "ccf764c392073fc195336bec75e0b91a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestDatabaseInitializer.cs": {
+    "mtime": 1781982429.6630127,
+    "ast_hash": "acbfcefc74e71735fd4bb2ff386377b0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestDataSeeder.cs": {
+    "mtime": 1781982429.6756215,
+    "ast_hash": "6f17a711835e19c34e18c272c53cce94",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestEmailService.cs": {
+    "mtime": 1781982429.6873844,
+    "ast_hash": "9d906e449d61ba476ff326e1f92fe000",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\ApiTestEmailSink.cs": {
+    "mtime": 1781982429.7009108,
+    "ast_hash": "12dcfb0354a0f6588ba9106a9ecc17ad",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API.Tests\\Support\\TestCollectionDefinitions.cs": {
+    "mtime": 1781982429.712618,
+    "ast_hash": "b3f810e7312d47f0067d1cb47b27466d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\GlobalUsings.cs": {
+    "mtime": 1781982432.7382169,
+    "ast_hash": "33902a9acb91bea3425ca3e790ae5690",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\SampleApp.Application.csproj": {
+    "mtime": 1781982432.88021,
+    "ast_hash": "dac692125f8dd2f1077330d9e08ace7e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\ServiceCollectionExtensions.cs": {
+    "mtime": 1781982432.8691397,
+    "ast_hash": "144c72ba24ddb01aa938b733e72df72b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Authorization\\AppPermissions.cs": {
+    "mtime": 1781982431.0346217,
+    "ast_hash": "2ccddf802deef8b8e8e4f49d318567a4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Behaviors\\IValidationFailureFactory.cs": {
+    "mtime": 1781982431.0454423,
+    "ast_hash": "515fab36cba97fde0450ef4fc04fea33",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Behaviors\\ValidationFailureFactory.cs": {
+    "mtime": 1781982431.058452,
+    "ast_hash": "8cdf86bfcb7cb9b537c9d2695b657de5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Behaviors\\ValidationPipelineBehavior.cs": {
+    "mtime": 1781982431.0700884,
+    "ast_hash": "216a5474476f7151796fe17d3b371bf6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Cache\\CacheConfiguration.cs": {
+    "mtime": 1781982431.0818145,
+    "ast_hash": "9fcadb1d4012992f29f7ac96b58173ef",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Common\\ClientSettings.cs": {
+    "mtime": 1781982431.0925336,
+    "ast_hash": "d0ff838c460b7fbc03be143397bcc134",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Common\\FileData.cs": {
+    "mtime": 1781982431.1012056,
+    "ast_hash": "720fe2473307b0cbb4efb43e1b32afee",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Common\\SD.cs": {
+    "mtime": 1781982431.112616,
+    "ast_hash": "9fd1888bbea7df2652182c5375931a48",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Email\\EmailConfiguration.cs": {
+    "mtime": 1781982431.12599,
+    "ast_hash": "13dc48c44b8d7d1a3815d70517ade364",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Email\\SendEmailDto.cs": {
+    "mtime": 1781982431.135639,
+    "ast_hash": "c3caad7841cdc02d5727f5ccbbef6d6a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\JWT\\JwtConfiguration.cs": {
+    "mtime": 1781982431.146973,
+    "ast_hash": "e774fbfc6fb3b4f056a2b9514d89eefc",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Pagination\\PagedFilterRequest.cs": {
+    "mtime": 1781982431.1608698,
+    "ast_hash": "ba670480bab71f79ea996d4a5e99c87e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Pagination\\PagedFilterValidator.cs": {
+    "mtime": 1781982431.172901,
+    "ast_hash": "b1112c0086aab119dd97d350399930f7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Pagination\\PagedResult.cs": {
+    "mtime": 1781982431.1848154,
+    "ast_hash": "57f2eb5ce819b0f00fd4976d4ce38252",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\TwoFactor\\TwoFactorOptions.cs": {
+    "mtime": 1781982431.2002485,
+    "ast_hash": "0b25dbce0b039341eb75d3bb0bd31d30",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Wrappers\\IResponseWrapper.cs": {
+    "mtime": 1781982431.21429,
+    "ast_hash": "16fcd2e0728625aa6524f6546763f01a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Wrappers\\ResponseWrapper.cs": {
+    "mtime": 1781982431.2298846,
+    "ast_hash": "7b64ac3e8df1b6a3ac039af9aebce058",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Dtos\\Wrappers\\ResponseWrapperExtension.cs": {
+    "mtime": 1781982431.243134,
+    "ast_hash": "9e99aca97db995e9e44e9e366f3871f6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\EnSampleApp\\AppEnSampleApp.cs": {
+    "mtime": 1781982431.2525578,
+    "ast_hash": "fbdae15c129e9b9b949cc74ceff88256",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\AuditTrails\\Queries\\AuditTrailQueryExtensions.cs": {
+    "mtime": 1781982431.2688503,
+    "ast_hash": "c46c1baf0a85c920838d42579e83c947",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\AuditTrails\\Queries\\ExportAuditTrails\\ExportAuditTrailsQuery.cs": {
+    "mtime": 1781982431.284502,
+    "ast_hash": "04e341798c30f744950068759b03a0d3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\AuditTrails\\Queries\\GetAuditTrailsList\\GetAuditTrailsListQuery.cs": {
+    "mtime": 1781982431.2975,
+    "ast_hash": "b0572bad4003419212eaf34c8d5c970e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\AuditTrails\\Queries\\GetAuditTrailsPaged\\GetAuditTrailsPagedQuery.cs": {
+    "mtime": 1781982431.3128095,
+    "ast_hash": "d9f18ba42640215ef8e99fc34c5cdd82",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\AuditTrails\\Queries\\GetAuditTrailsPaged\\GetAuditTrailsPagedQueryValidator.cs": {
+    "mtime": 1781982431.3238502,
+    "ast_hash": "313ff0ba2dcc647df32ba647c3bb7c79",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\CategoryCacheKeys.cs": {
+    "mtime": 1781982431.3340247,
+    "ast_hash": "a3424e01eaf7990ddb7e2063bba18b80",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\CategoryWriteGuards.cs": {
+    "mtime": 1781982431.3500526,
+    "ast_hash": "24204f208a128baaa6d13a743dfd52b7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\ChangeCategoryStatus\\ChangeCategoryStatusCommand.cs": {
+    "mtime": 1781982431.3614674,
+    "ast_hash": "fd359a4ec9fc74514f2739c247e37856",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Create\\CreateCategoryCommand.cs": {
+    "mtime": 1781982431.3747036,
+    "ast_hash": "7dc3d85fe4f515c368fd7c070b854ddc",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Create\\CreateCategoryCommandValidator.cs": {
+    "mtime": 1781982431.384616,
+    "ast_hash": "d7e540b73b0fc8c1ad99edd4bedb83e0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Delete\\DeleteCategoryCommand.cs": {
+    "mtime": 1781982431.397409,
+    "ast_hash": "c78e9f1f4d84c6204384418585a33b1d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Delete\\DeleteCategoryCommandValidator.cs": {
+    "mtime": 1781982431.4088776,
+    "ast_hash": "a51ffa8d227f644b3d207d618526b6ea",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\RestoreCategory\\RestoreCategoryCommand.cs": {
+    "mtime": 1781982431.4225385,
+    "ast_hash": "09a99d793000fd04a811d3f8c2dc9d4e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\RestoreCategory\\RestoreCategoryCommandValidator.cs": {
+    "mtime": 1781982431.431021,
+    "ast_hash": "874cd7b39de6ff147e332ec1d6e5a932",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Update\\UpdateCategoryCommand.cs": {
+    "mtime": 1781982431.4448533,
+    "ast_hash": "2e4c61563676d0409ca48167f1882737",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Commands\\Update\\UpdateCategoryCommandValidator.cs": {
+    "mtime": 1781982431.4561405,
+    "ast_hash": "e1cb6935e09bbc0f2b97252fc4c1fe03",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Events\\CategoryCreatedEvent.cs": {
+    "mtime": 1781982431.465734,
+    "ast_hash": "753a9248eed60c739ff67decfe8c6a69",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Events\\CategoryDeletedEvent.cs": {
+    "mtime": 1781982431.4760232,
+    "ast_hash": "8e87fe4aed94918795d35911439bee4d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Events\\CategoryRestoredEvent.cs": {
+    "mtime": 1781982431.4849339,
+    "ast_hash": "278ae013e2f7766c948fcb7414898e19",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Events\\CategoryUpdatedEvent.cs": {
+    "mtime": 1781982431.4948847,
+    "ast_hash": "c597272fb917e7ced3e95b2a5e933f0d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\CategoryQueryExtensions.cs": {
+    "mtime": 1781982431.509504,
+    "ast_hash": "97fa17fe1fbe21bb1c28e26cab7d99bd",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\ExportCategories\\ExportCategoriesQuery.cs": {
+    "mtime": 1781982431.5226045,
+    "ast_hash": "1180f980524ada3ecc5e26baa9042e06",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetAllCategories\\GetAllCategoriesQuery.cs": {
+    "mtime": 1781982431.536877,
+    "ast_hash": "16d18983eb718c868d7282dc25079013",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetAllCategoriesForList\\CategoryLookupDto.cs": {
+    "mtime": 1781982431.547461,
+    "ast_hash": "586b064961e2272286c97850eee8cc88",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetAllCategoriesForList\\GetAllCategoriesForListQuery.cs": {
+    "mtime": 1781982431.5644772,
+    "ast_hash": "7798ca27c1503c842de7dd31b2cc7e99",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesAdmin\\GetAllCategoriesAdminQuery.cs": {
+    "mtime": 1781982431.5804884,
+    "ast_hash": "2a92d91819e8ac62fae3c36cbaf86819",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesList\\GetCategoriesListQuery.cs": {
+    "mtime": 1781982431.5941703,
+    "ast_hash": "14e616a7ecf0d3983dcdedca4d47ee1d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesPaged\\GetCategoriesPagedQuery.cs": {
+    "mtime": 1781982431.6047916,
+    "ast_hash": "370f83327225d13c0b64fc1bdbb361e8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesPaged\\GetCategoriesPagedQueryValidator.cs": {
+    "mtime": 1781982431.6159658,
+    "ast_hash": "ba9afc7cec8755e2ee546c91d2a11eab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesPagedAdmin\\GetCategoriesPagedAdminQuery.cs": {
+    "mtime": 1781982431.6281197,
+    "ast_hash": "00af81661316d5164a232d94d35c828f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoriesPagedAdmin\\GetCategoriesPagedAdminQueryValidator.cs": {
+    "mtime": 1781982431.6368556,
+    "ast_hash": "35726480e5bbf4695e8bff86199d5100",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoryById\\GetCategoryByIdQuery.cs": {
+    "mtime": 1781982431.6474261,
+    "ast_hash": "d9d20cc13bd13c59cfe042d63387f812",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoryById\\GetCategoryByIdQueryValidator.cs": {
+    "mtime": 1781982431.6583495,
+    "ast_hash": "822d63036cd6342f27a9d0afa2423dca",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoryByIdAdmin\\GetCategoryByIdAdmin.cs": {
+    "mtime": 1781982431.6691124,
+    "ast_hash": "cddcd3f740325c8dde44dceeb525b947",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Categories\\Queries\\GetCategoryByIdAdmin\\GetCategoryByIdAdminQueryValidator.cs": {
+    "mtime": 1781982431.679836,
+    "ast_hash": "4e954af64828459b59e934827e389245",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\IRoleService.cs": {
+    "mtime": 1781982431.7847807,
+    "ast_hash": "3e9971265d25937b415dcefe0a4e2307",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\RoleClaimResponse.cs": {
+    "mtime": 1781982431.8558261,
+    "ast_hash": "4eb9ed5a16fd71533a6acc458058ad1e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\RoleClaimViewModel.cs": {
+    "mtime": 1781982431.8640718,
+    "ast_hash": "994e09193d1ab09f84415bef98a71b61",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\RoleResponse.cs": {
+    "mtime": 1781982431.87378,
+    "ast_hash": "dafa022dc84971d45c03bf9a2bec597c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\CreateRole\\CreateRoleCommand.cs": {
+    "mtime": 1781982431.6929982,
+    "ast_hash": "2db5927e0f52c0019515e0970d073143",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\CreateRole\\CreateRoleCommandValidator.cs": {
+    "mtime": 1781982431.7038298,
+    "ast_hash": "bd23dfaf4741f450ced2d519508fbcbf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\DeleteRole\\DeleteRoleCommand.cs": {
+    "mtime": 1781982431.7155926,
+    "ast_hash": "6f708426223b3520bb5fabf097105b39",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\DeleteRole\\DeleteRoleCommandValidator.cs": {
+    "mtime": 1781982431.7261171,
+    "ast_hash": "56738cd9053f0bcaf81901ee13ab76cf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\UpdateRole\\UpdateRoleCommand.cs": {
+    "mtime": 1781982431.737926,
+    "ast_hash": "466cfa5422c715dac390af0440da701e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\UpdateRole\\UpdateRoleCommandValidator.cs": {
+    "mtime": 1781982431.7488594,
+    "ast_hash": "080fcee27bc86f10f9ad19baf301603c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\UpdateRolePermissions\\UpdateRolePermissionsCommand.cs": {
+    "mtime": 1781982431.76042,
+    "ast_hash": "12e7164cddc88d985814ae74419b0a8b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Commands\\UpdateRolePermissions\\UpdateRolePermissionsCommandValidator.cs": {
+    "mtime": 1781982431.7736194,
+    "ast_hash": "aa87236c1b23269388438b6ed9b1a14e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Queries\\GetAll\\GetRolesQuery.cs": {
+    "mtime": 1781982431.799953,
+    "ast_hash": "2655a55a49a51727bf9c3b3184d816ec",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Queries\\GetPermissions\\GetPermissionsQuery.cs": {
+    "mtime": 1781982431.8131597,
+    "ast_hash": "020309dca637f087747906cfaa3a53b2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Queries\\GetPermissions\\GetPermissionsQueryValidator.cs": {
+    "mtime": 1781982431.822148,
+    "ast_hash": "21cb35c5a0abe9be1dc843735a29a136",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Queries\\GetRoleById\\GetRoleByIdQuery.cs": {
+    "mtime": 1781982431.833929,
+    "ast_hash": "5d8002879648ec248048b0f5966c97c3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Roles\\Queries\\GetRoleById\\GetRoleByIdQueryValidator.cs": {
+    "mtime": 1781982431.8455408,
+    "ast_hash": "83f8e3037a69bf303485d7e6a5c8e563",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\ITokenService.cs": {
+    "mtime": 1781982431.8841057,
+    "ast_hash": "cf2611112d9029ef67350e889e34f1b8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetRefreshToken\\GetRefreshTokenQuery.cs": {
+    "mtime": 1781982431.897611,
+    "ast_hash": "910d4016231b05745089999404ab9b95",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetRefreshToken\\GetRefreshTokenQueryValidator.cs": {
+    "mtime": 1781982431.9082272,
+    "ast_hash": "13919574f884a724ca6f12531b009318",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetRefreshToken\\RefreshTokenRequest.cs": {
+    "mtime": 1781982431.9174633,
+    "ast_hash": "99b8fbc89cdb42f5b2b1a0ed85d29114",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetToken\\GetTokenQuery.cs": {
+    "mtime": 1781982431.9304526,
+    "ast_hash": "37f81226efa8a77d119a4228538f17a7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetToken\\GetTokenQueryValidator.cs": {
+    "mtime": 1781982431.9408202,
+    "ast_hash": "d53167d8c6292203404e0880d2e8dbd4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetToken\\TokenRequest.cs": {
+    "mtime": 1781982431.9511392,
+    "ast_hash": "b69e0d6b23304cdd72d6f5f5f27cd565",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\GetToken\\TokenResponse.cs": {
+    "mtime": 1781982431.961337,
+    "ast_hash": "bd866747e03fd84b0e7ad26c0f846f5c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\LoginWith2FA\\LoginWith2FAQuery.cs": {
+    "mtime": 1781982431.9711986,
+    "ast_hash": "11cb513dfcadcdec98d111d1df339754",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\LoginWith2FA\\LoginWith2FAQueryValidator.cs": {
+    "mtime": 1781982431.9813056,
+    "ast_hash": "1ec29cde986ee97b08fd3642ede50cd6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Token\\Queries\\LoginWith2FA\\TwoFactorLoginRequest.cs": {
+    "mtime": 1781982431.9927735,
+    "ast_hash": "3f05c2918b007efdb28966b3563cee6a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\IUserService.cs": {
+    "mtime": 1781982432.575511,
+    "ast_hash": "5ba01d7cf3b58ff06e25bd2566dfbe85",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserPassword\\ChangePasswordRequest.cs": {
+    "mtime": 1781982432.004296,
+    "ast_hash": "9b4ce6dad3b200e4fa0d971e3377cd35",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserPassword\\ChangeUserPasswordCommand.cs": {
+    "mtime": 1781982432.0164998,
+    "ast_hash": "1636b98c52d1321ed138964d5e5f506a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserPassword\\ChangeUserPasswordValidator.cs": {
+    "mtime": 1781982432.0299628,
+    "ast_hash": "ad14799f869f693f5a1b87569d1e08d8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserStatus\\ChangeUserStatusCommand.cs": {
+    "mtime": 1781982432.0432723,
+    "ast_hash": "31db42b82d601c38f636fb5ecc50d3d7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserStatus\\ChangeUserStatusRequest.cs": {
+    "mtime": 1781982432.054068,
+    "ast_hash": "2895d4151b346924e8d73c90bd2d455f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ChangeUserStatus\\ChangeUserStatusValidator.cs": {
+    "mtime": 1781982432.0639603,
+    "ast_hash": "8b0b4e123ef1a53ab6b7d1e399a583db",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmail\\ConfirmEmailCommand.cs": {
+    "mtime": 1781982432.0748045,
+    "ast_hash": "13b2c54a95caae233431f5d94f443dd6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmail\\ConfirmEmailRequest.cs": {
+    "mtime": 1781982432.0828114,
+    "ast_hash": "9d936a709fde1a5a743194475d6c6c6b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmail\\ConfirmEmailValidator.cs": {
+    "mtime": 1781982432.0939353,
+    "ast_hash": "be8fb8ae1e0da7d167fd82894e143236",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmailChange\\ConfirmEmailChangeCommand.cs": {
+    "mtime": 1781982432.1046717,
+    "ast_hash": "f5111e5a7b7279f6e9019f562ee48383",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmailChange\\ConfirmEmailChangeRequest.cs": {
+    "mtime": 1781982432.1132667,
+    "ast_hash": "8985d5e19b2c90c548a1bf8c96ce3dc4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmEmailChange\\ConfirmEmailChangeValidator.cs": {
+    "mtime": 1781982432.1248324,
+    "ast_hash": "d80a9eda30f1a173bdeb63f91767e988",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmTwoFactorAuth\\ConfirmTwoFactorAuthCommand.cs": {
+    "mtime": 1781982432.1340175,
+    "ast_hash": "c96ff3a493ee17eb91b9a8f4fa2250a0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ConfirmTwoFactorAuth\\ConfirmTwoFactorAuthValidator.cs": {
+    "mtime": 1781982432.1448214,
+    "ast_hash": "73c9eb7aea60fce3617ff6728611f528",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\DeactivateUser\\DeactivateUserCommand.cs": {
+    "mtime": 1781982432.1573544,
+    "ast_hash": "5c01addae597b2b8aa053a82af7e80b1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\DeactivateUser\\DeactivateUserCommandValidator.cs": {
+    "mtime": 1781982432.1671185,
+    "ast_hash": "d7e6fc7da54e1bc6b25de19a56e9f739",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\DisableTwoFactorAuth\\DisableTwoFactorAuthCommand.cs": {
+    "mtime": 1781982432.1782608,
+    "ast_hash": "5283b8e4bcdda08a08d6eec2c925c56e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\DisableTwoFactorAuth\\DisableTwoFactorAuthRequest.cs": {
+    "mtime": 1781982432.1880195,
+    "ast_hash": "19e63024d7e66b38a7c16135cdd889b3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\DisableTwoFactorAuth\\DisableTwoFactorAuthValidator.cs": {
+    "mtime": 1781982432.1977756,
+    "ast_hash": "4abce397bebbadc5025bc112c22dc081",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\EnableTwoFactorAuth\\EnableTwoFactorAuthCommand.cs": {
+    "mtime": 1781982432.2104006,
+    "ast_hash": "e4337c2d02bb02de0aa9e93827d4834d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\EnableTwoFactorAuth\\EnableTwoFactorAuthValidator.cs": {
+    "mtime": 1781982432.219202,
+    "ast_hash": "2e13a2418153dd379ee1f04b07bc104e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ForgotPassword\\ForgotPasswordCommand.cs": {
+    "mtime": 1781982432.2308908,
+    "ast_hash": "cdac71cf5c82ac7d9c007ff666b58d7a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ForgotPassword\\ForgotPasswordCommandValidator.cs": {
+    "mtime": 1781982432.2424433,
+    "ast_hash": "46b3127c88943130dad9c3550b67a816",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\GenerateChangeEmailToken\\GenerateChangeEmailTokenCommand.cs": {
+    "mtime": 1781982432.2528422,
+    "ast_hash": "6eddccea0b77bd5286179e9991363142",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\GenerateChangeEmailToken\\GenerateChangeEmailTokenRequest.cs": {
+    "mtime": 1781982432.2631605,
+    "ast_hash": "1942f947cc1f261cdf0985844d9dbe87",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\GenerateChangeEmailToken\\GenerateChangeEmailTokenValidator.cs": {
+    "mtime": 1781982432.2740738,
+    "ast_hash": "3900ccb35881e45f11bc24705a250ef2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\GenerateNew2FARecoveryCodes\\GenerateNew2FARecoveryCodesCommand.cs": {
+    "mtime": 1781982432.287338,
+    "ast_hash": "fd436eac6afbd75ab3102aff31fee22d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\LockUser\\LockUserCommand.cs": {
+    "mtime": 1781982432.299438,
+    "ast_hash": "2ff24218227cd4d0abf9ddb16d923795",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\LockUser\\LockUserRequest.cs": {
+    "mtime": 1781982432.310956,
+    "ast_hash": "c1506efdfd410c3a8c9eb92a6eeb2b70",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\LockUser\\LockUserValidator.cs": {
+    "mtime": 1781982432.3205693,
+    "ast_hash": "2f51d6442805eb728e086f2e5afd3520",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\Logout\\LogoutCommand.cs": {
+    "mtime": 1781982432.3310852,
+    "ast_hash": "e3ddf6dff711c02ee3706351882d05fa",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\Logout\\LogoutCommandValidator.cs": {
+    "mtime": 1781982432.3437195,
+    "ast_hash": "c5d9d49630e27a3a6c67e1b4686fb832",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\Logout\\LogoutRequest.cs": {
+    "mtime": 1781982432.3537147,
+    "ast_hash": "23bfdad19071f34e5b92ddc26829b47b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResendConfirmationEmail\\ResendConfirmationEmailCommand.cs": {
+    "mtime": 1781982432.3644397,
+    "ast_hash": "469b16c816d8793415a25c030f5f1919",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResendConfirmationEmail\\ResendConfirmationEmailRequest.cs": {
+    "mtime": 1781982432.373301,
+    "ast_hash": "ecae0c2d413396591e8ace2d0f5b68ad",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResendConfirmationEmail\\ResendConfirmationEmailValidator.cs": {
+    "mtime": 1781982432.3824384,
+    "ast_hash": "9b92484a7901a0b63d0da93045373d26",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResetPassword\\ResetPasswordCommand.cs": {
+    "mtime": 1781982432.3962357,
+    "ast_hash": "7de09340a5879b5816ff2fe63b391130",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResetPassword\\ResetPasswordCommandValidator.cs": {
+    "mtime": 1781982432.4078639,
+    "ast_hash": "5abffa5ffd90b4872181bf403e8c0c70",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\ResetPassword\\ResetPasswordRequest.cs": {
+    "mtime": 1781982432.4178538,
+    "ast_hash": "1b967ed586790975bec035ec17373fb2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\SetupTwoFactorAuth\\SetupTwoFactorAuthCommand.cs": {
+    "mtime": 1781982432.4283373,
+    "ast_hash": "880087475af95989a515621c77f740b4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UnlockUser\\UnlockUserCommand.cs": {
+    "mtime": 1781982432.4409382,
+    "ast_hash": "ca593486048ef8db21ba9968d4bcdaae",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UnlockUser\\UnlockUserRequest.cs": {
+    "mtime": 1781982432.4505038,
+    "ast_hash": "d495bb2cdbc111348116d8268a3c1182",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UnlockUser\\UnlockUserValidator.cs": {
+    "mtime": 1781982432.4610534,
+    "ast_hash": "6c67a4982c77d27897e232937f9367ee",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUser\\UpdateUserCommand.cs": {
+    "mtime": 1781982432.473906,
+    "ast_hash": "fb97c3ae10efe0861e157994564ee61b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUser\\UpdateUserCommandValidator.cs": {
+    "mtime": 1781982432.4839764,
+    "ast_hash": "e0379eac95b9330003a3ad6d41074e16",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUser\\UpdateUserRequest.cs": {
+    "mtime": 1781982432.4947996,
+    "ast_hash": "bcb402bf0a41db0daf50e773f479e753",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUserRoles\\UpdateUserRolesCommand.cs": {
+    "mtime": 1781982432.5078807,
+    "ast_hash": "f295f0c47055c5ec3c720be73e4edbf8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUserRoles\\UpdateUserRolesCommandValidator.cs": {
+    "mtime": 1781982432.517359,
+    "ast_hash": "cff5ef7eb69fc504380d14fe49320109",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UpdateUserRoles\\UpdateUserRolesRequest.cs": {
+    "mtime": 1781982432.5277605,
+    "ast_hash": "4f04391d81df123106ff69ec17caf164",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UserRegistration\\UserRegistrationCommand.cs": {
+    "mtime": 1781982432.5402832,
+    "ast_hash": "fec8bcaf719e0d9b1ced04ca58de5ec2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UserRegistration\\UserRegistrationCommandValidator.cs": {
+    "mtime": 1781982432.5526755,
+    "ast_hash": "55a2dad78a0469b07e349465045c843b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Commands\\UserRegistration\\UserRegistrationRequest.cs": {
+    "mtime": 1781982432.5631905,
+    "ast_hash": "1c2f523c2e2465a74385bde7e3ade3eb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Requests\\TwoFactorCodeRequest.cs": {
+    "mtime": 1781982432.585905,
+    "ast_hash": "bd436b82e25b243a30e5f24c41858903",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Requests\\UserRoleViewModel.cs": {
+    "mtime": 1781982432.5958245,
+    "ast_hash": "529c50ee86ddd4b78e822dafeaf13ec1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Responses\\ProfileResponse.cs": {
+    "mtime": 1781982432.6064389,
+    "ast_hash": "5290b0719ca1dba639f8dc9b3ece32a2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Responses\\TwoFactorAuthViewModel.cs": {
+    "mtime": 1781982432.616808,
+    "ast_hash": "79cff4f34b93e67bcc19fbea7ef82756",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Responses\\UserExportResponse.cs": {
+    "mtime": 1781982432.6263697,
+    "ast_hash": "17442c24e476eec6f8e0e17c41c15191",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Models\\Responses\\UserResponse.cs": {
+    "mtime": 1781982432.635017,
+    "ast_hash": "d877ff9de94a77006525d1aea2d00eab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUserRolesQuery.cs": {
+    "mtime": 1781982432.6943958,
+    "ast_hash": "a414655988873fea2ba90a750118e397",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUserRolesQueryValidator.cs": {
+    "mtime": 1781982432.704085,
+    "ast_hash": "462c5aba0d10f3890814b265f1bd08ae",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\ExportUsers\\ExportUsersQuery.cs": {
+    "mtime": 1781982432.648557,
+    "ast_hash": "37cd1d1c24828d80f5560e90dfa93c9d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetMyProfile\\GetMyProfileQuery.cs": {
+    "mtime": 1781982432.6601195,
+    "ast_hash": "a1606aebbbeec0e132b9d77250284c42",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUserById\\GetUserByIdQuery.cs": {
+    "mtime": 1781982432.6727643,
+    "ast_hash": "04cc67af688aaa4d956fc699ecc83d39",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUserById\\GetUserByIdQueryValidator.cs": {
+    "mtime": 1781982432.6819458,
+    "ast_hash": "45e9b65d15d59ca00650d8e7a9a8263b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUsersPaged\\GetUsersPagedQuery.cs": {
+    "mtime": 1781982432.7171478,
+    "ast_hash": "cdc670a083f4258574468ae6558bb31b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Features\\Users\\Queries\\GetUsersPaged\\GetUsersPagedQueryValidator.cs": {
+    "mtime": 1781982432.7279806,
+    "ast_hash": "1809e852f45439532f30c6fc9d8df1cb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IApiRequest.cs": {
+    "mtime": 1781982432.747925,
+    "ast_hash": "2f8f9457bdfd7e00d0b90f1dde44bc94",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IApplicationDbContext.cs": {
+    "mtime": 1781982432.7589588,
+    "ast_hash": "a16a182cdd483f2d19c7ab8ebba16b33",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IAuditTrailExportService.cs": {
+    "mtime": 1781982432.7686903,
+    "ast_hash": "cf47b3f593209f6a6aae69ebbe7be53b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\ICacheAbleMediatorQuery.cs": {
+    "mtime": 1781982432.7785406,
+    "ast_hash": "4faa3cbbdc43c1b884a1c2be04143efe",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\ICacheService.cs": {
+    "mtime": 1781982432.7884312,
+    "ast_hash": "f664fb12f5198d76379532851d00e6ed",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\ICategoryExportService.cs": {
+    "mtime": 1781982432.7980664,
+    "ast_hash": "ba763cf4ae2f62cd568be6c98e9bf003",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\ICurrentUserService.cs": {
+    "mtime": 1781982432.8083463,
+    "ast_hash": "3d82534fc20a349a5f301e4c63ed3517",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IDateTimeService.cs": {
+    "mtime": 1781982432.8169534,
+    "ast_hash": "830d9f246e0b82378b0994beadba5200",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IEmailService.cs": {
+    "mtime": 1781982432.828196,
+    "ast_hash": "4c748dea4f55ddad7a930b51d9f091bb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IFileStorageService.cs": {
+    "mtime": 1781982432.837528,
+    "ast_hash": "d1ae9ae019873624b49a4d5b609824cb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\ISessionWrapper.cs": {
+    "mtime": 1781982432.8470128,
+    "ast_hash": "bffd082c3a719f5127ec4cdd3a092d75",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application\\Interfaces\\Common\\IValidateMe.cs": {
+    "mtime": 1781982432.8562527,
+    "ast_hash": "b976331fbb1802e27421ecf852277d2c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\GlobalUsings.cs": {
+    "mtime": 1781982430.0341487,
+    "ast_hash": "99c3885d43d9b69e347014861d84ec4c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\SampleApp.Application.Tests.csproj": {
+    "mtime": 1781982430.4956555,
+    "ast_hash": "90ac3243eaa99db2d0cc8fed7b2717b4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Behaviors\\ValidationPipelineBehaviorTests.cs": {
+    "mtime": 1781982430.0133667,
+    "ast_hash": "50e5a00cad0795d4d7ef52bae6551cb7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Fixtures\\TestData.cs": {
+    "mtime": 1781982430.025656,
+    "ast_hash": "68abadda705d58f15c6868fe149e56a2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Categories\\CategoryCommandHandlerTests.cs": {
+    "mtime": 1781982430.0517406,
+    "ast_hash": "7680b11f2e6e18ea596ae5324915845f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Categories\\CategoryQueryHandlerTests.cs": {
+    "mtime": 1781982430.068293,
+    "ast_hash": "7018521b8f73855ba5c4e16f44d4fdcb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Categories\\ExportCategoriesQueryHandlerTests.cs": {
+    "mtime": 1781982430.082404,
+    "ast_hash": "4bae08fdc06f40eea9b52202eb524a47",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Roles\\RoleHandlerTests.cs": {
+    "mtime": 1781982430.0972948,
+    "ast_hash": "b05a19628b1739f0b7cadc1334f8c235",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Token\\GetRefreshTokenQueryHandlerTests.cs": {
+    "mtime": 1781982430.110952,
+    "ast_hash": "0a52995a47c843a34c60b5dc817e7dac",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Token\\GetTokenQueryHandlerTests.cs": {
+    "mtime": 1781982430.124832,
+    "ast_hash": "f12bd217fb80bee04dc1ba58a1c79973",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Token\\LoginWith2FAQueryHandlerTests.cs": {
+    "mtime": 1781982430.1376295,
+    "ast_hash": "3148d8934e1cb39a6dceffecccd0cb2b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ChangeUserPasswordCommandHandlerTests.cs": {
+    "mtime": 1781982430.1502478,
+    "ast_hash": "a8688de291b0a262b90765b7f9742067",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ChangeUserStatusCommandHandlerTests.cs": {
+    "mtime": 1781982430.164315,
+    "ast_hash": "6a048a03d7545f6bc1a7c0b60bd008d4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ConfirmEmailChangeCommandHandlerTests.cs": {
+    "mtime": 1781982430.1788003,
+    "ast_hash": "bd26a041c02648d63797d9e3121cb78c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ConfirmEmailCommandHandlerTests.cs": {
+    "mtime": 1781982430.1916437,
+    "ast_hash": "7797c2d7368956958da507e3dc10f392",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ConfirmTwoFactorAuthCommandHandlerTests.cs": {
+    "mtime": 1781982430.2038047,
+    "ast_hash": "15d692fc63f4cf8037b21bb826dbb452",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\DeactivateUserCommandHandlerTests.cs": {
+    "mtime": 1781982430.2171035,
+    "ast_hash": "571e2f9275429a80bfd3c54c46c2e7d9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\DisableTwoFactorAuthCommandHandlerTests.cs": {
+    "mtime": 1781982430.2299361,
+    "ast_hash": "812e2a29ec809c8afc9defc0f4dcffaf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\EnableTwoFactorAuthCommandHandlerTests.cs": {
+    "mtime": 1781982430.2430308,
+    "ast_hash": "8021ecb507629a5465647136fcf628d5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ExportUsersQueryHandlerTests.cs": {
+    "mtime": 1781982430.2586086,
+    "ast_hash": "6d349e5667f12c6beb5fd9bae956850a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ForgotPasswordCommandHandlerTests.cs": {
+    "mtime": 1781982430.2729318,
+    "ast_hash": "ff03cf6ac81b1e9ddd6442f9ddfc519e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GenerateChangeEmailTokenCommandHandlerTests.cs": {
+    "mtime": 1781982430.2859094,
+    "ast_hash": "a44411d1ec03edfc087854407113932e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GenerateNew2FARecoveryCodesCommandHandlerTests.cs": {
+    "mtime": 1781982430.2989233,
+    "ast_hash": "26740aab727567621f64237562af9a5f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GetMyProfileQueryHandlerTests.cs": {
+    "mtime": 1781982430.3113515,
+    "ast_hash": "fe02ce56496f62205ea0348492e0d86d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GetUserByIdQueryHandlerTests.cs": {
+    "mtime": 1781982430.325168,
+    "ast_hash": "4628a4df55a9dc36fc43a44f43a648ac",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GetUserRolesQueryHandlerTests.cs": {
+    "mtime": 1781982430.338831,
+    "ast_hash": "91b780f8fd7a9244ba0888c0412e3673",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\GetUsersPagedQueryHandlerTests.cs": {
+    "mtime": 1781982430.351535,
+    "ast_hash": "79ed9dfa4190aa32502534d0e4cd8329",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\LockUserCommandHandlerTests.cs": {
+    "mtime": 1781982430.3650844,
+    "ast_hash": "b89015114f249f189f32272427d93768",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\LogoutCommandHandlerTests.cs": {
+    "mtime": 1781982430.378489,
+    "ast_hash": "4a40d240b1757a74f9bb1cdb06201c5f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ResendConfirmationEmailCommandHandlerTests.cs": {
+    "mtime": 1781982430.391773,
+    "ast_hash": "96c6eca35547bb9ecb1489f679b69a9b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\ResetPasswordCommandHandlerTests.cs": {
+    "mtime": 1781982430.404209,
+    "ast_hash": "9f5350c23ef4028fc426c7e302be99ff",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\SetupTwoFactorAuthCommandHandlerTests.cs": {
+    "mtime": 1781982430.4172432,
+    "ast_hash": "b4787777a76fe71b75ccd730abe788e4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\UnlockUserCommandHandlerTests.cs": {
+    "mtime": 1781982430.4311938,
+    "ast_hash": "c6a6a7678e32832c97b24cef02a47833",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\UpdateUserCommandHandlerTests.cs": {
+    "mtime": 1781982430.444625,
+    "ast_hash": "653af50ec92bf47cf1f54dab50606bc4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\UpdateUserRolesCommandHandlerTests.cs": {
+    "mtime": 1781982430.4584246,
+    "ast_hash": "9bb248de9b2700de8805cab7feb81f4e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Handlers\\Users\\UserRegistrationCommandHandlerTests.cs": {
+    "mtime": 1781982430.4708228,
+    "ast_hash": "06c811bbee8295c629398c856db3e44b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Support\\Categories\\CategoryHandlerTestSupport.cs": {
+    "mtime": 1781982430.4849703,
+    "ast_hash": "dee4c4ec54d35ccfcbed06393b39a8f0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\AuditTrails\\GetAuditTrailsPagedQueryValidatorTests.cs": {
+    "mtime": 1781982430.5101695,
+    "ast_hash": "f680c3e3e6812f026f27781c0ff7f8b3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\ChangeCategoryStatusCommandValidatorTests.cs": {
+    "mtime": 1781982430.5226867,
+    "ast_hash": "5e0f76a4022edaf620893f855d0fa072",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\CreateCategoryCommandValidatorTests.cs": {
+    "mtime": 1781982430.5351224,
+    "ast_hash": "c693b957cd4cb3c66f855fb1d318fbb9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\DeleteCategoryCommandValidatorTests.cs": {
+    "mtime": 1781982430.5469573,
+    "ast_hash": "9017b1f35a3c0a6df06c0d35a4907f20",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\GetCategoriesPagedAdminQueryValidatorTests.cs": {
+    "mtime": 1781982430.5604305,
+    "ast_hash": "e18b74e083f8b1041a065af4e0b90f19",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\GetCategoriesPagedQueryValidatorTests.cs": {
+    "mtime": 1781982430.5726173,
+    "ast_hash": "d2455c8cf31c7b14990bcec2f0240105",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\GetCategoryByIdAdminQueryValidatorTests.cs": {
+    "mtime": 1781982430.5847352,
+    "ast_hash": "6cd9d12f12ef50880fda6b49fdfef6fa",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\GetCategoryByIdQueryValidatorTests.cs": {
+    "mtime": 1781982430.5979483,
+    "ast_hash": "479c21109c368a7a493b7ee28e914575",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Categories\\UpdateCategoryCommandValidatorTests.cs": {
+    "mtime": 1781982430.6102114,
+    "ast_hash": "fbd4d1b605fc016fe710dd1a90dda904",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\CreateRoleCommandValidatorTests.cs": {
+    "mtime": 1781982430.6225324,
+    "ast_hash": "ff9beb5c99fee67eb3f6bb20905e4e39",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\DeleteRoleCommandValidatorTests.cs": {
+    "mtime": 1781982430.6325424,
+    "ast_hash": "2a20a1f75f617414956716ebd9947dba",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\GetPermissionsQueryValidatorTests.cs": {
+    "mtime": 1781982430.6452055,
+    "ast_hash": "2d40e056b0496a063050d7e94b1ee9f4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\GetRoleByIdQueryValidatorTests.cs": {
+    "mtime": 1781982430.6577902,
+    "ast_hash": "c0aa866102ee0124a997ed6f46b585c0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\UpdateRoleCommandValidatorTests.cs": {
+    "mtime": 1781982430.6700463,
+    "ast_hash": "cd2b6247304db3bb0ec5f8cbc5eeb2f9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Roles\\UpdateRolePermissionsCommandValidatorTests.cs": {
+    "mtime": 1781982430.681215,
+    "ast_hash": "16467f1bbb6e03bc977fc61d042df448",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Shared\\PagedFilterValidatorTests.cs": {
+    "mtime": 1781982430.6957495,
+    "ast_hash": "21183acdbd99125a62ab3a442d0b033f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Token\\GetRefreshTokenQueryPipelineTests.cs": {
+    "mtime": 1781982430.7081635,
+    "ast_hash": "87d627c549f8213ca899add17f171951",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Token\\GetRefreshTokenQueryValidatorTests.cs": {
+    "mtime": 1781982430.722618,
+    "ast_hash": "1c855f46ef76083543da018f9027f7aa",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Token\\GetTokenQueryValidatorTests.cs": {
+    "mtime": 1781982430.7356079,
+    "ast_hash": "d37428e033ba1041fb5ee03d1c6b2459",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Token\\LoginWith2FAQueryValidatorTests.cs": {
+    "mtime": 1781982430.7495687,
+    "ast_hash": "396a553688362d2ad519e2a8e74440df",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ChangeUserPasswordValidatorTests.cs": {
+    "mtime": 1781982430.7620625,
+    "ast_hash": "e89558307f3c7076834707471ba94b54",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ChangeUserStatusValidatorTests.cs": {
+    "mtime": 1781982430.7754817,
+    "ast_hash": "a50c5ef8696ea7a11c92c6f133d0fe63",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ConfirmEmailChangeValidatorTests.cs": {
+    "mtime": 1781982430.7877758,
+    "ast_hash": "7e1e141fc67783f807093d6c5c107477",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ConfirmEmailValidatorTests.cs": {
+    "mtime": 1781982430.7979882,
+    "ast_hash": "017ba13379a332a50f5ecc1a14c6b81c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ConfirmTwoFactorAuthValidatorTests.cs": {
+    "mtime": 1781982430.8119576,
+    "ast_hash": "01b3769f21980f5a1e6033943d098cda",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\DisableTwoFactorAuthValidatorTests.cs": {
+    "mtime": 1781982430.824543,
+    "ast_hash": "0dc78ae40fe43c0a94a228068312529e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\EnableTwoFactorAuthValidatorTests.cs": {
+    "mtime": 1781982430.8378844,
+    "ast_hash": "9e694ff92ed81e5d3cd0df42858f1920",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ForgotPasswordCommandValidatorTests.cs": {
+    "mtime": 1781982430.8509827,
+    "ast_hash": "91978de0c0ca931be61d9e78fba91765",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\GenerateChangeEmailTokenValidatorTests.cs": {
+    "mtime": 1781982430.8642051,
+    "ast_hash": "32734f87f1bfd2bf1338d77e81530aab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\GetUserByIdQueryValidatorTests.cs": {
+    "mtime": 1781982430.876906,
+    "ast_hash": "0d6ddf00d9434d1747f2b4220b06879a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\GetUserRolesQueryValidatorTests.cs": {
+    "mtime": 1781982430.8896172,
+    "ast_hash": "bdaae0bc5c4bc246516ff8245462bd16",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\GetUsersPagedQueryValidatorTests.cs": {
+    "mtime": 1781982430.9010925,
+    "ast_hash": "1c9a9fbe28a90e6a31ce3f31b6864a05",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\LockUserValidatorTests.cs": {
+    "mtime": 1781982430.9137754,
+    "ast_hash": "217fc43268f1aa928178d9c2ab0a6324",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\LogoutCommandValidatorTests.cs": {
+    "mtime": 1781982430.92613,
+    "ast_hash": "1ba5a9a51afc95bebd1479e7f6cd0e60",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ResendConfirmationEmailValidatorTests.cs": {
+    "mtime": 1781982430.937977,
+    "ast_hash": "8828b64d0c8d0503deaf3fba0a43d9e6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\ResetPasswordCommandValidatorTests.cs": {
+    "mtime": 1781982430.9505548,
+    "ast_hash": "d693adccfee63d4a32db51a23ad9f11c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\UnlockUserValidatorTests.cs": {
+    "mtime": 1781982430.9631793,
+    "ast_hash": "795b392dd22d670713a3671f1bfa26b4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\UpdateUserCommandValidatorTests.cs": {
+    "mtime": 1781982430.975259,
+    "ast_hash": "2ba8d8e1a77db89f9576b48c3cfc1dc5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\UpdateUserRolesCommandPipelineTests.cs": {
+    "mtime": 1781982430.9889295,
+    "ast_hash": "fcdde451aacd901e79f45f512ca9fa71",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\UpdateUserRolesCommandValidatorTests.cs": {
+    "mtime": 1781982431.0005846,
+    "ast_hash": "a89833c70ab7104740b48abc0d48d4b9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Application.Tests\\Validation\\Users\\UserRegistrationCommandValidatorTests.cs": {
+    "mtime": 1781982431.0142412,
+    "ast_hash": "9ae74af586d9cf73dc37b5b6200199fa",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\components.json": {
+    "mtime": 1781982432.9010422,
+    "ast_hash": "54c6b59637245270a38c9333ef3dc504",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\eslint.config.js": {
+    "mtime": 1781982432.916298,
+    "ast_hash": "1e4b6620226fb9f3f25cc62cc815a415",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\package.json": {
+    "mtime": 1781982432.9387174,
+    "ast_hash": "39abc64be8678013dc8bccaa2e956ba0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\postcss.config.js": {
+    "mtime": 1781982432.954643,
+    "ast_hash": "3c28f25fec4d7eceba24345e12e9e429",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\tailwind.config.js": {
+    "mtime": 1781982433.8478937,
+    "ast_hash": "f4602f20b48980ca0caeaf055febe442",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\tsconfig.app.json": {
+    "mtime": 1781982433.8587587,
+    "ast_hash": "4ef6bf66b844c8ae06ba7bb0520f3d3b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\tsconfig.json": {
+    "mtime": 1781982433.8674638,
+    "ast_hash": "102db038a102330cea8198a2805d7373",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\tsconfig.node.json": {
+    "mtime": 1781982433.8784692,
+    "ast_hash": "a4870a3c779bed4f6f6c0da8bed6a3e3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\vite.config.ts": {
+    "mtime": 1781982433.890719,
+    "ast_hash": "f75346dd987ac5ee5abea246b11e190d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\App.tsx": {
+    "mtime": 1781982433.0002193,
+    "ast_hash": "1e42f0507ae76ec4e14148bebc5fa75c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\main.tsx": {
+    "mtime": 1781982433.5715816,
+    "ast_hash": "c4f9e45140747e3dba496cea65883785",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\AuthContext.tsx": {
+    "mtime": 1781982433.0235653,
+    "ast_hash": "bfa9deb3322876cae9faca09fb6f29ca",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\EntityDiffViewer.tsx": {
+    "mtime": 1781982433.0408957,
+    "ast_hash": "1c44f5943f4e5335f4cb093c3be1b466",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\PasswordStrengthMeter.tsx": {
+    "mtime": 1781982433.0571952,
+    "ast_hash": "bc58ab92510952d3864aab9355581800",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ProtectedRoute.tsx": {
+    "mtime": 1781982433.0706613,
+    "ast_hash": "0437a1519e781007f7db8c842eff5911",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\shared\\StatusConfirmationDialog.tsx": {
+    "mtime": 1781982433.0846057,
+    "ast_hash": "75b10e3bdedb3474fd66aa510d769bf5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\shared\\StatusSwitch.tsx": {
+    "mtime": 1781982433.0981922,
+    "ast_hash": "1bb4bba95a698179fc5ebcbd12be64ab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\badge.tsx": {
+    "mtime": 1781982433.112423,
+    "ast_hash": "cd71b09ad343cd0ae3693c9b85036a4d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\button.tsx": {
+    "mtime": 1781982433.1254547,
+    "ast_hash": "0e3c3c05baa3c8ec530aa5d474b78dea",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\calendar.tsx": {
+    "mtime": 1781982433.1392882,
+    "ast_hash": "1970a3f94d9a1aca9d80480518f25b1a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\card.tsx": {
+    "mtime": 1781982433.1524045,
+    "ast_hash": "78b5b43290ac6ecda354393c74358430",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\DataTableExport.tsx": {
+    "mtime": 1781982433.1650114,
+    "ast_hash": "b5f4c5a3908800086d07f5fc610d3614",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\DataTablePagination.test.tsx": {
+    "mtime": 1781982433.179664,
+    "ast_hash": "1db77fa5aa59074b0a8e67025fa5ace6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\DataTablePagination.tsx": {
+    "mtime": 1781982433.1955774,
+    "ast_hash": "00b51bb79ba9c0c89d489409047a9550",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\date-picker.tsx": {
+    "mtime": 1781982433.2063358,
+    "ast_hash": "112fea0c26b68f7f322c3dc0c3a84343",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\dialog.tsx": {
+    "mtime": 1781982433.2194428,
+    "ast_hash": "7d4bdbbf71c3ea7ca2124df50f794d61",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\pagination.tsx": {
+    "mtime": 1781982433.235738,
+    "ast_hash": "5c16223cb14eb90b80c302fee1a2db88",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\popover.tsx": {
+    "mtime": 1781982433.2526493,
+    "ast_hash": "e8c8c5f6a5de9cc81cf2e83d956363ad",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\select.tsx": {
+    "mtime": 1781982433.2689064,
+    "ast_hash": "5baa7c1b771c93dbf323f3b43ae575a8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\sheet.tsx": {
+    "mtime": 1781982433.2814445,
+    "ast_hash": "3809710ebec40855647f33f3e0fdcc44",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\switch.tsx": {
+    "mtime": 1781982433.298227,
+    "ast_hash": "3e8cebe5515e108f678d92fdfcb182aa",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\toast.tsx": {
+    "mtime": 1781982433.3166747,
+    "ast_hash": "36bcceefc4d076ebc4e059c412aa198e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\components\\ui\\tooltip.tsx": {
+    "mtime": 1781982433.3314488,
+    "ast_hash": "80875e625d83a29a0074e0f593af4472",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\hooks\\useAuditLogs.ts": {
+    "mtime": 1781982433.3472693,
+    "ast_hash": "da966fc61895f3576108e1f5d0963e4a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\hooks\\useCategories.ts": {
+    "mtime": 1781982433.3643289,
+    "ast_hash": "ec1aad23631929bfe79d144469759fc5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\hooks\\useUsers.test.tsx": {
+    "mtime": 1781982433.3801563,
+    "ast_hash": "dadee974d63dbdbb3e5d34337c37a8cf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\hooks\\useUsers.ts": {
+    "mtime": 1781982433.399476,
+    "ast_hash": "3f0b4db614e47acba86f1321167e0c51",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\layouts\\AdminLayout.tsx": {
+    "mtime": 1781982433.426371,
+    "ast_hash": "8bfa1eac987cd58bc09bde4c886fca51",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\layouts\\LoginLayout.tsx": {
+    "mtime": 1781982433.4369001,
+    "ast_hash": "33ee3524c485bbc5bac16d01cee7bab6",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\api-client.ts": {
+    "mtime": 1781982433.4535024,
+    "ast_hash": "4b6e09b0cf08e42f899f9ecc0307599b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\audit-logs-api.ts": {
+    "mtime": 1781982433.4702554,
+    "ast_hash": "9c4a03a3472e66fca6e0f1eea4126409",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\categories-api.ts": {
+    "mtime": 1781982433.4874656,
+    "ast_hash": "58c11745ccb6eaccecfbdf897a5b8e99",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\jwt.ts": {
+    "mtime": 1781982433.507503,
+    "ast_hash": "d6324385bc6df7a5a98424a4aa86a742",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\roles-api.ts": {
+    "mtime": 1781982433.532794,
+    "ast_hash": "94fa15c115cf74f6704afa9a2c3c8123",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\users-api.ts": {
+    "mtime": 1781982433.5493531,
+    "ast_hash": "bef2a5c2c4b123e6f4eb94f5761008d9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\lib\\utils.ts": {
+    "mtime": 1781982433.560991,
+    "ast_hash": "7ff08ad10c631633dc0de80aef5992d7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\AdminHome.tsx": {
+    "mtime": 1781982433.5838747,
+    "ast_hash": "52486ee7a917f7f64331edc16421f73c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\AuditLogsManagement.test.tsx": {
+    "mtime": 1781982433.6004024,
+    "ast_hash": "08f84bbf2d5bdf28b1ae49960f900fd9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\AuditLogsManagement.tsx": {
+    "mtime": 1781982433.6192358,
+    "ast_hash": "aa1a157b610bbb7195ef92060450d1d2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\CategoriesManagement.tsx": {
+    "mtime": 1781982433.6377685,
+    "ast_hash": "d8c6b348259254aab2bfa849c937d32c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\ConfirmEmail.tsx": {
+    "mtime": 1781982433.6537883,
+    "ast_hash": "f26627ea838a172504b959b4126fd492",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\ConfirmEmailChange.tsx": {
+    "mtime": 1781982433.6683173,
+    "ast_hash": "a87e99fcc82ea54aab8ffaf9be94fc38",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\ForgotPassword.tsx": {
+    "mtime": 1781982433.683758,
+    "ast_hash": "738ce9bce6e2bb4bbd445c01f3f4b102",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\Login.tsx": {
+    "mtime": 1781982433.7014325,
+    "ast_hash": "c633b521b48b1844077c7fa651c81b8e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\Profile.tsx": {
+    "mtime": 1781982433.7197573,
+    "ast_hash": "308b10aab234f11828c5614aef693741",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\PublicHome.tsx": {
+    "mtime": 1781982433.733646,
+    "ast_hash": "71e6366552d13f3882e629d5f21e40a3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\Register.tsx": {
+    "mtime": 1781982433.7511683,
+    "ast_hash": "cba8246fb4e51baa66ec9a806c0943ae",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\ResendConfirmation.tsx": {
+    "mtime": 1781982433.7658813,
+    "ast_hash": "7419779ee3b19215d92729b51fe6d37a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\ResetPassword.tsx": {
+    "mtime": 1781982433.783579,
+    "ast_hash": "f98168ca2f5faa290aa41f1b4e184a04",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\RoleManagement.tsx": {
+    "mtime": 1781982433.8023043,
+    "ast_hash": "b0ce979b9bfb5364aaa9be7cc8194922",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\pages\\UsersManagement.tsx": {
+    "mtime": 1781982433.824575,
+    "ast_hash": "70221cab732b2ae1357579d28d79dc97",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\test\\setup.ts": {
+    "mtime": 1781982433.8347807,
+    "ast_hash": "511d72f1f1711a95c8e8fbe326129ed7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\GlobalUsings.cs": {
+    "mtime": 1781982434.0570068,
+    "ast_hash": "c4e536c34bcec3130be8c131eea1496f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\SampleApp.Domain.csproj": {
+    "mtime": 1781982434.1453495,
+    "ast_hash": "c0e0d2bf61289ef270bacb54b848212b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Common\\BaseEntity.cs": {
+    "mtime": 1781982433.9680512,
+    "ast_hash": "8f66f08f583b385401f35d1a29163d60",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Common\\DomainEvent.cs": {
+    "mtime": 1781982433.979144,
+    "ast_hash": "c97cf41fd67ab1f5496f10599ec90e33",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\EnSampleApp\\DomainEnSampleApp.cs": {
+    "mtime": 1781982434.0465121,
+    "ast_hash": "769fc4599496ab578ace2de8390f6a47",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Entities\\AuditTrail.cs": {
+    "mtime": 1781982433.9906752,
+    "ast_hash": "bd4f3e6f48abb1bc95ee89463dedb66e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Entities\\Category.cs": {
+    "mtime": 1781982434.0001967,
+    "ast_hash": "01b393e59f085287682fd9dacb84cc54",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Entities\\LogUserActivity.cs": {
+    "mtime": 1781982434.0132196,
+    "ast_hash": "5e6d38a7da3717449f5aaf1f21acffa9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Entities\\OutboxMessage.cs": {
+    "mtime": 1781982434.025422,
+    "ast_hash": "e196d9a80e0884759acb4afffe30150c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Entities\\User.cs": {
+    "mtime": 1781982434.0349257,
+    "ast_hash": "c26c3bcb0aebf925b7574d6f1ad8b980",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IAuditable.cs": {
+    "mtime": 1781982434.068047,
+    "ast_hash": "f20f3150d51162f26f4b05f42be76d66",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IDataConcurrency.cs": {
+    "mtime": 1781982434.079887,
+    "ast_hash": "357f0978f6143d3a4e8e48ce2b668802",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IDomainEvent.cs": {
+    "mtime": 1781982434.0914395,
+    "ast_hash": "d3897d2c319f8a95ef518ad2dcce609b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IEntity.cs": {
+    "mtime": 1781982434.1009996,
+    "ast_hash": "8c1852438e86d4db2f706db7b9c2510a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IFullEntity.cs": {
+    "mtime": 1781982434.1130579,
+    "ast_hash": "32a8d46f6693d01b5b0d73cc697d94fe",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\IMustHaveTenant.cs": {
+    "mtime": 1781982434.1245828,
+    "ast_hash": "09d77b23058705e77e3bdb82fbb09281",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain\\Interfaces\\ISoftDelete.cs": {
+    "mtime": 1781982434.1348405,
+    "ast_hash": "65c7bb76c24384c545c684c42f09d2c0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain.Tests\\GlobalUsings.cs": {
+    "mtime": 1781982433.9292116,
+    "ast_hash": "65d523a9a8de8e9478c930185809121b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain.Tests\\SampleApp.Domain.Tests.csproj": {
+    "mtime": 1781982433.9512715,
+    "ast_hash": "4083cb04c0bf21ff5aaff575b48b9b13",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain.Tests\\Builders\\CategoryBuilder.cs": {
+    "mtime": 1781982433.906948,
+    "ast_hash": "77bab26b2a414a887d210d2fdac78f3a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain.Tests\\Entities\\CategoryTests.cs": {
+    "mtime": 1781982433.9189384,
+    "ast_hash": "2ff473bb68da87d447eda403e7bdedbf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Domain.Tests\\Support\\EntityTestExtensions.cs": {
+    "mtime": 1781982433.941735,
+    "ast_hash": "ee407d9666a24453bb518e1669591c17",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\GlobalUsings.cs": {
+    "mtime": 1781982434.4341996,
+    "ast_hash": "c56bf636a2b6fea52669ece1c386ed54",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\SampleApp.Infrastructure.csproj": {
+    "mtime": 1781982435.0246682,
+    "ast_hash": "8a0a67c2d40b31616b9b78609948a4c4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\ServiceCollectionExtensions.cs": {
+    "mtime": 1781982434.9037583,
+    "ast_hash": "23c75b72da58806c0b0ee57e70a57fe9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Extensions\\QueryExtensions.cs": {
+    "mtime": 1781982434.424457,
+    "ast_hash": "4174c299e137266edb0acf94c7dc9e1e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\CurrentUserMiddleware.cs": {
+    "mtime": 1781982434.4750025,
+    "ast_hash": "27c37144279f986f475a7bda5fc815f1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\IdentityServiceExtensions.cs": {
+    "mtime": 1781982434.4915662,
+    "ast_hash": "5151c2aadbc8e3db5807a278c4ac5ae7",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Configurations\\SeedUsersConfiguration.cs": {
+    "mtime": 1781982434.4446764,
+    "ast_hash": "f159fd2b476d41a1ab9d55ca0ce85d52",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Constants\\AppClaim.cs": {
+    "mtime": 1781982434.4555445,
+    "ast_hash": "149cc3859a39dce8729274aef502c754",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Constants\\AppRoles.cs": {
+    "mtime": 1781982434.464961,
+    "ast_hash": "d1f97b528d1dc80c979cb9bb3e45d7ba",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationRole.cs": {
+    "mtime": 1781982434.501269,
+    "ast_hash": "bf5a4487901c776d0ba8107f24df0d72",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationRoleClaim.cs": {
+    "mtime": 1781982434.510913,
+    "ast_hash": "66d97c9b699b55ff4c401e033eaf0bc3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationUser.cs": {
+    "mtime": 1781982434.5226998,
+    "ast_hash": "7077dafdfec67fe72b45734579cdb28d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationUserClaim.cs": {
+    "mtime": 1781982434.5317686,
+    "ast_hash": "93f3b23d2d102a3492954e58a48e1097",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationUserLogin.cs": {
+    "mtime": 1781982434.541161,
+    "ast_hash": "d4a22d1e16548dd488832b2d6650a35d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationUserRole.cs": {
+    "mtime": 1781982434.5507243,
+    "ast_hash": "d73de90ace6b725a9a3c56d0b1ed0e91",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Models\\ApplicationUserToken.cs": {
+    "mtime": 1781982434.5609007,
+    "ast_hash": "ca742b9834a969d96861419cdda5f64f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Permissions\\PermissionAuthorizationHandler.cs": {
+    "mtime": 1781982434.5739055,
+    "ast_hash": "390b185248473f5b8cadbe5a650d7ea5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Permissions\\PermissionPolicyProvider.cs": {
+    "mtime": 1781982434.584829,
+    "ast_hash": "427d1a75389d43a2ec14824ecc6d2f4b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Permissions\\PermissionRequirement.cs": {
+    "mtime": 1781982434.5954158,
+    "ast_hash": "535c13f49cabeb00892eb271a7b4db0d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Seeds\\FeaturesDbSeeder.cs": {
+    "mtime": 1781982434.6099524,
+    "ast_hash": "6e81ee1c2b063579bc433504c55f0eea",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Seeds\\IdentityDbSeeder.cs": {
+    "mtime": 1781982434.623887,
+    "ast_hash": "bca49e193dbfd22e13cdae7415b4fcab",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Services\\RoleService.cs": {
+    "mtime": 1781982434.639802,
+    "ast_hash": "904a38742f20b64ca5905de0480186cb",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Services\\TokenService.cs": {
+    "mtime": 1781982434.6552248,
+    "ast_hash": "5a90a6af99f0b71486421000f1c9030e",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Identity\\Services\\UserService.cs": {
+    "mtime": 1781982434.675063,
+    "ast_hash": "3f3356b844ee1d1eb9dd79566cb47dc0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260418130054_InitiailDb.cs": {
+    "mtime": 1781982434.6908414,
+    "ast_hash": "36b4fdc224872a6b8aa6fe26535a984b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260418130054_InitiailDb.Designer.cs": {
+    "mtime": 1781982434.7024891,
+    "ast_hash": "8ef444164d80fb876f75ec14deda3203",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260424070230_AddCategoryNormalizationAndConcurrency.cs": {
+    "mtime": 1781982434.714485,
+    "ast_hash": "535bb644aee04c64a2bd7f7116a185b3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260424070230_AddCategoryNormalizationAndConcurrency.Designer.cs": {
+    "mtime": 1781982434.7269466,
+    "ast_hash": "3f560b5687a0dad29e746f5c04dd36d8",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260425071933_RemoveRefreshTokenTable.cs": {
+    "mtime": 1781982434.7403705,
+    "ast_hash": "9529a86a59c4bb5812f7fd7ba1405b56",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260425071933_RemoveRefreshTokenTable.Designer.cs": {
+    "mtime": 1781982434.750937,
+    "ast_hash": "b5c1ccd434a012b289e5793cbcefa29d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260601174237_AddAuditTrailIpAddress.cs": {
+    "mtime": 1781982434.7632587,
+    "ast_hash": "f19c53278147677af78c2025e49fea28",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260601174237_AddAuditTrailIpAddress.Designer.cs": {
+    "mtime": 1781982434.7752008,
+    "ast_hash": "d39c9ee442200cb633ecc38a1b0213b5",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260619190420_AddFilteredUniqueIndexesForCategories.cs": {
+    "mtime": 1781982434.7860467,
+    "ast_hash": "09d648123b5b136b31ce2497ec41a04d",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\20260619190420_AddFilteredUniqueIndexesForCategories.Designer.cs": {
+    "mtime": 1781982434.7984262,
+    "ast_hash": "51343c5ead5069eb088bed42719cb1d4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Migrations\\ApplicationDbContextModelSnapshot.cs": {
+    "mtime": 1781982434.8106956,
+    "ast_hash": "3d4ff5aca3bf4a9b2a1c7e20bf8ad4e1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\Audit\\AuditEntry.cs": {
+    "mtime": 1781982434.8228636,
+    "ast_hash": "4c3771e74e978dbe03f85a2adf472a36",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\Constants\\SchemaNames.cs": {
+    "mtime": 1781982434.8336396,
+    "ast_hash": "c36950f588bf5c7702fc45b993758548",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\Contexts\\ApplicationDbContext.cs": {
+    "mtime": 1781982434.8511808,
+    "ast_hash": "74db19496aeb7140669a2d27b32870dd",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\DbConfigurations\\CategoryConfiguration.cs": {
+    "mtime": 1781982434.863307,
+    "ast_hash": "ce046aaa92367870ae3246cd8e0761c3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\Interceptors\\TrimStringInterceptor.cs": {
+    "mtime": 1781982434.878186,
+    "ast_hash": "489dfd3b40c726e167caf26b1d060f33",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Persistence\\Seeds\\ApplicationDbSeeder.cs": {
+    "mtime": 1781982434.8892984,
+    "ast_hash": "ffff3e7c6f1bfec60078bf5035c5c286",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\AuditTrailExportService.cs": {
+    "mtime": 1781982434.9182494,
+    "ast_hash": "6c183d24d7038791411c10e18015d708",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\CategoryExportService.cs": {
+    "mtime": 1781982434.9337208,
+    "ast_hash": "0f39159cdf246bbc9c14642deb7de2ec",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\LocalFileStorageService.cs": {
+    "mtime": 1781982435.013137,
+    "ast_hash": "3720fbbfc327187839b2db595d43c4e1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\Common\\CurrentUserService.cs": {
+    "mtime": 1781982434.9482281,
+    "ast_hash": "a9e6f1055d1862efba43a4417c5323a2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\Common\\DateTimeService.cs": {
+    "mtime": 1781982434.9589014,
+    "ast_hash": "845cf36918e76d7e2231587938a90fcf",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\Common\\DistributedCacheService.cs": {
+    "mtime": 1781982434.970183,
+    "ast_hash": "f4c245a8698368f8691a65c4c8b456a4",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\Common\\InMemorySessionWrapper.cs": {
+    "mtime": 1781982434.9849362,
+    "ast_hash": "cd2ad78f674664859780c77310c98a58",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure\\Services\\Common\\MailSenderService.cs": {
+    "mtime": 1781982434.9995184,
+    "ast_hash": "be24753428f0ee2bd94b8b3881c1bcff",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\appsettings.Testing.json": {
+    "mtime": 1781982434.1592555,
+    "ast_hash": "6965b5a8bb159f81b4f16b51604178ec",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\GlobalUsings.cs": {
+    "mtime": 1781982434.1729233,
+    "ast_hash": "99c3885d43d9b69e347014861d84ec4c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\SampleApp.Infrastructure.Tests.csproj": {
+    "mtime": 1781982434.4078856,
+    "ast_hash": "f6a50a55e11cf86f4140291e201273cd",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Fixtures\\TempDirectoryFixture.cs": {
+    "mtime": 1781982434.16902,
+    "ast_hash": "deb2795b89159195940030ca6b329296",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Identity\\Services\\RoleServiceTests.cs": {
+    "mtime": 1781982434.190758,
+    "ast_hash": "0e9833f3d74c89f0cdaa01180a9de357",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Identity\\Services\\TokenService2FATests.cs": {
+    "mtime": 1781982434.2080438,
+    "ast_hash": "dafe2b930dba72094fd4d682e970fa06",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Identity\\Services\\TokenServiceTests.cs": {
+    "mtime": 1781982434.2246864,
+    "ast_hash": "b7fa61e4d345f15959d5f2997650b6c3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Identity\\Services\\UserServiceAuthTests.cs": {
+    "mtime": 1781982434.24375,
+    "ast_hash": "965a05a98ed2a6ea4b81cac11c2a87e3",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Identity\\Services\\UserServiceTests.cs": {
+    "mtime": 1781982434.2670653,
+    "ast_hash": "4acfe1be298ae9871d2ee11726e6e160",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\CategoryExportTest.cs": {
+    "mtime": 1781982434.2832396,
+    "ast_hash": "1aa621df6d5e26ffd967f2f2fed71357",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\LocalFileStorageServiceTests.cs": {
+    "mtime": 1781982434.3576794,
+    "ast_hash": "8a9b813ad89fcf8394a0af9dcc561b11",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\MailSenderServiceTests.cs": {
+    "mtime": 1781982434.370834,
+    "ast_hash": "9b95f3eb08ca584b8183b13ce8f3da40",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\Common\\CurrentUserServiceTests.cs": {
+    "mtime": 1781982434.299718,
+    "ast_hash": "02e27346323a4850ff6930cbf83b386f",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\Common\\DateTimeServiceTests.cs": {
+    "mtime": 1781982434.3121574,
+    "ast_hash": "1e82be61dc6d4f4f82beeb866d4ccee0",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\Common\\DistributedCacheServiceTests.cs": {
+    "mtime": 1781982434.3249092,
+    "ast_hash": "741eec61213774539774c592b7ea6e83",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Services\\Common\\InMemorySessionWrapperTests.cs": {
+    "mtime": 1781982434.3406854,
+    "ast_hash": "ae609f51a72f4aee32868f6d8500f3a9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Support\\IdentityMockFactory.cs": {
+    "mtime": 1781982434.3842297,
+    "ast_hash": "e69aef192db4b73c331b015b8833b6d2",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Infrastructure.Tests\\Support\\TestAsyncQueryProvider.cs": {
+    "mtime": 1781982434.3969748,
+    "ast_hash": "0ff95e33c557f82db311d34138a8a185",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\generate_NewProject_From_Script\\ai-prompt-for-the-creating-file.txt": {
+    "mtime": 1781982064.8741844,
+    "ast_hash": "badd8f31a98e3fb6e88f1efc39bc7e5a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\docs\\template3\\SkillPrompt.md": {
+    "mtime": 1781982402.7557878,
+    "ast_hash": "6fe89669e53dcee6bb701c493b2a5846",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\index.html": {
+    "mtime": 1781982432.9284985,
+    "ast_hash": "9ce1eded81f468efbefc9fcf3ab9da2c",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\README.md": {
+    "mtime": 1781982432.9756186,
+    "ast_hash": "0e405b01dd303ded16ce61f9bc2e0ce9",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.API\\wwwroot\\images\\banners\\1.jpg": {
+    "mtime": 1781982429.9916625,
+    "ast_hash": "80f0ef8515766b48cf2f57fdc42d0d86",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\public\\favicon.svg": {
+    "mtime": 1781982432.9565978,
+    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\public\\icons.svg": {
+    "mtime": 1781982432.9575453,
+    "ast_hash": "21c7473c592c67dc87223d49892c8f0a",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\assets\\hero.png": {
+    "mtime": 1781982433.0013158,
+    "ast_hash": "aead493361b27e7510691c5d7072dfc1",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\assets\\react.svg": {
+    "mtime": 1781982433.003009,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": ""
+  },
+  "D:\\_MyFolder\\MyWorkSpace\\UserManagement\\UMSSolution\\test-scaffold\\SampleApp\\SampleApp.Client\\src\\assets\\vite.svg": {
+    "mtime": 1781982433.005026,
+    "ast_hash": "6d5180a782d64c8cf51ba01c2a2184d8",
     "semantic_hash": ""
   }
 }

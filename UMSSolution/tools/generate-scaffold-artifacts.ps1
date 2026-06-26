@@ -3,7 +3,8 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $outDirs = @(
     (Join-Path $root 'generated/ums-boilerplate-agent-skill'),
-    (Join-Path $root 'docs/template2')
+    (Join-Path $root 'docs/template2'),
+    (Join-Path $root 'docs/template3')
 )
 foreach ($dir in $outDirs) {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
@@ -316,8 +317,11 @@ try {
         $dir = Split-Path -Parent $target
         New-Item -ItemType Directory -Force -Path $dir | Out-Null
         
-        # Timing boundary: step 2: replace on variable
-        $rendered = $Content
+        # 1. Write raw content first
+        [System.IO.File]::WriteAllText($target, $Content, [System.Text.UTF8Encoding]::new($false))
+        
+        # 2. Read back, apply replacements, and write back
+        $rendered = [System.IO.File]::ReadAllText($target, [System.Text.UTF8Encoding]::new($false))
         $rendered = [regex]::Replace($rendered, 'namespace UMS\b', "namespace $ProjectName")
         $rendered = [regex]::Replace($rendered, '\busing\s+(static\s+)?UMS\b', { param($m) "using " + $m.Groups[1].Value + $ProjectName })
         $rendered = [regex]::Replace($rendered, '<RootNamespace>UMS\b', "<RootNamespace>$ProjectName")
@@ -332,7 +336,7 @@ try {
         
         # Port replacements to avoid conflicts
         $rendered = $rendered -replace 'https://localhost:7122', "https://localhost:$HttpsPort"
-        $rendered = $rendered -replace 'http://localhost:7122', "http://localhost:$HttpsPort"
+        $rendered = $rendered -replace 'http://localhost:7122', "https://localhost:$HttpsPort"
         $rendered = $rendered -replace 'http://localhost:5055', "http://localhost:$HttpPort"
         $rendered = $rendered -replace 'http://localhost:5173', "http://localhost:$ClientPort"
         if ($RelativePath -match 'vite\.config\.ts$') {

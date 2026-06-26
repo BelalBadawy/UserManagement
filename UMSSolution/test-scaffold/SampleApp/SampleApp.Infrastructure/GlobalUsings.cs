@@ -1,0 +1,14 @@
+global using SampleApp.Domain.Entities;
+global using SampleApp.Domain.Interfaces;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.AspNetCore.Identity;
+global using SampleApp.Infrastructure.Identity.Constants;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.Extensions.Configuration;
+global using SampleApp.Infrastructure.Persistence.Contexts;
+global using SampleApp.Infrastructure.Identity.Models;
+global using SampleApp.Application.Interfaces;
+global using System.Data;
+global using System.Security.Claims;
